@@ -1,0 +1,284 @@
+---
+import Base from "../layouts/Base.astro";
+import Sign from "../components/Sign.astro";
+import Price from "../components/Price.astro";
+import UsMap from "../components/UsMap.astro";
+import TileMap from "../components/TileMap.astro";
+import Legend from "../components/Legend.astro";
+import BiggestMoves, { type MoveItem } from "../components/BiggestMoves.astro";
+import RegionMultiples from "../components/RegionMultiples.astro";
+import StateTable from "../components/StateTable.astro";
+import rollScript from "../scripts/roll.js?raw";
+import mapScript from "../scripts/map.js?raw";
+import chartScript from "../scripts/chart.js?raw";
+import sortScript from "../scripts/table-sort.js?raw";
+import { getSite } from "../lib/site.ts";
+import { formatShortDate, formatWeekdayDate } from "../lib/dates.ts";
+import { changeTenths, formatCents } from "../lib/format.ts";
+import { homeDescription, pctOf, sinceText } from "../lib/copy.ts";
+
+const site = getSite();
+const { mode, national, latest } = site;
+const aaaMode = mode === "aaa+eia";
+const daily = national.cadence === "daily";
+
+const dateLine = daily ? `Price as of ${formatShortDate(national.date)}` : `Week of ${formatShortDate(national.date)}`;
+const nm = national.move;
+const compareLine = !nm || nm.change === null
+  ? null
+  : daily
+    ? "vs yesterday"
+    : national.prevDate
+      ? `vs week of ${formatShortDate(national.prevDate)}`
+      : null;
+
+// Biggest moves: states when AAA is on, regions otherwise.
+const moveItems: MoveItem[] = aaaMode
+  ? site.states
+      .filter((s) => s.primary && s.primary.change !== null)
+      .map((s) => ({ name: s.name, href: s.href, price: s.primary!.price, change: s.primary!.change!, pct: pctOf(s.primary!) }))
+  : site.regions
+      .filter((r) => r.move && r.move.change !== null)
+      .map((r) => ({ name: r.name, price: r.move!.price, change: r.move!.change!, pct: r.move!.change_pct }));
+const rises = moveItems.filter((i) => changeTenths(i.change) > 0).sort((a, b) => b.change - a.change);
+const falls = moveItems.filter((i) => changeTenths(i.change) < 0).sort((a, b) => a.change - b.change);
+
+// The plain sentences beside the sign.
+const where = daily ? "since yesterday" : "this week";
+const usMove = nm?.change ?? null;
+const usSentence = usMove === null
+  ? "Here's where diesel prices stand in every state."
+  : changeTenths(usMove) === 0
+    ? `Diesel held steady across the U.S. ${where}.`
+    : `Diesel ${changeTenths(usMove) > 0 ? "rose" : "fell"} ${formatCents(usMove)} across the U.S. ${where}.`;
+const noun = aaaMode ? "state" : "region";
+const stateWhere = aaaMode ? sinceText(site) || where : where;
+// Name the period on the rise and fall lines when it differs from the U.S. line,
+// like a skipped AAA day (states since Sep 15, AAA's national since yesterday).
+const moveWhen = stateWhere === where ? "" : ` ${stateWhere}`;
+const topRise = rises[0];
+const topFall = falls[0];
+const eiaNext = latest.eia?.next_release_date ?? site.weekly?.next_release_date ?? null;
+// The EIA sentence carries its date so the stale script can swap in a late
+// notice when the page is read after that day and nothing new has landed.
+const nextDaily = aaaMode ? "Daily prices update every morning." : null;
+const nextEia = eiaNext
+  ? aaaMode
+    ? `EIA's next weekly numbers land ${formatWeekdayDate(eiaNext)}.`
+    : `EIA posts next week's prices on ${formatWeekdayDate(eiaNext)}.`
+  : aaaMode
+    ? null
+    : "EIA posts new prices every Tuesday.";
+const eiaLate = aaaMode ? "EIA's next weekly numbers are running late." : "EIA's next weekly prices are running late.";
+
+const nodataCount = site.states.filter((s) => s.fill === "nodata").length;
+const noDataLabel = nodataCount === 0 ? null : aaaMode ? "No change yet" : "No EIA survey (Alaska, Hawaii)";
+const mapWhat = aaaMode ? "since yesterday" : sinceText(site);
+const mapLabel = `Map of the diesel price change by state ${mapWhat}. Each state links to its page.`;
+const periodText = aaaMode
+  ? latest.aaa?.prev_as_of
+    ? `Daily AAA averages, ${formatShortDate(latest.aaa.prev_as_of)} to ${formatShortDate(latest.aaa.as_of)}.`
+    : "Daily AAA averages."
+  : latest.eia?.prev_period
+    ? `EIA weekly prices, week of ${formatShortDate(latest.eia.prev_period)} to week of ${formatShortDate(latest.eia.period)}.`
+    : "EIA weekly prices.";
+
+const title = "Diesel prices in every state, and which way they moved | DailyFuel";
+const description = homeDescription(site);
+---
+<Base title={title} description={description}>
+  <section class="hero wrap" aria-label="U.S. average">
+    <div class="hero-sign">
+      <Sign
+        legend="U.S. diesel average"
+        price={nm?.price ?? null}
+        noPrice="No national price today"
+        change={nm?.change ?? null}
+        pct={nm?.change_pct ?? null}
+        prev={nm?.prev ?? null}
+        cadence={national.cadence}
+        dateLine={dateLine}
+        compareLine={compareLine}
+        roll
+        note={Boolean(aaaMode && site.eiaUs && latest.eia && daily)}
+      >
+        {aaaMode && site.eiaUs && latest.eia && daily && (
+          <p slot="note">EIA weekly average: <Price price={site.eiaUs.price} /> for the week of {formatShortDate(latest.eia.period)}</p>
+        )}
+      </Sign>
+      <script is:inline set:html={rollScript}></script>
+    </div>
+    <div class="summary">
+      <p class="lead">{usSentence}</p>
+      {topRise && (
+        <p>
+          {aaaMode ? <a href={topRise.href}>{topRise.name}</a> : topRise.name} rose the most{moveWhen}, up {formatCents(topRise.change)}.
+        </p>
+      )}
+      {!topRise && <p>No {noun} went up {stateWhere}.</p>}
+      {topFall ? (
+        <p>
+          {aaaMode ? <a href={topFall.href}>{topFall.name}</a> : topFall.name} fell the most{moveWhen}, down {formatCents(topFall.change)}.
+        </p>
+      ) : (
+        <p>No {noun} went down {stateWhere}.</p>
+      )}
+      <p class="muted">
+        {nextDaily}{nextDaily && nextEia ? " " : ""}{nextEia && (
+          <span data-next-release={eiaNext ?? undefined} data-late={eiaLate}>{nextEia}</span>
+        )}
+      </p>
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="map-title">
+    <div class="section-head">
+      <h2 id="map-title">Where diesel went up or down</h2>
+      <p>{periodText}</p>
+    </div>
+    <div class="map-layout">
+      <div class="map-col">
+        <div class="geo-map">
+          <UsMap site={site} label={mapLabel} />
+        </div>
+        <div class="tile-map">
+          <TileMap site={site} label={mapLabel} />
+        </div>
+        {!aaaMode && (
+          <p class="map-note small muted">EIA reports diesel by region, so states in the same region share a price.</p>
+        )}
+      </div>
+      <aside class="map-side" aria-label="Legend and biggest moves">
+        <Legend cadence={national.cadence === "daily" || aaaMode ? "daily" : "weekly"} noData={noDataLabel} title={aaaMode ? `Change ${sinceText(site) || "since the last price"}` : "Change since last week"} />
+        <BiggestMoves items={moveItems} cadence={aaaMode ? "daily" : "weekly"} noun={aaaMode ? "state" : "region"} count={aaaMode ? 5 : 3} />
+      </aside>
+    </div>
+  </section>
+
+  {site.weekly && (
+    <section class="section wrap" aria-labelledby="regions-title">
+      <div class="section-head">
+        <h2 id="regions-title">Regions, last 52 weeks</h2>
+        <p>EIA's weekly price for its 8 diesel regions, all on the same scale.</p>
+      </div>
+      <RegionMultiples site={site} />
+    </section>
+  )}
+
+  <section class="section wrap" aria-labelledby="states-title">
+    <div class="section-head">
+      <h2 id="states-title">Every state</h2>
+    </div>
+    <StateTable site={site} />
+  </section>
+
+  <Fragment slot="scripts">
+    <script is:inline set:html={mapScript}></script>
+    <script is:inline set:html={chartScript}></script>
+    <script is:inline set:html={sortScript}></script>
+  </Fragment>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    gap: var(--space-6) var(--space-7);
+    align-items: center;
+    padding-block: var(--space-7) var(--space-7);
+  }
+  .summary {
+    font-size: 19px;
+    line-height: 1.5;
+  }
+  .summary p {
+    margin-bottom: var(--space-3);
+  }
+  .summary .lead {
+    font-size: var(--fs-h3);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .summary .muted {
+    font-size: 17px;
+  }
+  @media (max-width: 899px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      padding-block: var(--space-5) var(--space-6);
+    }
+    .summary {
+      font-size: 17px;
+    }
+  }
+
+  .map-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    gap: var(--space-6) var(--space-7);
+    align-items: start;
+  }
+  @media (max-width: 1023px) {
+    .map-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .map-side {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: var(--space-6);
+    }
+  }
+  .map-side {
+    display: grid;
+    gap: var(--space-6);
+  }
+  /* when the moves list runs longer than the map, the map stays in view beside it */
+  @media (min-width: 1024px) {
+    .map-col {
+      position: sticky;
+      top: var(--space-4);
+    }
+  }
+  .tile-map {
+    display: none;
+  }
+  @media (max-width: 639px) {
+    .geo-map {
+      display: none;
+    }
+    .tile-map {
+      display: block;
+    }
+  }
+  .map-note {
+    margin-top: var(--space-3);
+  }
+
+  /* hero roll reels */
+  .hero :global(.dg) {
+    position: relative;
+    display: inline-block;
+    line-height: 1;
+  }
+  /* the window shows one digit at rest: cap top to just under the baseline,
+     so a digit coming up the reel never shows in the gap above the date line */
+  .hero :global(.dg.rolling) {
+    color: transparent;
+    clip-path: inset(-0.02em -0.3em 0.2em -0.3em);
+  }
+  .hero :global(.dg .reel) {
+    position: absolute;
+    left: -0.5em;
+    right: -0.5em;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--sign-ink);
+  }
+  .hero :global(.dg .reel > span) {
+    display: block;
+    height: 1em;
+    line-height: 1;
+  }
+</style>

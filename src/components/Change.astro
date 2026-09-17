@@ -1,0 +1,34 @@
+---
+// A price change: direction glyph in color, the numbers in ink.
+// "31.8¢ (+5.3%)". With a cadence the glyph follows the map bins, so a change
+// under the about the same line gets a dot.
+import Glyph from "./Glyph.astro";
+import { directionFor, type Cadence, type Direction } from "../lib/bins.ts";
+import { changeTenths, formatChange, formatPct, pctFrom, spokenChange } from "../lib/format.ts";
+interface Props {
+  change: number | null;
+  pct?: number | null;
+  prev?: number | null;
+  cadence?: Cadence | null;
+  showPct?: boolean;
+  empty?: string;
+  class?: string;
+}
+const { change, pct = null, prev = null, cadence = null, showPct = true, empty = "No change yet", class: cls } = Astro.props;
+let direction: Direction = "flat";
+let text = "";
+let spoken = "";
+if (change !== null) {
+  const t = changeTenths(change);
+  direction = cadence ? directionFor(change, cadence) : t > 0 ? "up" : t < 0 ? "down" : "flat";
+  const p = pct ?? (prev ? pctFrom(change, prev) : null);
+  text = formatChange(change, showPct ? p : null);
+  const pctSpoken = showPct && p !== null ? `, ${formatPct(p).replace("−", "minus ").replace("+", "plus ")}` : "";
+  spoken = `${direction === "flat" && t !== 0 ? "about the same, " : ""}${spokenChange(change)}${pctSpoken}`;
+}
+---
+{change === null ? (
+  <span class:list={["change", "muted", cls]}>{empty}</span>
+) : (
+  <span class:list={["change", cls]} data-dir={direction}><Glyph direction={direction} /><span class="sr-only">{spoken}</span><span aria-hidden="true">{text}</span></span>
+)}

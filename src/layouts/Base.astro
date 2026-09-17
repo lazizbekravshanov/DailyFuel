@@ -1,0 +1,112 @@
+---
+import "@fontsource-variable/overpass";
+import "../styles/tokens.css";
+import "../styles/global.css";
+import fontUrl from "@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2?url";
+import Footer from "../components/Footer.astro";
+import StaleBanner from "../components/StaleBanner.astro";
+import { getSite, SITE_NAME } from "../lib/site.ts";
+interface Props {
+  title: string;
+  description: string;
+  noindex?: boolean;
+}
+const { title, description, noindex = false } = Astro.props;
+const site = getSite();
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const current = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={fontUrl} as="font" type="font/woff2" crossorigin />
+    <meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16191c" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {!noindex && <meta property="og:url" content={canonical} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to prices</a>
+    <header class="site-header">
+      <div class="wrap header-row">
+        <a class="wordmark" href="/" aria-current={current === "/" ? "page" : undefined}>
+          <svg class="mark" viewBox="0 0 32 24" aria-hidden="true" focusable="false">
+            <rect x="0.5" y="0.5" width="31" height="23" rx="4" class="mark-bg"></rect>
+            <rect x="2.75" y="2.75" width="26.5" height="18.5" rx="2.25" class="mark-line"></rect>
+            <rect x="7" y="8" width="18" height="3" rx="1" class="mark-ink"></rect>
+            <rect x="7" y="13" width="11" height="3" rx="1" class="mark-ink"></rect>
+          </svg>
+          <span>DailyFuel</span>
+        </a>
+        <nav aria-label="Site">
+          <a href="/about/" aria-current={current.startsWith("/about") ? "page" : undefined}>About</a>
+        </nav>
+      </div>
+    </header>
+    <StaleBanner site={site} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer site={site} />
+    <slot name="scripts" />
+  </body>
+</html>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--hairline);
+  }
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+  }
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+  }
+  .mark {
+    width: 32px;
+    height: 24px;
+  }
+  .mark-bg {
+    fill: var(--sign);
+  }
+  .mark-line {
+    fill: none;
+    stroke: var(--sign-ink);
+    stroke-width: 1.5;
+  }
+  .mark-ink {
+    fill: var(--sign-ink);
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 4px;
+    font-weight: 650;
+    text-decoration: none;
+  }
+  nav a:hover,
+  nav a[aria-current="page"] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+</style>

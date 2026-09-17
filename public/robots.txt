@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dailydiesel.vercel.app/sitemap-index.xml

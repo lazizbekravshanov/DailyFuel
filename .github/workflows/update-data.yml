@@ -1,0 +1,99 @@
+name: update-data
+
+# Fetches new diesel prices, commits changed JSON under data/, and checks the
+# result. Every data commit on main triggers a Vercel production deploy.
+# AAA stays off unless the repo variable AAA_ENABLED is exactly "true".
+
+on:
+  schedule:
+    # UTC. Odd minutes, because scheduled runs can start hours late.
+    - cron: "17 12 * * *"
+    - cron: "47 15 * * *"
+    - cron: "17 20 * * *"
+  workflow_dispatch:
+    inputs:
+      force_aaa:
+        description: Fetch AAA even if today's snapshot already exists (only matters when AAA_ENABLED is true)
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      issues: write
+    env:
+      AAA_ENABLED: ${{ vars.AAA_ENABLED || 'false' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install Python packages
+        run: python -m pip install -r scripts/requirements.txt
+
+      - name: Update data
+        id: update
+        env:
+          FORCE_AAA: ${{ inputs.force_aaa && 'true' || 'false' }}
+        run: python scripts/update_data.py
+
+      - name: Commit and push data
+        env:
+          COMMIT_MESSAGE: ${{ steps.update.outputs.commit_message }}
+        run: |
+          git add data/
+          if git diff --cached --quiet data/; then
+            echo "No data changes, nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "${COMMIT_MESSAGE:-data: update}"
+          git pull --rebase
+          git push
+
+      - name: Health check
+        run: python scripts/health.py
+
+      - name: Report a failed scheduled run
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          repo="$GITHUB_REPOSITORY"
+          if ! gh label list --repo "$repo" --search data-failure --json name --jq '.[].name' | grep -qx data-failure; then
+            gh label create data-failure --repo "$repo" --color B42F2F --description "The scheduled data update failed"
+          fi
+          open_issue=$(gh issue list --repo "$repo" --label data-failure --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$open_issue" ]; then
+            gh issue comment "$open_issue" --repo "$repo" --body "It failed again. Run: $RUN_URL"
+          else
+            gh issue create --repo "$repo" --label data-failure \
+              --title "Scheduled data update failed" \
+              --body "The scheduled data update failed. Check the run log and the health check output: $RUN_URL
+
+          Close this issue once a run passes again. Later failures add a comment here while it stays open."
+          fi
+
+  keepalive:
+    # Its own job so it still runs when update fails.
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@f72ff1a1336129f29bf0166c0fd0ca6cf1bcb38c # v1.2.1

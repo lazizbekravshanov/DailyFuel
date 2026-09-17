@@ -1,0 +1,37 @@
+---
+// The table twin under a chart: every value the chart draws, as text.
+// Plain three decimal prices here, since this table is for reading and copying numbers.
+import { formatDate } from "../lib/dates.ts";
+import { formatPrice } from "../lib/format.ts";
+interface Props {
+  caption: string;
+  firstColumn: string;
+  columns: string[];
+  rows: { date: string; values: (number | null)[] }[];
+  label: string;
+  tall?: boolean;
+}
+const { caption, firstColumn, columns, rows, label, tall = false } = Astro.props;
+---
+<details class="numbers">
+  <summary>Show the numbers</summary>
+  <div class:list={["table-scroll", tall && "table-tall"]} tabindex="0" role="region" aria-label={label}>
+    <table class="data">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{firstColumn}</th>
+          {columns.map((c) => <th scope="col" class="r">{c}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr>
+            <th scope="row">{formatDate(row.date)}</th>
+            {row.values.map((v) => <td class="r">{v === null ? "No price" : formatPrice(v)}</td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</details>

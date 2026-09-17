@@ -1,0 +1,85 @@
+---
+// Top rises and falls: regions in eia_only, states in aaa+eia.
+import Change from "./Change.astro";
+import Price from "./Price.astro";
+import type { Cadence } from "../lib/bins.ts";
+import { changeTenths } from "../lib/format.ts";
+export interface MoveItem {
+  name: string;
+  href?: string;
+  price: number;
+  change: number;
+  pct: number | null;
+}
+interface Props {
+  items: MoveItem[];
+  cadence: Cadence;
+  noun: string;
+  count?: number;
+}
+const { items, cadence, noun, count = 3 } = Astro.props;
+const rises = items.filter((i) => changeTenths(i.change) > 0).sort((a, b) => b.change - a.change).slice(0, count);
+const falls = items.filter((i) => changeTenths(i.change) < 0).sort((a, b) => a.change - b.change).slice(0, count);
+const groups = [
+  { title: "Biggest rises", list: rises, none: `No ${noun} went up.` },
+  { title: "Biggest drops", list: falls, none: `No ${noun} went down.` },
+];
+---
+<div class="moves">
+  {groups.map((g) => (
+    <div class="group">
+      <h3>{g.title}</h3>
+      {g.list.length === 0 ? (
+        <p class="muted">{g.none}</p>
+      ) : (
+        <ol>
+          {g.list.map((i) => (
+            <li>
+              <span class="who">{i.href ? <a href={i.href}>{i.name}</a> : i.name}</span>
+              <Change change={i.change} pct={i.pct} cadence={cadence} showPct={false} />
+              <span class="at muted"><Price price={i.price} /></span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  ))}
+</div>
+
+<style>
+  .moves {
+    display: grid;
+    gap: var(--space-5);
+  }
+  h3 {
+    font-size: 17px;
+    margin-bottom: var(--space-2);
+  }
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: baseline;
+    gap: 4px 14px;
+    padding: 7px 0 5px;
+    border-top: 1px solid var(--hairline);
+    font-variant-numeric: tabular-nums;
+  }
+  li:last-child {
+    border-bottom: 1px solid var(--hairline);
+  }
+  .who {
+    min-width: 0;
+  }
+  .at {
+    min-width: 4.2em;
+    text-align: right;
+  }
+  p {
+    margin: 0;
+  }
+</style>

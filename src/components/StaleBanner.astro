@@ -1,0 +1,27 @@
+---
+import staleScript from "../scripts/stale.js?raw";
+import type { SiteData } from "../lib/site.ts";
+interface Props {
+  site: SiteData;
+}
+const { site } = Astro.props;
+const aaa = site.mode === "aaa+eia" ? (site.latest.aaa?.as_of ?? "") : "";
+const eia = site.latest.eia?.period ?? "";
+---
+<div class="wrap">
+  <p id="stale-banner" class="stale" role="status" data-aaa={aaa} data-eia={eia} hidden>
+    These prices are older than usual. The next update is late.
+  </p>
+</div>
+<script is:inline set:html={staleScript}></script>
+
+<style>
+  .stale {
+    max-width: none;
+    margin: var(--space-4) 0 0;
+    padding: 10px 14px 8px;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    font-weight: 650;
+  }
+</style>

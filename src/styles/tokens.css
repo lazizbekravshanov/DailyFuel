@@ -1,0 +1,126 @@
+/*
+  DailyFuel design tokens.
+
+  Diverging ramps were checked with the dataviz skill's validate_palette.js
+  against the real surfaces (light #FCFCFB, dark #16191C):
+    each arm with --ordinal: monotone lightness, steps at least 0.06 apart,
+    the step nearest the surface at 2:1 or better, one hue. All pass.
+    (The PROMPT starting points #F2C4BE and #C6DCF7 sit at 1.52:1 and 1.37:1
+    on paper, which fails that 2:1 floor, so the arms were re stepped.)
+    all seven fills, midpoint included, with --pairs all:
+      light: CVD worst pair 11.3, normal vision worst pair 15.5. Pass.
+      dark:  CVD worst pair 10.0, normal vision worst pair 15.7. Pass.
+    The dark midpoint moved from #363534 to #282A2C because the lighter gray
+    sat only 5.8 from --up-1 under protanopia.
+    (The categorical band, chroma and 3:1 checks flag the pale steps by design.
+    Every value is also in a table and a tooltip, which is the relief channel.)
+  Text on fills clears 4.5:1 with the colors set by the on tokens, and the
+  direction glyphs clear 4.4:1 (light) and 8.6:1 (dark) on paper.
+*/
+
+:root {
+  color-scheme: light;
+
+  --paper: #fcfcfb;
+  --ink: #1d2125;
+  --ink-2: #51565b;
+  --hairline: #ddded9;
+  --hairline-strong: #c3c5c0;
+
+  --sign: #0a6640;
+  --sign-ink: #ffffff;
+
+  --up-1: #e79d95;
+  --up-2: #c94d47;
+  --up-3: #901e1f;
+  --down-1: #90b5e5;
+  --down-2: #3a75bf;
+  --down-3: #104888;
+  --flat: #efeeea;
+  --nodata: var(--paper);
+  --nodata-line: #c9cbc6;
+
+  /* text on each fill, 4.5:1 or better */
+  --on-up-1: var(--ink);
+  --on-up-2: #ffffff;
+  --on-up-3: #ffffff;
+  --on-down-1: var(--ink);
+  --on-down-2: #ffffff;
+  --on-down-3: #ffffff;
+  --on-flat: var(--ink);
+  --on-nodata: var(--ink);
+
+  /* direction glyphs beside text, 4:1 or better on paper */
+  --glyph-up: var(--up-2);
+  --glyph-down: var(--down-2);
+  --glyph-flat: var(--ink-2);
+
+  /* chart lines: the price in asphalt, the EIA benchmark in a quieter gray */
+  --line-primary: var(--ink);
+  --line-bench: #7d8287;
+
+  --focus: var(--ink);
+  --focus-halo: var(--paper);
+
+  --font: "Overpass Variable", "Overpass", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-small: 14px;
+  --fs-body: 17px;
+  --fs-h3: 21px;
+  --fs-h2: 28px;
+  --fs-h1: 44px;
+  /* sized to the sign itself (a container), not the window */
+  --fs-sign-price: clamp(56px, 22cqi, 112px);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  --max: 1120px;
+  --gutter: 16px;
+  --radius-sign: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --paper: #16191c;
+    --ink: #e8e9e5;
+    --ink-2: #a6abaf;
+    --hairline: #30353a;
+    --hairline-strong: #474d53;
+
+    --sign: #0a6640;
+    --sign-ink: #ffffff;
+
+    --up-1: #82332e;
+    --up-2: #d66159;
+    --up-3: #fe9b92;
+    --down-1: #265085;
+    --down-2: #508cd8;
+    --down-3: #8fbefa;
+    --flat: #282a2c;
+    --nodata-line: #3d4349;
+
+    --on-up-1: var(--ink);
+    --on-up-2: var(--paper);
+    --on-up-3: var(--paper);
+    --on-down-1: var(--ink);
+    --on-down-2: var(--paper);
+    --on-down-3: var(--paper);
+    --on-flat: var(--ink);
+
+    --glyph-up: var(--up-3);
+    --glyph-down: var(--down-3);
+    --glyph-flat: var(--ink-2);
+
+    --line-primary: var(--ink);
+    --line-bench: #8a8f94;
+  }
+}

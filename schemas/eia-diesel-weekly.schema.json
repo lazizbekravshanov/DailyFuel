@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dailyfuel/eia-diesel-weekly/1",
+  "title": "EIA weekly retail on-highway diesel, 11 geographies",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "source",
+    "source_url",
+    "fetched_at",
+    "last_modified",
+    "release_date",
+    "next_release_date",
+    "weeks"
+  ],
+  "properties": {
+    "schema": {
+      "const": "dailyfuel/eia-diesel-weekly/1"
+    },
+    "source": {
+      "enum": [
+        "eia_xls",
+        "usda_socrata",
+        "eia_api_v2"
+      ]
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "fetched_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_modified": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "next_release_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "weeks": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "period",
+          "values"
+        ],
+        "properties": {
+          "period": {
+            "type": "string",
+            "format": "date"
+          },
+          "values": {
+            "type": "object",
+            "minProperties": 11,
+            "maxProperties": 11,
+            "propertyNames": {
+              "enum": [
+                "NUS",
+                "R10",
+                "R1X",
+                "R1Y",
+                "R1Z",
+                "R20",
+                "R30",
+                "R40",
+                "R50",
+                "SCA",
+                "R5XCA"
+              ]
+            },
+            "additionalProperties": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 1.5,
+              "maximum": 15
+            }
+          }
+        }
+      }
+    }
+  }
+}

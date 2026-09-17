@@ -1,0 +1,62 @@
+---
+// Always visible legend: every bin with its glyph, plus no data when it appears.
+import Glyph from "./Glyph.astro";
+import { legendItems, type Cadence } from "../lib/bins.ts";
+interface Props {
+  cadence: Cadence;
+  noData?: string | null;
+  title: string;
+}
+const { cadence, noData = null, title } = Astro.props;
+const items = legendItems(cadence);
+---
+<div class="legend">
+  <p class="legend-title" id="legend-title">{title}</p>
+  <ul aria-labelledby="legend-title">
+    {items.map((i) => (
+      <li>
+        <span class={`sw f-${i.key}`} aria-hidden="true"></span>
+        <Glyph direction={i.direction} />
+        <span>{i.label}</span>
+      </li>
+    ))}
+    {noData && (
+      <li>
+        <span class="sw f-nodata" aria-hidden="true"></span>
+        <span class="glyph" aria-hidden="true"></span>
+        <span>{noData}</span>
+      </li>
+    )}
+  </ul>
+</div>
+
+<style>
+  .legend-title {
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 26px;
+  }
+  .sw {
+    flex: none;
+    width: 28px;
+    height: 18px;
+    border-radius: 3px;
+  }
+  li :global(.glyph) {
+    margin-right: 0;
+  }
+</style>

@@ -1,0 +1,56 @@
+---
+// Phone map: one square per state on a grid, placed from states.json tile row and col.
+import { mapLabel } from "../lib/copy.ts";
+import type { SiteData } from "../lib/site.ts";
+interface Props {
+  site: SiteData;
+  label: string;
+}
+const { site, label } = Astro.props;
+const cols = Math.max(...site.states.map((s) => s.tile.col)) + 1;
+const rows = Math.max(...site.states.map((s) => s.tile.row)) + 1;
+---
+<nav class="tiles" aria-label={label} style={`--cols:${cols};--rows:${rows}`}>
+  {site.states.map((s) => {
+    const l = mapLabel(s, site);
+    return (
+      <a
+        class={`tile f-${s.fill}`}
+        href={s.href}
+        aria-label={l.aria}
+        style={`grid-row:${s.tile.row + 1};grid-column:${s.tile.col + 1}`}
+      >
+        {s.code}
+      </a>
+    );
+  })}
+</nav>
+
+<style>
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--rows), auto);
+    gap: 3px;
+    max-width: 520px;
+  }
+  .tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    min-height: 26px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    line-height: 1;
+    padding-top: 2px;
+  }
+  .tile:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 1px;
+    position: relative;
+    z-index: 1;
+  }
+</style>

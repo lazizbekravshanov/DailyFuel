@@ -1,0 +1,216 @@
+---
+// A line chart with one y axis, hairline grid, 2px lines, and a direct label at
+// the end of each line. Hover or keyboard focus shows a crosshair and tooltip.
+import Price from "./Price.astro";
+import type { ChartModel } from "../lib/chart.ts";
+interface Props {
+  model: ChartModel;
+  height: number;
+  label: string;
+  weekly: boolean;
+  compact?: boolean;
+  class?: string;
+}
+const { model, height, label, weekly, compact = false, class: cls } = Astro.props;
+const hover = JSON.stringify({ weekly, dates: model.hover.dates, x: model.hover.x, series: model.hover.series });
+---
+<div class:list={["chart", compact && "chart-compact", cls]} style={`--h:${height}px`}>
+  <div class="chart-plot" tabindex="0" role="img" aria-label={label} data-chart={hover}>
+    <div class="y-axis" aria-hidden="true">
+      {model.yTicks.map((t) => <span style={`top:${t.pos}%`}>{t.label}</span>)}
+    </div>
+    <div class="plot-area">
+      <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        {model.yTicks.map((t) => <line class="grid" x1="0" x2="1000" y1={t.pos * 10} y2={t.pos * 10}></line>)}
+        {model.paths.map((p) => <path class={`line line-${p.kind}`} d={p.d}></path>)}
+      </svg>
+      {model.ends.map((e) => <span class={`end-dot end-dot-${e.kind}`} style={`left:${e.x}%;top:${e.y}%`} aria-hidden="true"></span>)}
+    </div>
+    <div class="end-labels" aria-hidden="true">
+      {model.showEndLabels && model.ends.map((e) => <span class={`end-${e.kind}`} style={`top:${e.y}%`}><Price price={e.value} /></span>)}
+    </div>
+    <div class="x-axis" aria-hidden="true">
+      {model.xTicks.map((t) => <span class:list={[t.minor && "minor"]} style={`left:${t.pos}%`}>{t.label}</span>)}
+    </div>
+  </div>
+</div>
+
+<style>
+  .chart-plot {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) 66px;
+    grid-template-rows: var(--h) auto;
+    border-radius: 4px;
+  }
+  .chart-compact .chart-plot {
+    grid-template-columns: 42px minmax(0, 1fr) 58px;
+  }
+  .chart-plot:focus-visible {
+    outline-offset: 6px;
+  }
+  .y-axis {
+    position: relative;
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .y-axis span,
+  .x-axis span,
+  .end-labels span {
+    position: absolute;
+    white-space: nowrap;
+    line-height: 1;
+  }
+  .y-axis span {
+    right: 8px;
+    transform: translateY(-45%);
+    font-size: 13px;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .plot-area {
+    position: relative;
+    grid-column: 2;
+    grid-row: 1;
+    touch-action: pan-y;
+  }
+  .plot-area svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .grid {
+    stroke: var(--hairline);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    shape-rendering: crispEdges;
+  }
+  .line {
+    fill: none;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .line-primary {
+    stroke: var(--line-primary);
+  }
+  .line-bench {
+    stroke: var(--line-bench);
+  }
+  .end-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--paper);
+  }
+  .end-dot-primary {
+    background: var(--line-primary);
+  }
+  .end-dot-bench {
+    background: var(--line-bench);
+  }
+  .end-labels {
+    position: relative;
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .end-labels span {
+    left: 10px;
+    transform: translateY(-45%);
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .end-labels .end-bench {
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+  .x-axis {
+    position: relative;
+    grid-column: 2;
+    grid-row: 2;
+    height: 26px;
+  }
+  .x-axis span {
+    top: 9px;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  @media (max-width: 639px) {
+    .x-axis .minor {
+      display: none;
+    }
+  }
+  .chart-compact .end-labels span {
+    font-size: 14px;
+  }
+
+  .plot-area :global(.cross) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--ink-2);
+    pointer-events: none;
+  }
+  .plot-area :global(.cross-dot) {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--paper);
+    pointer-events: none;
+  }
+  .plot-area :global(.cross-dot-primary) {
+    background: var(--line-primary);
+  }
+  .plot-area :global(.cross-dot-bench) {
+    background: var(--line-bench);
+  }
+  .plot-area :global(.chart-tip) {
+    position: absolute;
+    top: 0;
+    z-index: 4;
+    padding: 8px 10px 6px;
+    background: var(--paper);
+    border: 1px solid var(--hairline-strong);
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
+    font-size: 14px;
+    line-height: 1.35;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .plot-area :global(.tip-date) {
+    color: var(--ink-2);
+    margin-bottom: 2px;
+  }
+  .plot-area :global(.tip-row) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .plot-area :global(.tip-row strong) {
+    font-size: 16px;
+  }
+  .plot-area :global(.tip-label) {
+    color: var(--ink-2);
+  }
+  .plot-area :global(.tip-key) {
+    width: 14px;
+    height: 2px;
+    flex: none;
+  }
+  .plot-area :global(.tip-key-primary) {
+    background: var(--line-primary);
+  }
+  .plot-area :global(.tip-key-bench) {
+    background: var(--line-bench);
+  }
+</style>

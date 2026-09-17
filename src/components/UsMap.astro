@@ -1,0 +1,190 @@
+---
+// Choropleth of the latest change, drawn at build time. Each state is a link.
+import { CALLOUTS, MAP_HEIGHT, nationOutline, stateShape } from "../lib/geo.ts";
+import { mapLabel } from "../lib/copy.ts";
+import type { SiteData } from "../lib/site.ts";
+interface Props {
+  site: SiteData;
+  label: string;
+}
+const { site, label } = Astro.props;
+const WIDTH = 1000;
+const BOX_W = 46;
+const BOX_H = 28;
+const BOX_GAP = 6;
+const BOX_X = 950;
+const BOX_Y = 168;
+const items = site.states.map((s) => ({ s, shape: stateShape(s.fips), l: mapLabel(s, site) }));
+const callouts = CALLOUTS.map((code, i) => ({
+  item: items.find((it) => it.s.code === code)!,
+  y: BOX_Y + i * (BOX_H + BOX_GAP),
+}));
+---
+<div class="map-wrap" data-map>
+  <a class="skip-map" href="#after-map">Skip past the map</a>
+  <svg class="us-map" viewBox={`0 0 ${WIDTH} ${MAP_HEIGHT}`} role="group" aria-label={label} tabindex="-1">
+    <defs>
+      <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect class="hatch-bg" width="7" height="7"></rect>
+        <line class="hatch-line" x1="1.5" y1="0" x2="1.5" y2="7"></line>
+      </pattern>
+    </defs>
+    <g class="states">
+      {items.map(({ s, shape, l }) => (
+        <a
+          class="state"
+          href={s.href}
+          aria-label={l.aria}
+          data-code={s.code}
+          data-name={s.name}
+          data-price={l.price}
+          data-change={l.change}
+          data-dir={l.dir}
+          data-note={l.note}
+        >
+          <title>{l.title}</title>
+          <path class={`f f-${s.fill}`} d={shape.d}></path>
+        </a>
+      ))}
+    </g>
+    <path class="nation" d={nationOutline()} aria-hidden="true"></path>
+    <g class="callouts" aria-hidden="true">
+      {callouts.map(({ item: { s, l }, y }) => (
+        <a
+          class="callout"
+          href={s.href}
+          tabindex="-1"
+          data-code={s.code}
+          data-name={s.name}
+          data-price={l.price}
+          data-change={l.change}
+          data-dir={l.dir}
+          data-note={l.note}
+        >
+          <rect class={`f f-${s.fill}`} x={BOX_X} y={y} width={BOX_W} height={BOX_H} rx="4"></rect>
+          <text class={`t t-${s.fill}`} x={BOX_X + BOX_W / 2} y={y + BOX_H / 2 + 6} text-anchor="middle">{s.code}</text>
+        </a>
+      ))}
+    </g>
+    <g class="map-hi" aria-hidden="true">
+      <path class="hi-halo" d=""></path>
+      <path class="hi-line" d=""></path>
+    </g>
+  </svg>
+  <div class="map-tip" hidden></div>
+</div>
+<span id="after-map" tabindex="-1"></span>
+
+<style is:global>
+  .map-wrap {
+    position: relative;
+  }
+  .skip-map {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 6;
+    padding: 8px 12px;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 700;
+    border-radius: 4px;
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .skip-map:focus {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .us-map {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .us-map .state {
+    outline: none;
+  }
+  .us-map .f {
+    stroke: var(--paper);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+  }
+  .us-map .state .f-nodata {
+    stroke: var(--hairline-strong);
+  }
+  .us-map .nation {
+    fill: none;
+    stroke: var(--hairline-strong);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+  }
+  .us-map .state:focus-visible .f {
+    stroke: var(--focus);
+    stroke-width: 3;
+  }
+  .us-map .callout {
+    cursor: pointer;
+  }
+  .us-map .callout .f {
+    stroke-width: 0;
+  }
+  .us-map .callout.is-active .f {
+    stroke: var(--focus);
+    stroke-width: 2.5;
+  }
+  .us-map .callout .t {
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 700;
+    pointer-events: none;
+  }
+  .us-map .map-hi path {
+    fill: none;
+    pointer-events: none;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+  }
+  .us-map .hi-halo {
+    stroke: var(--focus-halo);
+    stroke-width: 6;
+  }
+  .us-map .hi-line {
+    stroke: var(--focus);
+    stroke-width: 2.5;
+  }
+  .map-tip {
+    position: absolute;
+    z-index: 5;
+    min-width: 180px;
+    max-width: 260px;
+    padding: 10px 12px 8px;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--hairline-strong);
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
+    pointer-events: none;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  .map-tip .tip-name {
+    color: var(--ink-2);
+  }
+  .map-tip .tip-price {
+    font-size: 21px;
+    font-weight: 750;
+  }
+  .map-tip .tip-change {
+    font-weight: 600;
+  }
+  .map-tip .tip-note {
+    margin-top: 4px;
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+</style>

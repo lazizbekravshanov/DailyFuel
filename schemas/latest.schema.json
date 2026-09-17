@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dailyfuel/latest/1",
+  "title": "Derived snapshot the site renders",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "mode",
+    "aaa",
+    "eia",
+    "states"
+  ],
+  "properties": {
+    "schema": {
+      "const": "dailyfuel/latest/1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "enum": [
+        "aaa+eia",
+        "eia_only"
+      ]
+    },
+    "aaa": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "as_of",
+        "prev_as_of",
+        "gap_days",
+        "national"
+      ],
+      "properties": {
+        "as_of": {
+          "type": "string",
+          "format": "date"
+        },
+        "prev_as_of": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "gap_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "national": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/move"
+            }
+          ]
+        }
+      }
+    },
+    "eia": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "period",
+        "prev_period",
+        "release_date",
+        "next_release_date",
+        "us"
+      ],
+      "properties": {
+        "period": {
+          "type": "string",
+          "format": "date"
+        },
+        "prev_period": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "release_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "next_release_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "us": {
+          "$ref": "#/$defs/move"
+        }
+      }
+    },
+    "states": {
+      "type": "array",
+      "minItems": 51,
+      "maxItems": 51,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "fips",
+          "name",
+          "padd",
+          "eia_series",
+          "aaa",
+          "eia",
+          "flags"
+        ],
+        "properties": {
+          "code": {
+            "enum": [
+              "AK",
+              "AL",
+              "AR",
+              "AZ",
+              "CA",
+              "CO",
+              "CT",
+              "DC",
+              "DE",
+              "FL",
+              "GA",
+              "HI",
+              "IA",
+              "ID",
+              "IL",
+              "IN",
+              "KS",
+              "KY",
+              "LA",
+              "MA",
+              "MD",
+              "ME",
+              "MI",
+              "MN",
+              "MO",
+              "MS",
+              "MT",
+              "NC",
+              "ND",
+              "NE",
+              "NH",
+              "NJ",
+              "NM",
+              "NV",
+              "NY",
+              "OH",
+              "OK",
+              "OR",
+              "PA",
+              "RI",
+              "SC",
+              "SD",
+              "TN",
+              "TX",
+              "UT",
+              "VA",
+              "VT",
+              "WA",
+              "WI",
+              "WV",
+              "WY"
+            ]
+          },
+          "fips": {
+            "type": "string",
+            "pattern": "^\\d{2}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "padd": {
+            "enum": [
+              "1A",
+              "1B",
+              "1C",
+              "2",
+              "3",
+              "4",
+              "5"
+            ]
+          },
+          "eia_series": {
+            "enum": [
+              "R1X",
+              "R1Y",
+              "R1Z",
+              "R20",
+              "R30",
+              "R40",
+              "SCA",
+              "R5XCA",
+              null
+            ]
+          },
+          "aaa": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/move"
+              }
+            ]
+          },
+          "eia": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/move"
+              }
+            ]
+          },
+          "flags": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "gap",
+                "large_move",
+                "eia_divergence",
+                "no_eia_survey",
+                "prev_missing"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "move": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "price",
+        "prev",
+        "change",
+        "change_pct",
+        "direction"
+      ],
+      "properties": {
+        "price": {
+          "type": "number"
+        },
+        "prev": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "change": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "change_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "direction": {
+          "enum": [
+            "up",
+            "down",
+            "flat",
+            null
+          ]
+        }
+      }
+    }
+  }
+}

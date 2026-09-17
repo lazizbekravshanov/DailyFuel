@@ -1,0 +1,133 @@
+---
+// Every state, sortable. Default order is alphabetical.
+import Change from "./Change.astro";
+import Price from "./Price.astro";
+import { changeOver } from "../lib/stats.ts";
+import type { SiteData } from "../lib/site.ts";
+interface Props {
+  site: SiteData;
+}
+const { site } = Astro.props;
+const aaaMode = site.mode === "aaa+eia";
+const rows = [...site.states]
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map((s) => {
+    const year = aaaMode ? null : changeOver(s.eiaHistory, 364, 0);
+    return { s, year };
+  });
+const lastCol = aaaMode ? "EIA weekly" : "52 week change";
+---
+<div class="table-scroll state-table" tabindex="0" role="region" aria-labelledby="table-caption">
+  <table class="data" data-sortable data-status="table-status">
+    <caption id="table-caption">
+      {aaaMode
+        ? "Daily AAA price and change for every state, with EIA's weekly region price."
+        : "EIA weekly price and change for every state. States in the same region share a price."}
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" data-sort-type="text" aria-sort="ascending">State</th>
+        <th scope="col" class="r" data-sort-type="number" data-sort-first="descending">Price</th>
+        <th scope="col" data-sort-type="number" data-sort-first="descending">Change</th>
+        <th scope="col" data-sort-type="text">Source</th>
+        <th scope="col" class={aaaMode ? "r" : ""} data-sort-type="number" data-sort-first="descending">{lastCol}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map(({ s, year }) => (
+        <tr>
+          <th scope="row" data-sort={s.name}><a href={s.href}>{s.name}</a></th>
+          <td class="r" data-sort={s.primary ? String(s.primary.price) : ""}>
+            {s.primary ? <Price price={s.primary.price} /> : <span class="muted">No survey</span>}
+          </td>
+          <td data-sort={s.primary?.change ?? ""}>
+            {s.primary ? (
+              <Change change={s.primary.change} pct={s.primary.change_pct} prev={s.primary.prev} cadence={s.cadence} empty="No change yet" />
+            ) : (
+              <span class="muted">None</span>
+            )}
+          </td>
+          <td data-sort={aaaMode ? "AAA" : (s.regionName ?? "")}>
+            {aaaMode ? "AAA" : (s.regionName ?? <span class="muted">Not surveyed</span>)}
+          </td>
+          {aaaMode ? (
+            <td class="r" data-sort={s.eia ? String(s.eia.price) : ""}>
+              {s.eia ? <Price price={s.eia.price} /> : <span class="muted">Not surveyed</span>}
+            </td>
+          ) : (
+            <td data-sort={year ? String(year.change) : ""}>
+              {year ? <Change change={year.change} pct={year.pct} /> : <span class="muted">{s.eia_series ? "Not enough history" : "None"}</span>}
+            </td>
+          )}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+<p id="table-status" class="sr-only" aria-live="polite"></p>
+
+<style is:global>
+  .state-table {
+    border-top: 0;
+  }
+  .state-table table {
+    font-size: 16px;
+  }
+  .state-table tbody th {
+    font-weight: 600;
+  }
+  .state-table tbody th a {
+    text-decoration-color: var(--hairline-strong);
+  }
+  .state-table tbody tr:hover {
+    background: color-mix(in srgb, var(--hairline) 35%, transparent);
+  }
+  .state-table th[data-sort-type] {
+    padding: 0 12px 0 0;
+    vertical-align: bottom;
+  }
+  /* a right aligned price needs air before the left aligned change beside it */
+  .state-table tr > :nth-child(3) {
+    padding-left: var(--space-4);
+  }
+  .state-table .sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 4px 0 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    vertical-align: bottom;
+  }
+  .state-table th.r .sort-btn {
+    flex-direction: row-reverse;
+  }
+  .state-table .sort-icon {
+    width: 8px;
+    height: 12px;
+    fill: var(--hairline-strong);
+  }
+  .state-table th[aria-sort="ascending"] .sort-up,
+  .state-table th[aria-sort="descending"] .sort-down {
+    fill: var(--ink);
+  }
+  @media (max-width: 639px) {
+    .state-table tbody th,
+    .state-table thead th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: var(--paper);
+      box-shadow: 1px 0 0 var(--hairline);
+    }
+    .state-table th,
+    .state-table td {
+      padding-left: 8px;
+    }
+  }
+</style>

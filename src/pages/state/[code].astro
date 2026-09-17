@@ -1,0 +1,442 @@
+---
+import Base from "../../layouts/Base.astro";
+import Sign from "../../components/Sign.astro";
+import Price from "../../components/Price.astro";
+import Change from "../../components/Change.astro";
+import LineChart from "../../components/LineChart.astro";
+import NumbersTable from "../../components/NumbersTable.astro";
+import chartScript from "../../scripts/chart.js?raw";
+import { getSite, type StateView } from "../../lib/site.ts";
+import { buildChart, type ChartSeries } from "../../lib/chart.ts";
+import { addDays, formatDate, formatMonthYear, formatShortDate } from "../../lib/dates.ts";
+import { formatPrice } from "../../lib/format.ts";
+import { changeOver, highLow, lastDays, newest, type Point } from "../../lib/stats.ts";
+import { stateDescription } from "../../lib/copy.ts";
+
+export function getStaticPaths() {
+  return getSite().states.map((s) => ({ params: { code: s.slug } }));
+}
+
+const site = getSite();
+const s = site.byCode.get(Astro.params.code!.toUpperCase()) as StateView;
+const aaaMode = site.mode === "aaa+eia";
+const { latest } = site;
+const CHART_H = 300;
+
+// Sign lines
+const noSurvey = !aaaMode && s.eia_series === null;
+let dateLine = "";
+let compareLine: string | null = null;
+if (aaaMode && latest.aaa) {
+  dateLine = `Price as of ${formatShortDate(latest.aaa.as_of)}`;
+  if (s.primary?.change !== null && latest.aaa.prev_as_of) {
+    compareLine = latest.aaa.gap_days && latest.aaa.gap_days > 1 ? `vs ${formatShortDate(latest.aaa.prev_as_of)}` : "vs yesterday";
+  }
+} else if (latest.eia) {
+  dateLine = noSurvey ? "Not in EIA's weekly survey" : `Week of ${formatShortDate(latest.eia.period)}`;
+  if (latest.eia.prev_period) compareLine = `vs week of ${formatShortDate(latest.eia.prev_period)}`;
+}
+
+// Where the number comes from, in one sentence.
+const regionCount = s.eia_series ? site.states.filter((o) => o.eia_series === s.eia_series).length : 0;
+let sourceSentence = "";
+if (aaaMode) {
+  sourceSentence = `This is AAA's daily average for ${s.name}.`;
+} else if (noSurvey) {
+  sourceSentence = `EIA doesn't survey diesel prices in ${s.name}.`;
+} else if (s.eia_series === "SCA") {
+  sourceSentence = "This is EIA's weekly price for California, the one state EIA prices on its own.";
+} else {
+  sourceSentence = `EIA doesn't price diesel state by state here, so this is its weekly average for the ${s.regionName} region, which covers ${regionCount} states.`;
+}
+
+const notes: string[] = [];
+if (s.flags.includes("gap") && latest.aaa?.prev_as_of) {
+  notes.push(`There was no AAA price for the day before, so the change is since ${formatDate(latest.aaa.prev_as_of)}.`);
+}
+if (s.flags.includes("prev_missing")) notes.push("This is the first daily price we have, so there's no change yet.");
+if (s.flags.includes("large_move")) notes.push("That's a big move for one day. It's worth checking again tomorrow.");
+if (s.flags.includes("eia_divergence") && s.aaa && s.eia) {
+  notes.push(`AAA's price is more than $1 away from EIA's weekly ${s.regionName} price. They survey different stations, so some gap is normal.`);
+}
+if (aaaMode && s.eia_series === null) {
+  notes.push(`EIA doesn't survey diesel prices in ${s.name}, so there's no weekly benchmark here.`);
+}
+
+// Chart
+interface ChartView {
+  id: string;
+  label: string;
+  model: ReturnType<typeof buildChart>;
+  table: { date: string; values: (number | null)[] }[];
+  columns: string[];
+  caption: string;
+  weekly: boolean;
+}
+const charts: ChartView[] = [];
+const chartTitle = aaaMode ? "Last 90 days" : "Weekly price";
+if (aaaMode) {
+  const last = newest(s.history);
+  if (last) {
+    const from = addDays(last.date, -89);
+    const daily = s.history.filter((p) => p.date >= from);
+    const series: ChartSeries[] = [{ id: "aaa", label: "AAA daily", kind: "primary", points: daily }];
+    if (s.eia_series && s.eiaHistory.length) {
+      series.push({ id: "eia", label: `EIA weekly, ${s.regionName}`, kind: "bench", points: s.eiaHistory, step: true });
+    }
+    const model = buildChart(series, { from, to: last.date, heightPx: CHART_H, xTicks: "months", maxYTicks: 6 });
+    charts.push({
+      id: "daily",
+      label: `Line chart of ${s.name} diesel prices for the last 90 days${series.length > 1 ? `, with EIA's weekly ${s.regionName} price` : ""}. The numbers are in the table below.`,
+      model,
+      table: model.hover.dates.map((d, i) => ({ date: d, values: model.hover.series.map((ser) => ser.values[i]) })).reverse(),
+      columns: series.map((x) => x.label),
+      caption: `${s.name} diesel, ${formatDate(from)} to ${formatDate(last.date)}, newest first`,
+      weekly: false,
+    });
+  }
+} else if (!noSurvey) {
+  const last = newest(s.history);
+  if (last) {
+    const year = lastDays(s.history, 364);
+    const all = s.history;
+    const label = `EIA weekly, ${s.regionName}`;
+    const mk = (pts: Point[], xTicks: "months" | "years") =>
+      buildChart([{ id: "eia", label, kind: "primary", points: pts }], { from: pts[0].date, to: last.date, heightPx: CHART_H, xTicks, maxYTicks: 6 });
+    charts.push({
+      id: "year",
+      label: `Line chart of the ${s.regionName} weekly diesel price for the last 52 weeks. The numbers are in the table below.`,
+      model: mk(year, "months"),
+      table: [],
+      columns: [],
+      caption: "",
+      weekly: true,
+    });
+    const allModel = mk(all, "years");
+    charts.push({
+      id: "all",
+      label: `Line chart of the ${s.regionName} weekly diesel price since ${formatMonthYear(all[0].date)}. The numbers are in the table below.`,
+      model: allModel,
+      table: all.map((p) => ({ date: p.date, values: [p.value] })).reverse(),
+      columns: ["Price"],
+      caption: `${s.regionName} weekly diesel price since ${formatMonthYear(all[0].date)}, newest first`,
+      weekly: true,
+    });
+  }
+}
+const tableChart = charts.find((c) => c.table.length > 0);
+
+// Stats: 4 week change, 52 week change, 52 week high and low.
+const primaryHist = s.history;
+const fourWeek = primaryHist.length ? changeOver(primaryHist, 28, aaaMode ? 3 : 0) : null;
+let yearBasis = primaryHist;
+let yearNote = "";
+const primaryHL = primaryHist.length ? highLow(primaryHist) : null;
+if (aaaMode && (!primaryHL || !primaryHL.complete) && s.eiaHistory.length) {
+  yearBasis = s.eiaHistory;
+  yearNote = `AAA daily history is shorter than a year, so the 52 week figures use EIA's weekly ${s.regionName} price.`;
+}
+const yearChange = yearBasis.length ? changeOver(yearBasis, 364, aaaMode && yearBasis === primaryHist ? 3 : 0) : null;
+const yearHL = yearBasis.length ? highLow(yearBasis) : null;
+if (aaaMode && yearBasis === primaryHist && yearHL && !yearHL.complete) {
+  yearNote = `Daily history starts ${formatDate(primaryHist[0].date)}, so the high and low cover that stretch.`;
+}
+
+const peers = s.peers.map((c) => site.byCode.get(c)!);
+const peerTitle = s.peerLabel;
+
+const title = `${s.name} diesel price${aaaMode ? " today" : " this week"} | DailyFuel`;
+const description = stateDescription(s, site);
+const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
+---
+<Base title={title} description={description}>
+  <div class="wrap back-row">
+    <a href="/#states-title">All states</a>
+  </div>
+
+  <section class="wrap state-hero" aria-label={`${s.name} price`}>
+    <Sign
+      legend={`${s.name} diesel average`}
+      price={s.primary?.price ?? null}
+      noPrice="No weekly price"
+      change={s.primary?.change ?? null}
+      pct={s.primary?.change_pct ?? null}
+      prev={s.primary?.prev ?? null}
+      cadence={s.cadence}
+      dateLine={dateLine}
+      compareLine={compareLine}
+      shield={s.code}
+      note={Boolean(aaaMode && s.eia && latest.eia)}
+    >
+      {aaaMode && s.eia && latest.eia && (
+        <p slot="note">EIA weekly {s.regionName} price: <Price price={s.eia.price} /> for the week of {formatShortDate(latest.eia.period)}</p>
+      )}
+    </Sign>
+    <div class="explain">
+      <p class="lead">{sourceSentence}</p>
+      {noSurvey && <p>Daily prices for each state are on the way.</p>}
+      {notes.map((n) => <p>{n}</p>)}
+      <p><a href={aaaLink}>AAA's daily average for {s.name}</a></p>
+    </div>
+  </section>
+
+  {charts.length > 0 && (
+    <section class="section wrap" aria-labelledby="chart-title">
+      <div class="section-head">
+        <h2 id="chart-title">{chartTitle}</h2>
+        <p>
+          {aaaMode
+            ? s.eia_series
+              ? `AAA's daily average for ${s.name}, with EIA's weekly ${s.regionName} price as a step line.`
+              : `AAA's daily average for ${s.name}.`
+            : `EIA's weekly ${s.regionName} price, which ${s.name} shares.`}
+        </p>
+      </div>
+      {aaaMode ? (
+        <>
+          {charts[0].model.paths.length > 1 && (
+            <ul class="key" aria-label="Chart key">
+              <li><span class="key-line key-primary" aria-hidden="true"></span>AAA daily</li>
+              <li><span class="key-line key-bench" aria-hidden="true"></span>EIA weekly, {s.regionName}</li>
+            </ul>
+          )}
+          <LineChart model={charts[0].model} height={CHART_H} label={charts[0].label} weekly={false} />
+        </>
+      ) : (
+        <div class="range-switch">
+          <fieldset class="range">
+            <legend class="sr-only">Chart range</legend>
+            <input type="radio" id="range-year" name="range" value="year" checked />
+            <label for="range-year">Last 52 weeks</label>
+            <input type="radio" id="range-all" name="range" value="all" />
+            <label for="range-all">Since {formatMonthYear(charts[1].model.from)}</label>
+          </fieldset>
+          <LineChart class="chart-year" model={charts[0].model} height={CHART_H} label={charts[0].label} weekly />
+          <LineChart class="chart-all" model={charts[1].model} height={CHART_H} label={charts[1].label} weekly />
+        </div>
+      )}
+      {tableChart && (
+        <NumbersTable
+          caption={tableChart.caption}
+          firstColumn={tableChart.weekly ? "Week of" : "Date"}
+          columns={tableChart.columns}
+          rows={tableChart.table}
+          label="Price table, scrolls"
+          tall
+        />
+      )}
+    </section>
+  )}
+
+  {(fourWeek || yearChange || yearHL) && (
+    <section class="section wrap" aria-labelledby="stats-title">
+      <div class="section-head">
+        <h2 id="stats-title">The longer view</h2>
+        {yearNote && <p>{yearNote}</p>}
+      </div>
+      <dl class="stats">
+        <div>
+          <dt>4 week change</dt>
+          <dd>{fourWeek ? <Change change={fourWeek.change} pct={fourWeek.pct} /> : <span class="muted">Not enough history yet</span>}</dd>
+          {fourWeek && <dd class="small muted">Since {formatShortDate(fourWeek.from.date)}</dd>}
+        </div>
+        <div>
+          <dt>52 week change</dt>
+          <dd>{yearChange ? <Change change={yearChange.change} pct={yearChange.pct} /> : <span class="muted">Not enough history yet</span>}</dd>
+          {yearChange && <dd class="small muted">Since {formatDate(yearChange.from.date)}</dd>}
+        </div>
+        <div>
+          <dt>52 week high</dt>
+          <dd>{yearHL ? <Price price={yearHL.high.value} /> : <span class="muted">None yet</span>}</dd>
+          {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory && !aaaMode ? "Week of " : ""}{formatDate(yearHL.high.date)}</dd>}
+        </div>
+        <div>
+          <dt>52 week low</dt>
+          <dd>{yearHL ? <Price price={yearHL.low.value} /> : <span class="muted">None yet</span>}</dd>
+          {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory && !aaaMode ? "Week of " : ""}{formatDate(yearHL.low.date)}</dd>}
+        </div>
+      </dl>
+    </section>
+  )}
+
+  {peers.length > 0 && (
+    <section class="section wrap" aria-labelledby="peers-title">
+      <div class="section-head">
+        <h2 id="peers-title">{peerTitle}</h2>
+      </div>
+      <ul class="peers">
+        {peers.map((p) => (
+          <li>
+            <a href={p.href}>{p.name}</a>
+            <span class="peer-price">{p.primary ? <Price price={p.primary.price} /> : <span class="muted">No survey</span>}</span>
+            <span class="peer-change">{p.primary ? <Change change={p.primary.change} pct={p.primary.change_pct} prev={p.primary.prev} cadence={p.cadence} showPct={false} /> : null}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <Fragment slot="scripts">
+    {charts.length > 0 && <script is:inline set:html={chartScript}></script>}
+  </Fragment>
+</Base>
+
+<style>
+  .back-row {
+    padding-top: var(--space-4);
+    font-size: 15px;
+  }
+  .back-row a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .state-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 5fr);
+    gap: var(--space-6) var(--space-7);
+    align-items: center;
+    padding-block: var(--space-3) var(--space-7);
+  }
+  @media (max-width: 899px) {
+    .state-hero {
+      grid-template-columns: minmax(0, 1fr);
+      padding-bottom: var(--space-6);
+    }
+  }
+  .explain .lead {
+    font-size: var(--fs-h3);
+    font-weight: 650;
+    line-height: 1.35;
+  }
+  .key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    list-style: none;
+    margin: 0 0 var(--space-3);
+    padding: 0;
+    font-size: 15px;
+  }
+  .key li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .key-line {
+    width: 20px;
+    height: 2px;
+  }
+  .key-primary {
+    background: var(--line-primary);
+  }
+  .key-bench {
+    background: var(--line-bench);
+  }
+  .range {
+    display: inline-flex;
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    border: 1px solid var(--hairline-strong);
+    border-radius: 6px;
+  }
+  .range input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+  .range label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 2px 14px 0;
+    font-size: 15px;
+    font-weight: 650;
+    cursor: pointer;
+  }
+  .range label + input + label {
+    border-left: 1px solid var(--hairline-strong);
+  }
+  .range input:checked + label {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .range input:first-of-type:checked + label {
+    border-radius: 5px 0 0 5px;
+  }
+  .range input:last-of-type:checked + label {
+    border-radius: 0 5px 5px 0;
+  }
+  .range input:focus-visible + label {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .range-switch:has(#range-year:checked) :global(.chart-all),
+  .range-switch:has(#range-all:checked) :global(.chart-year) {
+    display: none;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin: 0;
+  }
+  @media (max-width: 899px) {
+    .stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .stats > div {
+    border-top: 2px solid var(--ink);
+    padding-top: var(--space-3);
+    min-width: 0;
+  }
+  .stats dt {
+    font-size: 15px;
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+  .stats dd {
+    margin: 4px 0 0;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .stats dd.small {
+    font-size: var(--fs-small);
+    font-weight: 400;
+  }
+  @media (max-width: 479px) {
+    .stats dd {
+      font-size: 18px;
+    }
+    .stats :global(.change) {
+      white-space: normal;
+    }
+  }
+  .peers {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    column-gap: var(--space-6);
+  }
+  .peers li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: baseline;
+    gap: 12px;
+    padding: 9px 0 7px;
+    border-top: 1px solid var(--hairline);
+    font-variant-numeric: tabular-nums;
+  }
+  .peers a {
+    font-weight: 600;
+  }
+  .peer-change {
+    min-width: 5.5em;
+    text-align: right;
+  }
+</style>

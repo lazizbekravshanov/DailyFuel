@@ -1,0 +1,614 @@
+{
+  "source": "https://www.eia.gov/dnav/pet/TblDefs/pet_pri_gnd_tbldef2.asp",
+  "series_id_pattern": "EMD_EPD2D_PTE_{KEY}_DPG",
+  "benchmarks": {
+    "R1X": {
+      "label": "New England",
+      "padd": "1A"
+    },
+    "R1Y": {
+      "label": "Central Atlantic",
+      "padd": "1B"
+    },
+    "R1Z": {
+      "label": "Lower Atlantic",
+      "padd": "1C"
+    },
+    "R20": {
+      "label": "Midwest",
+      "padd": "2"
+    },
+    "R30": {
+      "label": "Gulf Coast",
+      "padd": "3"
+    },
+    "R40": {
+      "label": "Rocky Mountain",
+      "padd": "4"
+    },
+    "SCA": {
+      "label": "California",
+      "padd": "5"
+    },
+    "R5XCA": {
+      "label": "West Coast less California",
+      "padd": "5"
+    }
+  },
+  "aggregates": {
+    "NUS": {
+      "label": "U.S."
+    },
+    "R10": {
+      "label": "East Coast",
+      "padd": "1"
+    },
+    "R50": {
+      "label": "West Coast",
+      "padd": "5"
+    }
+  },
+  "states": [
+    {
+      "code": "AL",
+      "name": "Alabama",
+      "fips": "01",
+      "padd": "3",
+      "eia_series": "R30",
+      "tile": {
+        "row": 6,
+        "col": 6
+      }
+    },
+    {
+      "code": "AK",
+      "name": "Alaska",
+      "fips": "02",
+      "padd": "5",
+      "eia_series": null,
+      "tile": {
+        "row": 0,
+        "col": 0
+      }
+    },
+    {
+      "code": "AZ",
+      "name": "Arizona",
+      "fips": "04",
+      "padd": "5",
+      "eia_series": "R5XCA",
+      "tile": {
+        "row": 5,
+        "col": 1
+      }
+    },
+    {
+      "code": "AR",
+      "name": "Arkansas",
+      "fips": "05",
+      "padd": "3",
+      "eia_series": "R30",
+      "tile": {
+        "row": 5,
+        "col": 4
+      }
+    },
+    {
+      "code": "CA",
+      "name": "California",
+      "fips": "06",
+      "padd": "5",
+      "eia_series": "SCA",
+      "tile": {
+        "row": 4,
+        "col": 0
+      }
+    },
+    {
+      "code": "CO",
+      "name": "Colorado",
+      "fips": "08",
+      "padd": "4",
+      "eia_series": "R40",
+      "tile": {
+        "row": 4,
+        "col": 2
+      }
+    },
+    {
+      "code": "CT",
+      "name": "Connecticut",
+      "fips": "09",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "tile": {
+        "row": 3,
+        "col": 9
+      }
+    },
+    {
+      "code": "DE",
+      "name": "Delaware",
+      "fips": "10",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "tile": {
+        "row": 4,
+        "col": 9
+      }
+    },
+    {
+      "code": "DC",
+      "name": "District of Columbia",
+      "fips": "11",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "tile": {
+        "row": 5,
+        "col": 8
+      }
+    },
+    {
+      "code": "FL",
+      "name": "Florida",
+      "fips": "12",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "tile": {
+        "row": 7,
+        "col": 7
+      }
+    },
+    {
+      "code": "GA",
+      "name": "Georgia",
+      "fips": "13",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "tile": {
+        "row": 6,
+        "col": 7
+      }
+    },
+    {
+      "code": "HI",
+      "name": "Hawaii",
+      "fips": "15",
+      "padd": "5",
+      "eia_series": null,
+      "tile": {
+        "row": 7,
+        "col": 0
+      }
+    },
+    {
+      "code": "ID",
+      "name": "Idaho",
+      "fips": "16",
+      "padd": "4",
+      "eia_series": "R40",
+      "tile": {
+        "row": 2,
+        "col": 1
+      }
+    },
+    {
+      "code": "IL",
+      "name": "Illinois",
+      "fips": "17",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 2,
+        "col": 5
+      }
+    },
+    {
+      "code": "IN",
+      "name": "Indiana",
+      "fips": "18",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 3,
+        "col": 5
+      }
+    },
+    {
+      "code": "IA",
+      "name": "Iowa",
+      "fips": "19",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 3,
+        "col": 4
+      }
+    },
+    {
+      "code": "KS",
+      "name": "Kansas",
+      "fips": "20",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 5,
+        "col": 3
+      }
+    },
+    {
+      "code": "KY",
+      "name": "Kentucky",
+      "fips": "21",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 4,
+        "col": 5
+      }
+    },
+    {
+      "code": "LA",
+      "name": "Louisiana",
+      "fips": "22",
+      "padd": "3",
+      "eia_series": "R30",
+      "tile": {
+        "row": 6,
+        "col": 4
+      }
+    },
+    {
+      "code": "ME",
+      "name": "Maine",
+      "fips": "23",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "tile": {
+        "row": 0,
+        "col": 10
+      }
+    },
+    {
+      "code": "MD",
+      "name": "Maryland",
+      "fips": "24",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "tile": {
+        "row": 4,
+        "col": 8
+      }
+    },
+    {
+      "code": "MA",
+      "name": "Massachusetts",
+      "fips": "25",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "tile": {
+        "row": 2,
+        "col": 10
+      }
+    },
+    {
+      "code": "MI",
+      "name": "Michigan",
+      "fips": "26",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 2,
+        "col": 7
+      }
+    },
+    {
+      "code": "MN",
+      "name": "Minnesota",
+      "fips": "27",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 2,
+        "col": 4
+      }
+    },
+    {
+      "code": "MS",
+      "name": "Mississippi",
+      "fips": "28",
+      "padd": "3",
+      "eia_series": "R30",
+      "tile": {
+        "row": 6,
+        "col": 5
+      }
+    },
+    {
+      "code": "MO",
+      "name": "Missouri",
+      "fips": "29",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 4,
+        "col": 4
+      }
+    },
+    {
+      "code": "MT",
+      "name": "Montana",
+      "fips": "30",
+      "padd": "4",
+      "eia_series": "R40",
+      "tile": {
+        "row": 2,
+        "col": 2
+      }
+    },
+    {
+      "code": "NE",
+      "name": "Nebraska",
+      "fips": "31",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 4,
+        "col": 3
+      }
+    },
+    {
+      "code": "NV",
+      "name": "Nevada",
+      "fips": "32",
+      "padd": "5",
+      "eia_series": "R5XCA",
+      "tile": {
+        "row": 3,
+        "col": 1
+      }
+    },
+    {
+      "code": "NH",
+      "name": "New Hampshire",
+      "fips": "33",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "tile": {
+        "row": 1,
+        "col": 10
+      }
+    },
+    {
+      "code": "NJ",
+      "name": "New Jersey",
+      "fips": "34",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "tile": {
+        "row": 3,
+        "col": 8
+      }
+    },
+    {
+      "code": "NM",
+      "name": "New Mexico",
+      "fips": "35",
+      "padd": "3",
+      "eia_series": "R30",
+      "tile": {
+        "row": 5,
+        "col": 2
+      }
+    },
+    {
+      "code": "NY",
+      "name": "New York",
+      "fips": "36",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "tile": {
+        "row": 2,
+        "col": 8
+      }
+    },
+    {
+      "code": "NC",
+      "name": "North Carolina",
+      "fips": "37",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "tile": {
+        "row": 5,
+        "col": 6
+      }
+    },
+    {
+      "code": "ND",
+      "name": "North Dakota",
+      "fips": "38",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 2,
+        "col": 3
+      }
+    },
+    {
+      "code": "OH",
+      "name": "Ohio",
+      "fips": "39",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 3,
+        "col": 6
+      }
+    },
+    {
+      "code": "OK",
+      "name": "Oklahoma",
+      "fips": "40",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 6,
+        "col": 3
+      }
+    },
+    {
+      "code": "OR",
+      "name": "Oregon",
+      "fips": "41",
+      "padd": "5",
+      "eia_series": "R5XCA",
+      "tile": {
+        "row": 3,
+        "col": 0
+      }
+    },
+    {
+      "code": "PA",
+      "name": "Pennsylvania",
+      "fips": "42",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "tile": {
+        "row": 3,
+        "col": 7
+      }
+    },
+    {
+      "code": "RI",
+      "name": "Rhode Island",
+      "fips": "44",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "tile": {
+        "row": 2,
+        "col": 9
+      }
+    },
+    {
+      "code": "SC",
+      "name": "South Carolina",
+      "fips": "45",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "tile": {
+        "row": 5,
+        "col": 7
+      }
+    },
+    {
+      "code": "SD",
+      "name": "South Dakota",
+      "fips": "46",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 3,
+        "col": 3
+      }
+    },
+    {
+      "code": "TN",
+      "name": "Tennessee",
+      "fips": "47",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 5,
+        "col": 5
+      }
+    },
+    {
+      "code": "TX",
+      "name": "Texas",
+      "fips": "48",
+      "padd": "3",
+      "eia_series": "R30",
+      "tile": {
+        "row": 7,
+        "col": 3
+      }
+    },
+    {
+      "code": "UT",
+      "name": "Utah",
+      "fips": "49",
+      "padd": "4",
+      "eia_series": "R40",
+      "tile": {
+        "row": 4,
+        "col": 1
+      }
+    },
+    {
+      "code": "VT",
+      "name": "Vermont",
+      "fips": "50",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "tile": {
+        "row": 1,
+        "col": 9
+      }
+    },
+    {
+      "code": "VA",
+      "name": "Virginia",
+      "fips": "51",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "tile": {
+        "row": 4,
+        "col": 7
+      }
+    },
+    {
+      "code": "WA",
+      "name": "Washington",
+      "fips": "53",
+      "padd": "5",
+      "eia_series": "R5XCA",
+      "tile": {
+        "row": 2,
+        "col": 0
+      }
+    },
+    {
+      "code": "WV",
+      "name": "West Virginia",
+      "fips": "54",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "tile": {
+        "row": 4,
+        "col": 6
+      }
+    },
+    {
+      "code": "WI",
+      "name": "Wisconsin",
+      "fips": "55",
+      "padd": "2",
+      "eia_series": "R20",
+      "tile": {
+        "row": 2,
+        "col": 6
+      }
+    },
+    {
+      "code": "WY",
+      "name": "Wyoming",
+      "fips": "56",
+      "padd": "4",
+      "eia_series": "R40",
+      "tile": {
+        "row": 3,
+        "col": 2
+      }
+    }
+  ]
+}

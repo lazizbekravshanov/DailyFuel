@@ -1,0 +1,13 @@
+---
+// Direction glyph: triangle up for rose, triangle down for fell, dot for about the same.
+import type { Direction } from "../lib/bins.ts";
+interface Props {
+  direction: Direction;
+}
+const { direction } = Astro.props;
+---
+<svg class={`glyph glyph-${direction}`} viewBox="0 0 10 10" aria-hidden="true" focusable="false">
+  {direction === "up" && <path d="M5 0.8 9.8 9.2H0.2Z" />}
+  {direction === "down" && <path d="M0.2 0.8H9.8L5 9.2Z" />}
+  {direction === "flat" && <circle cx="5" cy="5" r="3.6" />}
+</svg>

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dailyfuel/aaa-daily/1",
+  "title": "One AAA daily snapshot (diesel only)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "as_of",
+    "as_of_raw",
+    "fetched_at",
+    "origin",
+    "source_url",
+    "national",
+    "diesel"
+  ],
+  "properties": {
+    "schema": {
+      "const": "dailyfuel/aaa-daily/1"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date"
+    },
+    "as_of_raw": {
+      "type": "string",
+      "pattern": "^\\d{1,2}/\\d{1,2}/\\d{2}$"
+    },
+    "fetched_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "origin": {
+      "type": "string",
+      "pattern": "^(live|synthetic)$"
+    },
+    "source_url": {
+      "const": "https://gasprices.aaa.com/state-gas-price-averages/"
+    },
+    "national": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "current",
+        "yesterday"
+      ],
+      "properties": {
+        "current": {
+          "$ref": "#/$defs/price"
+        },
+        "yesterday": {
+          "$ref": "#/$defs/price"
+        }
+      }
+    },
+    "diesel": {
+      "type": "object",
+      "minProperties": 51,
+      "maxProperties": 51,
+      "propertyNames": {
+        "$ref": "#/$defs/code"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/price"
+      }
+    }
+  },
+  "$defs": {
+    "price": {
+      "type": "number",
+      "minimum": 1.5,
+      "maximum": 15
+    },
+    "code": {
+      "enum": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "CA",
+        "CO",
+        "CT",
+        "DC",
+        "DE",
+        "FL",
+        "GA",
+        "HI",
+        "IA",
+        "ID",
+        "IL",
+        "IN",
+        "KS",
+        "KY",
+        "LA",
+        "MA",
+        "MD",
+        "ME",
+        "MI",
+        "MN",
+        "MO",
+        "MS",
+        "MT",
+        "NC",
+        "ND",
+        "NE",
+        "NH",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VA",
+        "VT",
+        "WA",
+        "WI",
+        "WV",
+        "WY"
+      ]
+    }
+  }
+}

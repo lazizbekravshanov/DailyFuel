@@ -1,0 +1,829 @@
+{
+  "schema": "dailyfuel/latest/1",
+  "generated_at": "2026-09-17T16:23:06Z",
+  "mode": "eia_only",
+  "aaa": null,
+  "eia": {
+    "period": "2026-09-14",
+    "prev_period": "2026-09-07",
+    "release_date": "2026-09-15",
+    "next_release_date": "2026-09-22",
+    "us": {
+      "price": 6.285,
+      "prev": 5.967,
+      "change": 0.318,
+      "change_pct": 5.33,
+      "direction": "up"
+    }
+  },
+  "states": [
+    {
+      "code": "AL",
+      "fips": "01",
+      "name": "Alabama",
+      "padd": "3",
+      "eia_series": "R30",
+      "aaa": null,
+      "eia": {
+        "price": 6.027,
+        "prev": 5.754,
+        "change": 0.273,
+        "change_pct": 4.74,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "AK",
+      "fips": "02",
+      "name": "Alaska",
+      "padd": "5",
+      "eia_series": null,
+      "aaa": null,
+      "eia": null,
+      "flags": [
+        "no_eia_survey"
+      ]
+    },
+    {
+      "code": "AZ",
+      "fips": "04",
+      "name": "Arizona",
+      "padd": "5",
+      "eia_series": "R5XCA",
+      "aaa": null,
+      "eia": {
+        "price": 6.566,
+        "prev": 6.314,
+        "change": 0.252,
+        "change_pct": 3.99,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "AR",
+      "fips": "05",
+      "name": "Arkansas",
+      "padd": "3",
+      "eia_series": "R30",
+      "aaa": null,
+      "eia": {
+        "price": 6.027,
+        "prev": 5.754,
+        "change": 0.273,
+        "change_pct": 4.74,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "CA",
+      "fips": "06",
+      "name": "California",
+      "padd": "5",
+      "eia_series": "SCA",
+      "aaa": null,
+      "eia": {
+        "price": 8.039,
+        "prev": 7.764,
+        "change": 0.275,
+        "change_pct": 3.54,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "CO",
+      "fips": "08",
+      "name": "Colorado",
+      "padd": "4",
+      "eia_series": "R40",
+      "aaa": null,
+      "eia": {
+        "price": 6.066,
+        "prev": 5.805,
+        "change": 0.261,
+        "change_pct": 4.5,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "CT",
+      "fips": "09",
+      "name": "Connecticut",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "aaa": null,
+      "eia": {
+        "price": 6.202,
+        "prev": 5.99,
+        "change": 0.212,
+        "change_pct": 3.54,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "DE",
+      "fips": "10",
+      "name": "Delaware",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "aaa": null,
+      "eia": {
+        "price": 6.312,
+        "prev": 6.051,
+        "change": 0.261,
+        "change_pct": 4.31,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "DC",
+      "fips": "11",
+      "name": "District of Columbia",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "aaa": null,
+      "eia": {
+        "price": 6.312,
+        "prev": 6.051,
+        "change": 0.261,
+        "change_pct": 4.31,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "FL",
+      "fips": "12",
+      "name": "Florida",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "aaa": null,
+      "eia": {
+        "price": 6.096,
+        "prev": 5.605,
+        "change": 0.491,
+        "change_pct": 8.76,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "GA",
+      "fips": "13",
+      "name": "Georgia",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "aaa": null,
+      "eia": {
+        "price": 6.096,
+        "prev": 5.605,
+        "change": 0.491,
+        "change_pct": 8.76,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "HI",
+      "fips": "15",
+      "name": "Hawaii",
+      "padd": "5",
+      "eia_series": null,
+      "aaa": null,
+      "eia": null,
+      "flags": [
+        "no_eia_survey"
+      ]
+    },
+    {
+      "code": "ID",
+      "fips": "16",
+      "name": "Idaho",
+      "padd": "4",
+      "eia_series": "R40",
+      "aaa": null,
+      "eia": {
+        "price": 6.066,
+        "prev": 5.805,
+        "change": 0.261,
+        "change_pct": 4.5,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "IL",
+      "fips": "17",
+      "name": "Illinois",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "IN",
+      "fips": "18",
+      "name": "Indiana",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "IA",
+      "fips": "19",
+      "name": "Iowa",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "KS",
+      "fips": "20",
+      "name": "Kansas",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "KY",
+      "fips": "21",
+      "name": "Kentucky",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "LA",
+      "fips": "22",
+      "name": "Louisiana",
+      "padd": "3",
+      "eia_series": "R30",
+      "aaa": null,
+      "eia": {
+        "price": 6.027,
+        "prev": 5.754,
+        "change": 0.273,
+        "change_pct": 4.74,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "ME",
+      "fips": "23",
+      "name": "Maine",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "aaa": null,
+      "eia": {
+        "price": 6.202,
+        "prev": 5.99,
+        "change": 0.212,
+        "change_pct": 3.54,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "MD",
+      "fips": "24",
+      "name": "Maryland",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "aaa": null,
+      "eia": {
+        "price": 6.312,
+        "prev": 6.051,
+        "change": 0.261,
+        "change_pct": 4.31,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "MA",
+      "fips": "25",
+      "name": "Massachusetts",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "aaa": null,
+      "eia": {
+        "price": 6.202,
+        "prev": 5.99,
+        "change": 0.212,
+        "change_pct": 3.54,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "MI",
+      "fips": "26",
+      "name": "Michigan",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "MN",
+      "fips": "27",
+      "name": "Minnesota",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "MS",
+      "fips": "28",
+      "name": "Mississippi",
+      "padd": "3",
+      "eia_series": "R30",
+      "aaa": null,
+      "eia": {
+        "price": 6.027,
+        "prev": 5.754,
+        "change": 0.273,
+        "change_pct": 4.74,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "MO",
+      "fips": "29",
+      "name": "Missouri",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "MT",
+      "fips": "30",
+      "name": "Montana",
+      "padd": "4",
+      "eia_series": "R40",
+      "aaa": null,
+      "eia": {
+        "price": 6.066,
+        "prev": 5.805,
+        "change": 0.261,
+        "change_pct": 4.5,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "NE",
+      "fips": "31",
+      "name": "Nebraska",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "NV",
+      "fips": "32",
+      "name": "Nevada",
+      "padd": "5",
+      "eia_series": "R5XCA",
+      "aaa": null,
+      "eia": {
+        "price": 6.566,
+        "prev": 6.314,
+        "change": 0.252,
+        "change_pct": 3.99,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "NH",
+      "fips": "33",
+      "name": "New Hampshire",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "aaa": null,
+      "eia": {
+        "price": 6.202,
+        "prev": 5.99,
+        "change": 0.212,
+        "change_pct": 3.54,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "NJ",
+      "fips": "34",
+      "name": "New Jersey",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "aaa": null,
+      "eia": {
+        "price": 6.312,
+        "prev": 6.051,
+        "change": 0.261,
+        "change_pct": 4.31,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "NM",
+      "fips": "35",
+      "name": "New Mexico",
+      "padd": "3",
+      "eia_series": "R30",
+      "aaa": null,
+      "eia": {
+        "price": 6.027,
+        "prev": 5.754,
+        "change": 0.273,
+        "change_pct": 4.74,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "NY",
+      "fips": "36",
+      "name": "New York",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "aaa": null,
+      "eia": {
+        "price": 6.312,
+        "prev": 6.051,
+        "change": 0.261,
+        "change_pct": 4.31,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "NC",
+      "fips": "37",
+      "name": "North Carolina",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "aaa": null,
+      "eia": {
+        "price": 6.096,
+        "prev": 5.605,
+        "change": 0.491,
+        "change_pct": 8.76,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "ND",
+      "fips": "38",
+      "name": "North Dakota",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "OH",
+      "fips": "39",
+      "name": "Ohio",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "OK",
+      "fips": "40",
+      "name": "Oklahoma",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "OR",
+      "fips": "41",
+      "name": "Oregon",
+      "padd": "5",
+      "eia_series": "R5XCA",
+      "aaa": null,
+      "eia": {
+        "price": 6.566,
+        "prev": 6.314,
+        "change": 0.252,
+        "change_pct": 3.99,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "PA",
+      "fips": "42",
+      "name": "Pennsylvania",
+      "padd": "1B",
+      "eia_series": "R1Y",
+      "aaa": null,
+      "eia": {
+        "price": 6.312,
+        "prev": 6.051,
+        "change": 0.261,
+        "change_pct": 4.31,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "RI",
+      "fips": "44",
+      "name": "Rhode Island",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "aaa": null,
+      "eia": {
+        "price": 6.202,
+        "prev": 5.99,
+        "change": 0.212,
+        "change_pct": 3.54,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "SC",
+      "fips": "45",
+      "name": "South Carolina",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "aaa": null,
+      "eia": {
+        "price": 6.096,
+        "prev": 5.605,
+        "change": 0.491,
+        "change_pct": 8.76,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "SD",
+      "fips": "46",
+      "name": "South Dakota",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "TN",
+      "fips": "47",
+      "name": "Tennessee",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "TX",
+      "fips": "48",
+      "name": "Texas",
+      "padd": "3",
+      "eia_series": "R30",
+      "aaa": null,
+      "eia": {
+        "price": 6.027,
+        "prev": 5.754,
+        "change": 0.273,
+        "change_pct": 4.74,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "UT",
+      "fips": "49",
+      "name": "Utah",
+      "padd": "4",
+      "eia_series": "R40",
+      "aaa": null,
+      "eia": {
+        "price": 6.066,
+        "prev": 5.805,
+        "change": 0.261,
+        "change_pct": 4.5,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "VT",
+      "fips": "50",
+      "name": "Vermont",
+      "padd": "1A",
+      "eia_series": "R1X",
+      "aaa": null,
+      "eia": {
+        "price": 6.202,
+        "prev": 5.99,
+        "change": 0.212,
+        "change_pct": 3.54,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "VA",
+      "fips": "51",
+      "name": "Virginia",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "aaa": null,
+      "eia": {
+        "price": 6.096,
+        "prev": 5.605,
+        "change": 0.491,
+        "change_pct": 8.76,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "WA",
+      "fips": "53",
+      "name": "Washington",
+      "padd": "5",
+      "eia_series": "R5XCA",
+      "aaa": null,
+      "eia": {
+        "price": 6.566,
+        "prev": 6.314,
+        "change": 0.252,
+        "change_pct": 3.99,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "WV",
+      "fips": "54",
+      "name": "West Virginia",
+      "padd": "1C",
+      "eia_series": "R1Z",
+      "aaa": null,
+      "eia": {
+        "price": 6.096,
+        "prev": 5.605,
+        "change": 0.491,
+        "change_pct": 8.76,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "WI",
+      "fips": "55",
+      "name": "Wisconsin",
+      "padd": "2",
+      "eia_series": "R20",
+      "aaa": null,
+      "eia": {
+        "price": 6.25,
+        "prev": 5.946,
+        "change": 0.304,
+        "change_pct": 5.11,
+        "direction": "up"
+      },
+      "flags": []
+    },
+    {
+      "code": "WY",
+      "fips": "56",
+      "name": "Wyoming",
+      "padd": "4",
+      "eia_series": "R40",
+      "aaa": null,
+      "eia": {
+        "price": 6.066,
+        "prev": 5.805,
+        "change": 0.261,
+        "change_pct": 4.5,
+        "direction": "up"
+      },
+      "flags": []
+    }
+  ]
+}

@@ -1,0 +1,325 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  font-weight: 400;
+  overflow-wrap: break-word;
+}
+
+.wrap {
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--fs-h1);
+}
+
+h2 {
+  font-size: var(--fs-h2);
+}
+
+h3 {
+  font-size: var(--fs-h3);
+}
+
+@media (max-width: 639px) {
+  :root {
+    --fs-h1: 34px;
+    --fs-h2: 24px;
+    --fs-h3: 19px;
+  }
+}
+
+p {
+  margin: 0 0 var(--space-3);
+  max-width: 68ch;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+main:focus {
+  outline: none;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--gutter);
+  top: -80px;
+  z-index: 10;
+  padding: var(--space-2) var(--space-3);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  top: var(--space-2);
+}
+
+.muted {
+  color: var(--ink-2);
+}
+
+.small {
+  font-size: var(--fs-small);
+  line-height: 1.45;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* the pump board tenth of a cent */
+.tenth {
+  position: relative;
+  top: -0.42em;
+  margin-left: 0.03em;
+  font-size: 0.7em;
+  line-height: 0;
+}
+
+.price {
+  white-space: nowrap;
+}
+
+.glyph {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 0.3em;
+  vertical-align: 0.02em;
+  flex: none;
+}
+
+.glyph-up {
+  fill: var(--glyph-up);
+}
+
+.glyph-down {
+  fill: var(--glyph-down);
+}
+
+.glyph-flat {
+  fill: var(--glyph-flat);
+}
+
+.change {
+  white-space: nowrap;
+}
+
+.section {
+  border-top: 1px solid var(--hairline);
+  padding-block: var(--space-7);
+}
+
+.section-head {
+  margin-bottom: var(--space-5);
+}
+
+.section-head p {
+  margin-top: var(--space-2);
+  margin-bottom: 0;
+  color: var(--ink-2);
+}
+
+details.numbers {
+  margin-top: var(--space-4);
+}
+
+details.numbers > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+
+details.numbers > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.numbers > summary::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 6px solid currentColor;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  transition: transform 120ms ease-out;
+}
+
+details.numbers[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.table-scroll {
+  /* positioned so screen reader only text inside can't widen the page */
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll:focus-visible {
+  outline-offset: 4px;
+}
+
+table.data {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  min-width: 100%;
+}
+
+table.data th,
+table.data td {
+  padding: 10px 16px 8px 0;
+  text-align: left;
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+table.data thead th {
+  font-weight: 700;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  border-bottom-color: var(--hairline-strong);
+}
+
+table.data td.r,
+table.data th.r {
+  text-align: right;
+}
+
+table.data caption {
+  text-align: left;
+  padding-bottom: var(--space-2);
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .glyph {
+    fill: CanvasText;
+  }
+}
+
+/* change bins, shared by the map, tiles, legend and table swatches */
+.f-up-1 { fill: var(--up-1); background-color: var(--up-1); color: var(--on-up-1); }
+.f-up-2 { fill: var(--up-2); background-color: var(--up-2); color: var(--on-up-2); }
+.f-up-3 { fill: var(--up-3); background-color: var(--up-3); color: var(--on-up-3); }
+.f-down-1 { fill: var(--down-1); background-color: var(--down-1); color: var(--on-down-1); }
+.f-down-2 { fill: var(--down-2); background-color: var(--down-2); color: var(--on-down-2); }
+.f-down-3 { fill: var(--down-3); background-color: var(--down-3); color: var(--on-down-3); }
+.f-flat { fill: var(--flat); background-color: var(--flat); color: var(--on-flat); }
+.f-nodata {
+  fill: url(#hatch);
+  background: repeating-linear-gradient(45deg, var(--nodata-line) 0 1.5px, var(--nodata) 1.5px 5px);
+  color: var(--on-nodata);
+}
+.t-up-1 { fill: var(--on-up-1); }
+.t-up-2 { fill: var(--on-up-2); }
+.t-up-3 { fill: var(--on-up-3); }
+.t-down-1 { fill: var(--on-down-1); }
+.t-down-2 { fill: var(--on-down-2); }
+.t-down-3 { fill: var(--on-down-3); }
+.t-flat { fill: var(--on-flat); }
+.t-nodata { fill: var(--on-nodata); }
+.hatch-bg { fill: var(--nodata); }
+.hatch-line { stroke: var(--nodata-line); stroke-width: 2; }
+span.f-nodata,
+a.f-nodata,
+span.f-flat,
+a.f-flat {
+  box-shadow: inset 0 0 0 1px var(--hairline-strong);
+}
+
+.table-tall {
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+.table-tall thead th {
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+}
