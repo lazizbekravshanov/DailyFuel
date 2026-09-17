@@ -76,9 +76,12 @@ export function formatSignedCents(change: number): string {
 
 /** Percent with one decimal and a sign: "+5.3%", "−2.1%", "0.0%". */
 export function formatPct(pct: number): string {
-  const h = Math.round(pct * 100);
-  const sign = h < 0 ? -1 : 1;
-  const t = roundHalfUp(Math.abs(h), 10);
+  const sign = pct < 0 ? -1 : 1;
+  // One rounding, straight to tenths of a percent, half away from zero. Rounding
+  // twice (to hundredths and then to tenths) pushes an x.xx45 percent up a whole
+  // 0.1pp. The epsilon absorbs binary representation slop so an exact x.x5 tie,
+  // which a double can hold just under, still rounds up.
+  const t = Math.floor(Math.abs(pct) * 10 + 0.5 + 1e-9);
   const s = t === 0 ? "" : sign > 0 ? "+" : MINUS;
   return `${s}${Math.floor(t / 10)}.${t % 10}%`;
 }

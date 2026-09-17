@@ -12,7 +12,7 @@ import json
 import re
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 import xlrd
@@ -54,6 +54,10 @@ class EiaParseError(ValueError):
     pass
 
 
+class EiaDataError(ValueError):
+    """Stored EIA data is unreadable. The file is left alone and the run fails."""
+
+
 @dataclass
 class Workbook:
     weeks: list[dict]
@@ -73,7 +77,9 @@ class EiaResult:
 
 
 def _price(raw) -> Decimal:
-    value = store.dec(raw).quantize(PRICE_STEP)
+    # Half up, like every other money step in the pipeline. The Decimal context
+    # default is half even, which would disagree on a four decimal tie.
+    value = store.dec(raw).quantize(PRICE_STEP, rounding=ROUND_HALF_UP)
     if not (MIN_PRICE <= value <= MAX_PRICE):
         raise EiaParseError(f"price {raw} outside [{MIN_PRICE}, {MAX_PRICE}]")
     return value
@@ -270,19 +276,34 @@ def _content(doc: dict | None) -> dict | None:
     return {k: v for k, v in doc.items() if k not in ("fetched_at", "last_modified")}
 
 
-def load(data_dir: Path) -> dict | None:
+def load(data_dir: Path, v: store.Validators | None = None) -> dict | None:
+    """Read the stored weekly file, checked against its schema.
+
+    A damaged file raises instead of being quietly treated as "no stored data",
+    because that would let the USDA fallback replace years of history with 2 weeks.
+    """
     path = Path(data_dir) / EIA_WEEKLY
     if not path.exists():
         return None
-    return store.read_json(path)
+    try:
+        doc = store.read_json(path)
+    except ValueError as e:
+        raise EiaDataError(f"{path} is not valid JSON, so it was left alone: {e}") from e
+    if not isinstance(doc, dict) or doc.get("schema") != SCHEMA_ID:
+        # A file from a different schema version is not ours to read. update()
+        # refetches, which is the same thing it already did for this case.
+        return None
+    try:
+        (v or store.validators()).validate("eia-diesel-weekly", doc)
+    except store.SchemaError as e:
+        raise EiaDataError(f"{path} doesn't match its schema, so it was left alone: {e}") from e
+    return doc
 
 
 def update(data_dir: Path, http: HttpClient, now: datetime, v: store.Validators | None = None) -> EiaResult:
     data_dir = Path(data_dir)
     path = data_dir / EIA_WEEKLY
-    existing = load(data_dir)
-    if existing is not None and existing.get("schema") != SCHEMA_ID:
-        existing = None
+    existing = load(data_dir, v)
 
     headers = {"Accept": "application/vnd.ms-excel, */*"}
     if existing and existing.get("last_modified"):
@@ -297,7 +318,7 @@ def update(data_dir: Path, http: HttpClient, now: datetime, v: store.Validators 
 
     if resp is not None:
         if resp.status == 304 and existing is not None:
-            return EiaResult("not_modified", newest_period=existing["weeks"][-1]["period"])
+            return EiaResult("not_modified", newest_period=_newest(existing))
         if resp.status != 200:
             failure = f"eia_xls HTTP {resp.status}"
         else:
@@ -306,25 +327,37 @@ def update(data_dir: Path, http: HttpClient, now: datetime, v: store.Validators 
             except EiaParseError as e:
                 failure = f"eia_xls parse failed: {e}"
             else:
+                # A renamed Contents sheet or a reworded label reads as None.
+                # Keep what we already know rather than blanking the dated EIA
+                # acknowledgment the site is required to show, and say so.
+                warnings: list[str] = []
+                release = book.release_date or (existing.get("release_date") if existing else None)
+                next_release = book.next_release_date or (existing.get("next_release_date") if existing else None)
+                if book.release_date is None and release is not None:
+                    warnings.append(f"eia_release_date_missing: Contents gave no Release Date, keeping {release}")
+                if book.next_release_date is None and next_release is not None:
+                    warnings.append(
+                        f"eia_next_release_date_missing: Contents gave no Next Release Date, keeping {next_release}"
+                    )
                 doc = {
                     "schema": SCHEMA_ID,
                     "source": "eia_xls",
                     "source_url": XLS_URL,
                     "fetched_at": iso_utc(now),
                     "last_modified": resp.headers.get("Last-Modified"),
-                    "release_date": book.release_date,
-                    "next_release_date": book.next_release_date,
+                    "release_date": release,
+                    "next_release_date": next_release,
                     "weeks": merge_weeks(existing["weeks"] if existing else [], book.weeks),
                 }
                 newest = doc["weeks"][-1]["period"]
                 if existing is not None and _content(doc) == _content(existing):
-                    return EiaResult("unchanged", newest_period=newest)
+                    return EiaResult("unchanged", newest_period=newest, warnings=warnings)
                 try:
                     changed = store.write_doc("eia-diesel-weekly", path, doc, v)
                 except store.SchemaError as e:
                     failure = f"eia_xls data failed validation: {e}"
                 else:
-                    return EiaResult("ok", changed=changed, newest_period=newest)
+                    return EiaResult("ok", changed=changed, newest_period=newest, warnings=warnings)
 
     return _fallback(path, existing, http, now, v, failure)
 

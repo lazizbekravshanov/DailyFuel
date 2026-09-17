@@ -8,7 +8,7 @@ import NumbersTable from "../../components/NumbersTable.astro";
 import chartScript from "../../scripts/chart.js?raw";
 import { getSite, type StateView } from "../../lib/site.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
-import { addDays, formatDate, formatMonthYear, formatShortDate } from "../../lib/dates.ts";
+import { addDays, formatDate, formatMonthYear, formatShortDate, when } from "../../lib/dates.ts";
 import { formatPrice } from "../../lib/format.ts";
 import { changeOver, highLow, lastDays, newest, type Point } from "../../lib/stats.ts";
 import { stateDescription } from "../../lib/copy.ts";
@@ -128,19 +128,28 @@ const tableChart = charts.find((c) => c.table.length > 0);
 
 // Stats: 4 week change, 52 week change, 52 week high and low.
 const primaryHist = s.history;
-const fourWeek = primaryHist.length ? changeOver(primaryHist, 28, aaaMode ? 3 : 0) : null;
+let fourWeek = primaryHist.length ? changeOver(primaryHist, 28, aaaMode ? 3 : 0) : null;
+// For the first four weeks after the AAA switch flips, daily history is too
+// short for a 4 week change. Fall back the same way the 52 week block does,
+// rather than showing "not enough history" above a real 52 week figure.
+const fourWeekFromEia = aaaMode && !fourWeek && s.eiaHistory.length > 0;
+if (fourWeekFromEia) fourWeek = changeOver(s.eiaHistory, 28, 0);
 let yearBasis = primaryHist;
 let yearNote = "";
 const primaryHL = primaryHist.length ? highLow(primaryHist) : null;
 if (aaaMode && (!primaryHL || !primaryHL.complete) && s.eiaHistory.length) {
   yearBasis = s.eiaHistory;
-  yearNote = `AAA daily history is shorter than a year, so the 52 week figures use EIA's weekly ${s.regionName} price.`;
+  const which = fourWeekFromEia && fourWeek ? "4 week and 52 week figures" : "52 week figures";
+  yearNote = `AAA daily history is shorter than a year, so the ${which} use EIA's weekly ${s.regionName} price.`;
 }
 const yearChange = yearBasis.length ? changeOver(yearBasis, 364, aaaMode && yearBasis === primaryHist ? 3 : 0) : null;
 const yearHL = yearBasis.length ? highLow(yearBasis) : null;
-if (aaaMode && yearBasis === primaryHist && yearHL && !yearHL.complete) {
-  yearNote = `Daily history starts ${formatDate(primaryHist[0].date)}, so the high and low cover that stretch.`;
-}
+// AK and HI have no EIA series to fall back to, so their high and low can cover
+// a few days. Say the real range in the label instead of calling it 52 weeks.
+const shortWindow = Boolean(yearHL && !yearHL.complete && yearBasis.length);
+const shortFrom = shortWindow ? formatShortDate(yearBasis[0].date) : "";
+const highLabel = shortWindow ? `High since ${shortFrom}` : "52 week high";
+const lowLabel = shortWindow ? `Low since ${shortFrom}` : "52 week low";
 
 const peers = s.peers.map((c) => site.byCode.get(c)!);
 const peerTitle = s.peerLabel;
@@ -189,7 +198,11 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
             ? s.eia_series
               ? `AAA's daily average for ${s.name}, with EIA's weekly ${s.regionName} price as a step line.`
               : `AAA's daily average for ${s.name}.`
-            : `EIA's weekly ${s.regionName} price, which ${s.name} shares.`}
+            : s.eia_series === "SCA"
+              // California is its own EIA region, so the shared-price sentence
+              // would say California shares a price with itself.
+              ? `EIA's weekly price for ${s.name}.`
+              : `EIA's weekly ${s.regionName} price, which ${s.name} shares.`}
         </p>
       </div>
       {aaaMode ? (
@@ -238,7 +251,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
         <div>
           <dt>4 week change</dt>
           <dd>{fourWeek ? <Change change={fourWeek.change} pct={fourWeek.pct} /> : <span class="muted">Not enough history yet</span>}</dd>
-          {fourWeek && <dd class="small muted">Since {formatShortDate(fourWeek.from.date)}</dd>}
+          {fourWeek && <dd class="small muted">Since {when(fourWeek.from.date, fourWeek.to.date)}</dd>}
         </div>
         <div>
           <dt>52 week change</dt>
@@ -246,12 +259,12 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
           {yearChange && <dd class="small muted">Since {formatDate(yearChange.from.date)}</dd>}
         </div>
         <div>
-          <dt>52 week high</dt>
+          <dt>{highLabel}</dt>
           <dd>{yearHL ? <Price price={yearHL.high.value} /> : <span class="muted">None yet</span>}</dd>
           {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory && !aaaMode ? "Week of " : ""}{formatDate(yearHL.high.date)}</dd>}
         </div>
         <div>
-          <dt>52 week low</dt>
+          <dt>{lowLabel}</dt>
           <dd>{yearHL ? <Price price={yearHL.low.value} /> : <span class="muted">None yet</span>}</dd>
           {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory && !aaaMode ? "Week of " : ""}{formatDate(yearHL.low.date)}</dd>}
         </div>
@@ -269,7 +282,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
           <li>
             <a href={p.href}>{p.name}</a>
             <span class="peer-price">{p.primary ? <Price price={p.primary.price} /> : <span class="muted">No survey</span>}</span>
-            <span class="peer-change">{p.primary ? <Change change={p.primary.change} pct={p.primary.change_pct} prev={p.primary.prev} cadence={p.cadence} showPct={false} /> : null}</span>
+            <span class="peer-change">{p.primary ? <Change change={p.primary.change} pct={p.primary.change_pct} prev={p.primary.prev} cadence={p.cadence} showPct={false} /> : <span class="muted">No survey</span>}</span>
           </li>
         ))}
       </ul>

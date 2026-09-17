@@ -172,6 +172,13 @@ export function checkConsistency(data: Omit<RawData, "dir">): void {
     fail(s.fips !== ref.fips || s.padd !== ref.padd || s.eia_series !== ref.eia_series,
       `latest.json row for ${s.code} disagrees with src/data/states.json`);
     fail(ref.eia_series === null && s.eia !== null, `${s.code} has an EIA price but EIA doesn't survey it`);
+    // The converse. One blank cell in the newest workbook week is legal input,
+    // but in eia_only it leaves a surveyed state with no price while its page
+    // still dates itself to that week and anchors its stats a week earlier.
+    // Stop rather than ship a page that disagrees with itself. Not checked in
+    // aaa+eia, where the state price is AAA's and EIA is only a benchmark.
+    fail(latest.mode === "eia_only" && ref.eia_series !== null && latest.eia !== null && s.eia === null,
+      `${s.code} has no EIA price for ${latest.eia?.period}, but EIA surveys it as part of ${ref.eia_series}`);
   });
 
   if (latest.mode === "eia_only") {
@@ -230,6 +237,10 @@ export function loadRawData(dirInput = process.env.DAILYFUEL_DATA_DIR ?? "data")
     for (const name of names) {
       const p = join(dailyDir, name);
       const doc = check<DailyFile>(v.daily, readJson(p), p);
+      // Made up prices must never ship credited to AAA and OPIS. A preview
+      // build from fixtures has to say so out loud.
+      fail(doc.origin !== "live" && process.env.DAILYFUEL_ALLOW_SYNTHETIC !== "1",
+        `${p} has origin ${doc.origin}; set DAILYFUEL_ALLOW_SYNTHETIC=1 to build a preview from made up data`);
       fail(name !== `${doc.as_of}.json`, `${p} has as_of ${doc.as_of}, which doesn't match its file name`);
       daily.push(doc);
     }

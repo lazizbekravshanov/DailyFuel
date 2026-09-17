@@ -19,13 +19,25 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: scripts/requirements*.txt
+          cache-dependency-path: scripts/requirements*.lock
 
       - name: Install Python packages
-        run: python -m pip install -r scripts/requirements-dev.txt
+        run: python -m pip install --require-hashes -r scripts/requirements-dev.lock
 
       - name: Python tests
         run: python -m pytest
+
+      - name: No AAA data under data/
+        # The structural "aaa": null keys are required by latest.schema.json.
+        # Anything else under data/ that mentions AAA is a leak.
+        run: |
+          leak=$(git grep -i aaa -- data/ | grep -v '^data/aaa/README.md:' | grep -v '"aaa": null' || true)
+          if [ -n "$leak" ]; then
+            echo "AAA data found under data/:"
+            echo "$leak"
+            exit 1
+          fi
+          echo "No AAA values under data/."
 
       - uses: actions/setup-node@v7
         with:
@@ -47,4 +59,10 @@ jobs:
       - name: Build against synthetic AAA mode data
         env:
           DAILYFUEL_DATA_DIR: tmp/fixture-data
+          # Made up prices would otherwise ship credited to AAA and OPIS, so
+          # the build refuses them unless a preview asks for them by name.
+          DAILYFUEL_ALLOW_SYNTHETIC: "1"
+        run: npm run build
+
+      - name: Rebuild against data/ so no synthetic dist is left behind
         run: npm run build

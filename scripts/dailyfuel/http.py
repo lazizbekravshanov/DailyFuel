@@ -18,6 +18,11 @@ from requests.structures import CaseInsensitiveDict
 
 USER_AGENT = "Mozilla/5.0 (compatible; DailyFuel/1.0; +https://github.com/lazizbekravshanov/DailyFuel)"
 
+# The real workbook is about 740 KB and the other responses are far smaller.
+# 16 MB is roughly 20x the biggest thing we ever expect, and it bounds what a
+# hostile or broken upstream can make the runner hold in memory.
+MAX_BODY = 16 * 1024 * 1024
+
 
 class NetworkError(Exception):
     """Connection failed, timed out, or the response could not be read."""
@@ -71,9 +76,21 @@ class RequestsClient:
                 headers=merged,
                 timeout=timeout,
                 allow_redirects=True,
+                stream=True,
                 hooks={"response": self._check_redirect},
             )
-            body = r.content
+            try:
+                # iter_content undoes Content-Encoding as it goes, so counting
+                # these bytes caps the decompressed size, not just the wire size.
+                chunks, total = [], 0
+                for chunk in r.iter_content(65536):
+                    total += len(chunk)
+                    if total > MAX_BODY:
+                        raise NetworkError(f"{url} returned more than {MAX_BODY} bytes")
+                    chunks.append(chunk)
+                body = b"".join(chunks)
+            finally:
+                r.close()
         except self._requests.RequestException as e:
             raise NetworkError(f"{type(e).__name__}: {e}") from e
         if is_aaa_host(r.url) and not self.allow_aaa:

@@ -265,6 +265,15 @@ def test_tomorrow_is_allowed():
     assert status == "ok"
 
 
+def test_tomorrow_warns_because_it_costs_a_day():
+    # Stored under tomorrow's name, so tomorrow's run sees today's date already
+    # covered and skips AAA. Nothing else notices, so say it out loud.
+    _, warnings = aaa.validate(_page(as_of=date(2026, 9, 18)), CODES, TODAY, None, None)
+    assert any(w.startswith("as_of_ahead:") for w in warnings)
+    _, same_day = aaa.validate(_page(as_of=TODAY), CODES, TODAY, None, None)
+    assert not any(w.startswith("as_of_ahead:") for w in same_day)
+
+
 def test_unchanged_values_with_new_date_is_invalid():
     prices = synth.diesel_prices()
     with pytest.raises(aaa.Invalid, match="all 51 values equal"):
@@ -312,3 +321,12 @@ def test_snapshot_rounds_to_4_decimals_and_sorts_codes():
     assert list(doc["diesel"]) == sorted(prices)
     assert doc["national"] == {"current": 6.1235, "yesterday": 6.1}
     assert doc["source_url"] == "https://gasprices.aaa.com/state-gas-price-averages/"
+
+
+def test_snapshot_dates_skips_an_impossible_file_name(tmp_path):
+    folder = tmp_path / "aaa" / "daily"
+    folder.mkdir(parents=True)
+    (folder / "2026-09-17.json").write_text("{}")
+    (folder / "2026-02-30.json").write_text("{}")  # not a real day
+    (folder / "notes.txt").write_text("ignored")
+    assert aaa.snapshot_dates(tmp_path) == [date(2026, 9, 17)]

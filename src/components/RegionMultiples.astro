@@ -4,10 +4,9 @@ import LineChart from "./LineChart.astro";
 import NumbersTable from "./NumbersTable.astro";
 import Change from "./Change.astro";
 import Price from "./Price.astro";
-import { buildChart, yDomainFor } from "../lib/chart.ts";
-import { formatShortDate, formatDate } from "../lib/dates.ts";
-const when = (iso: string, ref: string) => (iso.slice(0, 4) === ref.slice(0, 4) ? formatShortDate(iso) : formatDate(iso));
-import { highLow, lastDays, newest } from "../lib/stats.ts";
+import { buildChart, windowStart, yDomainFor } from "../lib/chart.ts";
+import { formatDate, when } from "../lib/dates.ts";
+import { highLow, newest, type Point } from "../lib/stats.ts";
 import type { SiteData } from "../lib/site.ts";
 import { formatPrice } from "../lib/format.ts";
 interface Props {
@@ -15,16 +14,26 @@ interface Props {
 }
 const { site } = Astro.props;
 const HEIGHT = 132;
-const windows = site.regions.map((r) => ({ r, pts: lastDays(r.history, 364) }));
-const domain = yDomainFor(windows.map((w) => w.pts), 6);
+// One shared x window for all 8 panels and for the table under them. Anchoring
+// each region on its own newest value ends that region a week early whenever its
+// newest cell is blank, which drops the newest week from the shared table for
+// every region and quietly breaks the shared scale the spec asks for.
+const anchor = site.latest.eia?.period
+  ?? site.regions.map((r) => newest(r.history)?.date ?? "").sort().pop()
+  ?? "";
+const since = anchor ? windowStart(anchor, 364) : "";
+const inWindow = (pts: Point[]) => (anchor ? pts.filter((p) => p.date >= since && p.date <= anchor) : []);
+const windows = site.regions.map((r) => ({ r, pts: inWindow(r.history) }));
+// 7 ticks, not 6: a $1 step over $3 to $9 needs 7, and falling through to the
+// $2 step leaves 39% of every panel permanently empty. Still one shared scale.
+const domain = yDomainFor(windows.map((w) => w.pts), 7);
 const cards = windows.map(({ r, pts }) => {
-  const from = pts[0]?.date;
   const last = newest(r.history);
   const hl = highLow(r.history);
-  const model = from && last
+  const model = anchor && pts.length
     ? buildChart([{ id: r.key, label: r.name, kind: "primary", points: pts }], {
-        from,
-        to: last.date,
+        from: since,
+        to: anchor,
         yDomain: domain,
         heightPx: HEIGHT,
         xTicks: "none",
@@ -35,9 +44,9 @@ const cards = windows.map(({ r, pts }) => {
     : `${r.name}, no prices yet.`;
   return { r, pts, model, hl, last, label };
 });
-const tableWeeks = windows[0].pts.map((p) => p.date).slice().reverse();
-const firstDate = windows[0].pts[0]?.date;
-const lastDate = windows[0].pts[windows[0].pts.length - 1]?.date;
+const tableWeeks = [...new Set(windows.flatMap((w) => w.pts.map((p) => p.date)))].sort().reverse();
+const firstDate = tableWeeks[tableWeeks.length - 1];
+const lastDate = tableWeeks[0];
 ---
 <div class="multiples">
   {cards.map((c) => (

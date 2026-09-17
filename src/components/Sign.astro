@@ -194,5 +194,11 @@ const { legend, price, noPrice = "No price", change, pct = null, prev = null, ca
     .sign {
       border: 3px solid CanvasText;
     }
+    /* The price's inline box overhangs its block box, and forced colors paints
+       an opaque backplate behind the text, which then covers the date under it.
+       Only the date under the price needs the clearance. */
+    .sign-price-block .sign-date {
+      margin-top: 16px;
+    }
   }
 </style>

@@ -74,6 +74,20 @@ describe("change formatting", () => {
     expect(formatPct(12.25)).toBe("+12.3%");
   });
 
+  it("rounds a percent once, straight to tenths", () => {
+    // Percents computed in TypeScript arrive at full precision, not quantized to
+    // hundredths the way the pipeline's change_pct is. Rounding twice moved these.
+    expect(formatPct(11.848512173128945)).toBe("+11.8%");
+    expect(formatPct(-3.2451)).toBe("−3.2%");
+    expect(formatPct(9.7451)).toBe("+9.7%");
+  });
+
+  it("still rounds an exact tie away from zero", () => {
+    expect(formatPct((-6025 / 50000) * 100)).toBe("−12.1%");
+    expect(formatPct((-14382 / 22560) * 100)).toBe("−63.8%");
+    expect(formatPct((9867 / 34320) * 100)).toBe("+28.8%");
+  });
+
   it("says the change in words", () => {
     expect(spokenChange(0.318)).toBe("up 31.8 cents");
     expect(spokenChange(-0.12)).toBe("down 12.0 cents");

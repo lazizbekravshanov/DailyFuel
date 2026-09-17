@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import date, timedelta
+from decimal import Decimal
 
 import pytest
 
@@ -118,6 +119,14 @@ def test_release_dates_from_contents():
 def test_missing_release_dates_are_null():
     wb = eia.parse_book(synth.eia_book(MONDAYS, release=None, next_release=None))
     assert (wb.release_date, wb.next_release_date) == (None, None)
+
+
+def test_price_rounds_half_up_not_half_even():
+    # Reachable through the USDA mirror, which sends prices as strings.
+    # Half even would give 5.632 here and 5.634 for the next one.
+    assert eia._price("5.6325") == Decimal("5.633")
+    assert eia._price("5.6335") == Decimal("5.634")
+    assert eia._price("5.6324") == Decimal("5.632")
 
 
 def test_synthetic_xls_file_through_xlrd():
@@ -313,3 +322,59 @@ def test_weekly_file_has_one_week_per_line(tmp_path, now, fake_http, validators)
     assert len(week_lines) == len(doc["weeks"])
     for ln, week in zip(week_lines, doc["weeks"]):
         assert json.loads(ln.strip().rstrip(",")) == week
+
+
+# ---------------------------------------------------------------- damaged inputs
+
+
+def test_release_dates_survive_a_contents_sheet_that_stops_parsing(tmp_path, now, fake_http, validators, monkeypatch):
+    """A renamed sheet or a reworded label must not blank the dated EIA acknowledgment."""
+    path = _seed(tmp_path, now, fake_http, validators)
+    before = path.read_bytes()
+    assert json.loads(before)["release_date"] == "2026-09-15"
+
+    real = eia.parse_workbook
+
+    def blind(body):
+        wb = real(body)
+        wb.release_date = None
+        wb.next_release_date = None
+        return wb
+
+    monkeypatch.setattr(eia, "parse_workbook", blind)
+    fake_http.set(eia.XLS_URL, synth.xls_server(last_modified="Wed, 23 Sep 2026 09:00:00 GMT"))
+    result = eia.update(tmp_path, fake_http, now + timedelta(days=1), validators)
+
+    doc = json.loads(path.read_text())
+    assert doc["release_date"] == "2026-09-15"
+    assert doc["next_release_date"] == "2026-09-22"
+    assert path.read_bytes() == before, "carrying the dates forward must not churn the file"
+    assert result.status == "unchanged"
+    assert any("eia_release_date_missing" in w for w in result.warnings)
+    assert any("eia_next_release_date_missing" in w for w in result.warnings)
+
+
+def test_damaged_stored_json_raises_instead_of_looking_empty(tmp_path, now, fake_http, validators):
+    path = _seed(tmp_path, now, fake_http, validators)
+    before = path.read_bytes()
+    path.write_text(before.decode()[:400])
+    with pytest.raises(eia.EiaDataError, match="not valid JSON"):
+        eia.load(tmp_path, validators)
+    assert path.read_bytes() == before[:400], "a damaged file is left alone, never refetched over"
+
+
+def test_stored_json_that_fails_its_schema_raises(tmp_path, now, fake_http, validators):
+    path = _seed(tmp_path, now, fake_http, validators)
+    doc = json.loads(path.read_text())
+    doc["weeks"] = doc["weeks"][:1]  # the schema needs 2
+    path.write_text(json.dumps(doc))
+    with pytest.raises(eia.EiaDataError, match="schema"):
+        eia.load(tmp_path, validators)
+
+
+def test_a_file_from_another_schema_version_reads_as_no_stored_data(tmp_path, now, fake_http, validators):
+    path = _seed(tmp_path, now, fake_http, validators)
+    doc = json.loads(path.read_text())
+    doc["schema"] = "dailyfuel/eia-diesel-weekly/2"
+    path.write_text(json.dumps(doc))
+    assert eia.load(tmp_path, validators) is None

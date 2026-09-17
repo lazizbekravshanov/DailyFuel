@@ -304,3 +304,19 @@ def test_update_data_cli(tmp_path, monkeypatch, capsys):
     assert json.loads((tmp_path / "rt" / "run_status.json").read_text())["eia"] == "ok"
     assert (tmp_path / "out").read_text().startswith("commit_message=data: EIA ")
     assert (tmp_path / "data" / "latest.json").exists()
+
+
+def test_switching_aaa_off_warns_that_the_snapshots_are_still_committed(tmp_path, sleeps, now, states, validators):
+    # Day one with AAA on writes a snapshot.
+    result, data = run(tmp_path, {"AAA_ENABLED": "true"}, aaa_http(), sleeps, now, states, validators)
+    assert result.aaa.status == "ok"
+    assert not any(w.startswith("aaa_off_with_data:") for w in result.warnings)
+
+    # The switch goes off. latest.json goes back to eia_only, but the file stays.
+    off, _ = run(tmp_path, {"AAA_ENABLED": "false"}, eia_only_http(), sleeps, now + timedelta(days=1), states, validators)
+    assert json.loads((data / "latest.json").read_text())["mode"] == "eia_only"
+    assert (data / "aaa" / "daily" / "2026-09-17.json").exists()
+    assert any(w.startswith("aaa_off_with_data:") for w in off.warnings)
+    assert "1 snapshot file is" in " ".join(off.warnings)
+    # It is a warning, not a failure: switching off is not always a takedown.
+    assert off.eia.status in ("not_modified", "unchanged", "ok")

@@ -39,10 +39,13 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: scripts/requirements.txt
+          cache-dependency-path: scripts/requirements.lock
 
       - name: Install Python packages
-        run: python -m pip install -r scripts/requirements.txt
+        # The lock pins every transitive package with a hash. This job can push
+        # to the repo, so a new release of something two levels down must not
+        # arrive unreviewed. Regenerate with scripts/requirements.txt as input.
+        run: python -m pip install --require-hashes -r scripts/requirements.lock
 
       - name: Update data
         id: update
@@ -54,7 +57,7 @@ jobs:
         env:
           COMMIT_MESSAGE: ${{ steps.update.outputs.commit_message }}
         run: |
-          git add data/
+          git add data/latest.json data/eia data/aaa
           if git diff --cached --quiet data/; then
             echo "No data changes, nothing to commit."
             exit 0
@@ -93,6 +96,10 @@ jobs:
     # Its own job so it still runs when update fails.
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    # Workflow level concurrency does not cancel in progress, so a keepalive
+    # hung on the default 360 minutes would hold the whole run open and queue
+    # the next scheduled data runs behind it.
+    timeout-minutes: 5
     permissions:
       actions: write
     steps:

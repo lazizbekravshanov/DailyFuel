@@ -40,15 +40,17 @@ const lastCol = aaaMode ? "EIA weekly" : "52 week change";
           <td class="r" data-sort={s.primary ? String(s.primary.price) : ""}>
             {s.primary ? <Price price={s.primary.price} /> : <span class="muted">No survey</span>}
           </td>
+          {/* One phrase for the absence in the data cells. The Source cell
+              carries the reason, so the row scans as a single statement. */}
           <td data-sort={s.primary?.change ?? ""}>
             {s.primary ? (
               <Change change={s.primary.change} pct={s.primary.change_pct} prev={s.primary.prev} cadence={s.cadence} empty="No change yet" />
             ) : (
-              <span class="muted">None</span>
+              <span class="muted">No survey</span>
             )}
           </td>
           <td data-sort={aaaMode ? "AAA" : (s.regionName ?? "")}>
-            {aaaMode ? "AAA" : (s.regionName ?? <span class="muted">Not surveyed</span>)}
+            {aaaMode ? "AAA" : (s.regionName ?? <span class="muted">EIA doesn't survey {s.name}</span>)}
           </td>
           {aaaMode ? (
             <td class="r" data-sort={s.eia ? String(s.eia.price) : ""}>
@@ -56,7 +58,7 @@ const lastCol = aaaMode ? "EIA weekly" : "52 week change";
             </td>
           ) : (
             <td data-sort={year ? String(year.change) : ""}>
-              {year ? <Change change={year.change} pct={year.pct} /> : <span class="muted">{s.eia_series ? "Not enough history" : "None"}</span>}
+              {year ? <Change change={year.change} pct={year.pct} /> : <span class="muted">{s.eia_series ? "Not enough history" : "No survey"}</span>}
             </td>
           )}
         </tr>

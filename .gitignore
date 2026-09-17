@@ -7,6 +7,8 @@ __pycache__/
 *.pyc
 .pytest_cache/
 run_status.json
+# a hard kill between the temp write and the rename leaves one of these behind
+data/**/.*.tmp
 .env
 .env.*
 .DS_Store

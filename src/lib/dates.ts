@@ -67,6 +67,14 @@ export function formatDate(iso: string): string {
   return `${MONTHS[mo - 1]} ${d}, ${y}`;
 }
 
+/**
+ * "Sep 14" when `iso` falls in the same year as `ref`, "Sep 14, 2025" when it
+ * doesn't. A comparison date is only ambiguous when it crosses the year.
+ */
+export function when(iso: string, ref: string): string {
+  return iso.slice(0, 4) === ref.slice(0, 4) ? formatShortDate(iso) : formatDate(iso);
+}
+
 /** "Tuesday, Sep 22" */
 export function formatWeekdayDate(iso: string): string {
   const [, mo, d] = parts(iso);

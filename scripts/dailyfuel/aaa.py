@@ -10,6 +10,7 @@ No other grades, no raw HTML.
 from __future__ import annotations
 
 import gzip
+import io
 import re
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
@@ -20,7 +21,7 @@ from typing import Callable
 from bs4 import BeautifulSoup
 
 from . import store
-from .http import USER_AGENT, HttpClient, NetworkError, Response
+from .http import MAX_BODY, USER_AGENT, HttpClient, NetworkError, Response
 from .paths import AAA_DAILY_DIR, iso_utc
 
 ALL_STATES_URL = "https://gasprices.aaa.com/state-gas-price-averages/"
@@ -88,7 +89,12 @@ class AaaResult:
 def decode_body(body: bytes) -> str:
     """Bodies are normally decompressed by requests, but a gzip body can still show up raw."""
     if body[:2] == b"\x1f\x8b":
-        body = gzip.decompress(body)
+        # Bounded, because a small gzip body can expand a thousandfold. The
+        # client's own cap does not cover this path, it only sees the raw bytes.
+        with gzip.GzipFile(fileobj=io.BytesIO(body)) as f:
+            body = f.read(MAX_BODY + 1)
+        if len(body) > MAX_BODY:
+            raise Invalid(f"gzipped body expands past {MAX_BODY} bytes")
     return body.decode("utf-8", errors="replace")
 
 
@@ -121,7 +127,7 @@ def fetch(http: HttpClient, url: str, sleep: Callable[[float], None]) -> Fetch:
             return Fetch("error", detail=last)
         try:
             text = decode_body(resp.body)
-        except (OSError, EOFError) as e:
+        except (OSError, EOFError, Invalid) as e:
             text = ""
             decode_error = f"couldn't decompress body: {e}"
         else:
@@ -242,6 +248,13 @@ def validate(
     if prev_as_of is not None and page.as_of == prev_as_of:
         return "noop", []
     warnings: list[str] = []
+    if page.as_of > today_et:
+        # Allowed, but it costs a day: the next run sees a snapshot dated today
+        # and skips AAA, so that calendar day is never collected.
+        warnings.append(
+            f"as_of_ahead: AAA's badge says {page.as_of} but today in ET is {today_et}, "
+            "so the next run will skip AAA"
+        )
     if prev_as_of is None or prev_diesel is None:
         warnings.append("prev_missing: no earlier AAA snapshot")
         return "ok", warnings
@@ -270,8 +283,14 @@ def snapshot_dates(data_dir: Path) -> list[date]:
     out = []
     for p in folder.iterdir():
         m = _SNAPSHOT_NAME.match(p.name)
-        if m:
+        if not m:
+            continue
+        try:
             out.append(date.fromisoformat(m.group(1)))
+        except ValueError:
+            # A name like 2026-02-30.json is not a day. Skip it rather than
+            # taking the run and the health check down with a traceback.
+            continue
     return sorted(out)
 
 

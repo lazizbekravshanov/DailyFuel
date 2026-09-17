@@ -13,7 +13,7 @@ import mapScript from "../scripts/map.js?raw";
 import chartScript from "../scripts/chart.js?raw";
 import sortScript from "../scripts/table-sort.js?raw";
 import { getSite } from "../lib/site.ts";
-import { formatShortDate, formatWeekdayDate } from "../lib/dates.ts";
+import { formatShortDate, formatWeekdayDate, todayInNewYork } from "../lib/dates.ts";
 import { changeTenths, formatCents } from "../lib/format.ts";
 import { homeDescription, pctOf, sinceText } from "../lib/copy.ts";
 
@@ -70,10 +70,27 @@ const nextEia = eiaNext
     ? null
     : "EIA posts new prices every Tuesday.";
 const eiaLate = aaaMode ? "EIA's next weekly numbers are running late." : "EIA's next weekly prices are running late.";
+// The build already knows the date, so a page read with JS off doesn't promise
+// a release day that has passed. The inline script still corrects a page that
+// is served for days after the build.
+const eiaIsLate = Boolean(eiaNext && eiaNext < todayInNewYork());
 
-const nodataCount = site.states.filter((s) => s.fill === "nodata").length;
-const noDataLabel = nodataCount === 0 ? null : aaaMode ? "No change yet" : "No EIA survey (Alaska, Hawaii)";
-const mapWhat = aaaMode ? "since yesterday" : sinceText(site);
+// Day one after the AAA switch flips, no state has a yesterday, so the two
+// "no state went up / down" lines would contradict the national change above them.
+const dayOne = aaaMode && moveItems.length === 0;
+
+// Name the states that actually carry the no data fill. Hardcoding Alaska and
+// Hawaii goes wrong the moment a surveyed region has a blank week.
+const nodataStates = site.states.filter((s) => s.fill === "nodata");
+const unsurveyed = nodataStates.filter((s) => s.eia_series === null);
+const noDataLabel = nodataStates.length === 0
+  ? null
+  : aaaMode
+    ? "No change yet"
+    : unsurveyed.length === nodataStates.length
+      ? `No EIA survey (${unsurveyed.map((s) => s.name).join(", ")})`
+      : "No price this week";
+const mapWhat = aaaMode ? (sinceText(site) || "since the last price") : sinceText(site);
 const mapLabel = `Map of the diesel price change by state ${mapWhat}. Each state links to its page.`;
 const periodText = aaaMode
   ? latest.aaa?.prev_as_of
@@ -110,22 +127,23 @@ const description = homeDescription(site);
     </div>
     <div class="summary">
       <p class="lead">{usSentence}</p>
+      {dayOne && <p>This is the first day of daily state prices, so there's nothing to compare yet.</p>}
       {topRise && (
         <p>
           {aaaMode ? <a href={topRise.href}>{topRise.name}</a> : topRise.name} rose the most{moveWhen}, up {formatCents(topRise.change)}.
         </p>
       )}
-      {!topRise && <p>No {noun} went up {stateWhere}.</p>}
+      {!topRise && !dayOne && <p>No {noun} went up {stateWhere}.</p>}
       {topFall ? (
         <p>
           {aaaMode ? <a href={topFall.href}>{topFall.name}</a> : topFall.name} fell the most{moveWhen}, down {formatCents(topFall.change)}.
         </p>
-      ) : (
+      ) : !dayOne ? (
         <p>No {noun} went down {stateWhere}.</p>
-      )}
+      ) : null}
       <p class="muted">
         {nextDaily}{nextDaily && nextEia ? " " : ""}{nextEia && (
-          <span data-next-release={eiaNext ?? undefined} data-late={eiaLate}>{nextEia}</span>
+          <span data-next-release={eiaNext ?? undefined} data-late={eiaLate}>{eiaIsLate ? eiaLate : nextEia}</span>
         )}
       </p>
     </div>

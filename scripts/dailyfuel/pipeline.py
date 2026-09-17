@@ -128,6 +128,14 @@ def run(
     latest_changed, latest = derive.rebuild(data_dir, states, enabled, now, v)
 
     warnings = list(aaa_result.warnings) + list(eia_result.warnings)
+    if not enabled and dates:
+        # Switching AAA off rebuilds latest.json but leaves the snapshots on
+        # disk, and a public repo keeps serving them until someone deletes them.
+        n = len(dates)
+        warnings.append(
+            f"aaa_off_with_data: AAA is off but {n} snapshot {'file is' if n == 1 else 'files are'} "
+            "still committed under data/aaa/daily/. Delete them if this is a takedown."
+        )
     if aaa_result.status == "ok":
         for row in latest["states"]:
             if "eia_divergence" in row["flags"] and row["aaa"] and row["eia"]:

@@ -11,6 +11,7 @@ import {
   isStale,
   todayInNewYork,
   weekday,
+  when,
 } from "./dates.ts";
 
 describe("today in America/New_York", () => {
@@ -76,6 +77,12 @@ describe("date labels", () => {
     expect(formatMonthTick("2026-01-01")).toBe("2026");
     expect(formatBadgeDate("2026-09-17")).toBe("9/17/26");
     expect(formatBadgeDate("2030-01-05")).toBe("1/5/30");
+  });
+
+  it("adds the year only when a comparison date crosses it", () => {
+    expect(when("2026-08-17", "2026-09-14")).toBe("Aug 17");
+    expect(when("2026-12-07", "2027-01-04")).toBe("Dec 7, 2026");
+    expect(when("2025-09-15", "2026-09-14")).toBe("Sep 15, 2025");
   });
 });
 

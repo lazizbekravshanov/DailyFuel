@@ -178,9 +178,16 @@ def rebuild(
 
     if existing_generated:
         candidate = build_latest(states, eia_doc, snapshots, enabled, existing_generated)
-        (v or store.validators()).validate("latest", candidate)
-        if store.dumps(candidate) == existing_text:
-            return False, candidate
+        try:
+            # Only a sanity check on a document that exists to be compared and
+            # thrown away. A stored timestamp the schema rejects must not block
+            # the rebuild two lines below that would replace it.
+            (v or store.validators()).validate("latest", candidate)
+        except store.SchemaError:
+            existing_generated = None
+        else:
+            if store.dumps(candidate) == existing_text:
+                return False, candidate
 
     doc = build_latest(states, eia_doc, snapshots, enabled, iso_utc(now))
     changed = store.write_doc("latest", path, doc, v)

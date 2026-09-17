@@ -25,7 +25,7 @@ The same code runs in one of two modes. The `mode` field in `data/latest.json` s
 * **`eia_only`** is the launch mode and what's live now. It shows the official weekly prices from the U.S. Energy Information Administration. EIA reports diesel by region, not by state (California is the only state it breaks out), so states in the same region share a price. EIA doesn't survey Alaska or Hawaii, so those two have no weekly price.
 * **`aaa+eia`** adds AAA's daily diesel average for each state, with EIA's weekly price shown as a benchmark.
 
-**AAA is switched off for now.** AAA's site terms only allow personal, non commercial use, so the owner is asking AAA for permission first. The AAA code is built and tested, but while it's off nothing contacts AAA and there's no AAA data in this repo. Tests and CI only use made up AAA pages and numbers.
+**AAA is switched off for now.** We read AAA's site terms as limiting reuse to personal, non commercial use, so the owner is asking AAA for permission before turning this on. The AAA code is built and tested, but while it's off nothing contacts AAA and there's no AAA data in this repo. Tests and CI only use made up AAA pages and numbers.
 
 The switch is the repo variable `AAA_ENABLED`. Only the exact string `true` turns it on. Unset, `false`, `True`, `1` or anything else means off.
 
@@ -123,12 +123,22 @@ PROMPT.md                  the full build spec
 
 1. Get written permission from AAA.
 2. Set the repo variable `AAA_ENABLED` to `true`. On GitHub that's Settings, then Secrets and variables, then Actions, on the Variables tab. Or run `gh variable set AAA_ENABLED --body true`.
-3. Run the `update-data` workflow by hand with `force_aaa` checked. A good run makes 2 AAA requests: the all states page, then the homepage for the national average at least 15 seconds later. Once a day's snapshot is saved, later runs that day leave AAA alone.
+3. Run the `update-data` workflow by hand with `force_aaa` checked. A clean run makes 2 AAA requests: the all states page, then the homepage for the national average at least 15 seconds later. A page that returns a 5xx is retried once after 30 seconds, so a bad run can reach 4. Once a day's snapshot is saved, later runs that day leave AAA alone, and `force_aaa` can't change a day that's already stored.
 4. The data commit deploys the site in `aaa+eia` mode. Day over day changes show up for every state the day after.
 
 If AAA ever blocks a request, the job writes nothing and doesn't retry. The health check fails the run, and on a scheduled run that opens an issue.
 
 To turn it off again, for example if AAA or OPIS objects: set `AAA_ENABLED` to `false`, run the job once, and delete `data/aaa/daily/`.
+
+## Python packages
+
+`scripts/requirements.txt` and `scripts/requirements-dev.txt` are the human edited inputs. The workflows install from `scripts/requirements.lock` and `scripts/requirements-dev.lock`, which pin every transitive package with a hash, because the data job can push to this repo. Because the install uses `--require-hashes`, a workflow step that adds a package will fail until it's in the lock. Regenerate after editing a `.txt`:
+
+```
+pip install pip-tools
+pip-compile --generate-hashes --strip-extras --output-file scripts/requirements.lock scripts/requirements.txt
+pip-compile --generate-hashes --strip-extras --output-file scripts/requirements-dev.lock scripts/requirements-dev.txt
+```
 
 ## License
 

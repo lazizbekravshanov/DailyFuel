@@ -13,11 +13,14 @@ const rows = Math.max(...site.states.map((s) => s.tile.row)) + 1;
 <nav class="tiles" aria-label={label} style={`--cols:${cols};--rows:${rows}`}>
   {site.states.map((s) => {
     const l = mapLabel(s, site);
+    // The visible label on a tile is the two letter code, so the accessible
+    // name has to start with it (WCAG 2.5.3 Label in Name). Without it, voice
+    // control users saying "click AK" can't activate the tile.
     return (
       <a
         class={`tile f-${s.fill}`}
         href={s.href}
-        aria-label={l.aria}
+        aria-label={`${s.code}. ${l.aria}`}
         style={`grid-row:${s.tile.row + 1};grid-column:${s.tile.col + 1}`}
       >
         {s.code}
