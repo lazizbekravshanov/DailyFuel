@@ -13,3 +13,6 @@ data/**/.*.tmp
 .env.*
 .DS_Store
 tmp/
+
+# build spec, kept local only
+PROMPT.md

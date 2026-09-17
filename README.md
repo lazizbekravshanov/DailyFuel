@@ -116,7 +116,6 @@ src/
   layouts/  pages/  styles/
   scripts/                 small inline browser scripts: map and chart tooltips, table sort, stale banner, price roll
 public/                    favicon.svg, robots.txt
-PROMPT.md                  the full build spec
 ```
 
 ## Turning AAA on
