@@ -123,6 +123,7 @@ scripts/
   health.py                fails the job on errors or stale data
   update_taxes.py          refreshes the tax file from FHWA, run by hand, not by the job
   make_fixtures.py         synthetic aaa+eia data for CI and previews
+  make_app_icons.mjs       renders the favicon and home screen icons into public/, run by hand
   requirements.txt         requests, beautifulsoup4, xlrd, jsonschema (pinned)
   requirements-dev.txt     pytest and openpyxl (pinned)
   dailyfuel/               the Python package: states, http, store, eia, aaa, derive, pipeline, health, taxes
@@ -131,9 +132,10 @@ src/
   data/states.json         every state with its FIPS code, EIA region and tile map spot
   lib/                     data loading, formatting, stats and color bins, with vitest tests
   components/              sign, map, charts, tables
+  icons/                   road sign icons, 24 by 24, one fill in currentColor
   layouts/  pages/  styles/
-  scripts/                 small inline browser scripts: map and chart tooltips, table sort, stale banner, price roll
-public/                    favicon.svg, robots.txt
+  scripts/                 small inline browser scripts: map and chart tooltips, table sort, stale banner, price roll, your state
+public/                    favicon.svg and .ico, home screen icons, site.webmanifest, robots.txt
 ```
 
 ## Turning AAA on
