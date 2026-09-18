@@ -314,16 +314,8 @@ table.data caption {
   .tile .glyph {
     fill: currentColor;
   }
-  /* the chosen chart range keeps its ink and paper pair, so you can see which one is on */
-  .range input:checked + label {
-    forced-color-adjust: none;
-  }
-  /* chart dots are painted backgrounds, which a contrast theme drops */
-  .end-dot,
-  .cross-dot {
-    forced-color-adjust: none;
-    background: CanvasText !important;
-  }
+  /* The chart dots, crosshair, tooltip key and the chosen range keep their
+     marks through LineChart.astro's own forced colors block. */
   /* the disclosure triangle is borders, and only the left one should show */
   details.numbers > summary::before,
   details.disclosure > summary::before {

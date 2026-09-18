@@ -8,14 +8,16 @@ import Legend from "../components/Legend.astro";
 import BiggestMoves, { type MoveItem } from "../components/BiggestMoves.astro";
 import RegionMultiples from "../components/RegionMultiples.astro";
 import StateTable from "../components/StateTable.astro";
+import UsSparkline from "../components/UsSparkline.astro";
 import rollScript from "../scripts/roll.js?raw";
 import mapScript from "../components/home/map.js?raw";
 import chartScript from "../scripts/chart.js?raw";
 import sortScript from "../scripts/table-sort.js?raw";
 import { getSite, SITE_NAME } from "../lib/site.ts";
 import { formatShortDate, formatWeekdayDate, todayInNewYork } from "../lib/dates.ts";
+import { nextEiaRelease } from "../lib/release.ts";
 import { changeTenths, formatCents } from "../lib/format.ts";
-import { pctOf, sinceText } from "../lib/copy.ts";
+import { missingNote, pctOf, sinceText } from "../lib/copy.ts";
 import { peakKind } from "../lib/stats.ts";
 import { allRegionsSentence, DOE_LINE, HOME_TITLE } from "../lib/doe.ts";
 import { homeMeta, keyLine } from "../components/home/home.ts";
@@ -70,8 +72,17 @@ const topRise = rises[0];
 const topFall = falls[0];
 // Say the high in words, only when it's true: every stored week of a region
 // sits strictly below this one. Computed from the 8 benchmark series.
-const peakLine = site.weekly ? allRegionsSentence(site.regions.map((r) => peakKind(r.history))) : null;
-const eiaNext = latest.eia?.next_release_date ?? site.weekly?.next_release_date ?? null;
+// With AAA on, the sign is a daily number, so say these are EIA's regions.
+const regionPeak = site.weekly ? allRegionsSentence(site.regions.map((r) => peakKind(r.history))) : null;
+const peakLine = regionPeak && aaaMode ? regionPeak.replace("region", "EIA region") : regionPeak;
+// The same holiday aware date the state pages use. EIA's own next release date
+// wins when it points past this week; otherwise the usual Tuesday schedule.
+const release = nextEiaRelease(
+  latest.eia?.period ?? null,
+  latest.eia?.next_release_date ?? site.weekly?.next_release_date ?? null,
+  todayInNewYork(),
+);
+const eiaNext = release?.date ?? null;
 // The EIA sentence carries its date so the stale script can swap in a late
 // notice when the page is read after that day and nothing new has landed.
 const nextDaily = aaaMode ? "Daily prices update every morning." : null;
@@ -86,7 +97,7 @@ const eiaLate = aaaMode ? "EIA's next weekly numbers are running late." : "EIA's
 // The build already knows the date, so a page read with JS off doesn't promise
 // a release day that has passed. The inline script still corrects a page that
 // is served for days after the build.
-const eiaIsLate = Boolean(eiaNext && eiaNext < todayInNewYork());
+const eiaIsLate = Boolean(release?.late);
 
 // Day one after the AAA switch flips, no state has a yesterday, so the two
 // "no state went up / down" lines would contradict the national change above them.
@@ -121,13 +132,13 @@ const periodText = aaaMode
 const doeSign = !daily;
 const title = doeSign ? `${HOME_TITLE} | ${SITE_NAME}` : `Diesel prices in every state, and which way they moved | ${SITE_NAME}`;
 // Names only the places that have a price, so it never promises Alaska and
-// Hawaii while EIA doesn't survey them.
+// Hawaii while EIA doesn't survey them, then says why the rest are missing.
 const description = homeMeta({
   price: nm?.price ?? null,
   change: nm?.change ?? null,
   daily,
   priced: site.states.filter((s) => s.primary !== null).map((s) => s.code),
-});
+}) + missingNote(site);
 ---
 <Base title={title} description={description}>
   <section class="hero wrap" aria-label="U.S. average">
@@ -155,7 +166,7 @@ const description = homeMeta({
     <div class="summary">
       <p class="lead">{usSentence}</p>
       {peakLine && <p class="peak">{peakLine}</p>}
-      <!-- US_SPARKLINE -->
+      {site.weekly && <UsSparkline site={site} class="spark-slot" />}
       {dayOne && <p>This is the first day of daily state prices, so there's nothing to compare yet.</p>}
       {topRise && (
         <p>
@@ -266,6 +277,10 @@ const description = homeMeta({
   .doe {
     margin: var(--space-3) 0 0;
     max-width: 62ch;
+  }
+  /* the U.S. line sits between the peak line and the moves, with air on both sides */
+  .summary :global(.spark-slot) {
+    margin: var(--space-4) 0 var(--space-5);
   }
   @media (max-width: 899px) {
     .hero {

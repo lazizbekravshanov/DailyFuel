@@ -1,20 +1,24 @@
 ---
 // A price change: direction glyph in color, the numbers in ink.
 // "31.8¢ (+5.3%)". With a cadence the glyph follows the map bins, so a change
-// under the about the same line gets a dot.
+// under the about the same line gets a dot. Where no signed percent follows,
+// `signed` puts the sign on the cents ("+49.1¢"), so copied text still says
+// which way it moved once the glyph is gone.
 import Glyph from "./Glyph.astro";
 import { directionFor, type Cadence, type Direction } from "../lib/bins.ts";
-import { changeTenths, formatChange, formatPct, pctFrom, spokenChange } from "../lib/format.ts";
+import { changeTenths, formatChange, formatPct, formatSignedCents, pctFrom, spokenChange } from "../lib/format.ts";
 interface Props {
   change: number | null;
   pct?: number | null;
   prev?: number | null;
   cadence?: Cadence | null;
   showPct?: boolean;
+  /** Sign the cents when no percent is shown. */
+  signed?: boolean;
   empty?: string;
   class?: string;
 }
-const { change, pct = null, prev = null, cadence = null, showPct = true, empty = "No change yet", class: cls } = Astro.props;
+const { change, pct = null, prev = null, cadence = null, showPct = true, signed = false, empty = "No change yet", class: cls } = Astro.props;
 let direction: Direction = "flat";
 let text = "";
 let spoken = "";
@@ -22,7 +26,8 @@ if (change !== null) {
   const t = changeTenths(change);
   direction = cadence ? directionFor(change, cadence) : t > 0 ? "up" : t < 0 ? "down" : "flat";
   const p = pct ?? (prev ? pctFrom(change, prev) : null);
-  text = formatChange(change, showPct ? p : null);
+  const shownPct = showPct ? p : null;
+  text = signed && shownPct === null ? formatSignedCents(change) : formatChange(change, shownPct);
   const pctSpoken = showPct && p !== null ? `, ${formatPct(p).replace("−", "minus ").replace("+", "plus ")}` : "";
   spoken = `${direction === "flat" && t !== 0 ? "about the same, " : ""}${spokenChange(change)}${pctSpoken}`;
 }

@@ -10,7 +10,7 @@ import chartScript from "../../scripts/chart.js?raw";
 import { getSite, REGION_NAMES, type StateView } from "../../lib/site.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
 import { addDays, formatDate, formatMonthYear, formatShortDate, todayInNewYork, when } from "../../lib/dates.ts";
-import { changeOver, highLow, lastDays, newest, peakKind, type Point } from "../../lib/stats.ts";
+import { changeOver, highLow, lastDays, newest, peakKind } from "../../lib/stats.ts";
 import { DOE_LINE, DYED_DIESEL_NOTE, peakSentence } from "../../lib/doe.ts";
 import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText, WEEKLY_LEAD } from "../../lib/release.ts";
 import { regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence } from "../../lib/copy.ts";
@@ -72,7 +72,9 @@ if (aaaMode && s.eia_series === null) {
 // Chart
 interface ChartView {
   id: string;
-  label: string;
+  /** What and over what stretch. LineChart builds the spoken name from it with chartLabel. */
+  title: string;
+  tableNote: string;
   model: ReturnType<typeof buildChart>;
   table: { date: string; values: (number | null)[] }[];
   columns: string[];
@@ -85,15 +87,18 @@ if (aaaMode) {
   const last = newest(s.history);
   if (last) {
     const from = addDays(last.date, -89);
-    const daily = s.history.filter((p) => p.date >= from);
-    const series: ChartSeries[] = [{ id: "aaa", label: "AAA daily", kind: "primary", points: daily }];
+    // The full history goes in, so the tooltip on the first day can say its change.
+    const series: ChartSeries[] = [{ id: "aaa", label: "AAA daily", kind: "primary", points: s.history }];
     if (s.eia_series && s.eiaHistory.length) {
       series.push({ id: "eia", label: `EIA weekly, ${s.regionName}`, kind: "bench", points: s.eiaHistory, step: true });
     }
     const model = buildChart(series, { from, to: last.date, heightPx: CHART_H, xTicks: "months", maxYTicks: 6 });
     charts.push({
       id: "daily",
-      label: `Line chart of ${s.name} diesel prices for the last 90 days${series.length > 1 ? `, with EIA's weekly ${s.regionName} price` : ""}. The numbers are in the table below.`,
+      title: `${s.name} daily diesel price, last 90 days`,
+      tableNote: series.length > 1
+        ? `Every day is in the table below, with EIA's weekly ${s.regionName} price.`
+        : "Every day is in the table below.",
       model,
       table: model.hover.dates.map((d, i) => ({ date: d, values: model.hover.series.map((ser) => ser.values[i]) })).reverse(),
       columns: series.map((x) => x.label),
@@ -107,21 +112,25 @@ if (aaaMode) {
     const year = lastDays(s.history, 364);
     const all = s.history;
     const label = `EIA weekly, ${s.regionName}`;
-    const mk = (pts: Point[], xTicks: "months" | "years") =>
-      buildChart([{ id: "eia", label, kind: "primary", points: pts }], { from: pts[0].date, to: last.date, heightPx: CHART_H, xTicks, maxYTicks: 6 });
+    // Every chart gets the full history and its own start date, so the tooltip
+    // on the first week in the window can still say the change from the week before.
+    const mk = (from: string, xTicks: "months" | "years") =>
+      buildChart([{ id: "eia", label, kind: "primary", points: all }], { from, to: last.date, heightPx: CHART_H, xTicks, maxYTicks: 6 });
     charts.push({
       id: "year",
-      label: `Line chart of the ${s.regionName} weekly diesel price for the last 52 weeks. The numbers are in the table below.`,
-      model: mk(year, "months"),
+      title: `${s.regionName} weekly diesel price, last 52 weeks`,
+      tableNote: "Every week is in the table below.",
+      model: mk(year[0].date, "months"),
       table: [],
       columns: [],
       caption: "",
       weekly: true,
     });
-    const allModel = mk(all, "years");
+    const allModel = mk(all[0].date, "years");
     charts.push({
       id: "all",
-      label: `Line chart of the ${s.regionName} weekly diesel price since ${formatMonthYear(all[0].date)}. The numbers are in the table below.`,
+      title: `${s.regionName} weekly diesel price since ${formatMonthYear(all[0].date)}`,
+      tableNote: "Every week is in the table below.",
       model: allModel,
       table: all.map((p) => ({ date: p.date, values: [p.value] })).reverse(),
       columns: ["Price"],
@@ -203,7 +212,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
 ---
 <Base title={title} description={description}>
   <div class="wrap back-row">
-    <a href="/#states-title">All states</a>
+    <a href="/#every-state">All states</a>
   </div>
 
   <section class="wrap state-hero" aria-label={`${s.name} price`}>
@@ -272,7 +281,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
               <li><span class="key-line key-bench" aria-hidden="true"></span>EIA weekly, {s.regionName}</li>
             </ul>
           )}
-          <LineChart model={charts[0].model} height={CHART_H} label={charts[0].label} weekly={false} />
+          <LineChart model={charts[0].model} height={CHART_H} title={charts[0].title} tableNote={charts[0].tableNote} weekly={false} />
         </>
       ) : (
         <div class="range-switch">
@@ -283,8 +292,8 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
             <input type="radio" id="range-all" name="range" value="all" />
             <label for="range-all">Since {formatMonthYear(charts[1].model.from)}</label>
           </fieldset>
-          <LineChart class="chart-year" model={charts[0].model} height={CHART_H} label={charts[0].label} weekly />
-          <LineChart class="chart-all" model={charts[1].model} height={CHART_H} label={charts[1].label} weekly />
+          <LineChart class="chart-year" model={charts[0].model} height={CHART_H} title={charts[0].title} tableNote={charts[0].tableNote} weekly />
+          <LineChart class="chart-all" model={charts[1].model} height={CHART_H} title={charts[1].title} tableNote={charts[1].tableNote} weekly />
         </div>
       )}
       {tableChart && (
@@ -345,7 +354,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
             <li>
               <a href={p.href}>{p.name}</a>
               <span class="peer-price">{p.primary ? <Price price={p.primary.price} /> : <span class="muted">No price</span>}</span>
-              <span class="peer-change">{p.primary ? <Change change={p.primary.change} pct={p.primary.change_pct} prev={p.primary.prev} cadence={p.cadence} showPct={false} /> : <span class="muted">No price</span>}</span>
+              <span class="peer-change">{p.primary ? <Change change={p.primary.change} pct={p.primary.change_pct} prev={p.primary.prev} cadence={p.cadence} showPct={false} signed /> : <span class="muted">No price</span>}</span>
             </li>
           ))}
         </ul>
@@ -370,7 +379,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
                       {g.move && <span class="peer-price"><Price price={g.move.price} /></span>}
                       {g.move && (
                         <span class="peer-change">
-                          <Change change={g.move.change} pct={g.move.change_pct} prev={g.move.prev} cadence={s.cadence} showPct={false} />
+                          <Change change={g.move.change} pct={g.move.change_pct} prev={g.move.prev} cadence={s.cadence} showPct={false} signed />
                         </span>
                       )}
                     </div>

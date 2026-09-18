@@ -173,33 +173,18 @@ export function stateDescription(s: StateView, site: SiteData): string {
   return lead + (aaa ? " Daily average from AAA." : doeTail(s, site));
 }
 
-/** "all 50 states and DC", or "48 states and DC" when some have no price. */
-function coverage(site: SiteData): string {
-  const priced = site.states.filter((s) => s.primary);
-  return priced.length === site.states.length ? "all 50 states and DC" : countPlaces(priced, false);
-}
-
-/** Why the missing states are missing, so the home meta never claims them. */
-function missingNote(site: SiteData): string {
+/**
+ * Why the missing states are missing, so the home meta never claims them:
+ * " EIA doesn't survey Alaska or Hawaii." Empty when every state has a price.
+ * The home page puts it after homeMeta, which counts the places that do.
+ */
+export function missingNote(site: SiteData): string {
   const missing = site.states.filter((s) => !s.primary);
   if (!missing.length) return "";
   if (missing.length > 3) return " Some states have no price right now.";
   const names = joinOr(missing.map(shortName));
   const unsurveyed = site.mode === "eia_only" && missing.every((s) => s.eia_series === null);
   return unsurveyed ? ` EIA doesn't survey ${names}.` : ` There's no price for ${names} right now.`;
-}
-
-export function homeDescription(site: SiteData): string {
-  const m = site.national.move;
-  const where = `${coverage(site)}.${missingNote(site)}`;
-  if (!m) return `The latest diesel price and change for ${where}`;
-  const p = formatPrice(m.price);
-  if (site.national.cadence === "daily") {
-    const c = m.change === null ? "" : `, ${spokenChange(m.change).replace(" cents", "¢")} since yesterday`;
-    return `U.S. diesel is ${p} a gallon today${c}. See today's price and change for ${where}`;
-  }
-  const c = m.change === null ? "" : `, ${spokenChange(m.change).replace(" cents", "¢")} this week`;
-  return `U.S. diesel is ${p} a gallon${c}. See the weekly price and change for ${where}`;
 }
 
 export { changeVerb, formatDate, formatShortDate, formatWeekdayDate };

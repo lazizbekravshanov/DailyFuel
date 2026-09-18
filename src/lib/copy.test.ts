@@ -3,8 +3,9 @@ import statesFile from "../data/states.json";
 import type { BenchmarkKey, Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 import {
-  countPlaces, homeDescription, regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence,
+  countPlaces, missingNote, regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence,
 } from "./copy.ts";
+import { homeMeta } from "../components/home/home.ts";
 
 const REGION: Record<BenchmarkKey, string> = {
   R1X: "New England",
@@ -141,20 +142,38 @@ describe("state page sentences", () => {
 });
 
 describe("home meta description", () => {
+  // The home page builds its meta the same way: homeMeta counts the places
+  // with a price, missingNote says why the rest are missing.
+  const meta = (x: SiteData) =>
+    homeMeta({
+      price: x.national.move?.price ?? null,
+      change: x.national.move?.change ?? null,
+      daily: false,
+      priced: x.states.filter((s) => s.primary).map((s) => s.code),
+    }) + missingNote(x);
+
   it("never claims Alaska and Hawaii in EIA mode", () => {
-    expect(homeDescription(S)).toBe(
-      "U.S. diesel is $6.285 a gallon, up 31.8¢ this week. See the weekly price and change for 48 states and DC. EIA doesn't survey Alaska or Hawaii.",
+    expect(missingNote(S)).toBe(" EIA doesn't survey Alaska or Hawaii.");
+    expect(meta(S)).toBe(
+      "U.S. diesel is $6.285 a gallon, up 31.8¢ this week. See the DOE weekly price and change for 48 states and DC. EIA doesn't survey Alaska or Hawaii.",
     );
+    expect(meta(S).length).toBeLessThanOrEqual(160);
   });
 
   it("says all 50 states and DC when every one has a price", () => {
     const all = site();
     for (const s of all.states) if (!s.primary) (s as { primary: Move | null }).primary = move(6, 0.1);
-    expect(homeDescription(all)).toMatch(/for all 50 states and DC\.$/);
+    expect(missingNote(all)).toBe("");
+    expect(meta(all)).toMatch(/for all 50 states and DC\.$/);
   });
 
   it("stays general when a whole region is missing", () => {
     const gap = site({ priced: (c) => !["OH", "IN", "IA", "KS"].includes(c) });
-    expect(homeDescription(gap)).toMatch(/for 44 states and DC\. Some states have no price right now\.$/);
+    expect(meta(gap)).toMatch(/for 44 states and DC\. Some states have no price right now\.$/);
+  });
+
+  it("names a surveyed state with no price as missing, not unsurveyed", () => {
+    const one = site({ priced: (c) => c !== "OH" });
+    expect(missingNote(one)).toBe(" There's no price for Alaska, Hawaii or Ohio right now.");
   });
 });

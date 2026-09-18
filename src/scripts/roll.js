@@ -1,9 +1,10 @@
 // Hero price roll: each digit spins up into place once, under 600 ms.
-// Skipped when the reader prefers reduced motion. Without JS the price is plain text.
+// Skipped when the reader prefers reduced motion, and in forced colors, where the
+// hidden digit under the reel would paint black. Without JS the price is plain text.
 (function () {
   var root = document.querySelector("[data-roll]");
   if (!root || !window.matchMedia || !Element.prototype.animate) return;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(forced-colors: active)").matches) return;
   var digits = root.querySelectorAll(".dg");
   digits.forEach(function (dg, i) {
     var target = Number(dg.textContent);

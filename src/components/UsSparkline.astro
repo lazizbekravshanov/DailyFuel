@@ -17,6 +17,8 @@ interface Props {
   class?: string;
 }
 const { site, height = 64, class: cls } = Astro.props;
+// With AAA on, the sign beside this is AAA's daily number, so the line names EIA.
+const eiaNamed = site.mode === "aaa+eia";
 const all = weeklySeries(site.weekly, "NUS");
 const v = present(all);
 const first = v[0];
@@ -36,9 +38,9 @@ const model = v.length > 1
     })
   : null;
 const start = first ? formatMonthYear(first.date) : "";
-const caption = `U.S. average since ${start}`;
-const peak = model ? peakSentence(peakKind(all), "U.S.") : null;
-const label = model ? `${chartLabel({ name: `U.S. weekly diesel price since ${start}`, points: all, weekly: true })}${peak ? ` ${peak}` : ""}` : "";
+const caption = `${eiaNamed ? "EIA weekly U.S. average" : "U.S. average"} since ${start}`;
+const peak = model ? peakSentence(peakKind(all), eiaNamed ? "EIA weekly U.S." : "U.S.") : null;
+const label = model ? `${chartLabel({ name: `${eiaNamed ? "EIA weekly U.S." : "U.S. weekly"} diesel price since ${start}`, points: all, weekly: true })}${peak ? ` ${peak}` : ""}` : "";
 const svg = model
   ? linesSvg({
       from: model.from,

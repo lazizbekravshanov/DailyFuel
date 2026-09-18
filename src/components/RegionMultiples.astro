@@ -62,7 +62,7 @@ const lastDate = tableWeeks[0];
       {c.r.move ? (
         <p class="now">
           <Price price={c.r.move.price} class="now-price" />
-          <Change change={c.r.move.change} pct={c.r.move.change_pct} cadence="weekly" showPct={false} />
+          <Change change={c.r.move.change} pct={c.r.move.change_pct} cadence="weekly" showPct={false} signed />
         </p>
       ) : (
         <p class="now muted">No price this week</p>

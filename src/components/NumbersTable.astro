@@ -79,10 +79,7 @@ const changes = rows.map((row, i) => {
 </details>
 
 <style is:global>
-  /* never taller than most of the screen, so the page can still scroll past it */
-  .numbers .table-tall {
-    max-height: min(440px, 70vh);
-  }
+  /* .table-tall in global.css keeps it shorter than most of the screen */
   .numbers .chg {
     padding-left: var(--space-4);
   }
