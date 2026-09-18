@@ -5,12 +5,36 @@ import { formatPrice } from "../lib/format.ts";
 
 const site = getSite();
 const states = [...site.states].sort((a, b) => a.name.localeCompare(b.name));
+// Every way someone might type a state, squeezed to letters only, pointing at
+// its code: "oh", "ohio", "newyork", "districtofcolumbia".
+const squeeze = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
+const lookup: Record<string, string> = {};
+for (const s of site.states) {
+  lookup[s.slug] = s.slug;
+  lookup[squeeze(s.name)] = s.slug;
+}
+// A mistyped state link, like /state/OH/, /state/Ohio or /state/new-york/,
+// goes straight to the right page. Static redirects can't lowercase a path,
+// so this runs here, before the page paints. Anything else stays on this page.
+const redirect = `(function(){try{
+var m=${JSON.stringify(lookup)};
+var p=decodeURIComponent(location.pathname).toLowerCase();
+var r=/^\\/(?:state|states)\\/([^/]+)\\/?$/.exec(p)||/^\\/([^/]+)\\/?$/.exec(p);
+if(!r)return;
+var k=r[1].replace(/\\.html?$/,"").replace(/[^a-z]/g,"");
+var c=m[k];
+if(!c||(k.length===2&&!/^\\/states?\\//.test(p)))return;
+var t="/state/"+c+"/";
+if(t!==location.pathname)location.replace(t+location.hash);
+}catch(e){}})();`;
 ---
 <Base
   title="Page not found | DailyFuel"
   description={`That page isn't here.${site.national.move ? ` U.S. diesel averages ${formatPrice(site.national.move.price)} a gallon.` : ""} Find any state's price from the home page.`}
   noindex
+  skipLabel="Skip to main content"
 >
+  <script slot="head" is:inline set:html={redirect}></script>
   <div class="wrap missing">
     <h1>That page isn't here</h1>
     <p>The link may be old or mistyped. State pages use the two letter code, like /state/oh/ for Ohio.</p>

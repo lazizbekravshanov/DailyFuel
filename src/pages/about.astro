@@ -1,8 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
-import { getSite, REPO_URL } from "../lib/site.ts";
+import { CONTACT_EMAIL, getSite, REPO_URL } from "../lib/site.ts";
 import { formatBadgeDate, formatDate, formatMonthYear } from "../lib/dates.ts";
 import { formatPrice } from "../lib/format.ts";
+import { DOE_LINE, DYED_DIESEL_NOTE } from "../lib/doe.ts";
 import { inSentence, newestRate, spokenCpg } from "../lib/tax.ts";
 
 const site = getSite();
@@ -15,6 +16,9 @@ const noTaxFigure = tax
   : [];
 const staleTax = tax ? site.states.filter((s) => s.tax?.outOfDate).map((s) => inSentence(s.name)) : [];
 const newestTax = tax ? newestRate(tax) : null;
+/** "Utah", "Minnesota and Utah", "Maine, Minnesota and Utah". */
+const inWords = (items: string[]) =>
+  items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
 const release = site.latest.eia?.release_date ?? site.weekly?.release_date ?? null;
 const first = site.weekly?.weeks[0]?.period ?? null;
 const us = site.national.move;
@@ -23,7 +27,7 @@ const description = aaaMode
   ? `Where DailyFuel's diesel prices come from: AAA daily state averages and EIA weekly prices.${usText}`
   : `Where DailyFuel's diesel prices come from: EIA's weekly survey of diesel stations.${usText}`;
 ---
-<Base title="Where the numbers come from | DailyFuel" description={description}>
+<Base title="Where the numbers come from | DailyFuel" description={description} skipLabel="Skip to main content">
   <article class="wrap about">
     <h1>Where the numbers come from</h1>
 
@@ -31,7 +35,7 @@ const description = aaaMode
       <h2 id="weekly">Weekly prices from EIA</h2>
       <p>
         The U.S. Energy Information Administration surveys diesel stations every Monday morning and posts the averages on
-        Tuesday, or Wednesday after a Monday holiday. It's the government's official weekly number.
+        Tuesday, or Wednesday after a Monday holiday. {DOE_LINE}
       </p>
       <p>
         EIA doesn't publish a diesel price for single states, except California. It reports regions instead, so every state
@@ -44,8 +48,25 @@ const description = aaaMode
       {first && <p>Charts go back to {formatMonthYear(first)}, when EIA changed how it collects the numbers.</p>}
     </section>
 
+    <section aria-labelledby="not">
+      <h2 id="not">What this number is not</h2>
+      <ul class="plain-list">
+        <li>
+          <strong>Not the price at one pump.</strong> It's an average of many stations, so the one down the road can be
+          higher or lower.
+        </li>
+        <li>
+          <strong>Not a price before tax.</strong> Federal and state taxes are in it. {DYED_DIESEL_NOTE}
+        </li>
+        <li>
+          <strong>Not your fleet card price.</strong> Card discounts and cost plus deals work off their own numbers, so what
+          you pay will differ.
+        </li>
+      </ul>
+    </section>
+
     <section aria-labelledby="daily">
-      <h2 id="daily">Daily prices for each state</h2>
+      <h2 id="daily">Daily prices</h2>
       {aaaMode ? (
         <>
           <p>
@@ -57,7 +78,10 @@ const description = aaaMode
           </p>
         </>
       ) : (
-        <p>Daily prices for each state are on the way.</p>
+        <p>
+          EIA's number comes out once a week. If you need something fresher, each state page links to AAA's daily average
+          for that state.
+        </p>
       )}
     </section>
 
@@ -82,13 +106,13 @@ const description = aaaMode
         <p>{tax.scope}</p>
         {noTaxFigure.length > 0 && (
           <p>
-            FHWA's table has no diesel rate for {noTaxFigure.join(", ")}, so that page shows only the federal rate. That
+            FHWA's table has no diesel rate for {inWords(noTaxFigure)}, so {noTaxFigure.length === 1 ? "that page shows" : "those pages show"} only the federal rate. That
             doesn't mean there's no tax on diesel there.
           </p>
         )}
         {staleTax.length > 0 && (
           <p>
-            FHWA's rate for {staleTax.join(", ")} is known to be out of date, so {staleTax.length === 1 ? "that page says so and it isn't" : "those pages say so and they aren't"} ranked.
+            {staleTax.length === 1 ? "FHWA's rate" : "FHWA's rates"} for {inWords(staleTax)} {staleTax.length === 1 ? "is" : "are"} known to be out of date, so {staleTax.length === 1 ? "that page says so and it isn't" : "those pages say so and they aren't"} ranked.
           </p>
         )}
       </section>
@@ -102,6 +126,21 @@ const description = aaaMode
           : "The site checks for new numbers three times a day. EIA's weekly prices change on Tuesdays."}
         {" "}If prices look older than usual, a note at the top of the page says so.
       </p>
+    </section>
+
+    <section aria-labelledby="contact">
+      <h2 id="contact">Spot a wrong number?</h2>
+      {CONTACT_EMAIL ? (
+        <p>
+          Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. Say which page and what looks off, and we'll check it
+          against the source.
+        </p>
+      ) : (
+        <p>
+          Tell us on <a href={`${REPO_URL}/issues/new`}>GitHub</a>. Say which page and what looks off, and we'll check it
+          against the source.
+        </p>
+      )}
     </section>
 
     <section aria-labelledby="credits">
@@ -126,23 +165,24 @@ const description = aaaMode
       <p>
         Map: us-atlas © 2013 to 2019 Michael Bostock (ISC license), from U.S. Census Bureau boundaries.
       </p>
-      <p class="license small muted">
-        Copyright 2013 to 2019 Michael Bostock. Permission to use, copy, modify, and/or distribute this software for any
-        purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice
-        appear in all copies. THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-        SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-        ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
-        PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH
-        THE USE OR PERFORMANCE OF THIS SOFTWARE.
-      </p>
+      <details class="disclosure">
+        <summary>Full map license</summary>
+        <p class="license small muted">
+          Copyright 2013 to 2019 Michael Bostock. Permission to use, copy, modify, and/or distribute this software for any
+          purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice
+          appear in all copies. THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+          SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+          ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+          PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH
+          THE USE OR PERFORMANCE OF THIS SOFTWARE.
+        </p>
+      </details>
       <p>
         Type: Overpass by The Overpass Project Authors, copyright 2021, under the{" "}
-        <a href="https://openfontlicense.org/">SIL Open Font License 1.1</a>.
+        <a href="https://openfontlicense.org/">SIL Open Font License 1.1</a>. The share images use the same font, from the{" "}
+        <a href="https://github.com/RedHatOfficial/Overpass">Overpass project</a>.
       </p>
-      <p>
-        DailyFuel is free and has no ads, no tracking and no accounts. The code is MIT licensed and{" "}
-        <a href={REPO_URL}>lives on GitHub</a>.
-      </p>
+      <p>DailyFuel's own code is MIT licensed.</p>
     </section>
   </article>
 </Base>
@@ -156,14 +196,35 @@ const description = aaaMode
     max-width: 20ch;
   }
   .about section {
-    max-width: 68ch;
     padding-top: var(--space-5);
     margin-top: var(--space-5);
     border-top: 1px solid var(--hairline);
   }
+  /* about 70 characters a line in Overpass at 17px */
+  .about p,
+  .about li {
+    max-width: 32em;
+  }
   .about h2 {
     font-size: var(--fs-h3);
     margin-bottom: var(--space-3);
+  }
+  .plain-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .plain-list li {
+    margin-bottom: var(--space-3);
+  }
+  .plain-list strong {
+    font-weight: 700;
+  }
+  .disclosure {
+    margin: 0 0 var(--space-3);
+  }
+  .disclosure .license {
+    margin-top: var(--space-2);
   }
   .license {
     font-size: 13px;

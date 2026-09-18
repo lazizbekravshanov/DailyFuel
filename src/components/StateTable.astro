@@ -3,6 +3,8 @@
 import Change from "./Change.astro";
 import Price from "./Price.astro";
 import { changeOver } from "../lib/stats.ts";
+import { formatPct } from "../lib/format.ts";
+import { pctOf } from "../lib/copy.ts";
 import { formatCpg, spokenCpg } from "../lib/tax.ts";
 import type { SiteData } from "../lib/site.ts";
 interface Props {
@@ -16,61 +18,70 @@ const rows = [...site.states]
   .sort((a, b) => a.name.localeCompare(b.name))
   .map((s) => {
     const year = aaaMode ? null : changeOver(s.eiaHistory, 364, 0);
-    return { s, year };
+    const pct = s.primary ? pctOf(s.primary) : null;
+    // Where the price in the row comes from, the way a driver would say it.
+    const from = aaaMode ? "AAA daily" : s.regionName ? `EIA ${s.regionName}` : null;
+    return { s, year, pct, from };
   });
 const lastCol = aaaMode ? "EIA weekly" : "52 week change";
-// Six columns is one too many on a phone, so one drops out under 640px.
-// In AAA mode that's Source, which says "AAA" on all 51 rows. In EIA only mode
-// Source is the reason two states show the same price, so the 52 week change
-// goes instead. Both numbers are still on the state page.
-const phoneHide = aaaMode ? "source" : "last";
+const note = aaaMode
+  ? "Daily AAA price and change for every state, with EIA's weekly region price."
+  : "EIA weekly price and change for every state. States in the same region share a price.";
+const taxNote = showTax
+  ? ` Tax is each state's own diesel tax from FHWA's ${taxYear} table, in cents a gallon, without the federal ${formatCpg(site.tax!.federal_cpg)} everyone pays.`
+  : "";
+// Six columns don't fit a phone. Under 640px the table keeps State, Price and
+// Change (cents only), which fit a 343px screen with no sideways scroll. Price
+// from, tax and the last column are all on each state page.
+// The spoken percent matches what Change says when it shows the percent itself.
+const spokenPct = (p: number) => formatPct(p).replace("−", "minus ").replace("+", "plus ");
 ---
+{/* The explanation sits outside the scroll box, so a phone never cuts it off.
+    The id is where /state and /states land. */}
+<p class="table-note" id="every-state">{note}{taxNote && <span class="phone-hide">{taxNote}</span>}</p>
 <div class="table-scroll state-table" tabindex="0" role="region" aria-labelledby="table-caption">
   <table class="data" data-sortable data-status="table-status">
-    <caption id="table-caption">
-      {/* The caption is as wide as the table, which on a phone is wider than
-          the box it scrolls in. The inner block keeps the words to the part
-          you can see. */}
-      <span class="caption-text">
-        {aaaMode
-          ? "Daily AAA price and change for every state, with EIA's weekly region price."
-          : "EIA weekly price and change for every state. States in the same region share a price."}
-        {showTax ? ` Tax is each state's own diesel tax from FHWA's ${taxYear} table, in cents a gallon, without the federal ${formatCpg(site.tax!.federal_cpg)} everyone pays.` : ""}
-      </span>
-    </caption>
+    <caption id="table-caption" class="sr-only">Diesel price and change by state</caption>
     <thead>
       <tr>
         <th scope="col" data-sort-type="text" aria-sort="ascending">State</th>
         <th scope="col" class="r" data-sort-type="number" data-sort-first="descending">Price</th>
         <th scope="col" data-sort-type="number" data-sort-first="descending">Change</th>
-        <th scope="col" class:list={[phoneHide === "source" && "phone-hide"]} data-sort-type="text">Source</th>
-        {showTax && <th scope="col" class="r tax-head" data-sort-type="number" data-sort-first="descending">{taxYear} tax</th>}
-        <th scope="col" class:list={[aaaMode && "r", phoneHide === "last" && "phone-hide"]} data-sort-type="number" data-sort-first="descending">{lastCol}</th>
+        <th scope="col" class="phone-hide" data-sort-type="text">Price from</th>
+        {showTax && <th scope="col" class="r tax-head phone-hide" data-sort-type="number" data-sort-first="descending">{taxYear} tax</th>}
+        <th scope="col" class:list={["phone-hide", aaaMode && "r"]} data-sort-type="number" data-sort-first="descending">{lastCol}</th>
       </tr>
     </thead>
     <tbody>
-      {rows.map(({ s, year }) => (
+      {rows.map(({ s, year, pct, from }) => (
         <tr>
           <th scope="row" data-sort={s.name}><a href={s.href}>{s.name}</a></th>
           <td class="r" data-sort={s.primary ? String(s.primary.price) : ""}>
             {s.primary ? <Price price={s.primary.price} /> : <span class="muted">No survey</span>}
           </td>
-          {/* One phrase for the absence in the data cells. The Source cell
-              carries the reason, so the row scans as a single statement. */}
+          {/* One phrase for the absence in the data cells. The Price from cell
+              carries the reason, so the row scans as a single statement.
+              On a phone the percent steps out so the row fits without a
+              sideways scroll; screen readers still hear it. */}
           <td data-sort={s.primary?.change ?? ""}>
             {s.primary ? (
-              <Change change={s.primary.change} pct={s.primary.change_pct} prev={s.primary.prev} cadence={s.cadence} empty="No change yet" />
+              <>
+                <Change change={s.primary.change} showPct={false} cadence={s.cadence} empty="No change yet" />
+                {s.primary.change !== null && pct !== null && (
+                  <span class="pct"><span class="sr-only">, {spokenPct(pct)}</span><span class="pct-text" aria-hidden="true"> ({formatPct(pct)})</span></span>
+                )}
+              </>
             ) : (
               <span class="muted">No survey</span>
             )}
           </td>
-          <td class:list={[phoneHide === "source" && "phone-hide"]} data-sort={aaaMode ? "AAA" : (s.regionName ?? "")}>
-            {aaaMode ? "AAA" : (s.regionName ?? <span class="muted">EIA doesn't survey {s.name}</span>)}
+          <td class="phone-hide" data-sort={from ?? ""}>
+            {from ?? <span class="muted">EIA doesn't survey {s.name}</span>}
           </td>
           {/* Tax is not a price we measured, so it keeps plain cents styling
               and never borrows the raised tenth the pump prices wear. */}
           {showTax && (
-            <td class="r tax-cell" data-sort={s.tax && !s.tax.outOfDate ? (s.tax.state ?? "") : ""}>
+            <td class="r tax-cell phone-hide" data-sort={s.tax && !s.tax.outOfDate ? (s.tax.state ?? "") : ""}>
               {s.tax?.outOfDate ? (
                 <span class="muted">Out of date</span>
               ) : s.tax?.state != null ? (
@@ -84,11 +95,11 @@ const phoneHide = aaaMode ? "source" : "last";
             </td>
           )}
           {aaaMode ? (
-            <td class:list={["r", phoneHide === "last" && "phone-hide"]} data-sort={s.eia ? String(s.eia.price) : ""}>
+            <td class="r phone-hide" data-sort={s.eia ? String(s.eia.price) : ""}>
               {s.eia ? <Price price={s.eia.price} /> : <span class="muted">Not surveyed</span>}
             </td>
           ) : (
-            <td class:list={[phoneHide === "last" && "phone-hide"]} data-sort={year ? String(year.change) : ""}>
+            <td class="phone-hide" data-sort={year ? String(year.change) : ""}>
               {year ? <Change change={year.change} pct={year.pct} /> : <span class="muted">{s.eia_series ? "Not enough history" : "No survey"}</span>}
             </td>
           )}
@@ -100,16 +111,35 @@ const phoneHide = aaaMode ? "source" : "last";
 <p id="table-status" class="sr-only" aria-live="polite"></p>
 
 <style is:global>
+  /* The note reads as the section's subtitle, the same as the other sections.
+     Where :has() isn't supported the gap above it is just a little wider. */
+  .section-head:has(+ .table-note) {
+    margin-bottom: 0;
+  }
+  .table-note {
+    margin: var(--space-2) 0 var(--space-5);
+    color: var(--ink-2);
+    /* lands /state and /states with the section title still in view */
+    scroll-margin-top: calc(var(--fs-h2) * 1.15 + var(--space-2) + var(--space-5));
+  }
   .state-table {
     border-top: 0;
   }
   .state-table table {
     font-size: 16px;
   }
-  .state-table tbody th {
+  .state-table tbody th[scope="row"] {
     font-weight: 600;
+    /* the link below carries the row's height, so the whole cell is the target */
+    padding-top: 0;
+    padding-bottom: 0;
   }
-  .state-table tbody th a {
+  /* inline-block, not block, so copying a row still pastes as one line */
+  .state-table tbody th[scope="row"] a {
+    display: inline-block;
+    min-width: 100%;
+    min-height: 44px;
+    padding: 10px 0 8px;
     text-decoration-color: var(--hairline-strong);
   }
   .state-table tbody tr:hover {
@@ -160,22 +190,15 @@ const phoneHide = aaaMode ? "source" : "last";
   .state-table th[aria-sort="descending"] .sort-down {
     fill: var(--ink);
   }
-  /* the scroll box is the page width less its gutters, so the caption words
-     stay inside it even when the table under them is wider */
-  .state-table caption .caption-text {
-    display: block;
-    white-space: normal;
-    max-width: calc(100vw - 2 * var(--gutter));
-    /* and they stay in view while the table scrolls sideways under them */
-    position: sticky;
-    left: 0;
-  }
   @media (max-width: 639px) {
-    /* one column steps out of the way on a phone rather than stretching the
-       row into a long sideways scroll */
-    .state-table .phone-hide {
+    /* State, Price and Change fit a phone with no sideways scroll. The note
+       above says why states share a price. */
+    .state-table .phone-hide,
+    .state-table .pct-text,
+    .table-note .phone-hide {
       display: none;
     }
+    /* on the narrowest phones the name column stays put if the row scrolls */
     .state-table tbody th,
     .state-table thead th:first-child {
       position: sticky;
@@ -184,9 +207,23 @@ const phoneHide = aaaMode ? "source" : "last";
       background: var(--paper);
       box-shadow: 1px 0 0 var(--hairline);
     }
-    .state-table th,
-    .state-table td {
+    .state-table .data th,
+    .state-table .data td {
       padding-left: 8px;
+      padding-right: 8px;
+    }
+    .state-table .data th[data-sort-type] {
+      padding-right: 4px;
+    }
+    /* On the narrowest phones a long name or "No survey" takes two lines
+       rather than pushing Change off the screen. Where there's room, as on a
+       375px phone, nothing wraps. */
+    .state-table .data td .muted,
+    .state-table .data tbody th[scope="row"] {
+      white-space: normal;
+    }
+    .state-table tr > :nth-child(3) {
+      padding-left: 12px;
     }
   }
 </style>
