@@ -1,10 +1,10 @@
 ---
 import Base from "../layouts/Base.astro";
+import FindYourState from "../components/FindYourState.astro";
 import { getSite } from "../lib/site.ts";
 import { formatPrice } from "../lib/format.ts";
 
 const site = getSite();
-const states = [...site.states].sort((a, b) => a.name.localeCompare(b.name));
 // Every way someone might type a state, squeezed to letters only, pointing at
 // its code: "oh", "ohio", "newyork", "districtofcolumbia".
 const squeeze = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
@@ -39,10 +39,10 @@ if(t!==location.pathname)location.replace(t+location.hash);
     <h1>That page isn't here</h1>
     <p>The link may be old or mistyped. State pages use the two letter code, like /state/oh/ for Ohio.</p>
     <p><a href="/#every-state">See diesel prices for every state</a></p>
-    <h2>Jump to a state</h2>
-    <ul class="state-list">
-      {states.map((s) => <li><a href={s.href}>{s.name}</a></li>)}
-    </ul>
+    {/* the same list as the home page's Find your state, open from the start */}
+    <div class="jump">
+      <FindYourState open />
+    </div>
   </div>
 </Base>
 
@@ -53,19 +53,8 @@ if(t!==location.pathname)location.replace(t+location.hash);
   h1 {
     margin-bottom: var(--space-4);
   }
-  h2 {
-    font-size: var(--fs-h3);
-    margin: var(--space-6) 0 var(--space-3);
-  }
-  .state-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    columns: 4 140px;
-    column-gap: var(--space-5);
-  }
-  .state-list li {
-    padding: 3px 0;
-    break-inside: avoid;
+  .jump {
+    max-width: 760px;
+    margin-top: var(--space-6);
   }
 </style>

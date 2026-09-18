@@ -4,6 +4,7 @@
 // This is a separate fact from the prices DailyFuel measures, so it never
 // borrows the pump price styling: no sign green, no raised tenth of a cent,
 // hairline rules instead of the solid ink rules the price stats use.
+import Icon from "./Icon.astro";
 import { formatCpg, rankLabel, rankedNote, sinceLabel, spokenCpg, spokenRank, taxVintage } from "../lib/tax.ts";
 import type { SiteData, StateView } from "../lib/site.ts";
 
@@ -22,7 +23,7 @@ const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
 ---
 <section class="section wrap tax" aria-labelledby="tax-title">
   <div class="section-head">
-    <h2 id="tax-title">Tax on every gallon</h2>
+    <h2 id="tax-title"><Icon name="state-tax" size={24} class="head-mark" />Tax on every gallon</h2>
     <p>Tax is part of what you pay at the pump. These rates come from a yearly federal table, not from the price survey.</p>
   </div>
 
@@ -69,6 +70,9 @@ const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
 </section>
 
 <style>
+  .section-head :global(.head-mark) {
+    margin-right: 10px;
+  }
   .tax-stats {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));

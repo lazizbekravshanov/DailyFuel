@@ -1,0 +1,160 @@
+---
+// "Find your state": every state in one tap target list, inside a plain
+// <details>, so it opens and closes with JS off. On the home page it's the
+// your state row until a state is saved. The 404 page shows it open.
+import Icon from "./Icon.astro";
+import { getSite } from "../lib/site.ts";
+interface Props {
+  open?: boolean;
+}
+const { open = false } = Astro.props;
+const states = [...getSite().states].sort((a, b) => a.name.localeCompare(b.name));
+---
+<details class="find" id="find-your-state" open={open}>
+  <summary>
+    <Icon name="find-a-state" size={22} class="find-mark" />
+    <span class="find-words">
+      <span class="find-title">Find your state</span>
+      <span class="find-sub">Pick once and it stays on this phone</span>
+    </span>
+    <span class="chevron" aria-hidden="true"></span>
+  </summary>
+  <ul class="find-list" data-ys-list tabindex="-1" aria-label="All states">
+    {states.map((s) => (
+      <li><a href={s.href}><span class="code" aria-hidden="true">{s.code}</span><span class="name">{s.name}</span></a></li>
+    ))}
+  </ul>
+</details>
+
+<style>
+  .find {
+    --find-line: var(--sign);
+    border: 2px dashed var(--find-line);
+    border-radius: 10px;
+    /* where /#find-your-state lands, with a little air above */
+    scroll-margin-top: var(--space-4);
+  }
+  @media (prefers-color-scheme: dark) {
+    .find {
+      /* guide sign green is too dark to see as a line on dark paper */
+      --find-line: #4f9f78;
+    }
+  }
+  .find[hidden] {
+    display: none;
+  }
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* 60 plus the 2px dashed border top and bottom: the same 64px the saved
+       row takes, so nothing below moves when a saved state fills the row */
+    min-height: 60px;
+    padding: 0 14px;
+    cursor: pointer;
+    list-style: none;
+    border-radius: 8px;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary :global(.find-mark) {
+    color: var(--ink-2);
+  }
+  .find-words {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+    line-height: 1.25;
+  }
+  .find-title {
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .find-sub {
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .chevron {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    margin: 0 4px 4px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 120ms ease-out;
+  }
+  .find[open] .chevron {
+    transform: translateY(4px) rotate(225deg);
+  }
+  .find-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-4);
+    margin: 0;
+    padding: 4px 14px 10px;
+    list-style: none;
+    border-top: 1px solid var(--hairline);
+  }
+  @media (min-width: 640px) {
+    .find-list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .find-list:focus-visible {
+    outline-offset: -3px;
+  }
+  .find-list li {
+    border-bottom: 1px solid var(--hairline);
+    min-width: 0;
+  }
+  .find-list a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 4px 0;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+  }
+  .find-list a:hover .name {
+    text-decoration: underline;
+  }
+  .name {
+    min-width: 0;
+    hyphens: auto;
+  }
+  /* two columns on a phone: a little tighter so Massachusetts fits at 375 */
+  @media (max-width: 639px) {
+    .find-list {
+      column-gap: 12px;
+      padding-inline: 12px;
+    }
+    .find-list a {
+      gap: 8px;
+      font-size: 16px;
+    }
+  }
+  .code {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    min-width: 30px;
+    height: 20px;
+    padding: 1px 4px 0;
+    border-radius: 4px;
+    background: var(--sign);
+    color: var(--sign-ink);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+  }
+  @media (forced-colors: active) {
+    .code {
+      border: 1px solid CanvasText;
+    }
+  }
+</style>

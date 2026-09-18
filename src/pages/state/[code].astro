@@ -6,6 +6,7 @@ import Change from "../../components/Change.astro";
 import LineChart from "../../components/LineChart.astro";
 import NumbersTable from "../../components/NumbersTable.astro";
 import TaxPanel from "../../components/TaxPanel.astro";
+import Icon from "../../components/Icon.astro";
 import chartScript from "../../scripts/chart.js?raw";
 import { getSite, REGION_NAMES, type StateView } from "../../lib/site.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
@@ -14,6 +15,9 @@ import { changeOver, highLow, lastDays, newest, peakKind } from "../../lib/stats
 import { DOE_LINE, DYED_DIESEL_NOTE, peakSentence } from "../../lib/doe.ts";
 import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText, WEEKLY_LEAD } from "../../lib/release.ts";
 import { regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence } from "../../lib/copy.ts";
+import { regionPlate } from "../../lib/yourstate.ts";
+import { saveState } from "../../scripts/your-state.ts";
+import { inlineCall } from "../../lib/inline.ts";
 import type { Move } from "../../lib/data.ts";
 
 export function getStaticPaths() {
@@ -209,10 +213,14 @@ const title = noSurvey ? `${s.name} diesel prices | DailyFuel` : `${s.name} dies
 const legend = noSurvey ? `Diesel in ${s.name}` : `${s.name} diesel average`;
 const description = stateDescription(s, site);
 const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
+// "EIA Midwest average, 15 states" under the price, only while the price is shared.
+const plate = regionPlate(s, site);
+// Viewing a state page makes it the home page's "your state". Only the code is stored.
+const save = inlineCall(saveState, JSON.stringify(s.code));
 ---
 <Base title={title} description={description}>
   <div class="wrap back-row">
-    <a href="/#every-state">All states</a>
+    <a href="/#find-your-state">All states</a>
   </div>
 
   <section class="wrap state-hero" aria-label={`${s.name} price`}>
@@ -228,18 +236,19 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
         dateLine={dateLine}
         compareLine={compareLine}
         shield={s.code}
+        plate={plate}
         note={Boolean(aaaMode && s.eia && latest.eia)}
       >
         {aaaMode && s.eia && latest.eia && (
-          <p slot="note">EIA weekly {s.regionName} price: <Price price={s.eia.price} /> for the week of {formatShortDate(latest.eia.period)}</p>
+          <p slot="note"><Icon name="region" size={17} class="note-mark" />EIA weekly {s.regionName} price: <Price price={s.eia.price} /> for the week of {formatShortDate(latest.eia.period)}</p>
         )}
       </Sign>
       {release && (
         <p class="cadence">
-          {WEEKLY_LEAD} <span data-next-release={release.date} data-late={LATE_TEXT}>{release.late ? LATE_TEXT : nextUpdateText(release.date)}</span>
+          <Icon name="next-update" size={15} class="cadence-mark" />{WEEKLY_LEAD} <span data-next-release={release.date} data-late={LATE_TEXT}>{release.late ? LATE_TEXT : nextUpdateText(release.date)}</span>
         </p>
       )}
-      {dailyLine && <p class="cadence">{dailyLine}</p>}
+      {dailyLine && <p class="cadence"><Icon name="next-update" size={15} class="cadence-mark" />{dailyLine}</p>}
     </div>
     <div class="explain">
       <p class="lead">{source}</p>
@@ -260,7 +269,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
   {charts.length > 0 && (
     <section class="section wrap" aria-labelledby="chart-title">
       <div class="section-head">
-        <h2 id="chart-title">{chartTitle}</h2>
+        <h2 id="chart-title"><Icon name="price-history" size={24} class="head-mark" />{chartTitle}</h2>
         <p>
           {aaaMode
             ? s.eia_series
@@ -400,6 +409,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
 
   <Fragment slot="scripts">
     {charts.length > 0 && <script is:inline set:html={chartScript}></script>}
+    <script is:inline set:html={save}></script>
   </Fragment>
 </Base>
 
@@ -433,6 +443,15 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
     margin: var(--space-3) 0 0;
     font-size: 15px;
     color: var(--ink-2);
+  }
+  .cadence :global(.cadence-mark) {
+    margin-right: 7px;
+  }
+  .state-hero :global(.note-mark) {
+    margin-right: 8px;
+  }
+  .section-head :global(.head-mark) {
+    margin-right: 10px;
   }
   .explain .lead {
     font-size: var(--fs-h3);

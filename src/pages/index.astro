@@ -9,6 +9,8 @@ import BiggestMoves, { type MoveItem } from "../components/BiggestMoves.astro";
 import RegionMultiples from "../components/RegionMultiples.astro";
 import StateTable from "../components/StateTable.astro";
 import UsSparkline from "../components/UsSparkline.astro";
+import YourState from "../components/YourState.astro";
+import Icon from "../components/Icon.astro";
 import rollScript from "../scripts/roll.js?raw";
 import mapScript from "../components/home/map.js?raw";
 import chartScript from "../scripts/chart.js?raw";
@@ -162,6 +164,9 @@ const description = homeMeta({
       </Sign>
       <script is:inline set:html={rollScript}></script>
       {doeSign && <p class="doe small muted">{DOE_LINE}</p>}
+      {/* Under the U.S. sign, so on a phone the driver's own state is in the
+          first screen. It takes the same 64px saved or not. */}
+      <YourState />
     </div>
     <div class="summary">
       <p class="lead">{usSentence}</p>
@@ -182,7 +187,7 @@ const description = homeMeta({
         <p>No {noun} went down {stateWhere}.</p>
       ) : null}
       <p class="muted">
-        {nextDaily}{nextDaily && nextEia ? " " : ""}{nextEia && (
+        <Icon name="next-update" size={17} class="next-mark" />{nextDaily}{nextDaily && nextEia ? " " : ""}{nextEia && (
           <span data-next-release={eiaNext ?? undefined} data-late={eiaLate}>{eiaIsLate ? eiaLate : nextEia}</span>
         )}
       </p>
@@ -273,6 +278,12 @@ const description = homeMeta({
   }
   .summary .muted {
     font-size: 17px;
+  }
+  .summary :global(.next-mark) {
+    margin-right: 8px;
+  }
+  .hero-sign :global(.your-state) {
+    margin-top: var(--space-5);
   }
   .doe {
     margin: var(--space-3) 0 0;

@@ -1,0 +1,29 @@
+---
+// One icon from src/icons, inlined at build time. Decorative by default, so
+// screen readers skip it; pass a label when the icon is the only thing that
+// says what something is.
+import { iconBody, type IconName } from "../lib/icons.ts";
+interface Props {
+  name: IconName;
+  /** Width and height in px. Match it to the text beside the icon. */
+  size?: number;
+  /** Spoken name. Without one the icon is hidden from screen readers. */
+  label?: string;
+  class?: string;
+}
+const { name, size = 20, label, class: cls } = Astro.props;
+const body = iconBody(name);
+const a11y = label ? { role: "img", "aria-label": label } : { "aria-hidden": "true", focusable: "false" };
+// The shapes stop 2 units above the bottom of the 24 unit box, so pull the box
+// down by that much and the icon stands on the text baseline like a letter.
+const drop = `vertical-align:${-(size / 12).toFixed(2)}px`;
+---
+<svg class:list={["icon", cls]} width={size} height={size} viewBox="0 0 24 24" fill="currentColor" style={drop} {...a11y} set:html={body} />
+
+<style>
+  .icon {
+    display: inline-block;
+    flex: none;
+    color: var(--ink-2);
+  }
+</style>

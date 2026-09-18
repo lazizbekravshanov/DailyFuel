@@ -37,7 +37,7 @@ const taxNote = showTax
 const spokenPct = (p: number) => formatPct(p).replace("−", "minus ").replace("+", "plus ");
 ---
 {/* The explanation sits outside the scroll box, so a phone never cuts it off.
-    The id is where /state and /states land. */}
+    The id is where the 404 page's "every state" link lands. */}
 <p class="table-note" id="every-state">{note}{taxNote && <span class="phone-hide">{taxNote}</span>}</p>
 <div class="table-scroll state-table" tabindex="0" role="region" aria-labelledby="table-caption">
   <table class="data" data-sortable data-status="table-status">
