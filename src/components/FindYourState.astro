@@ -1,16 +1,25 @@
 ---
 // "Find your state": every state in one tap target list, inside a plain
 // <details>, so it opens and closes with JS off. On the home page it's the
-// your state row until a state is saved. The 404 page shows it open.
+// your state row until a state is picked. The 404 page shows it open. A tap on
+// a state saves it for the home page (src/scripts/your-state.ts), then the
+// link goes to its page. With JS off the link still works; nothing is saved.
+//
+// The /#find-your-state target is the list inside the <details>, not the
+// <details> itself, so Chrome opens the closed list when a link lands on it,
+// even with JS off.
 import Icon from "./Icon.astro";
 import { getSite } from "../lib/site.ts";
+import { inlineCall } from "../lib/inline.ts";
+import { rememberPick } from "../scripts/your-state.ts";
 interface Props {
   open?: boolean;
 }
 const { open = false } = Astro.props;
 const states = [...getSite().states].sort((a, b) => a.name.localeCompare(b.name));
+const pick = inlineCall(rememberPick, "document", "function(){return window.localStorage}");
 ---
-<details class="find" id="find-your-state" open={open}>
+<details class="find" data-ys-find open={open}>
   <summary>
     <Icon name="find-a-state" size={22} class="find-mark" />
     <span class="find-words">
@@ -19,29 +28,25 @@ const states = [...getSite().states].sort((a, b) => a.name.localeCompare(b.name)
     </span>
     <span class="chevron" aria-hidden="true"></span>
   </summary>
-  <ul class="find-list" data-ys-list tabindex="-1" aria-label="All states">
+  <ul class="find-list" id="find-your-state" data-ys-list tabindex="-1" aria-label="All states">
     {states.map((s) => (
-      <li><a href={s.href}><span class="code" aria-hidden="true">{s.code}</span><span class="name">{s.name}</span></a></li>
+      <li><a href={s.href} data-ys-pick={s.code}><span class="code" aria-hidden="true">{s.code}</span><span class="name">{s.name}</span></a></li>
     ))}
   </ul>
 </details>
+<script is:inline set:html={pick}></script>
 
 <style>
   .find {
     --find-line: var(--sign);
     border: 2px dashed var(--find-line);
     border-radius: 10px;
-    /* where /#find-your-state lands, with a little air above */
-    scroll-margin-top: var(--space-4);
   }
   @media (prefers-color-scheme: dark) {
     .find {
       /* guide sign green is too dark to see as a line on dark paper */
       --find-line: #4f9f78;
     }
-  }
-  .find[hidden] {
-    display: none;
   }
   summary {
     display: flex;
@@ -97,6 +102,9 @@ const states = [...getSite().states].sort((a, b) => a.name.localeCompare(b.name)
     padding: 4px 14px 10px;
     list-style: none;
     border-top: 1px solid var(--hairline);
+    /* where /#find-your-state lands: the 64px summary stays in view above the
+       list, with a little air over it */
+    scroll-margin-top: calc(64px + var(--space-4));
   }
   @media (min-width: 640px) {
     .find-list {
@@ -136,6 +144,26 @@ const states = [...getSite().states].sort((a, b) => a.name.localeCompare(b.name)
     .find-list a {
       gap: 8px;
       font-size: 16px;
+    }
+  }
+  /* Narrower still, the type steps down so no name breaks inside a word:
+     Massachusetts and Pennsylvania fit whole at 350. Under that, one column. */
+  @media (max-width: 379px) {
+    .find-list {
+      column-gap: 8px;
+      padding-inline: 10px;
+    }
+    .find-list a {
+      gap: 6px;
+      font-size: 15px;
+    }
+    .name {
+      hyphens: manual;
+    }
+  }
+  @media (max-width: 349px) {
+    .find-list {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
   .code {

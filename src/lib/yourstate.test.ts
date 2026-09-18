@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import statesFile from "../data/states.json";
 import type { BenchmarkKey, Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
-import { islandJson, regionPlate, yourStateData } from "./yourstate.ts";
+import { islandJson, regionAverage, regionPlate, yourStateData } from "./yourstate.ts";
 
 const REGION: Record<BenchmarkKey, string> = {
   R1X: "New England",
@@ -94,6 +94,16 @@ describe("region plate under the state sign", () => {
 
   it("never uses a dash", () => {
     for (const s of sd.states) expect(regionPlate(s, sd) ?? "").not.toMatch(/[–—]| - /);
+  });
+
+  it("uses the same words the share cards use, in any mode", () => {
+    const aaa = site("aaa+eia");
+    for (const s of sd.states) {
+      if (regionPlate(s, sd)) expect(regionAverage(s, sd)).toBe(regionPlate(s, sd));
+    }
+    expect(regionAverage(at(aaa, "WA"), aaa)).toBe("EIA West Coast average outside California, 4 states");
+    expect(regionAverage(at(aaa, "CA"), aaa)).toBeNull();
+    expect(regionAverage(at(aaa, "AK"), aaa)).toBeNull();
   });
 });
 

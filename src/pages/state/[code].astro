@@ -16,8 +16,6 @@ import { DOE_LINE, DYED_DIESEL_HERE, peakSentence } from "../../lib/doe.ts";
 import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText, WEEKLY_LEAD } from "../../lib/release.ts";
 import { regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence } from "../../lib/copy.ts";
 import { regionPlate } from "../../lib/yourstate.ts";
-import { saveState } from "../../scripts/your-state.ts";
-import { inlineCall } from "../../lib/inline.ts";
 import type { Move } from "../../lib/data.ts";
 
 export function getStaticPaths() {
@@ -222,13 +220,13 @@ const title = noSurvey
   : sharedPrice
     ? `${s.name} diesel, DOE ${s.regionName} weekly average | DailyFuel`
     : `${s.name} diesel price${aaaMode ? " today" : " this week"} | DailyFuel`;
-const legend = noSurvey ? `Diesel in ${s.name}` : `${s.name} diesel average`;
-const description = stateDescription(s, site);
-const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
 // "EIA Midwest average, 15 states" under the price, only while the price is shared.
 const plate = regionPlate(s, site);
-// Viewing a state page makes it the home page's "your state". Only the code is stored.
-const save = inlineCall(saveState, JSON.stringify(s.code));
+// With a plate, the big heading is just the state, so it never claims an Ohio
+// average right above a plate that says it's the Midwest's.
+const legend = noSurvey ? `Diesel in ${s.name}` : plate ? s.name : `${s.name} diesel average`;
+const description = stateDescription(s, site);
+const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
 ---
 <Base title={title} description={description}>
   <div class="wrap back-row">
@@ -421,7 +419,6 @@ const save = inlineCall(saveState, JSON.stringify(s.code));
 
   <Fragment slot="scripts">
     {charts.length > 0 && <script is:inline set:html={chartScript}></script>}
-    <script is:inline set:html={save}></script>
   </Fragment>
 </Base>
 

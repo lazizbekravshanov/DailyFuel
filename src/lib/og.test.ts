@@ -1,9 +1,10 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   CARD_HEIGHT,
   CARD_WIDTH,
   FONT_FILES,
+  PUMP_32,
   cardAlt,
   cardDate,
   cardFor,
@@ -20,7 +21,7 @@ import {
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 
-const REGION: Record<string, string> = { R20: "Midwest", R1Y: "Central Atlantic", SCA: "California" };
+const REGION: Record<string, string> = { R20: "Midwest", R1Y: "Central Atlantic", SCA: "California", R5XCA: "West Coast outside California" };
 
 function move(price: number, prev: number | null): Move {
   if (prev === null) return { price, prev: null, change: null, change_pct: null, direction: null };
@@ -52,6 +53,8 @@ function fakeSite(opts: { aaa?: boolean; period?: string; prev?: string } = {}):
     state("IN", "Indiana", "R20", move(6.25, 5.946), aaa),
     state("OH", "Ohio", "R20", move(6.25, 5.946), aaa),
     state("PA", "Pennsylvania", "R1Y", move(6.3, 6.2), aaa),
+    state("OR", "Oregon", "R5XCA", move(6.57, 6.31), aaa),
+    state("WA", "Washington", "R5XCA", move(6.57, 6.31), aaa),
   ];
   const us = move(6.285, 5.967);
   return {
@@ -90,7 +93,7 @@ describe("share card URLs", () => {
   });
 
   it("draws the U.S. card and one per state", () => {
-    expect(cardKeys(site)).toEqual(["us", "ak", "ca", "dc", "in", "oh", "pa"]);
+    expect(cardKeys(site)).toEqual(["us", "ak", "ca", "dc", "in", "oh", "pa", "or", "wa"]);
   });
 
   it("gives a state page its own card and everything else the U.S. card", () => {
@@ -128,6 +131,10 @@ describe("what a card says", () => {
   it("counts DC apart from the states", () => {
     expect(cardFor(site, "dc").label).toBe("EIA Central Atlantic average, 1 state and DC");
     expect(cardFor(site, "pa").label).toBe("EIA Central Atlantic average, 1 state and DC");
+  });
+
+  it("says the West Coast outside California in the plate's words", () => {
+    expect(cardFor(site, "wa").label).toBe("EIA West Coast average outside California, 2 states");
   });
 
   it("names California as its own price", () => {
@@ -222,6 +229,14 @@ describe("drawing a card", () => {
     expect(size).toBeLessThan(60);
     // shield plus gap plus name stays inside the 1032px content width
     expect(size * 1.7 + 24 + (size * "District of Columbia diesel average".length * 55) / 100).toBeLessThanOrEqual(1032.5);
+  });
+
+  it("signs off with the header's pump mark, not the old two bar sign", () => {
+    const base = readFileSync(new URL("../layouts/Base.astro", import.meta.url), "utf8");
+    expect(base).toContain(`d="${PUMP_32}"`);
+    const svg = cardSvg(cardFor(site, "oh"), fakeMeasure);
+    expect(svg).toContain(`d="${PUMP_32}"`);
+    expect(svg).not.toContain('width="20" height="3.5"');
   });
 
   it("draws a no price card with no plaque", () => {

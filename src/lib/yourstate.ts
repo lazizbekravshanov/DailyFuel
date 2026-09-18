@@ -13,7 +13,17 @@ import type { SiteData, StateView } from "./site.ts";
  * them), or any state once AAA's per state prices are on.
  */
 export function regionPlate(s: StateView, site: SiteData): string | null {
-  if (site.mode !== "eia_only" || !s.primary || !s.eia_series || !s.regionName) return null;
+  if (site.mode !== "eia_only" || !s.primary) return null;
+  return regionAverage(s, site);
+}
+
+/**
+ * Whose average a shared EIA price is, in the plate's words, for any mode:
+ * the share cards say it too. Null when the region is one place (California)
+ * or none (Alaska, Hawaii).
+ */
+export function regionAverage(s: StateView, site: SiteData): string | null {
+  if (!s.eia_series || !s.regionName) return null;
   const members = [s, ...regionMates(s, site)];
   if (members.length < 2) return null;
   // "West Coast outside California" reads better split around "average"

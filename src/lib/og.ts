@@ -12,6 +12,7 @@ import { pctOf } from "./copy.ts";
 import { formatDate, when } from "./dates.ts";
 import { formatChange, priceParts, spokenChange, type PriceParts } from "./format.ts";
 import { palettePng } from "./png.ts";
+import { regionAverage } from "./yourstate.ts";
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 
@@ -67,14 +68,14 @@ export function cardKeyFor(pathname: string, site: SiteData): string {
   return US_KEY;
 }
 
-/** "EIA Midwest average, 15 states", "EIA Central Atlantic average, 5 states and DC". */
+/**
+ * "EIA Midwest average, 15 states", "EIA Central Atlantic average, 5 states
+ * and DC": the same words as the plate on the state sign and the mini sign.
+ */
 export function regionLabel(s: StateView, site: SiteData): string {
   if (!s.eia_series || !s.regionName) return `EIA doesn't survey diesel prices in ${s.name}`;
   if (s.eia_series === "SCA") return "EIA California average";
-  const members = site.states.filter((o) => o.eia_series === s.eia_series);
-  const states = members.filter((o) => o.code !== "DC").length;
-  const dc = members.some((o) => o.code === "DC");
-  return `EIA ${s.regionName} average, ${states} ${states === 1 ? "state" : "states"}${dc ? " and DC" : ""}`;
+  return regionAverage(s, site) ?? `EIA ${s.regionName} average`;
 }
 
 interface Timing {
@@ -182,6 +183,13 @@ const PLAQUE_INK = "#1d2125";
 // the plaque's glyph colors, the same as the sign on the page
 const GLYPH: Record<Direction, string> = { up: "#c94d47", down: "#3a75bf", flat: "#51565b" };
 
+/**
+ * The fuel pump from the app icon's 32px drawing (scripts/make_app_icons.mjs),
+ * the same path the site header draws, so a shared card shows the same mark.
+ */
+export const PUMP_32 =
+  "M15.12 7.75C15.46 7.75 15.79 7.89 16.03 8.13C16.28 8.37 16.41 8.7 16.41 9.04V14.87H18.03C18.74 14.87 19.4 15.11 19.89 15.6C20.38 16.09 20.62 16.75 20.62 17.46V20.69C20.62 20.96 20.7 21.1 20.78 21.18C20.85 21.25 21 21.34 21.26 21.34C21.53 21.34 21.67 21.25 21.75 21.18C21.83 21.1 21.91 20.96 21.91 20.69V12.68L19.93 10.7C19.55 10.32 19.55 9.71 19.93 9.33C20.31 8.95 20.92 8.95 21.3 9.33L23.57 11.59C23.75 11.78 23.85 12.02 23.85 12.28V20.69C23.85 21.4 23.61 22.06 23.12 22.55C22.63 23.04 21.97 23.28 21.26 23.28C20.56 23.28 19.9 23.04 19.41 22.55C18.92 22.06 18.68 21.4 18.68 20.69V17.46C18.68 17.19 18.59 17.05 18.52 16.97C18.44 16.89 18.29 16.81 18.03 16.81H16.41V24.25H8V9.04C8 8.7 8.14 8.37 8.38 8.13C8.62 7.89 8.95 7.75 9.29 7.75H15.12ZM10.59 9.69C10.23 9.69 9.94 9.98 9.94 10.34V13.25C9.94 13.61 10.23 13.9 10.59 13.9H13.82C14.18 13.9 14.47 13.61 14.47 13.25V10.34C14.47 9.98 14.18 9.69 13.82 9.69H10.59Z";
+
 const LEFT = 84;
 const RIGHT = CARD_WIDTH - 84;
 const INNER = RIGHT - LEFT;
@@ -286,13 +294,15 @@ export function cardSvg(card: Card, measure: Measure): string {
   const bottom = 552;
   const brandSize = 30;
   const brandW = width(measure, "DailyFuel", brandSize, 800);
-  const markW = 36;
-  const brandX = RIGHT - brandW - markW - 12;
-  const markY = bottom - brandSize * 0.35 - 13.5;
-  out.push(`<g transform="translate(${n(brandX)} ${n(markY)})">`
-    + `<rect x="1.5" y="1.5" width="33" height="24" rx="4" fill="none" stroke="${WHITE}" stroke-width="3"/>`
-    + `<rect x="8" y="8.5" width="20" height="3.5" rx="1" fill="${WHITE}"/>`
-    + `<rect x="8" y="15" width="12" height="3.5" rx="1" fill="${WHITE}"/></g>`);
+  // The header's mark: a small green sign with a white inset line and the
+  // pump. On the green card its own green melts in, so the line and the pump
+  // carry it, drawn a touch heavier to hold up when the card is shown small.
+  const markW = 40;
+  const brandX = RIGHT - brandW - markW - 10;
+  const markY = bottom - brandSize * 0.35 - markW / 2;
+  out.push(`<g transform="translate(${n(brandX)} ${n(markY)}) scale(${markW / 32})">`
+    + `<rect x="2.5" y="2.5" width="27" height="27" rx="4.5" fill="none" stroke="${WHITE}" stroke-width="2"/>`
+    + `<path fill="${WHITE}" fill-rule="evenodd" d="${PUMP_32}"/></g>`);
   out.push(text(RIGHT, bottom, brandSize, 800, WHITE, "DailyFuel", "end"));
   let labelSize = 30;
   const labelRoom = brandX - 48 - LEFT;

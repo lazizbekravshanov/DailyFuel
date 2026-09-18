@@ -1,28 +1,34 @@
 ---
 // The your state row under the U.S. sign. The server renders the "Find your
 // state" list, which is what anyone sees with no saved state, with JS off, or
-// when storage is blocked. When a state page was opened before, the inline
-// script (src/scripts/your-state.ts) fills the hidden mini sign from the JSON
-// island below and shows it instead. Both take the same 64px, so the page
-// under the row never moves.
+// when storage is blocked. When a state was picked from the list before, the
+// first inline script (src/scripts/your-state.ts) fills the hidden mini sign
+// from the JSON island and marks the row, before the parser reaches the list,
+// and CSS keeps the list out of the row. Both take the same 64px, so the page
+// under the row never moves. The second script, after the list, wires Change
+// state and Forget.
 import FindYourState from "./FindYourState.astro";
 import Glyph from "./Glyph.astro";
 import Icon from "./Icon.astro";
 import { getSite } from "../lib/site.ts";
 import { inlineCall } from "../lib/inline.ts";
 import { islandJson, yourStateData } from "../lib/yourstate.ts";
-import { yourState } from "../scripts/your-state.ts";
+import { yourState, yourStateList } from "../scripts/your-state.ts";
 
 const data = yourStateData(getSite());
-// Reaching localStorage can throw by itself, so the script asks for it inside its own try.
-const boot = inlineCall(yourState, "document", "function(){return window.localStorage}", "location.hash");
+// Reaching localStorage can throw by itself, so the scripts ask for it inside their own try.
+const store = "function(){return window.localStorage}";
+const fill = inlineCall(yourState, "document", store);
+const wire = inlineCall(yourStateList, "document", store, "location.hash");
 ---
 <section class="your-state" aria-label="Your state">
   <div class="ys" data-ys>
     <div class="ys-saved" data-ys-saved hidden>
       <Icon name="your-state" size={22} class="ys-mark" />
       <a class="mini" href="/#find-your-state" data-ys-link>
-        <span class="mini-row">
+        {/* the link's name for screen readers; the sign below says the same for the eye */}
+        <span class="sr-only" data-ys-spoken></span>
+        <span class="mini-row" aria-hidden="true">
           <span class="mini-id">
             <span class="mini-code" data-ys-code></span>
             <span class="mini-name" data-ys-name></span>
@@ -38,22 +44,32 @@ const boot = inlineCall(yourState, "document", "function(){return window.localSt
             </span>
           </span>
         </span>
-        <span class="mini-plate" data-ys-plate></span>
+        <span class="mini-plate" data-ys-plate aria-hidden="true"></span>
       </a>
       <div class="ys-actions">
         <button type="button" class="ys-change" data-ys-change aria-controls="find-your-state" aria-expanded="false">Change state</button>
         <button type="button" class="ys-forget" data-ys-forget>Forget</button>
       </div>
     </div>
+    <script type="application/json" id="your-state-data" set:html={islandJson(data)}></script>
+    <script is:inline set:html={fill}></script>
     <FindYourState />
+    <script is:inline set:html={wire}></script>
   </div>
-  <script type="application/json" id="your-state-data" set:html={islandJson(data)}></script>
-  <script is:inline set:html={boot}></script>
 </section>
 
 <style>
   .ys {
     min-height: 64px;
+  }
+  /* A saved state takes the row. The list shows under it only when asked for,
+     and then 16px down, clear of Forget's tap area, which reaches 12px below
+     the row. Opening it is a tap, so the move doesn't count as a shift. */
+  .ys[data-ys-state]:not([data-ys-list]) :global(.find) {
+    display: none;
+  }
+  .ys[data-ys-state][data-ys-list] :global(.find) {
+    margin-top: 16px;
   }
   .ys-saved {
     display: flex;
@@ -76,7 +92,7 @@ const boot = inlineCall(yourState, "document", "function(){return window.localSt
     color: var(--ink-2);
   }
   /* Under 400px every pixel goes to the sign, so a long name like District of
-     Columbia isn't cut. The shield is only a marker; the sign says the rest. */
+     Columbia fits from 360 up. The shield is only a marker; the sign says the rest. */
   @media (max-width: 399px) {
     .ys-saved :global(.ys-mark) {
       display: none;
@@ -161,6 +177,16 @@ const boot = inlineCall(yourState, "document", "function(){return window.localSt
     text-overflow: ellipsis;
     font-size: 17px;
     font-weight: 750;
+  }
+  /* Under the spec's 360 floor the code chip goes and the name steps down a
+     size, so District of Columbia still fits whole at 320. */
+  @media (max-width: 359px) {
+    .mini-code {
+      display: none;
+    }
+    .mini-name {
+      font-size: 16px;
+    }
   }
   .mini-price,
   .mini-none {
