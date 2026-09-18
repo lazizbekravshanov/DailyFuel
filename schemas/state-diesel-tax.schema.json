@@ -1,0 +1,1261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dailyfuel/state-diesel-tax/1",
+  "title": "State diesel excise tax, cents per gallon, from FHWA table MF-121T",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "source",
+    "source_url",
+    "reporting_period",
+    "published",
+    "fetched_at",
+    "federal_cpg",
+    "states",
+    "effective",
+    "out_of_date",
+    "notes",
+    "scope"
+  ],
+  "properties": {
+    "schema": {
+      "const": "dailyfuel/state-diesel-tax/1"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "reporting_period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "published": {
+      "type": "string",
+      "format": "date"
+    },
+    "fetched_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "federal_cpg": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 200
+    },
+    "states": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "properties": {
+        "AL": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "AK": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "AZ": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "AR": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "CA": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "CO": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "CT": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "DE": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "DC": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "FL": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "GA": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "HI": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "ID": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "IL": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "IN": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "IA": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "KS": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "KY": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "LA": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "ME": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "MD": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "MA": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "MI": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "MN": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "MS": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "MO": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "MT": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "NE": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "NV": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "NH": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "NJ": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "NM": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "NY": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "NC": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "ND": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "OH": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "OK": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "OR": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "PA": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "RI": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "SC": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "SD": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "TN": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "TX": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "UT": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "VT": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "VA": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "WA": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "WV": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "WI": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        },
+        "WY": {
+          "description": "Cents per gallon, or null when FHWA publishes no per gallon diesel rate.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 200
+        }
+      }
+    },
+    "effective": {
+      "description": "The day each state's diesel rate took effect, as FHWA has it. Null when FHWA publishes no per gallon rate.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "properties": {
+        "AL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "AK": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "AZ": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "AR": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "CA": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "CO": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "CT": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "DE": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "DC": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "FL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "GA": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "HI": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "ID": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "IL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "IN": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "IA": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "KS": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "KY": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "LA": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "ME": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "MD": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "MA": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "MI": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "MN": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "MS": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "MO": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "MT": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "NE": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "NV": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "NH": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "NJ": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "NM": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "NY": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "NC": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "ND": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "OH": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "OK": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "OR": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "PA": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "RI": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "SC": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "SD": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "TN": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "TX": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "UT": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "VT": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "VA": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "WA": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "WV": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "WI": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "WY": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        }
+      }
+    },
+    "out_of_date": {
+      "description": "States whose FHWA rate is known to be out of date. The site shows them as out of date and leaves them out of the ranking.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "AL",
+          "AK",
+          "AZ",
+          "AR",
+          "CA",
+          "CO",
+          "CT",
+          "DE",
+          "DC",
+          "FL",
+          "GA",
+          "HI",
+          "ID",
+          "IL",
+          "IN",
+          "IA",
+          "KS",
+          "KY",
+          "LA",
+          "ME",
+          "MD",
+          "MA",
+          "MI",
+          "MN",
+          "MS",
+          "MO",
+          "MT",
+          "NE",
+          "NV",
+          "NH",
+          "NJ",
+          "NM",
+          "NY",
+          "NC",
+          "ND",
+          "OH",
+          "OK",
+          "OR",
+          "PA",
+          "RI",
+          "SC",
+          "SD",
+          "TN",
+          "TX",
+          "UT",
+          "VT",
+          "VA",
+          "WA",
+          "WV",
+          "WI",
+          "WY"
+        ]
+      }
+    },
+    "notes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "AL": {
+          "type": "string",
+          "minLength": 1
+        },
+        "AK": {
+          "type": "string",
+          "minLength": 1
+        },
+        "AZ": {
+          "type": "string",
+          "minLength": 1
+        },
+        "AR": {
+          "type": "string",
+          "minLength": 1
+        },
+        "CA": {
+          "type": "string",
+          "minLength": 1
+        },
+        "CO": {
+          "type": "string",
+          "minLength": 1
+        },
+        "CT": {
+          "type": "string",
+          "minLength": 1
+        },
+        "DE": {
+          "type": "string",
+          "minLength": 1
+        },
+        "DC": {
+          "type": "string",
+          "minLength": 1
+        },
+        "FL": {
+          "type": "string",
+          "minLength": 1
+        },
+        "GA": {
+          "type": "string",
+          "minLength": 1
+        },
+        "HI": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ID": {
+          "type": "string",
+          "minLength": 1
+        },
+        "IL": {
+          "type": "string",
+          "minLength": 1
+        },
+        "IN": {
+          "type": "string",
+          "minLength": 1
+        },
+        "IA": {
+          "type": "string",
+          "minLength": 1
+        },
+        "KS": {
+          "type": "string",
+          "minLength": 1
+        },
+        "KY": {
+          "type": "string",
+          "minLength": 1
+        },
+        "LA": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ME": {
+          "type": "string",
+          "minLength": 1
+        },
+        "MD": {
+          "type": "string",
+          "minLength": 1
+        },
+        "MA": {
+          "type": "string",
+          "minLength": 1
+        },
+        "MI": {
+          "type": "string",
+          "minLength": 1
+        },
+        "MN": {
+          "type": "string",
+          "minLength": 1
+        },
+        "MS": {
+          "type": "string",
+          "minLength": 1
+        },
+        "MO": {
+          "type": "string",
+          "minLength": 1
+        },
+        "MT": {
+          "type": "string",
+          "minLength": 1
+        },
+        "NE": {
+          "type": "string",
+          "minLength": 1
+        },
+        "NV": {
+          "type": "string",
+          "minLength": 1
+        },
+        "NH": {
+          "type": "string",
+          "minLength": 1
+        },
+        "NJ": {
+          "type": "string",
+          "minLength": 1
+        },
+        "NM": {
+          "type": "string",
+          "minLength": 1
+        },
+        "NY": {
+          "type": "string",
+          "minLength": 1
+        },
+        "NC": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ND": {
+          "type": "string",
+          "minLength": 1
+        },
+        "OH": {
+          "type": "string",
+          "minLength": 1
+        },
+        "OK": {
+          "type": "string",
+          "minLength": 1
+        },
+        "OR": {
+          "type": "string",
+          "minLength": 1
+        },
+        "PA": {
+          "type": "string",
+          "minLength": 1
+        },
+        "RI": {
+          "type": "string",
+          "minLength": 1
+        },
+        "SC": {
+          "type": "string",
+          "minLength": 1
+        },
+        "SD": {
+          "type": "string",
+          "minLength": 1
+        },
+        "TN": {
+          "type": "string",
+          "minLength": 1
+        },
+        "TX": {
+          "type": "string",
+          "minLength": 1
+        },
+        "UT": {
+          "type": "string",
+          "minLength": 1
+        },
+        "VT": {
+          "type": "string",
+          "minLength": 1
+        },
+        "VA": {
+          "type": "string",
+          "minLength": 1
+        },
+        "WA": {
+          "type": "string",
+          "minLength": 1
+        },
+        "WV": {
+          "type": "string",
+          "minLength": 1
+        },
+        "WI": {
+          "type": "string",
+          "minLength": 1
+        },
+        "WY": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "scope": {
+      "description": "What the table counts and leaves out, from FHWA's footnote (1), in DailyFuel's words.",
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

@@ -24,6 +24,7 @@ SCHEMA_FILES = {
     "aaa-daily": "aaa-daily.schema.json",
     "eia-diesel-weekly": "eia-diesel-weekly.schema.json",
     "latest": "latest.schema.json",
+    "state-diesel-tax": "state-diesel-tax.schema.json",
 }
 
 _DATE_TIME = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$")

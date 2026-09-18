@@ -1,0 +1,130 @@
+---
+// What tax is on a gallon of diesel in one state.
+//
+// This is a separate fact from the prices DailyFuel measures, so it never
+// borrows the pump price styling: no sign green, no raised tenth of a cent,
+// hairline rules instead of the solid ink rules the price stats use.
+import { formatCpg, rankLabel, rankedNote, sinceLabel, spokenCpg, spokenRank, taxVintage } from "../lib/tax.ts";
+import type { SiteData, StateView } from "../lib/site.ts";
+
+interface Props {
+  site: SiteData;
+  state: StateView;
+}
+const { site, state: s } = Astro.props;
+const tax = site.tax!;
+const v = s.tax!;
+const spoken = spokenRank(v);
+const counted = rankedNote(tax);
+const since = sinceLabel(v);
+// "District of Columbia tax" wraps on a phone, and DC is what people call it.
+const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
+---
+<section class="section wrap tax" aria-labelledby="tax-title">
+  <div class="section-head">
+    <h2 id="tax-title">Tax on every gallon</h2>
+    <p>Tax is part of what you pay at the pump. These rates come from a yearly federal table, not from the price survey.</p>
+  </div>
+
+  <dl class="tax-stats">
+    <div>
+      <dt>{stateLabel}</dt>
+      {v.outOfDate ? (
+        <dd class="muted">Out of date</dd>
+      ) : v.state !== null ? (
+        <>
+          <dd><span class="sr-only">{spokenCpg(v.state)}</span><span aria-hidden="true">{formatCpg(v.state)}</span></dd>
+          {since && <dd class="small muted">{since}</dd>}
+        </>
+      ) : (
+        <dd class="muted">Not in FHWA's table</dd>
+      )}
+    </div>
+    <div>
+      <dt>Federal tax</dt>
+      <dd><span class="sr-only">{spokenCpg(v.federal)}</span><span aria-hidden="true">{formatCpg(v.federal)}</span></dd>
+      <dd class="small muted">Same in every state</dd>
+    </div>
+    {v.total !== null && (
+      <div class="total">
+        <dt>Total tax</dt>
+        <dd><span class="sr-only">{spokenCpg(v.total)}</span><span aria-hidden="true">{formatCpg(v.total)}</span></dd>
+        <dd class="small muted">State plus federal</dd>
+      </div>
+    )}
+    {v.rank !== null && (
+      <div>
+        <dt>Rank among states</dt>
+        <dd><span class="sr-only">{spoken}</span><span aria-hidden="true">{rankLabel(v)}</span></dd>
+        <dd class="small muted" aria-hidden="true">of {v.ranked}</dd>
+      </div>
+    )}
+  </dl>
+
+  {v.note && <p class="tax-note">{v.note}</p>}
+  <p class="small muted fine">{tax.scope}</p>
+  <p class="small muted fine">
+    {taxVintage(tax)}{counted ? ` ${counted}` : ""}
+  </p>
+</section>
+
+<style>
+  .tax-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin: 0;
+  }
+  @media (max-width: 899px) {
+    .tax-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .tax-stats > div {
+    /* a hairline, not the 2px ink rule the measured price stats wear */
+    border-top: 1px solid var(--hairline-strong);
+    padding-top: var(--space-3);
+    min-width: 0;
+  }
+  .tax-stats > div.total {
+    border-top-color: var(--ink);
+  }
+  .tax-stats dt {
+    font-size: 15px;
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+  .tax-stats dd {
+    margin: 4px 0 0;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+    font-variant-numeric: tabular-nums;
+  }
+  .tax-stats dd.muted {
+    font-weight: 600;
+  }
+  .tax-stats dd.small {
+    font-size: var(--fs-small);
+    font-weight: 400;
+  }
+  @media (max-width: 479px) {
+    .tax-stats dd {
+      font-size: 18px;
+    }
+  }
+  .tax-note {
+    max-width: 68ch;
+    margin-top: var(--space-5);
+  }
+  .fine {
+    max-width: 68ch;
+    margin-top: var(--space-3);
+  }
+  .tax-stats + .fine {
+    margin-top: var(--space-5);
+  }
+  .fine + .fine {
+    margin-top: var(--space-1);
+  }
+</style>

@@ -15,6 +15,7 @@ NEW_YORK = ZoneInfo("America/New_York")
 
 # Relative locations inside a data dir. The website reads the same layout.
 EIA_WEEKLY = Path("eia") / "diesel_weekly.json"
+TAXES = Path("taxes") / "state_diesel_tax.json"
 LATEST = Path("latest.json")
 AAA_DAILY_DIR = Path("aaa") / "daily"
 

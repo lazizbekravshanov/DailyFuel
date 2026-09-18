@@ -3,12 +3,15 @@
 import Change from "./Change.astro";
 import Price from "./Price.astro";
 import { changeOver } from "../lib/stats.ts";
+import { formatCpg, spokenCpg } from "../lib/tax.ts";
 import type { SiteData } from "../lib/site.ts";
 interface Props {
   site: SiteData;
 }
 const { site } = Astro.props;
 const aaaMode = site.mode === "aaa+eia";
+const showTax = site.tax !== null;
+const taxYear = site.tax?.reporting_period ?? "";
 const rows = [...site.states]
   .sort((a, b) => a.name.localeCompare(b.name))
   .map((s) => {
@@ -16,21 +19,33 @@ const rows = [...site.states]
     return { s, year };
   });
 const lastCol = aaaMode ? "EIA weekly" : "52 week change";
+// Six columns is one too many on a phone, so one drops out under 640px.
+// In AAA mode that's Source, which says "AAA" on all 51 rows. In EIA only mode
+// Source is the reason two states show the same price, so the 52 week change
+// goes instead. Both numbers are still on the state page.
+const phoneHide = aaaMode ? "source" : "last";
 ---
 <div class="table-scroll state-table" tabindex="0" role="region" aria-labelledby="table-caption">
   <table class="data" data-sortable data-status="table-status">
     <caption id="table-caption">
-      {aaaMode
-        ? "Daily AAA price and change for every state, with EIA's weekly region price."
-        : "EIA weekly price and change for every state. States in the same region share a price."}
+      {/* The caption is as wide as the table, which on a phone is wider than
+          the box it scrolls in. The inner block keeps the words to the part
+          you can see. */}
+      <span class="caption-text">
+        {aaaMode
+          ? "Daily AAA price and change for every state, with EIA's weekly region price."
+          : "EIA weekly price and change for every state. States in the same region share a price."}
+        {showTax ? ` Tax is each state's own diesel tax from FHWA's ${taxYear} table, in cents a gallon, without the federal ${formatCpg(site.tax!.federal_cpg)} everyone pays.` : ""}
+      </span>
     </caption>
     <thead>
       <tr>
         <th scope="col" data-sort-type="text" aria-sort="ascending">State</th>
         <th scope="col" class="r" data-sort-type="number" data-sort-first="descending">Price</th>
         <th scope="col" data-sort-type="number" data-sort-first="descending">Change</th>
-        <th scope="col" data-sort-type="text">Source</th>
-        <th scope="col" class={aaaMode ? "r" : ""} data-sort-type="number" data-sort-first="descending">{lastCol}</th>
+        <th scope="col" class:list={[phoneHide === "source" && "phone-hide"]} data-sort-type="text">Source</th>
+        {showTax && <th scope="col" class="r tax-head" data-sort-type="number" data-sort-first="descending">{taxYear} tax</th>}
+        <th scope="col" class:list={[aaaMode && "r", phoneHide === "last" && "phone-hide"]} data-sort-type="number" data-sort-first="descending">{lastCol}</th>
       </tr>
     </thead>
     <tbody>
@@ -49,15 +64,31 @@ const lastCol = aaaMode ? "EIA weekly" : "52 week change";
               <span class="muted">No survey</span>
             )}
           </td>
-          <td data-sort={aaaMode ? "AAA" : (s.regionName ?? "")}>
+          <td class:list={[phoneHide === "source" && "phone-hide"]} data-sort={aaaMode ? "AAA" : (s.regionName ?? "")}>
             {aaaMode ? "AAA" : (s.regionName ?? <span class="muted">EIA doesn't survey {s.name}</span>)}
           </td>
+          {/* Tax is not a price we measured, so it keeps plain cents styling
+              and never borrows the raised tenth the pump prices wear. */}
+          {showTax && (
+            <td class="r tax-cell" data-sort={s.tax && !s.tax.outOfDate ? (s.tax.state ?? "") : ""}>
+              {s.tax?.outOfDate ? (
+                <span class="muted">Out of date</span>
+              ) : s.tax?.state != null ? (
+                <>
+                  <span class="sr-only">{spokenCpg(s.tax.state)}</span>
+                  <span aria-hidden="true">{formatCpg(s.tax.state)}</span>
+                </>
+              ) : (
+                <span class="muted">Not listed</span>
+              )}
+            </td>
+          )}
           {aaaMode ? (
-            <td class="r" data-sort={s.eia ? String(s.eia.price) : ""}>
+            <td class:list={["r", phoneHide === "last" && "phone-hide"]} data-sort={s.eia ? String(s.eia.price) : ""}>
               {s.eia ? <Price price={s.eia.price} /> : <span class="muted">Not surveyed</span>}
             </td>
           ) : (
-            <td data-sort={year ? String(year.change) : ""}>
+            <td class:list={[phoneHide === "last" && "phone-hide"]} data-sort={year ? String(year.change) : ""}>
               {year ? <Change change={year.change} pct={year.pct} /> : <span class="muted">{s.eia_series ? "Not enough history" : "No survey"}</span>}
             </td>
           )}
@@ -92,6 +123,17 @@ const lastCol = aaaMode ? "EIA weekly" : "52 week change";
   .state-table tr > :nth-child(3) {
     padding-left: var(--space-4);
   }
+  /* tax sits apart from the price and change, so it gets its own air, and
+     the column after it starts well clear so a tax figure never reads as the
+     start of the change beside it */
+  .state-table .tax-cell,
+  .state-table .tax-head {
+    padding-left: var(--space-4);
+  }
+  .state-table .tax-cell + td,
+  .state-table .tax-head + th {
+    padding-left: var(--space-6);
+  }
   .state-table .sort-btn {
     display: inline-flex;
     align-items: center;
@@ -118,7 +160,22 @@ const lastCol = aaaMode ? "EIA weekly" : "52 week change";
   .state-table th[aria-sort="descending"] .sort-down {
     fill: var(--ink);
   }
+  /* the scroll box is the page width less its gutters, so the caption words
+     stay inside it even when the table under them is wider */
+  .state-table caption .caption-text {
+    display: block;
+    white-space: normal;
+    max-width: calc(100vw - 2 * var(--gutter));
+    /* and they stay in view while the table scrolls sideways under them */
+    position: sticky;
+    left: 0;
+  }
   @media (max-width: 639px) {
+    /* one column steps out of the way on a phone rather than stretching the
+       row into a long sideways scroll */
+    .state-table .phone-hide {
+      display: none;
+    }
     .state-table tbody th,
     .state-table thead th:first-child {
       position: sticky;

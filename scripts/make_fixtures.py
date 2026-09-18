@@ -9,6 +9,7 @@ DAILYFUEL_DATA_DIR=tmp/fixture-data npm run build.
 
 What it writes:
     eia/diesel_weekly.json  a copy of the real EIA file (public domain)
+    taxes/state_diesel_tax.json  a copy of the real FHWA file (public domain)
     aaa/daily/*.json        made up daily prices, origin "synthetic"
     latest.json             derived in aaa+eia mode
 
@@ -33,7 +34,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from dailyfuel import aaa, derive, store  # noqa: E402
-from dailyfuel.paths import AAA_DAILY_DIR, DATA_DIR, EIA_WEEKLY, LATEST, REPO_ROOT  # noqa: E402
+from dailyfuel.paths import AAA_DAILY_DIR, DATA_DIR, EIA_WEEKLY, LATEST, REPO_ROOT, TAXES  # noqa: E402
 from dailyfuel.states import load_states  # noqa: E402
 
 DEFAULT_OUT = REPO_ROOT / "tmp" / "fixture-data"
@@ -177,6 +178,11 @@ def main(argv: list[str] | None = None) -> int:
         for old in daily.glob("*.json"):
             old.unlink()
     store.write_doc("eia-diesel-weekly", out / EIA_WEEKLY, eia_doc, v)
+    # Tax rates are public domain and the same in both modes, so the preview
+    # build exercises the tax panel too. Missing is fine: the site drops it.
+    if (DATA_DIR / TAXES).exists():
+        tax_doc = store.read_json(DATA_DIR / TAXES)
+        store.write_doc("state-diesel-tax", out / TAXES, tax_doc, v)
     for doc in docs:
         store.write_doc("aaa-daily", daily / f"{doc['as_of']}.json", doc, v)
 

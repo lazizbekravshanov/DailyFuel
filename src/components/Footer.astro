@@ -7,6 +7,7 @@ interface Props {
 const { site } = Astro.props;
 const release = site.latest.eia?.release_date ?? site.weekly?.release_date ?? null;
 const aaa = site.mode === "aaa+eia" ? site.latest.aaa : null;
+const tax = site.tax;
 ---
 <footer class="site-footer">
   <div class="wrap">
@@ -21,6 +22,11 @@ const aaa = site.mode === "aaa+eia" ? site.latest.aaa : null;
         {aaa && (
           <p>
             Daily state averages: AAA (<a href="https://gasprices.aaa.com/">gasprices.aaa.com</a>), data by OPIS. Price as of {formatBadgeDate(aaa.as_of)}. DailyFuel is not affiliated with AAA or OPIS.
+          </p>
+        )}
+        {tax && (
+          <p>
+            Diesel tax: Federal Highway Administration, Highway Statistics table MF-121T ({tax.reporting_period} reporting period). U.S. government work, public domain.
           </p>
         )}
         <p class="muted">

@@ -8,6 +8,7 @@ table.table-mob with an E85 column). Every price is made up by a formula.
 from __future__ import annotations
 
 import gzip
+import io
 import json
 from datetime import date
 from decimal import Decimal
@@ -17,7 +18,7 @@ import xlrd
 from xlrd.biffh import XL_CELL_DATE, XL_CELL_EMPTY, XL_CELL_NUMBER, XL_CELL_TEXT
 from xlrd.sheet import Cell
 
-from dailyfuel import aaa, eia
+from dailyfuel import aaa, eia, taxes
 from dailyfuel.http import NetworkError, Response
 from dailyfuel.states import EIA_KEYS, load_states
 
@@ -336,3 +337,197 @@ def eia_book(
     if next_release is not None:
         contents.append([None, "Next Release Date:", next_release])
     return FakeBook({"Contents": contents, "Data 1": rows})
+
+
+# ---------------------------------------------------------------- FHWA MF-121T
+
+
+TAX_RATES_SHEET = "MF121TP1"
+TAX_FOOTNOTES_SHEET = "MF121TP2"
+TAX_SALES_SHEET = "MF121TP3"
+
+# Column layout of the real sheet: an empty column A, then State and four
+# rate/date pairs. Diesel is the third pair, so anything that reads by position
+# picks up gasoline or LPG instead.
+TAX_HEADERS = [
+    "State",
+    "GasolineRate",
+    "GasolineEffDate",
+    "DieselRate",
+    "DieselEffDate",
+    "LiquefiedRate",
+    "LiquefiedEffDate",
+    "GasoholRate",
+    "GasoholEffDate",
+]
+
+
+def tax_rates() -> dict[str, object]:
+    """A made up diesel rate for every state, with the two dollars cells FHWA really has."""
+    out: dict[str, object] = {}
+    for i, s in enumerate(STATES.states):
+        out[s.name] = round(12 + (i * 37 % 53) + (i % 4) * 0.1, 3)
+    out["Massachusetts"] = 0.24
+    out["Utah"] = 0.31
+    # The stale rows FHWA really has must match taxes.OUT_OF_DATE, or the out
+    # of date check stops the parse. Utah is already set above in dollars.
+    for code, (_, cents, _) in taxes.OUT_OF_DATE.items():
+        name = STATES.by_code(code).name
+        if name not in ("Massachusetts", "Utah"):
+            out[name] = float(cents)
+    return out
+
+
+def tax_footnotes() -> dict[str, list[str]]:
+    """One footnote per state DailyFuel carries a note for, holding the anchor phrase.
+
+    Built from taxes.NOTES so the synthetic sheet always satisfies the anchor
+    check by construction. A test that wants the failure drops an entry.
+    """
+    out: dict[str, list[str]] = {}
+    for code, (_, anchor) in taxes.NOTES.items():
+        name = STATES.by_code(code).name
+        head, _, tail = anchor.partition(" ")
+        # Split across two rows the way FHWA wraps a long footnote.
+        out[name] = [f"Rates are variable. {head}", f"{tail} and the rest of the note."] if tail else [anchor]
+    return out
+
+
+def tax_effective() -> dict[str, str]:
+    """Effective date cells that differ from the default 01/01/24.
+
+    Built from taxes.OUT_OF_DATE so the stale rows FHWA really has (Utah's
+    01/01/21) are there by construction and the out of date check passes.
+    """
+    out: dict[str, str] = {}
+    for code, (since, _, _) in taxes.OUT_OF_DATE.items():
+        y, m, d = since.split("-")
+        out[STATES.by_code(code).name] = f"{m}/{d}/{y[2:]}"
+    return out
+
+
+def tax_workbook(
+    rates: dict[str, object] | None = None,
+    eff: dict[str, str] | None = None,
+    federal=24.4,
+    curr_date="10/16/2025",
+    curr_year="2024",
+    footnotes: dict[str, list[str]] | None = None,
+    headers: list[str] | None = None,
+    rates_sheet: str = TAX_RATES_SHEET,
+    extra_rows: list[list] | None = None,
+    drop_rows: frozenset[str] = frozenset(),
+    sales_sheet: bool = True,
+    scope_line: str | None = None,
+    page_break_in: str | None = None,
+) -> bytes:
+    """A made up .xlsx laid out like FHWA's MF-121T, as bytes.
+
+    Every number is invented. The shape is what the parser is allowed to rely
+    on: sheet names, the machine header row, the CurrDate and CurrYear meta
+    cells, one row per jurisdiction, a Federal Tax row, and the footnotes and
+    sales tax sheets beside them.
+    """
+    import openpyxl
+
+    rates = tax_rates() if rates is None else rates
+    eff = {**tax_effective(), **(eff or {})}
+    footnotes = tax_footnotes() if footnotes is None else footnotes
+    headers = list(TAX_HEADERS if headers is None else headers)
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = rates_sheet
+    ws["B2"], ws["C2"], ws["D2"] = "Line", "CurrDate", "CurrYear"
+    ws["B3"], ws["C3"], ws["D3"] = "8", curr_date, curr_year
+    ws["B5"] = "Tax Rates on Motor Fuel (1)"
+    ws["B9"] = f"Created On: {curr_date}"
+    ws["B10"], ws["C10"], ws["E10"] = "State", "Gasoline", "Diesel"
+    ws["C12"], ws["E12"] = "Rate", "Rate"
+    for i, name in enumerate(headers):
+        ws.cell(row=13, column=2 + i, value=name)
+
+    row = 14
+    ws.cell(row=row, column=3, value=0)  # the real sheet has one nameless zero row
+    row += 1
+    for name, rate in rates.items():
+        if name in drop_rows:
+            continue
+        date_cell = eff.get(name, "01/01/24")
+        values = {
+            "State": name,
+            "GasolineRate": 22,
+            "GasolineEffDate": "01/01/24",
+            "DieselRate": rate,
+            "DieselEffDate": date_cell,
+            "LiquefiedRate": 0,
+            "LiquefiedEffDate": "-",
+            "GasoholRate": 22,
+            "GasoholEffDate": "01/01/24",
+        }
+        for i, name_ in enumerate(headers):
+            ws.cell(row=row, column=2 + i, value=values.get(name_))
+        row += 1
+    for extra in extra_rows or []:
+        for i, value in enumerate(extra):
+            ws.cell(row=row, column=2 + i, value=value)
+        row += 1
+    if federal is not None:
+        for i, name_ in enumerate(headers):
+            value = {"State": "Federal Tax", "DieselRate": federal, "DieselEffDate": "10/01/97"}.get(name_, 0)
+            ws.cell(row=row, column=2 + i, value=value)
+
+    fs = wb.create_sheet(TAX_FOOTNOTES_SHEET)
+    fs["C5"] = "Tax Rates on Motor Fuel - Footnotes A"
+    fs["B10"], fs["C10"], fs["D10"], fs["E10"], fs["H10"] = "RowNum", "State", "Date", "Comments", "RowNum"
+    r = 11
+    n = 1
+    for name, lines in footnotes.items():
+        for i, line in enumerate(lines):
+            if i == 1 and name == page_break_in:
+                # FHWA repeats its title and header block partway down the
+                # sheet, sometimes in the middle of one state's footnote.
+                fs.cell(row=r, column=3, value="Tax Rates on Motor Fuel - Footnotes B")
+                fs.cell(row=r + 1, column=5, value="Page 2 of 3")
+                for c, label in zip((2, 3, 4, 5, 8), ("RowNum", "State", "Date", "Comments", "RowNum")):
+                    fs.cell(row=r + 2, column=c, value=label)
+                r += 3
+            fs.cell(row=r, column=2, value=str(n))
+            fs.cell(row=r, column=8, value=str(n))
+            if i == 0:
+                fs.cell(row=r, column=3, value=name)
+            fs.cell(row=r, column=5, value=line)
+            r += 1
+            n += 1
+    if scope_line is None:
+        scope_line = (
+            "(1) This table shows motor-fuel tax rates in effect as of January 1. Only taxes that are "
+            "levied as a dollar amount per volume of motor fuel are included on sheet one."
+        )
+    fs.cell(row=r + 1, column=3, value=scope_line)
+
+    if sales_sheet:
+        # The trap: column E here is a sales tax percentage, not a rate.
+        ss = wb.create_sheet(TAX_SALES_SHEET)
+        ss["C5"] = "Tax Rates on Motor Fuel A"
+        ss["B10"], ss["C10"], ss["D10"], ss["E10"], ss["F10"] = "RowNum", "State", "Date", "Percent", "Sales Tax"
+        for i, s in enumerate(STATES.states[:12]):
+            ss.cell(row=11 + i, column=2, value=str(i + 1))
+            ss.cell(row=11 + i, column=3, value=s.name)
+            ss.cell(row=11 + i, column=4, value="12/15/2001 12:00:00 AM")
+            ss.cell(row=11 + i, column=5, value=4 + (i % 5) * 0.5)
+            ss.cell(row=11 + i, column=6, value="Applies to fuel not taxable under volume tax laws.")
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def tax_response(body: bytes | None = None, status: int = 200, year: str = "2024") -> Response:
+    url = taxes.URL_TEMPLATE.format(year=year)
+    return Response.make(
+        status,
+        tax_workbook() if body is None else body,
+        url=url,
+        headers={"Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+    )

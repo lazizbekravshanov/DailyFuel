@@ -5,6 +5,7 @@ import Price from "../../components/Price.astro";
 import Change from "../../components/Change.astro";
 import LineChart from "../../components/LineChart.astro";
 import NumbersTable from "../../components/NumbersTable.astro";
+import TaxPanel from "../../components/TaxPanel.astro";
 import chartScript from "../../scripts/chart.js?raw";
 import { getSite, type StateView } from "../../lib/site.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
@@ -271,6 +272,8 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
       </dl>
     </section>
   )}
+
+  {site.tax && s.tax && <TaxPanel site={site} state={s} />}
 
   {peers.length > 0 && (
     <section class="section wrap" aria-labelledby="peers-title">

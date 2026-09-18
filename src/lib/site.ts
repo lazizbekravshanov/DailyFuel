@@ -14,8 +14,10 @@ import {
   type RawData,
   type SeriesKey,
   type StateInfo,
+  type TaxFile,
   type WeeklyFile,
 } from "./data.ts";
+import { taxViews, type TaxView } from "./tax.ts";
 import type { Point } from "./stats.ts";
 
 export const SITE_NAME = "DailyFuel";
@@ -62,6 +64,8 @@ export interface StateView extends StateInfo {
   history: Point[];
   /** The EIA region's weekly history, empty for AK and HI. */
   eiaHistory: Point[];
+  /** What tax is on every gallon here. Null when the FHWA file isn't there. */
+  tax: TaxView | null;
 }
 
 export interface SiteData {
@@ -83,6 +87,8 @@ export interface SiteData {
   };
   /** EIA U.S. weekly move, when EIA data exists. */
   eiaUs: Move | null;
+  /** State diesel tax rates, or null when the FHWA file hasn't been fetched. */
+  tax: TaxFile | null;
 }
 
 export function weeklySeries(weekly: WeeklyFile | null, key: SeriesKey): Point[] {
@@ -122,7 +128,8 @@ let cached: SiteData | null = null;
 export function getSite(): SiteData {
   if (cached) return cached;
   const raw = loadRawData();
-  const { latest, weekly, daily } = raw;
+  const { latest, weekly, daily, tax } = raw;
+  const taxes = tax ? taxViews(tax) : null;
   const mode = latest.mode;
   const cadence: Cadence = mode === "aaa+eia" ? "daily" : "weekly";
   const info = raw.states.states;
@@ -165,6 +172,7 @@ export function getSite(): SiteData {
       fill: fillFor(primary, cadence),
       history: mode === "aaa+eia" ? dailySeries(daily, s.code) : eiaHistory,
       eiaHistory,
+      tax: taxes?.get(s.code) ?? null,
     };
   });
 
@@ -194,6 +202,7 @@ export function getSite(): SiteData {
     regions,
     national,
     eiaUs: latest.eia?.us ?? null,
+    tax,
   };
   return cached;
 }

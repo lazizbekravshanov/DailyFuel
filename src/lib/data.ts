@@ -10,6 +10,7 @@ import type { ValidateFunction } from "ajv";
 import latestSchema from "../../schemas/latest.schema.json";
 import weeklySchema from "../../schemas/eia-diesel-weekly.schema.json";
 import dailySchema from "../../schemas/aaa-daily.schema.json";
+import taxSchema from "../../schemas/state-diesel-tax.schema.json";
 import statesFile from "../data/states.json";
 import { weekday } from "./dates.ts";
 
@@ -85,6 +86,28 @@ export interface DailyFile {
   diesel: Record<string, number>;
 }
 
+export interface TaxFile {
+  schema: "dailyfuel/state-diesel-tax/1";
+  source: string;
+  source_url: string;
+  /** "2024", the FHWA reporting period. */
+  reporting_period: string;
+  /** The day FHWA built the table. */
+  published: string;
+  fetched_at: string;
+  /** Federal diesel excise, cents a gallon. */
+  federal_cpg: number;
+  /** State excise in cents a gallon, null where FHWA publishes no per gallon rate. */
+  states: Record<string, number | null>;
+  /** The day each state's rate took effect, as FHWA has it. Null with no rate. */
+  effective: Record<string, string | null>;
+  /** States whose FHWA rate is known to be out of date. Shown as such, never ranked. */
+  out_of_date: string[];
+  notes: Record<string, string>;
+  /** What the table counts and leaves out, one line for every state page. */
+  scope: string;
+}
+
 export interface StateInfo {
   code: string;
   name: string;
@@ -106,6 +129,8 @@ export interface RawData {
   weekly: WeeklyFile | null;
   /** Ascending by date. Empty in eia_only mode. */
   daily: DailyFile[];
+  /** Null when taxes/state_diesel_tax.json hasn't been fetched. */
+  tax: TaxFile | null;
   states: StatesFile;
 }
 
@@ -128,6 +153,7 @@ function makeValidators() {
     latest: ajv.compile(latestSchema),
     weekly: ajv.compile(weeklySchema),
     daily: ajv.compile(dailySchema),
+    tax: ajv.compile(taxSchema),
   };
 }
 
@@ -162,7 +188,7 @@ function fail(cond: boolean, message: string): void {
 
 /** Cross file rules the JSON Schemas can't express. */
 export function checkConsistency(data: Omit<RawData, "dir">): void {
-  const { latest, weekly, daily, states } = data;
+  const { latest, weekly, daily, tax, states } = data;
   const info = states.states;
 
   fail(latest.states.length !== info.length, `latest.json has ${latest.states.length} states, expected ${info.length}`);
@@ -196,6 +222,25 @@ export function checkConsistency(data: Omit<RawData, "dir">): void {
     for (const s of latest.states) {
       fail(Math.abs(newest.diesel[s.code] - s.aaa!.price) > 0.00005,
         `${s.code} AAA price in latest.json doesn't match aaa/daily/${newest.as_of}.json`);
+    }
+  }
+
+  if (tax) {
+    const codes = info.map((s) => s.code);
+    const got = Object.keys(tax.states);
+    fail(got.length !== codes.length || codes.some((c) => !(c in tax.states)),
+      `taxes/state_diesel_tax.json covers ${got.length} states, expected the ${codes.length} in states.json`);
+    for (const code of Object.keys(tax.notes)) {
+      fail(!codes.includes(code), `taxes/state_diesel_tax.json has a note for ${code}, which is not a state`);
+    }
+    for (const code of codes) {
+      const rated = tax.states[code] !== null;
+      fail(rated !== (tax.effective[code] !== null),
+        `taxes/state_diesel_tax.json has ${code} with a rate and an effective date that don't go together`);
+    }
+    for (const code of tax.out_of_date) {
+      fail(tax.states[code] === null, `taxes/state_diesel_tax.json marks ${code} out of date but has no rate for it`);
+      fail(!tax.notes[code], `taxes/state_diesel_tax.json marks ${code} out of date without a note saying why`);
     }
   }
 
@@ -246,7 +291,12 @@ export function loadRawData(dirInput = process.env.DAILYFUEL_DATA_DIR ?? "data")
     }
   }
 
-  const data = { latest, weekly, daily, states: statesFile as unknown as StatesFile };
+  // Tax rates come from a separate FHWA table that moves about once a year, so
+  // the file is optional. Without it the site simply shows no tax figures.
+  const taxPath = join(dir, "taxes", "state_diesel_tax.json");
+  const tax = existsSync(taxPath) ? check<TaxFile>(v.tax, readJson(taxPath), taxPath) : null;
+
+  const data = { latest, weekly, daily, tax, states: statesFile as unknown as StatesFile };
   checkConsistency(data);
   return { dir, ...data };
 }

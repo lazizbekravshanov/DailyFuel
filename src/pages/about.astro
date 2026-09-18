@@ -3,9 +3,18 @@ import Base from "../layouts/Base.astro";
 import { getSite, REPO_URL } from "../lib/site.ts";
 import { formatBadgeDate, formatDate, formatMonthYear } from "../lib/dates.ts";
 import { formatPrice } from "../lib/format.ts";
+import { inSentence, newestRate, spokenCpg } from "../lib/tax.ts";
 
 const site = getSite();
 const aaaMode = site.mode === "aaa+eia";
+const tax = site.tax;
+const taxPage = tax ? `https://www.fhwa.dot.gov/policyinformation/statistics/${tax.reporting_period}/mf121t.cfm` : "";
+// Named out loud so nobody has to guess why a state page shows no state figure.
+const noTaxFigure = tax
+  ? site.states.filter((s) => s.tax?.state == null).map((s) => inSentence(s.name))
+  : [];
+const staleTax = tax ? site.states.filter((s) => s.tax?.outOfDate).map((s) => inSentence(s.name)) : [];
+const newestTax = tax ? newestRate(tax) : null;
 const release = site.latest.eia?.release_date ?? site.weekly?.release_date ?? null;
 const first = site.weekly?.weeks[0]?.period ?? null;
 const us = site.national.move;
@@ -52,6 +61,39 @@ const description = aaaMode
       )}
     </section>
 
+    {tax && (
+      <section aria-labelledby="tax">
+        <h2 id="tax">Tax on every gallon</h2>
+        <p>
+          Every state taxes diesel, and the federal government adds {spokenCpg(tax.federal_cpg)} on top. Each state page
+          shows the tax on a gallon there and where the state ranks.
+        </p>
+        <p>
+          Keep the tax apart from the prices here. It comes from a different source and covers a different time,
+          {aaaMode ? "" : " and most prices here are regional averages,"} so taking the tax off a price won't tell you
+          what diesel costs before tax.
+        </p>
+        <p>
+          The rates come from the Federal Highway Administration, which collects them from the states once a year. This
+          is FHWA's {tax.reporting_period} table.{newestTax && ` The newest rate in it took effect in ${formatMonthYear(newestTax)}, so a change after that isn't in yet.`}
+          {" "}Many states change their rate every year, so check with the state before you count on a figure. Each
+          state page says when its rate took effect.
+        </p>
+        <p>{tax.scope}</p>
+        {noTaxFigure.length > 0 && (
+          <p>
+            FHWA's table has no diesel rate for {noTaxFigure.join(", ")}, so that page shows only the federal rate. That
+            doesn't mean there's no tax on diesel there.
+          </p>
+        )}
+        {staleTax.length > 0 && (
+          <p>
+            FHWA's rate for {staleTax.join(", ")} is known to be out of date, so {staleTax.length === 1 ? "that page says so and it isn't" : "those pages say so and they aren't"} ranked.
+          </p>
+        )}
+      </section>
+    )}
+
     <section aria-labelledby="updates">
       <h2 id="updates">How often it updates</h2>
       <p>
@@ -72,6 +114,13 @@ const description = aaaMode
         <p>
           Daily state averages: AAA (<a href="https://gasprices.aaa.com/">gasprices.aaa.com</a>), data by OPIS. Price as of {formatBadgeDate(site.latest.aaa.as_of)}.
           DailyFuel is not affiliated with AAA or OPIS. AAA and OPIS data is not covered by DailyFuel's code license.
+        </p>
+      )}
+      {tax && (
+        <p>
+          Diesel tax: Federal Highway Administration, Highway Statistics{" "}
+          <a href={taxPage}>table MF-121T</a> ({tax.reporting_period} reporting period, published {formatMonthYear(tax.published)}).
+          FHWA data is a U.S. government work in the public domain.
         </p>
       )}
       <p>

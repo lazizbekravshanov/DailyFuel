@@ -35,13 +35,14 @@ The switch is the repo variable `AAA_ENABLED`. Only the exact string `true` turn
 |---|---|---|
 | Weekly diesel prices | U.S. Energy Information Administration, [Gasoline and Diesel Fuel Update](https://www.eia.gov/petroleum/gasdiesel/) | Public domain. EIA asks for credit with the release date, and the site shows it. |
 | Backup copy of the same EIA prices, only used when EIA's workbook fails | USDA Agricultural Marketing Service, [agtransport.usda.gov](https://agtransport.usda.gov/) | U.S. government data |
+| State diesel tax rates | Federal Highway Administration, Highway Statistics [table MF-121T](https://www.fhwa.dot.gov/policyinformation/statistics/2024/mf121t.cfm) | U.S. government work, public domain. The site credits FHWA with the reporting period. |
 | Daily state prices (off for now) | AAA, [gasprices.aaa.com](https://gasprices.aaa.com/), data by OPIS | Not covered by this repo's license. See [data/aaa/README.md](data/aaa/README.md). |
 | US map shapes | [us-atlas](https://github.com/topojson/us-atlas) © 2013 to 2019 Michael Bostock, from U.S. Census Bureau boundaries | ISC |
 | Map drawing | [d3-geo](https://github.com/d3/d3-geo) and [topojson-client](https://github.com/topojson/topojson-client) | ISC |
 | Font | [Overpass](https://github.com/RedHatOfficial/Overpass) by The Overpass Project Authors, self hosted through Fontsource | SIL Open Font License 1.1 |
 | DailyFuel code | this repo | MIT, see [LICENSE](LICENSE) |
 
-The MIT license covers the code only. Each data source keeps its own terms. DailyFuel isn't affiliated with EIA, USDA, AAA or OPIS.
+The MIT license covers the code only. Each data source keeps its own terms. DailyFuel isn't affiliated with EIA, USDA, FHWA, AAA or OPIS.
 
 ## Run it locally
 
@@ -60,6 +61,21 @@ python scripts/health.py          # the same checks the scheduled job runs
 ```
 
 Run `update_data.py` twice in a row and the second run changes nothing. Locally it writes `run_status.json` in the repo root, which git ignores.
+
+### Diesel tax
+
+State diesel tax rates come from FHWA's table MF-121T, which FHWA posts once a year. They aren't part of the scheduled job. Refresh them by hand when a new reporting period comes out:
+
+```sh
+python scripts/update_taxes.py --year 2025     # fetches MF-121T for that year
+python scripts/update_taxes.py --file mf121t.xlsx --year 2025   # or read a copy you downloaded
+```
+
+It needs `openpyxl`, which is in the dev packages only. It writes `data/taxes/state_diesel_tax.json`, validated against its schema, and a rerun on the same table changes nothing. If FHWA changes the shape of the sheet, it stops and writes nothing.
+
+FHWA's footnotes are old (every one is dated 2002) and some describe taxes states have since changed, so the site never repeats a footnote just because FHWA prints it. The few state notes in `scripts/dailyfuel/taxes.py` were each checked against the state's own law or tax agency, with the source written beside them. The same goes for `OUT_OF_DATE`, the rates FHWA still prints that are known to be stale (Utah's 2021 rate in the 2024 table). A new reporting period stops the run until someone checks those again and bumps `NOTES_CHECKED_FOR`. A rate that moves more than 10 cents against the file on disk stops it too; check it, then pass `--allow-big-moves`.
+
+Tax is shown on its own. It never goes into a price, a change, or a map color.
 
 `scripts/make_fixtures.py` writes a complete `aaa+eia` data folder with made up AAA numbers to `tmp/fixture-data/` (also ignored by git). Nothing in it comes from AAA. By default the newest fake day is 3 days after EIA's newest week. For a preview without the "older than usual" banner, date it today:
 
@@ -99,15 +115,17 @@ The build stops with `DailyFuel data check failed: ...` when a file is missing, 
 data/
   eia/diesel_weekly.json   EIA weekly prices since 2022-06-13, one week per line
   aaa/README.md            rights notice (aaa/daily/ only shows up once AAA is on)
+  taxes/state_diesel_tax.json  state diesel tax rates from FHWA, refreshed by hand once a year
   latest.json              the snapshot the site renders
-schemas/                   JSON Schemas for the three data files, the contract
+schemas/                   JSON Schemas for the data files, the contract
 scripts/
   update_data.py           the data job
   health.py                fails the job on errors or stale data
+  update_taxes.py          refreshes the tax file from FHWA, run by hand, not by the job
   make_fixtures.py         synthetic aaa+eia data for CI and previews
   requirements.txt         requests, beautifulsoup4, xlrd, jsonschema (pinned)
-  requirements-dev.txt     pytest (pinned)
-  dailyfuel/               the Python package: states, http, store, eia, aaa, derive, pipeline, health
+  requirements-dev.txt     pytest and openpyxl (pinned)
+  dailyfuel/               the Python package: states, http, store, eia, aaa, derive, pipeline, health, taxes
 tests/                     pytest, synthetic fixtures only
 src/
   data/states.json         every state with its FIPS code, EIA region and tile map spot
