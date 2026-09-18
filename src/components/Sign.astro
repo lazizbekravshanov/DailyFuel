@@ -113,10 +113,23 @@ const { legend, price, noPrice = "No price", change, pct = null, prev = null, ca
     font-variant-numeric: proportional-nums;
   }
 
+  /* the raised tenth sits level with the cap tops, like a pump board */
   .sign-price :global(.tenth) {
     font-size: 0.5em;
-    top: -0.62em;
+    top: -0.72em;
     margin-left: 0.04em;
+  }
+
+  /* From a 1024 laptop up, the price and the plaque share one row once the
+     price gives up a little size. On a wide state sign that's 112px to 106px,
+     which keeps a double digit percent like "(+10.1%)" on one line. */
+  @container (min-width: 460px) {
+    .sign-body {
+      column-gap: 16px;
+    }
+    .sign-price:not(.sign-price-none) {
+      font-size: min(17.5cqi, 112px);
+    }
   }
 
   .sign-price-none {
@@ -133,10 +146,14 @@ const { legend, price, noPrice = "No price", change, pct = null, prev = null, ca
 
   .sign-change-block {
     text-align: left;
+    /* lets the plaque wrap its own text under WCAG text spacing instead of
+       pushing past the sign's border */
+    min-width: 0;
   }
   @container (min-width: 600px) {
     .sign-body {
       flex-wrap: nowrap;
+      column-gap: 16px;
     }
     .sign-change-block {
       padding-bottom: 2px;
@@ -155,6 +172,10 @@ const { legend, price, noPrice = "No price", change, pct = null, prev = null, ca
     --glyph-up: #c94d47;
     --glyph-down: #3a75bf;
     --glyph-flat: #51565b;
+  }
+
+  .plaque :global(.change) {
+    white-space: normal;
   }
 
   .plaque :global(.muted) {
@@ -199,6 +220,11 @@ const { legend, price, noPrice = "No price", change, pct = null, prev = null, ca
        Only the date under the price needs the clearance. */
     .sign-price-block .sign-date {
       margin-top: 16px;
+    }
+    /* Forced colors repaints the transparent digit under a rolling reel, so
+       the roll would show every digit twice. Keep the plain price instead. */
+    .sign .sign-price :global(.dg .reel) {
+      display: none;
     }
   }
 </style>
