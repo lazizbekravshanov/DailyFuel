@@ -106,11 +106,6 @@ const pick = inlineCall(rememberPick, "document", "function(){return window.loca
        list, with a little air over it */
     scroll-margin-top: calc(64px + var(--space-4));
   }
-  @media (min-width: 640px) {
-    .find-list {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
   .find-list:focus-visible {
     outline-offset: -3px;
   }

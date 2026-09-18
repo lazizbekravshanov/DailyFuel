@@ -4,7 +4,7 @@ import { parseHTML } from "linkedom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { formatCents, priceParts, spokenChange } from "../lib/format.ts";
 import { inlineCall } from "../lib/inline.ts";
-import { rememberPick, yourState, yourStateList } from "./your-state.ts";
+import { rememberPick, saveOnView, yourState, yourStateList } from "./your-state.ts";
 
 const KEY = "dailyfuel:state";
 
@@ -429,9 +429,29 @@ describe("picking a state from the list", () => {
     expect(() => rememberPick(document as unknown as Document, () => new MemoryStore() as unknown as Storage)).not.toThrow();
   });
 
-  it("is the only thing that saves: state pages print no save call", () => {
+  it("state pages save the state being viewed", () => {
     const statePage = readFileSync(new URL("../pages/state/[code].astro", import.meta.url), "utf8");
-    expect(statePage).not.toMatch(/saveState|setItem|localStorage/);
+    expect(statePage).toMatch(/inlineCall\(saveOnView/);
+  });
+});
+
+describe("saveOnView", () => {
+  it("stores the code of the page being viewed", () => {
+    const store = new MemoryStore("OH");
+    saveOnView("TX", () => store as unknown as Storage);
+    expect(store.map.get(KEY)).toBe("TX");
+  });
+
+  it("stays quiet when storage throws or is missing", () => {
+    expect(() => saveOnView("TX", () => { throw new Error("blocked"); })).not.toThrow();
+    const throwing = { setItem() { throw new Error("quota"); } } as unknown as Storage;
+    expect(() => saveOnView("TX", () => throwing)).not.toThrow();
+  });
+
+  it("runs on its own as an inline script", () => {
+    const store = new MemoryStore();
+    new Function("store", inlineCall(saveOnView, '"PA"', "function(){return store}"))(store);
+    expect(store.map.get(KEY)).toBe("PA");
   });
 });
 
@@ -468,6 +488,7 @@ describe("what ships in the page", () => {
     inlineCall(yourState, "document", STORE),
     inlineCall(yourStateList, "document", STORE, "location.hash"),
     inlineCall(rememberPick, "document", STORE),
+    inlineCall(saveOnView, '"OH"', STORE),
   ];
 
   it("runs on its own as inline scripts, with nothing from outside their bodies", () => {

@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
+import { SITE_URL } from "./src/lib/url.ts";
 import sitemap from "@astrojs/sitemap";
 import { transformSync } from "esbuild";
 
@@ -54,7 +55,7 @@ function minifyInlineScripts() {
 }
 
 export default defineConfig({
-  site: "https://dailydiesel.vercel.app",
+  site: SITE_URL,
   output: "static",
   trailingSlash: "ignore",
   integrations: [

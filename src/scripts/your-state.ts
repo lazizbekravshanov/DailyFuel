@@ -1,8 +1,9 @@
 // "Your state": pick a state once from the Find your state list and the home
 // page shows its price as a small sign under the U.S. sign, so a return visit
-// takes zero taps. Only a pick from the list saves it. Opening another state's
-// page, like a neighbor's, leaves your state alone. The state code is the only
-// thing stored, in this browser's localStorage under "dailyfuel:state".
+// takes zero taps. A pick from the list saves it, and so does opening a state's
+// page, so the last state you looked at is the one waiting on the home page.
+// The state code is the only thing stored, in this browser's localStorage
+// under "dailyfuel:state".
 // Nothing is sent anywhere.
 //
 // All three functions ship as inline scripts: the pages print `(${fn})(...)`,
@@ -28,6 +29,18 @@ export function rememberPick(doc: Document, getStore: () => Storage): void {
       // private mode, blocked storage, quota: the link still works
     }
   });
+}
+
+/**
+ * On every state page: remember the state being viewed, so the home page
+ * shows it next time. Storage that throws is ignored; the page works the same.
+ */
+export function saveOnView(code: string, getStore: () => Storage): void {
+  try {
+    getStore().setItem("dailyfuel:state", code);
+  } catch (err) {
+    // private mode, blocked storage, quota: nothing to do
+  }
 }
 
 interface Entry {

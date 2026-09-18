@@ -16,6 +16,8 @@ import { DOE_LINE, DYED_DIESEL_HERE, peakSentence } from "../../lib/doe.ts";
 import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText, WEEKLY_LEAD } from "../../lib/release.ts";
 import { regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence } from "../../lib/copy.ts";
 import { regionPlate } from "../../lib/yourstate.ts";
+import { inlineCall } from "../../lib/inline.ts";
+import { saveOnView } from "../../scripts/your-state.ts";
 import type { Move } from "../../lib/data.ts";
 
 export function getStaticPaths() {
@@ -227,6 +229,8 @@ const plate = regionPlate(s, site);
 const legend = noSurvey ? `Diesel in ${s.name}` : plate ? s.name : `${s.name} diesel average`;
 const description = stateDescription(s, site);
 const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
+// Remember this state for the home page's "your state" row.
+const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return window.localStorage}");
 ---
 <Base title={title} description={description}>
   <div class="wrap back-row">
@@ -418,6 +422,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
   )}
 
   <Fragment slot="scripts">
+    <script is:inline set:html={save}></script>
     {charts.length > 0 && <script is:inline set:html={chartScript}></script>}
   </Fragment>
 </Base>

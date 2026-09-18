@@ -21,7 +21,7 @@ import { taxViews, type TaxView } from "./tax.ts";
 import type { Point } from "./stats.ts";
 
 export const SITE_NAME = "DailyFuel";
-export const SITE_URL = "https://dailydiesel.vercel.app";
+export { SITE_URL } from "./url.ts";
 export const REPO_URL = "https://github.com/lazizbekravshanov/DailyFuel";
 
 /**
