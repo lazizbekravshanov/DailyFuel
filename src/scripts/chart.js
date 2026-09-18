@@ -1,11 +1,18 @@
 // Crosshair and tooltip for line charts. Pointer or keyboard: focus a chart and
-// use the arrow keys. Every value is also in the table under the chart.
+// use the arrow keys. Every value is also in the table under the chart. The
+// charts are static SVG drawn at build time; this is the only chart code here.
 (function () {
   var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  function dateLabel(iso, weekly) {
+  function shortDate(iso) {
     var a = iso.split("-");
-    var s = MONTHS[+a[1] - 1] + " " + +a[2] + ", " + a[0];
+    return MONTHS[+a[1] - 1] + " " + +a[2];
+  }
+  function dateLabel(iso, weekly) {
+    var s = shortDate(iso) + ", " + iso.slice(0, 4);
     return weekly ? "Week of " + s : s;
+  }
+  function day(iso) {
+    return Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)) / 86400000;
   }
   function priceNodes(v) {
     var units = Math.round(v * 10000);
@@ -26,6 +33,19 @@
     frag.appendChild(vis);
     return frag;
   }
+  // "▲ 30.4¢ vs week before": format.ts changeTenths rounding, map bin flat line
+  function changeRow(v, b, date, weekly, flat) {
+    var d = Math.round(v * 10000) - Math.round(b[1] * 10000);
+    var t = Math.floor((Math.abs(d) + 5) / 10);
+    var row = document.createElement("div");
+    row.className = "tip-row tip-change";
+    row.innerHTML = '<span class="tg tg-' + (t < flat ? "flat" : d > 0 ? "up" : "down") + '"></span>';
+    var one = weekly ? 7 : 1;
+    row.appendChild(document.createTextNode(Math.floor(t / 10) + "." + (t % 10) + "¢ vs " +
+      (day(date) - day(b[0]) === one ? (weekly ? "week" : "day") + " before" : shortDate(b[0]))));
+    return row;
+  }
+
   document.querySelectorAll("[data-chart]").forEach(function (plot) {
     var data;
     try { data = JSON.parse(plot.getAttribute("data-chart")); } catch (e) { return; }
@@ -49,12 +69,23 @@
     area.appendChild(tip);
     var idx = -1;
 
+    // newest earlier value of the primary series, for the change row
+    function earlier(i) {
+      var vals = data.series[0].values;
+      for (var j = i - 1; j >= 0; j--) if (vals[j] !== null) return [data.dates[j], vals[j]];
+      return data.prev;
+    }
+
     function show(i) {
       idx = Math.max(0, Math.min(n - 1, i));
       var x = data.x[idx];
       cross.style.left = x + "%";
       cross.hidden = false;
       tip.textContent = "";
+      var head = document.createElement("div");
+      head.className = "tip-date";
+      head.textContent = dateLabel(data.dates[idx], data.weekly);
+      tip.appendChild(head);
       data.series.forEach(function (s, k) {
         var v = s.values[idx];
         var y = s.y[idx];
@@ -78,11 +109,11 @@
         row.appendChild(val);
         row.appendChild(lab);
         tip.appendChild(row);
+        if (k === 0 && v !== null) {
+          var b = earlier(idx);
+          if (b) tip.appendChild(changeRow(v, b, data.dates[idx], data.weekly, data.flat));
+        }
       });
-      var head = document.createElement("div");
-      head.className = "tip-date";
-      head.textContent = dateLabel(data.dates[idx], data.weekly);
-      tip.insertBefore(head, tip.firstChild);
       tip.hidden = false;
       // put the tooltip beside the crosshair on whichever side has room
       var aw = area.offsetWidth, tw = tip.offsetWidth, px = (x / 100) * aw;

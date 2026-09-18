@@ -1,36 +1,54 @@
 ---
 // A line chart with one y axis, hairline grid, 2px lines, and a direct label at
-// the end of each line. Hover or keyboard focus shows a crosshair and tooltip.
+// the end of each line. Observable Plot draws the grid and lines at build time
+// (src/lib/plotting.ts), so the page gets plain SVG and no chart library.
+// Hover or keyboard focus shows a crosshair and tooltip (src/scripts/chart.js).
 import Price from "./Price.astro";
-import type { ChartModel } from "../lib/chart.ts";
+import { chartLabel, type ChartModel } from "../lib/chart.ts";
+import { linesSvg } from "../lib/plotting.ts";
+import { EDGES } from "../lib/bins.ts";
 interface Props {
   model: ChartModel;
   height: number;
-  label: string;
+  /** Full accessible name. Leave it out to build one with chartLabel from `title`. */
+  label?: string;
+  /** What and over what stretch, for the built name: "Midwest weekly diesel price, last 52 weeks". */
+  title?: string;
+  /** Where the numbers are, for the built name: "Every week is in the table below." */
+  tableNote?: string;
   weekly: boolean;
   compact?: boolean;
   class?: string;
 }
-const { model, height, label, weekly, compact = false, class: cls } = Astro.props;
-const hover = JSON.stringify({ weekly, dates: model.hover.dates, x: model.hover.x, series: model.hover.series });
+const { model, height, label, title, tableNote, weekly, compact = false, class: cls } = Astro.props;
+const primary = model.paths.find((p) => p.kind === "primary") ?? model.paths[0];
+const name = label ?? chartLabel({ name: title ?? primary?.label ?? "Price", points: primary?.points ?? [], weekly, tableNote });
+const svg = linesSvg({
+  from: model.from,
+  to: model.to,
+  lo: model.yDomain.lo,
+  hi: model.yDomain.hi,
+  grid: model.grid,
+  lines: model.paths.map((p) => ({ kind: p.kind, step: p.step, points: p.points })),
+});
+// The tooltip's change row uses the same about the same line as the map bins.
+const flat = EDGES[weekly ? "weekly" : "daily"][0];
+const hover = JSON.stringify({ weekly, flat, prev: model.hover.prev, dates: model.hover.dates, x: model.hover.x, series: model.hover.series });
 ---
 <div class:list={["chart", compact && "chart-compact", cls]} style={`--h:${height}px`}>
-  <div class="chart-plot" tabindex="0" role="img" aria-label={label} data-chart={hover}>
+  <div class="chart-plot" tabindex="0" role="img" aria-label={name} data-chart={hover}>
     <div class="y-axis" aria-hidden="true">
       {model.yTicks.map((t) => <span style={`top:${t.pos}%`}>{t.label}</span>)}
     </div>
     <div class="plot-area">
-      <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        {model.yTicks.map((t) => <line class="grid" x1="0" x2="1000" y1={t.pos * 10} y2={t.pos * 10}></line>)}
-        {model.paths.map((p) => <path class={`line line-${p.kind}`} d={p.d}></path>)}
-      </svg>
+      <Fragment set:html={svg} />
       {model.ends.map((e) => <span class={`end-dot end-dot-${e.kind}`} style={`left:${e.x}%;top:${e.y}%`} aria-hidden="true"></span>)}
     </div>
     <div class="end-labels" aria-hidden="true">
       {model.showEndLabels && model.ends.map((e) => <span class={`end-${e.kind}`} style={`top:${e.y}%`}><Price price={e.value} /></span>)}
     </div>
     <div class="x-axis" aria-hidden="true">
-      {model.xTicks.map((t) => <span class:list={[t.minor && "minor"]} style={`left:${t.pos}%`}>{t.label}</span>)}
+      {model.xTicks.map((t) => <span class:list={[t.minor && "minor", t.anchor === "start" && "start"]} style={`left:${t.pos}%`}>{t.label}</span>)}
     </div>
   </div>
 </div>
@@ -43,8 +61,9 @@ const hover = JSON.stringify({ weekly, dates: model.hover.dates, x: model.hover.
     grid-template-rows: var(--h) auto;
     border-radius: 4px;
   }
+  /* small multiples: a card can hand its y label column to the plot */
   .chart-compact .chart-plot {
-    grid-template-columns: 42px minmax(0, 1fr) 58px;
+    grid-template-columns: var(--y-axis-w, 34px) minmax(0, 1fr) 58px;
   }
   .chart-plot:focus-visible {
     outline-offset: 6px;
@@ -74,30 +93,34 @@ const hover = JSON.stringify({ weekly, dates: model.hover.dates, x: model.hover.
     grid-row: 1;
     touch-action: pan-y;
   }
-  .plot-area svg {
+  .plot-area :global(svg) {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     overflow: visible;
   }
-  .grid {
+  .plot-area :global(.grid) {
     stroke: var(--hairline);
     stroke-width: 1;
+  }
+  .plot-area :global(.grid line) {
     vector-effect: non-scaling-stroke;
     shape-rendering: crispEdges;
   }
-  .line {
+  .plot-area :global(.line) {
     fill: none;
     stroke-width: 2;
-    vector-effect: non-scaling-stroke;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .line-primary {
+  .plot-area :global(.line path) {
+    vector-effect: non-scaling-stroke;
+  }
+  .plot-area :global(.line-primary) {
     stroke: var(--line-primary);
   }
-  .line-bench {
+  .plot-area :global(.line-bench) {
     stroke: var(--line-bench);
   }
   .end-dot {
@@ -141,6 +164,10 @@ const hover = JSON.stringify({ weekly, dates: model.hover.dates, x: model.hover.
     font-size: 13px;
     color: var(--ink-2);
   }
+  /* a month name that starts on the first of its month */
+  .x-axis .start {
+    transform: none;
+  }
   @media (max-width: 639px) {
     .x-axis .minor {
       display: none;
@@ -148,6 +175,13 @@ const hover = JSON.stringify({ weekly, dates: model.hover.dates, x: model.hover.
   }
   .chart-compact .end-labels span {
     font-size: 14px;
+  }
+  .chart-compact .y-axis span {
+    font-size: 12px;
+  }
+  .chart-compact .x-axis span {
+    top: 8px;
+    font-size: 12px;
   }
 
   .plot-area :global(.cross) {
@@ -212,5 +246,48 @@ const hover = JSON.stringify({ weekly, dates: model.hover.dates, x: model.hover.
   }
   .plot-area :global(.tip-key-bench) {
     background: var(--line-bench);
+  }
+  /* the week's move under the price: glyph in its color, numbers in ink */
+  .plot-area :global(.tip-change) {
+    gap: 0;
+    padding-left: 22px;
+  }
+  /* direction glyph drawn in CSS, the same shapes as Glyph.astro */
+  .plot-area :global(.tg) {
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    margin-right: 0.35em;
+  }
+  .plot-area :global(.tg-up) {
+    background: var(--glyph-up);
+    clip-path: polygon(50% 8%, 98% 92%, 2% 92%);
+  }
+  .plot-area :global(.tg-down) {
+    background: var(--glyph-down);
+    clip-path: polygon(2% 8%, 98% 8%, 50% 92%);
+  }
+  .plot-area :global(.tg-flat) {
+    background: var(--glyph-flat);
+    clip-path: circle(36%);
+  }
+
+  /* Windows contrast themes drop span backgrounds. The dots, the crosshair and
+     the tooltip key are data marks, so they keep a color the theme picks. */
+  @media (forced-colors: active) {
+    .end-dot,
+    .plot-area :global(.cross),
+    .plot-area :global(.cross-dot),
+    .plot-area :global(.tip-key),
+    .plot-area :global(.tg) {
+      forced-color-adjust: none;
+      background: CanvasText;
+      box-shadow: none;
+    }
+    /* The state page range switch marks its checked choice with a fill the
+       theme would erase, so both choices would look the same. Keep the fill. */
+    :global(.range-switch .range input:checked + label) {
+      forced-color-adjust: none;
+    }
   }
 </style>

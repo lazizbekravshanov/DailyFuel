@@ -1,0 +1,136 @@
+---
+// The U.S. weekly price since our records start, as a small line with no axis.
+// Made for the summary column beside the sign, never inside it: an ink line
+// would nearly vanish on the green. Drawn by Observable Plot at build time.
+// Screen readers get the whole story in the name: now, the move, the high and
+// the low. It has no hover, so it adds no tab stop.
+import { buildChart, chartLabel } from "../lib/chart.ts";
+import { formatMonthYear } from "../lib/dates.ts";
+import { peakSentence } from "../lib/doe.ts";
+import { linesSvg } from "../lib/plotting.ts";
+import { peakKind, present } from "../lib/stats.ts";
+import { weeklySeries, type SiteData } from "../lib/site.ts";
+interface Props {
+  site: SiteData;
+  /** Plot height in px. */
+  height?: number;
+  class?: string;
+}
+const { site, height = 64, class: cls } = Astro.props;
+const all = weeklySeries(site.weekly, "NUS");
+const v = present(all);
+const first = v[0];
+const last = v[v.length - 1];
+// A sparkline fills its height: the lowest week sits at the bottom, the highest
+// at the top, with a little air for the 2px line.
+const lo = Math.min(...v.map((p) => p.value));
+const hi = Math.max(...v.map((p) => p.value));
+const pad = Math.max((hi - lo) * 0.04, 0.01);
+const model = v.length > 1
+  ? buildChart([{ id: "us", label: "U.S. average", kind: "primary", points: all }], {
+      from: first.date,
+      to: last.date,
+      yDomain: { lo: lo - pad, hi: hi + pad, step: hi - lo + 2 * pad, ticks: [] },
+      heightPx: height,
+      xTicks: "years",
+    })
+  : null;
+const start = first ? formatMonthYear(first.date) : "";
+const caption = `U.S. average since ${start}`;
+const peak = model ? peakSentence(peakKind(all), "U.S.") : null;
+const label = model ? `${chartLabel({ name: `U.S. weekly diesel price since ${start}`, points: all, weekly: true })}${peak ? ` ${peak}` : ""}` : "";
+const svg = model
+  ? linesSvg({
+      from: model.from,
+      to: model.to,
+      lo: model.yDomain.lo,
+      hi: model.yDomain.hi,
+      grid: [],
+      lines: model.paths.map((p) => ({ kind: p.kind, points: p.points })),
+    })
+  : "";
+const end = model?.ends[0];
+---
+{model && (
+  <figure class:list={["us-spark", cls]} style={`--h:${height}px`}>
+    <figcaption class="spark-cap">{caption}</figcaption>
+    <div class="spark" role="img" aria-label={label}>
+      <div class="spark-plot">
+        <Fragment set:html={svg} />
+        {end && <span class="spark-dot" style={`left:${end.x}%;top:${end.y}%`}></span>}
+      </div>
+      <div class="spark-x" aria-hidden="true">
+        {model.xTicks.map((t) => <span style={`left:${t.pos}%`}>{t.label}</span>)}
+      </div>
+    </div>
+  </figure>
+)}
+
+<style>
+  .us-spark {
+    margin: 0;
+    max-width: 420px;
+  }
+  .spark-cap {
+    font-size: var(--fs-small);
+    line-height: 1.3;
+    color: var(--ink-2);
+    margin-bottom: var(--space-2);
+  }
+  /* the dot and its halo need room past the last point */
+  .spark {
+    padding-right: 6px;
+  }
+  .spark-plot {
+    position: relative;
+    height: var(--h);
+  }
+  .spark-plot :global(svg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .spark-plot :global(.line) {
+    fill: none;
+    stroke: var(--line-primary);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .spark-plot :global(.line path) {
+    vector-effect: non-scaling-stroke;
+  }
+  .spark-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    border-radius: 50%;
+    background: var(--line-primary);
+    box-shadow: 0 0 0 2px var(--paper);
+  }
+  .spark-x {
+    position: relative;
+    height: 20px;
+    border-top: 1px solid var(--hairline);
+    margin-top: 6px;
+  }
+  .spark-x span {
+    position: absolute;
+    top: 5px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    line-height: 1;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  @media (forced-colors: active) {
+    .spark-dot {
+      forced-color-adjust: none;
+      background: CanvasText;
+      box-shadow: none;
+    }
+  }
+</style>

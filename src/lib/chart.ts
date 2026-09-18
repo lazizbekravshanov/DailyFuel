@@ -1,10 +1,13 @@
-// Line chart geometry, computed at build time. The SVG uses a 1000 by 1000
-// viewBox stretched to the plot box with non scaling strokes, and every label is
-// HTML placed by percent, so text never shrinks on a phone.
+// Line chart model, computed at build time. The lines are drawn by Observable
+// Plot (see plotting.ts) into a stretched SVG with non scaling strokes. Every
+// label is HTML placed by percent from the same Plot scales, so text never
+// shrinks on a phone. The hover data feeds the crosshair script in
+// src/scripts/chart.js, which is the only chart code that runs in the browser.
 
-import { addDays, dayNumber, formatMonthTick } from "./dates.ts";
-import { formatPrice, formatTick } from "./format.ts";
-import type { Point } from "./stats.ts";
+import { addDays, dayNumber, daysBetween, formatDate, formatMonthTick } from "./dates.ts";
+import { changeTenths, formatPrice, formatTick, spokenChange } from "./format.ts";
+import { frameScales } from "./plotting.ts";
+import { present, type Point, type Valued } from "./stats.ts";
 
 export interface ChartSeries {
   id: string;
@@ -21,26 +24,51 @@ export interface Tick {
   /** 0 to 100 from the top for y, from the left for x. */
   pos: number;
   minor?: boolean;
+  /** Where the label sits on its tick. Centered unless it says "start". */
+  anchor?: "start" | "middle";
+}
+
+export interface YDomain {
+  lo: number;
+  hi: number;
+  step: number;
+  /** Labeled values. Defaults to every step from lo to hi. */
+  ticks?: number[];
+}
+
+/** One line to draw: the points inside the window, ready for Plot. */
+export interface ChartLine {
+  id: string;
+  label: string;
+  kind: ChartSeries["kind"];
+  step: boolean;
+  points: Point[];
 }
 
 export interface ChartModel {
   from: string;
   to: string;
+  yDomain: YDomain;
   yTicks: Tick[];
+  /** Values that get a hairline rule: every tick, plus the bottom edge. */
+  grid: number[];
   xTicks: Tick[];
-  paths: { id: string; kind: ChartSeries["kind"]; d: string }[];
+  /** One entry per line, in drawing order. */
+  paths: ChartLine[];
   ends: { id: string; kind: ChartSeries["kind"]; label: string; value: number; text: string; x: number; y: number }[];
   showEndLabels: boolean;
   hover: {
     dates: string[];
     x: number[];
+    /** The primary series' last value before the window, so the first week still gets a change. */
+    prev: [string, number] | null;
     series: { label: string; kind: ChartSeries["kind"]; values: (number | null)[]; y: (number | null)[] }[];
   };
 }
 
 const STEPS = [0.05, 0.1, 0.25, 0.5, 1, 2, 5];
 
-export function niceDomain(min: number, max: number, maxTicks = 5): { lo: number; hi: number; step: number } {
+export function niceDomain(min: number, max: number, maxTicks = 5): YDomain {
   if (!(max > min)) {
     min -= 0.1;
     max += 0.1;
@@ -64,6 +92,50 @@ function r(v: number): number {
   return Math.round(v * 10) / 10;
 }
 
+function extent(series: Point[][]): [number, number] | null {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const s of series) {
+    for (const p of s) {
+      if (p.value === null) continue;
+      min = Math.min(min, p.value);
+      max = Math.max(max, p.value);
+    }
+  }
+  return Number.isFinite(min) ? [min, max] : null;
+}
+
+export function yDomainFor(series: Point[][], maxTicks = 5): YDomain {
+  const e = extent(series);
+  if (!e) return { lo: 0, hi: 1, step: 0.25 };
+  return niceDomain(e[0], e[1], maxTicks);
+}
+
+/**
+ * One scale for a set of small multiples, in round dollars: the edges sit on the
+ * half dollar just outside the data and only whole dollar steps get a label,
+ * three or fewer of them. $3.36 to $8.04 gives $3.00 to $8.50 with $4, $6, $8.
+ */
+export function sharedDollarDomain(series: Point[][], maxTicks = 3): YDomain {
+  const e = extent(series);
+  if (!e) return { lo: 0, hi: 1, step: 1, ticks: [] };
+  let lo = Math.floor(e[0] * 2 + 1e-9) / 2;
+  let hi = Math.ceil(e[1] * 2 - 1e-9) / 2;
+  if (!(hi > lo)) {
+    lo -= 0.5;
+    hi += 0.5;
+  }
+  for (const step of [0.5, 1, 2, 5]) {
+    const ticks: number[] = [];
+    for (let v = Math.ceil(lo / step - 1e-9) * step; v <= hi + 1e-9; v += step) {
+      // a label on the very edge would sit on the frame, not in the plot
+      if (v > lo + 1e-9) ticks.push(round2(v));
+    }
+    if (ticks.length && ticks.length <= maxTicks) return { lo, hi, step, ticks };
+  }
+  return { lo, hi, step: hi - lo, ticks: [hi] };
+}
+
 /** Value in effect on `date`: the newest point dated on or before it. */
 export function valueInEffect(points: Point[], date: string): number | null {
   let v: number | null = null;
@@ -78,31 +150,54 @@ export interface BuildOptions {
   from: string;
   to: string;
   /** Shared y domain for small multiples. */
-  yDomain?: { lo: number; hi: number; step: number };
+  yDomain?: YDomain;
   maxYTicks?: number;
   /** Plot height in px, used to decide whether end labels would collide. */
   heightPx: number;
-  xTicks?: "months" | "years" | "none";
+  /**
+   * months: every month start, every other one minor.
+   * years: each January.
+   * sparse: three month names (first, middle, last month start), each starting at its month.
+   */
+  xTicks?: "months" | "years" | "sparse" | "none";
+  /** "$4" instead of "$4.00" when every tick is a whole dollar. */
+  wholeDollarTicks?: boolean;
 }
 
-export function yDomainFor(series: Point[][], maxTicks = 5): { lo: number; hi: number; step: number } {
-  let min = Infinity;
-  let max = -Infinity;
-  for (const s of series) {
-    for (const p of s) {
-      if (p.value === null) continue;
-      min = Math.min(min, p.value);
-      max = Math.max(max, p.value);
+function monthStarts(from: string, to: string): string[] {
+  const out: string[] = [];
+  const [fy, fm] = from.split("-").map(Number);
+  let y = fy;
+  let m = fm;
+  if (from.endsWith("-01")) m -= 1; // the first day counts as a month start
+  for (;;) {
+    m += 1;
+    if (m > 12) {
+      m = 1;
+      y += 1;
     }
+    const iso = `${y}-${String(m).padStart(2, "0")}-01`;
+    if (iso > to) break;
+    out.push(iso);
   }
-  if (!Number.isFinite(min)) return { lo: 0, hi: 1, step: 0.25 };
-  return niceDomain(min, max, maxTicks);
+  return out;
+}
+
+/**
+ * First, middle and last month start. The middle one is the month the halfway
+ * day falls in, since each name reads from its month start.
+ */
+export function sparseMonths(from: string, to: string): string[] {
+  const all = monthStarts(from, to);
+  if (all.length <= 3) return all;
+  const first = all[0];
+  const last = all[all.length - 1];
+  const half = addDays(first, Math.floor(daysBetween(first, last) / 2));
+  const mid = `${half.slice(0, 7)}-01`;
+  return [first, all.includes(mid) && mid !== first && mid !== last ? mid : all[Math.floor(all.length / 2)], last];
 }
 
 export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartModel {
-  const x0 = dayNumber(opt.from);
-  const x1 = dayNumber(opt.to);
-  const span = Math.max(1, x1 - x0);
   const series = seriesIn.map((s) => {
     const inRange = s.points.filter((p) => p.date >= opt.from && p.date <= opt.to);
     if (s.step) {
@@ -116,32 +211,34 @@ export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartMod
   });
 
   const dom = opt.yDomain ?? yDomainFor(series.map((s) => s.inRange), opt.maxYTicks ?? 5);
-  const ySpan = dom.hi - dom.lo;
-  const xp = (date: string) => ((dayNumber(date) - x0) / span) * 100;
-  const yp = (v: number) => (1 - (v - dom.lo) / ySpan) * 100;
+  const sc = frameScales({ from: opt.from, to: opt.to, lo: dom.lo, hi: dom.hi });
+  const xp = sc.x;
+  const yp = sc.y;
 
-  const yTicks: Tick[] = [];
-  for (let v = dom.lo; v <= dom.hi + 1e-9; v += dom.step) {
-    const value = round2(v);
-    yTicks.push({ value, label: formatTick(value), pos: r(yp(value)) });
+  const tickValues = dom.ticks ?? [];
+  if (!dom.ticks) {
+    for (let v = dom.lo; v <= dom.hi + 1e-9; v += dom.step) tickValues.push(round2(v));
   }
+  const whole = opt.wholeDollarTicks && tickValues.every((v) => Number.isInteger(v));
+  const yTicks: Tick[] = tickValues.map((value) => ({
+    value,
+    label: whole ? `$${value}` : formatTick(value),
+    pos: r(yp(value)),
+  }));
+  const grid = [...tickValues];
+  if (!grid.some((v) => Math.abs(v - dom.lo) < 1e-9)) grid.unshift(dom.lo);
 
   const xTicks: Tick[] = [];
-  if (opt.xTicks !== "none") {
+  if (opt.xTicks === "sparse") {
+    for (const iso of sparseMonths(opt.from, opt.to)) {
+      xTicks.push({ value: dayNumber(iso), label: formatMonthTick(iso), pos: r(xp(iso)), anchor: "start" });
+    }
+  } else if (opt.xTicks !== "none") {
     const years = opt.xTicks === "years";
-    const [fy, fm] = opt.from.split("-").map(Number);
-    let y = fy;
-    let m = fm; // next month start after from
     let i = 0;
-    for (;;) {
-      m += 1;
-      if (m > 12) {
-        m = 1;
-        y += 1;
-      }
-      const iso = `${y}-${String(m).padStart(2, "0")}-01`;
-      if (iso > opt.to) break;
-      if (years && m !== 1) continue;
+    for (const iso of monthStarts(opt.from, opt.to)) {
+      if (iso === opt.from) continue;
+      if (years && !iso.endsWith("-01-01")) continue;
       const pos = xp(iso);
       if (pos < 3 || pos > 97) continue;
       xTicks.push({ value: dayNumber(iso), label: formatMonthTick(iso), pos: r(pos), minor: !years && i % 2 === 1 });
@@ -149,28 +246,12 @@ export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartMod
     }
   }
 
-  const paths = series.map((s) => {
-    let d = "";
-    let pen = false;
-    const pts = s.inRange;
-    pts.forEach((p, idx) => {
-      if (p.value === null) {
-        pen = false;
-        return;
-      }
-      const X = r(xp(p.date) * 10);
-      const Y = r(yp(p.value) * 10);
-      if (!pen) {
-        d += `M${X} ${Y}`;
-        pen = true;
-      } else if (s.step) {
-        d += `H${X}V${Y}`;
-      } else {
-        d += `L${X} ${Y}`;
-      }
-      if (s.step && idx === pts.length - 1) d += `H1000`;
-    });
-    return { id: s.id, kind: s.kind, d };
+  const paths: ChartLine[] = series.map((s) => {
+    const points = [...s.inRange];
+    // a step line holds its last value to the right edge
+    const last = [...points].reverse().find((p) => p.value !== null);
+    if (s.step && last && last.date < opt.to) points.push({ date: opt.to, value: last.value });
+    return { id: s.id, label: s.label, kind: s.kind, step: Boolean(s.step), points };
   });
 
   const ends = series
@@ -199,9 +280,11 @@ export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartMod
   // hover positions follow the primary series dates
   const primary = series.find((s) => s.kind === "primary") ?? series[0];
   const dates = primary.inRange.filter((p) => !(primary.step && p.date === opt.from && !primary.points.some((q) => q.date === opt.from))).map((p) => p.date);
+  const before = present(primary.points.filter((p) => p.date < opt.from)).pop();
   const hover = {
     dates,
     x: dates.map((d) => r(xp(d))),
+    prev: before ? ([before.date, before.value] as [string, number]) : null,
     series: series.map((s) => {
       const values = dates.map((d) =>
         s === primary ? (s.inRange.find((p) => p.date === d)?.value ?? null) : valueInEffect(s.points, d),
@@ -210,10 +293,62 @@ export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartMod
     }),
   };
 
-  return { from: opt.from, to: opt.to, yTicks, xTicks, paths, ends, showEndLabels, hover };
+  return { from: opt.from, to: opt.to, yDomain: dom, yTicks, grid, xTicks, paths, ends, showEndLabels, hover };
 }
 
 /** Date `days` before `to`, for window starts. */
 export function windowStart(to: string, days: number): string {
   return addDays(to, -(days - 1));
+}
+
+/** "up 30.4 cents", or "up $2.54" once the move is a dollar or more. */
+export function spokenMove(change: number): string {
+  const t = changeTenths(change);
+  const a = Math.abs(t);
+  if (a < 1000) return spokenChange(change);
+  const cents = Math.floor((a + 5) / 10);
+  return `${t > 0 ? "up" : "down"} $${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
+}
+
+export interface LabelInput {
+  /** What the chart shows and over what stretch: "Midwest, last 52 weeks". */
+  name: string;
+  /** The points the chart draws. Nulls are fine. */
+  points: Point[];
+  weekly: boolean;
+  /** Where every value is, when there's a table: "Every week is in the table below." */
+  tableNote?: string;
+}
+
+/**
+ * The accessible name for a price chart: what it is, where it ends, which way it
+ * went over the stretch, and its high and low. The region cards and the state
+ * chart both use this, so a screen reader hears the same shape everywhere.
+ */
+export function chartLabel(input: LabelInput): string {
+  const v = present(input.points);
+  const tail = input.tableNote ? ` ${input.tableNote}` : "";
+  const lead = /[.!?]$/.test(input.name) ? input.name : `${input.name}.`;
+  if (!v.length) return `${lead} No prices yet.${tail}`;
+  const first = v[0];
+  const last = v[v.length - 1];
+  let high: Valued = v[0];
+  let low: Valued = v[0];
+  for (const p of v) {
+    if (p.value >= high.value) high = p;
+    if (p.value <= low.value) low = p;
+  }
+  const on = (d: string) => (input.weekly ? `week of ${formatDate(d)}` : formatDate(d));
+  let move = "";
+  if (v.length > 1) {
+    const span = daysBetween(first.date, last.date);
+    // only a true year: 52 weeks, or 365 or 366 days
+    const yearAgo = span >= 364 && span <= 366;
+    const start = input.weekly ? `the week of ${formatDate(first.date)}` : formatDate(first.date);
+    const change = last.value - first.value;
+    if (changeTenths(change) === 0) move = `, the same as ${yearAgo ? "a year ago" : start}`;
+    else move = `, ${spokenMove(change)} ${yearAgo ? "from a year ago" : `since ${start}`}`;
+  }
+  const hl = v.length > 1 ? ` High ${formatPrice(high.value)}, ${on(high.date)}. Low ${formatPrice(low.value)}, ${on(low.date)}.` : "";
+  return `${lead} Now ${formatPrice(last.value)}${move}.${hl}${tail}`;
 }
