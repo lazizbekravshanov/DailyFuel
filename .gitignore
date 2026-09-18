@@ -16,3 +16,6 @@ tmp/
 
 # build spec, kept local only
 PROMPT.md
+
+# local agent worktrees and session files
+.claude/
