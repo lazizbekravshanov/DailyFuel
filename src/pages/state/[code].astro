@@ -7,12 +7,14 @@ import LineChart from "../../components/LineChart.astro";
 import NumbersTable from "../../components/NumbersTable.astro";
 import TaxPanel from "../../components/TaxPanel.astro";
 import chartScript from "../../scripts/chart.js?raw";
-import { getSite, type StateView } from "../../lib/site.ts";
+import { getSite, REGION_NAMES, type StateView } from "../../lib/site.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
-import { addDays, formatDate, formatMonthYear, formatShortDate, when } from "../../lib/dates.ts";
-import { formatPrice } from "../../lib/format.ts";
-import { changeOver, highLow, lastDays, newest, type Point } from "../../lib/stats.ts";
-import { stateDescription } from "../../lib/copy.ts";
+import { addDays, formatDate, formatMonthYear, formatShortDate, todayInNewYork, when } from "../../lib/dates.ts";
+import { changeOver, highLow, lastDays, newest, peakKind, type Point } from "../../lib/stats.ts";
+import { DOE_LINE, DYED_DIESEL_NOTE, peakSentence } from "../../lib/doe.ts";
+import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText, WEEKLY_LEAD } from "../../lib/release.ts";
+import { regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence } from "../../lib/copy.ts";
+import type { Move } from "../../lib/data.ts";
 
 export function getStaticPaths() {
   return getSite().states.map((s) => ({ params: { code: s.slug } }));
@@ -34,22 +36,25 @@ if (aaaMode && latest.aaa) {
     compareLine = latest.aaa.gap_days && latest.aaa.gap_days > 1 ? `vs ${formatShortDate(latest.aaa.prev_as_of)}` : "vs yesterday";
   }
 } else if (latest.eia) {
-  dateLine = noSurvey ? "Not in EIA's weekly survey" : `Week of ${formatShortDate(latest.eia.period)}`;
-  if (latest.eia.prev_period) compareLine = `vs week of ${formatShortDate(latest.eia.prev_period)}`;
+  // EIA surveys stations on Monday morning, so say the day, not "week of".
+  dateLine = noSurvey ? "Not in EIA's weekly survey" : `Surveyed ${formatShortWeekdayDate(latest.eia.period)}`;
+  if (latest.eia.prev_period) compareLine = `vs ${formatShortWeekdayDate(latest.eia.prev_period)}`;
 }
 
-// Where the number comes from, in one sentence.
-const regionCount = s.eia_series ? site.states.filter((o) => o.eia_series === s.eia_series).length : 0;
-let sourceSentence = "";
-if (aaaMode) {
-  sourceSentence = `This is AAA's daily average for ${s.name}.`;
-} else if (noSurvey) {
-  sourceSentence = `EIA doesn't survey diesel prices in ${s.name}.`;
-} else if (s.eia_series === "SCA") {
-  sourceSentence = "This is EIA's weekly price for California, the one state EIA prices on its own.";
-} else {
-  sourceSentence = `EIA doesn't price diesel state by state here, so this is its weekly average for the ${s.regionName} region, which covers ${regionCount} states.`;
-}
+// How often the number changes, under the sign. The late text is what the
+// stale script swaps in once the release day passes with nothing new.
+const release = !aaaMode && !noSurvey && s.primary
+  ? nextEiaRelease(latest.eia?.period ?? null, latest.eia?.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork())
+  : null;
+const dailyLine = aaaMode && s.primary ? "Daily number. It updates every morning." : null;
+
+// Where the number comes from, and how it sits against the U.S. and its own past.
+const source = sourceSentence(s, site);
+const vsUs = noSurvey ? null : vsUsSentence(s, site);
+const peak = s.eia_series ? peakKind(s.eiaHistory) : null;
+const peakLine = peak && s.regionName ? peakSentence(peak, aaaMode ? `EIA weekly ${s.regionName}` : s.regionName) : null;
+// Name the series the way drivers do, but only where the sign shows that number.
+const doeLine = !aaaMode && s.primary ? DOE_LINE : null;
 
 const notes: string[] = [];
 if (s.flags.includes("gap") && latest.aaa?.prev_as_of) {
@@ -153,9 +158,46 @@ const highLabel = shortWindow ? `High since ${shortFrom}` : "52 week high";
 const lowLabel = shortWindow ? `Low since ${shortFrom}` : "52 week low";
 
 const peers = s.peers.map((c) => site.byCode.get(c)!);
-const peerTitle = s.peerLabel;
+const peerTitle = noSurvey ? "Closest region EIA surveys" : s.peerLabel;
 
-const title = `${s.name} diesel price${aaaMode ? " today" : " this week"} | DailyFuel`;
+// Other states. While EIA is the source, every state in a region has the same
+// price, so the same number repeated 14 times becomes one line of links. The
+// other regions nearby get one row each. With AAA's per state prices the full
+// list comes back, since the prices differ.
+interface PeerGroup {
+  key: string;
+  label: string;
+  move: Move | null;
+  members: StateView[];
+}
+const mates = aaaMode ? [] : regionMates(s, site);
+const sameLead = mates.length ? samePriceLead(s, mates) : null;
+const groups: PeerGroup[] = [];
+if (!aaaMode) {
+  for (const p of peers) {
+    if (p.eia_series === s.eia_series && p.eia_series !== null) continue;
+    // AK and HI list only what EIA does survey
+    if (p.eia_series === null && noSurvey) continue;
+    const key = p.eia_series ?? "none";
+    let g = groups.find((x) => x.key === key);
+    if (!g) {
+      g = {
+        key,
+        label: p.eia_series ? REGION_NAMES[p.eia_series] : "Not in EIA's survey",
+        move: p.eia_series ? p.primary : null,
+        members: [],
+      };
+      groups.push(g);
+    }
+    g.members.push(p);
+  }
+  // the states with no survey go last
+  groups.sort((a, b) => Number(a.key === "none") - Number(b.key === "none"));
+}
+const peerNote = noSurvey ? "EIA splits the West Coast in two: California, and the rest of the region." : null;
+
+const title = noSurvey ? `${s.name} diesel prices | DailyFuel` : `${s.name} diesel price${aaaMode ? " today" : " this week"} | DailyFuel`;
+const legend = noSurvey ? `Diesel in ${s.name}` : `${s.name} diesel average`;
 const description = stateDescription(s, site);
 const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
 ---
@@ -165,27 +207,43 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
   </div>
 
   <section class="wrap state-hero" aria-label={`${s.name} price`}>
-    <Sign
-      legend={`${s.name} diesel average`}
-      price={s.primary?.price ?? null}
-      noPrice="No weekly price"
-      change={s.primary?.change ?? null}
-      pct={s.primary?.change_pct ?? null}
-      prev={s.primary?.prev ?? null}
-      cadence={s.cadence}
-      dateLine={dateLine}
-      compareLine={compareLine}
-      shield={s.code}
-      note={Boolean(aaaMode && s.eia && latest.eia)}
-    >
-      {aaaMode && s.eia && latest.eia && (
-        <p slot="note">EIA weekly {s.regionName} price: <Price price={s.eia.price} /> for the week of {formatShortDate(latest.eia.period)}</p>
+    <div class="sign-col">
+      <Sign
+        legend={legend}
+        price={s.primary?.price ?? null}
+        noPrice="No weekly price"
+        change={s.primary?.change ?? null}
+        pct={s.primary?.change_pct ?? null}
+        prev={s.primary?.prev ?? null}
+        cadence={s.cadence}
+        dateLine={dateLine}
+        compareLine={compareLine}
+        shield={s.code}
+        note={Boolean(aaaMode && s.eia && latest.eia)}
+      >
+        {aaaMode && s.eia && latest.eia && (
+          <p slot="note">EIA weekly {s.regionName} price: <Price price={s.eia.price} /> for the week of {formatShortDate(latest.eia.period)}</p>
+        )}
+      </Sign>
+      {release && (
+        <p class="cadence">
+          {WEEKLY_LEAD} <span data-next-release={release.date} data-late={LATE_TEXT}>{release.late ? LATE_TEXT : nextUpdateText(release.date)}</span>
+        </p>
       )}
-    </Sign>
+      {dailyLine && <p class="cadence">{dailyLine}</p>}
+    </div>
     <div class="explain">
-      <p class="lead">{sourceSentence}</p>
-      {noSurvey && <p>Daily prices for each state are on the way.</p>}
+      <p class="lead">{source}</p>
+      {noSurvey && (
+        <p>
+          So there's no DOE weekly number for {s.name}. The <a href="#peers-title">closest region EIA surveys</a> is
+          the West Coast.
+        </p>
+      )}
+      {vsUs && <p>{vsUs}</p>}
+      {peakLine && <p class="peak">{peakLine}</p>}
       {notes.map((n) => <p>{n}</p>)}
+      <p class="small muted fine">{doeLine && `${doeLine} `}{DYED_DIESEL_NOTE}</p>
       <p><a href={aaaLink}>AAA's daily average for {s.name}</a></p>
     </div>
   </section>
@@ -279,16 +337,55 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
     <section class="section wrap" aria-labelledby="peers-title">
       <div class="section-head">
         <h2 id="peers-title">{peerTitle}</h2>
+        {peerNote && <p>{peerNote}</p>}
       </div>
-      <ul class="peers">
-        {peers.map((p) => (
-          <li>
-            <a href={p.href}>{p.name}</a>
-            <span class="peer-price">{p.primary ? <Price price={p.primary.price} /> : <span class="muted">No survey</span>}</span>
-            <span class="peer-change">{p.primary ? <Change change={p.primary.change} pct={p.primary.change_pct} prev={p.primary.prev} cadence={p.cadence} showPct={false} /> : <span class="muted">No survey</span>}</span>
-          </li>
-        ))}
-      </ul>
+      {aaaMode ? (
+        <ul class="peers">
+          {peers.map((p) => (
+            <li>
+              <a href={p.href}>{p.name}</a>
+              <span class="peer-price">{p.primary ? <Price price={p.primary.price} /> : <span class="muted">No price</span>}</span>
+              <span class="peer-change">{p.primary ? <Change change={p.primary.change} pct={p.primary.change_pct} prev={p.primary.prev} cadence={p.cadence} showPct={false} /> : <span class="muted">No price</span>}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <>
+          {sameLead && (
+            <div class="same">
+              <p class="same-lead" id="same-lead">{sameLead}</p>
+              <ul class="peer-links" aria-labelledby="same-lead">
+                {mates.map((p) => <li><a href={p.href}>{p.name}</a></li>)}
+              </ul>
+            </div>
+          )}
+          {groups.length > 0 && (
+            <ul class="groups">
+              {groups.map((g) => {
+                const single = g.members.length === 1 && g.members[0].name === g.label;
+                return (
+                  <li class="group">
+                    <div class="group-row">
+                      <span class="group-name">{single ? <a href={g.members[0].href}>{g.label}</a> : g.label}</span>
+                      {g.move && <span class="peer-price"><Price price={g.move.price} /></span>}
+                      {g.move && (
+                        <span class="peer-change">
+                          <Change change={g.move.change} pct={g.move.change_pct} prev={g.move.prev} cadence={s.cadence} showPct={false} />
+                        </span>
+                      )}
+                    </div>
+                    {!single && (
+                      <ul class="peer-links" aria-label={g.move ? `States with the ${g.label} price` : g.label}>
+                        {g.members.map((p) => <li><a href={p.href}>{p.name}</a></li>)}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
+      )}
     </section>
   )}
 
@@ -320,10 +417,24 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
       padding-bottom: var(--space-6);
     }
   }
+  .sign-col {
+    min-width: 0;
+  }
+  .cadence {
+    margin: var(--space-3) 0 0;
+    font-size: 15px;
+    color: var(--ink-2);
+  }
   .explain .lead {
     font-size: var(--fs-h3);
     font-weight: 650;
     line-height: 1.35;
+  }
+  .explain .peak {
+    font-weight: 650;
+  }
+  .explain .fine {
+    margin-top: var(--space-4);
   }
   .key {
     display: flex;
@@ -454,5 +565,51 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
   .peer-change {
     min-width: 5.5em;
     text-align: right;
+  }
+  .same-lead {
+    margin-bottom: var(--space-1);
+  }
+  /* wrapped links, each a full size tap target */
+  .peer-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--space-5);
+  }
+  .peer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
+  }
+  .groups {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-5) var(--space-6);
+  }
+  .same + .groups {
+    margin-top: var(--space-5);
+  }
+  .group {
+    border-top: 1px solid var(--hairline);
+    padding-top: 9px;
+  }
+  .group-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: baseline;
+    gap: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .group-name {
+    font-weight: 700;
+  }
+  .group-row + .peer-links {
+    margin-top: 2px;
   }
 </style>
