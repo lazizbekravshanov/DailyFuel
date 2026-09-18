@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { byChange, coverage, homeMeta, keyLine, memberCount, regionNote, withNote } from "./home.ts";
+import { byChange, coverage, homeMeta, keyLine, leaders, memberCount, movers, regionNote, topWithTies, withNote } from "./home.ts";
 
 const c = (...changes: number[]) => changes.map((change) => ({ change }));
 
@@ -25,6 +25,18 @@ describe("keyLine above the map key", () => {
   it("says when nothing moved, and returns null with nothing to count", () => {
     expect(keyLine(c(0, 0.004), "region", "weekly")).toBe("All 2 regions were about the same.");
     expect(keyLine([], "region", "weekly")).toBeNull();
+  });
+
+  it("counts DC apart from the states", () => {
+    const s = (code: string, change: number) => ({ code, change });
+    expect(keyLine([s("OH", 0.3), s("DC", 0.018), s("PA", -0.2), s("NY", 0.004)], "state", "weekly")).toBe(
+      "1 state and DC rose, 1 fell and 1 was about the same.",
+    );
+    expect(keyLine([s("OH", 0.3), s("PA", -0.2), s("DC", -0.1)], "state", "daily")).toBe("1 state rose and 1 state and DC fell.");
+    expect(keyLine([s("OH", 0.3), s("DC", 0.001)], "state", "daily")).toBe("1 state rose and DC was about the same.");
+    expect(keyLine([s("OH", 0.3), s("PA", 0.2), s("DC", 0.1)], "state", "daily")).toBe("All 2 states and DC rose, 10.0¢ to 30.0¢.");
+    // regions have no codes and count as before
+    expect(keyLine(c(0.3, -0.2), "region", "weekly")).toBe("1 region rose and 1 fell.");
   });
 
   it("never uses a dash", () => {
@@ -74,6 +86,32 @@ describe("move list order", () => {
   });
 });
 
+describe("biggest moves", () => {
+  const m = (name: string, change: number) => ({ name, change });
+
+  it("leaves out a move the map calls about the same", () => {
+    // 0.8¢ is about the same on the weekly map, so it's not the biggest drop
+    const items = [m("California", -0.008), m("Midwest", 0.2), m("Gulf Coast", 0.009)];
+    expect(movers(items, "down", "weekly")).toEqual([]);
+    expect(movers(items, "up", "weekly").map((i) => i.name)).toEqual(["Midwest"]);
+    expect(movers([m("Ohio", 0.005)], "up", "daily").map((i) => i.name)).toEqual(["Ohio"]);
+  });
+
+  it("names everyone tied for the top", () => {
+    const falls = movers([m("Rocky Mountain", -0.061), m("Midwest", -0.061), m("Gulf Coast", -0.02)], "down", "weekly");
+    expect(falls.map((i) => i.name)).toEqual(["Midwest", "Rocky Mountain", "Gulf Coast"]);
+    expect(leaders(falls).map((i) => i.name)).toEqual(["Midwest", "Rocky Mountain"]);
+    expect(leaders([])).toEqual([]);
+  });
+
+  it("never cuts a tie at the end of a short list", () => {
+    const falls = movers([m("HI", -0.045), m("MT", -0.045), m("TN", -0.045), m("DE", -0.092), m("OH", -0.01)], "down", "daily");
+    expect(topWithTies(falls, 2).map((i) => i.name)).toEqual(["DE", "HI", "MT", "TN"]);
+    expect(topWithTies(falls, 1).map((i) => i.name)).toEqual(["DE"]);
+    expect(topWithTies(falls, 9)).toHaveLength(5);
+  });
+});
+
 describe("home meta description", () => {
   const surveyed = [
     "AL", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA",
@@ -92,6 +130,14 @@ describe("home meta description", () => {
     expect(d).toBe("U.S. diesel is $6.285 a gallon, up 31.8¢ this week. See the DOE weekly price and change for 48 states and DC.");
     expect(d).not.toMatch(/all 50/);
     expect(d).not.toMatch(/[–—]| - /);
+  });
+
+  it("says DOE prices regions, not states, while EIA is the source", () => {
+    const d = homeMeta({ price: 6.285, change: 0.318, daily: false, priced: surveyed, regions: 8 });
+    expect(d).toBe("U.S. diesel is $6.285 a gallon, up 31.8¢ this week. See the DOE weekly price for the 8 regions that cover 48 states and DC.");
+    expect(homeMeta({ price: null, change: null, daily: false, priced: surveyed, regions: 8 })).toBe(
+      "See the DOE weekly price for the 8 regions that cover 48 states and DC.",
+    );
   });
 
   it("reads right for a flat week, a daily page and no national price", () => {

@@ -8,10 +8,17 @@ import {
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 
+/**
+ * The percent a move shows. It comes from the raw change and previous price, so
+ * it's rounded once, straight to tenths. The stored change_pct is already
+ * rounded to hundredths, and rounding that again changes about 1 move in 20
+ * (19.7¢ on $5.257 is +3.7474%, which would print as +3.8%). The stored value
+ * is only the fallback when there's no previous price.
+ */
 export function pctOf(m: Move): number | null {
   if (m.change === null) return null;
-  if (m.change_pct !== null) return m.change_pct;
-  return m.prev ? pctFrom(m.change, m.prev) : null;
+  if (m.prev) return pctFrom(m.change, m.prev);
+  return m.change_pct;
 }
 
 /** "since Sep 7" for weekly, "since yesterday" or "since Sep 15" for daily. */

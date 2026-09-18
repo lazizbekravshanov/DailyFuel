@@ -24,6 +24,8 @@ export interface Tick {
   /** 0 to 100 from the top for y, from the left for x. */
   pos: number;
   minor?: boolean;
+  /** Also hidden on the narrowest phones, where even every other month crowds the row. */
+  thin?: boolean;
   /** Where the label sits on its tick. Centered unless it says "start". */
   anchor?: "start" | "middle";
 }
@@ -243,6 +245,18 @@ export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartMod
       if (pos < 3 || pos > 97) continue;
       xTicks.push({ value: dayNumber(iso), label: formatMonthTick(iso), pos: r(pos), minor: !years && i % 2 === 1 });
       i += 1;
+    }
+    // On a 320px phone the plot is about 174px wide, and six month names run
+    // together ("Nov 2026 Mar", with that Nov in 2025). Thin every other one of
+    // the rest there, keeping the year and an even step from it. Two or three
+    // names, as on a 90 day chart, have room already.
+    const majors = xTicks.filter((t) => !t.minor);
+    if (!years && majors.length > 3) {
+      const year = majors.findIndex((t) => /^\d{4}$/.test(t.label));
+      const keep = year >= 0 ? year % 2 : 0;
+      majors.forEach((t, k) => {
+        if (k % 2 !== keep) t.thin = true;
+      });
     }
   }
 

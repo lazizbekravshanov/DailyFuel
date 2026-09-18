@@ -3,9 +3,10 @@ import statesFile from "../data/states.json";
 import type { BenchmarkKey, Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 import {
-  countPlaces, missingNote, regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence,
+  countPlaces, missingNote, pctOf, regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence,
 } from "./copy.ts";
 import { homeMeta } from "../components/home/home.ts";
+import { formatChange } from "./format.ts";
 
 const REGION: Record<BenchmarkKey, string> = {
   R1X: "New England",
@@ -150,12 +151,13 @@ describe("home meta description", () => {
       change: x.national.move?.change ?? null,
       daily: false,
       priced: x.states.filter((s) => s.primary).map((s) => s.code),
+      regions: 8,
     }) + missingNote(x);
 
   it("never claims Alaska and Hawaii in EIA mode", () => {
     expect(missingNote(S)).toBe(" EIA doesn't survey Alaska or Hawaii.");
     expect(meta(S)).toBe(
-      "U.S. diesel is $6.285 a gallon, up 31.8¢ this week. See the DOE weekly price and change for 48 states and DC. EIA doesn't survey Alaska or Hawaii.",
+      "U.S. diesel is $6.285 a gallon, up 31.8¢ this week. See the DOE weekly price for the 8 regions that cover 48 states and DC. EIA doesn't survey Alaska or Hawaii.",
     );
     expect(meta(S).length).toBeLessThanOrEqual(160);
   });
@@ -164,16 +166,37 @@ describe("home meta description", () => {
     const all = site();
     for (const s of all.states) if (!s.primary) (s as { primary: Move | null }).primary = move(6, 0.1);
     expect(missingNote(all)).toBe("");
-    expect(meta(all)).toMatch(/for all 50 states and DC\.$/);
+    expect(meta(all)).toMatch(/cover all 50 states and DC\.$/);
   });
 
   it("stays general when a whole region is missing", () => {
     const gap = site({ priced: (c) => !["OH", "IN", "IA", "KS"].includes(c) });
-    expect(meta(gap)).toMatch(/for 44 states and DC\. Some states have no price right now\.$/);
+    expect(meta(gap)).toMatch(/cover 44 states and DC\. Some states have no price right now\.$/);
   });
 
   it("names a surveyed state with no price as missing, not unsurveyed", () => {
     const one = site({ priced: (c) => c !== "OH" });
     expect(missingNote(one)).toBe(" There's no price for Alaska, Hawaii or Ohio right now.");
+  });
+});
+
+describe("the percent on a move", () => {
+  it("comes from the raw numbers, rounded once", () => {
+    // U.S., week of Aug 17, 2026: +0.197 on $5.257 is +3.7474%. The stored
+    // change_pct is 3.75, and rounding that again printed +3.8%.
+    const us: Move = { price: 5.454, prev: 5.257, change: 0.197, change_pct: 3.75, direction: "up" };
+    expect(pctOf(us)).toBeCloseTo(3.7474, 4);
+    expect(formatChange(us.change!, pctOf(us))).toBe("19.7¢ (+3.7%)");
+    // West Coast outside California, week of Mar 16, 2026: +5.3459%.
+    const wc: Move = { price: 5.0506, prev: 4.7943, change: 0.2563, change_pct: 5.35, direction: "up" };
+    expect(formatChange(wc.change!, pctOf(wc))).toBe("25.6¢ (+5.3%)");
+    // a fall: −0.021 on $6.072 is −0.3458%, not −0.4%
+    const va: Move = { price: 6.051, prev: 6.072, change: -0.021, change_pct: -0.35, direction: "down" };
+    expect(formatChange(va.change!, pctOf(va))).toBe("2.1¢ (−0.3%)");
+  });
+
+  it("falls back to the stored percent with no previous price", () => {
+    expect(pctOf({ price: 6.25, prev: null, change: 0.3, change_pct: 5.1, direction: "up" })).toBe(5.1);
+    expect(pctOf({ price: 6.25, prev: null, change: null, change_pct: null, direction: null })).toBeNull();
   });
 });

@@ -5,9 +5,10 @@
 import Change from "./Change.astro";
 import Price from "./Price.astro";
 import type { Cadence } from "../lib/bins.ts";
-import { changeTenths } from "../lib/format.ts";
-import { byChange } from "./home/home.ts";
+import { byChange, movers, topWithTies } from "./home/home.ts";
 export interface MoveItem {
+  /** A state's code, so DC can be counted apart. Regions have none. */
+  code?: string;
   name: string;
   href?: string;
   price: number;
@@ -28,8 +29,10 @@ interface Props {
   empty?: string;
 }
 const { items, cadence, noun, layout = "split", count = 3, title = "Change by region", empty = `No ${noun} has a change yet.` } = Astro.props;
-const rises = items.filter((i) => changeTenths(i.change) > 0).sort((a, b) => b.change - a.change).slice(0, count);
-const falls = items.filter((i) => changeTenths(i.change) < 0).sort((a, b) => a.change - b.change).slice(0, count);
+// Rises and drops follow the map bins, like the key line. A tie at the cutoff
+// stays in, so the list never shows one of two equal moves and hides the other.
+const rises = topWithTies(movers(items, "up", cadence), count);
+const falls = topWithTies(movers(items, "down", cadence), count);
 const groups = layout === "list"
   ? [{ title, list: byChange(items) }]
   : [

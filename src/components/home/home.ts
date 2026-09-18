@@ -7,6 +7,8 @@ import { changeTenths, formatCents, formatPrice, spokenChange } from "../../lib/
 
 export interface Moved {
   change: number;
+  /** A state's code, so DC can be counted apart from the states. */
+  code?: string;
 }
 
 function plural(n: number, noun: string): string {
@@ -19,6 +21,19 @@ function list(parts: string[]): string {
 }
 
 /**
+ * How many are in a group, for keyLine. States count DC apart, since DC isn't
+ * one: "20 states and DC", or just "DC". Later parts of the line drop the noun
+ * ("22 fell") unless DC is in them. `one` picks "was" or "were".
+ */
+function howMany(group: Moved[], noun: string, first: boolean): { text: string; one: boolean } {
+  const dc = noun === "state" && group.some((i) => i.code === "DC");
+  if (!dc) return { text: first ? plural(group.length, noun) : String(group.length), one: group.length === 1 };
+  const n = group.length - 1;
+  if (n === 0) return { text: "DC", one: true };
+  return { text: `${plural(n, noun)} and DC`, one: false };
+}
+
+/**
  * One line above the map key, computed from the data:
  * "All 8 regions rose, 21.2¢ to 49.1¢." or "5 regions rose, 2 fell and 1 was about the same."
  * Direction follows the map bins, so a state the map paints as about the same is counted that way.
@@ -28,23 +43,55 @@ export function keyLine(items: Moved[], noun: string, cadence: Cadence): string 
   if (items.length === 0) return null;
   const up = items.filter((i) => directionFor(i.change, cadence) === "up");
   const down = items.filter((i) => directionFor(i.change, cadence) === "down");
-  const flat = items.length - up.length - down.length;
+  const flat = items.filter((i) => directionFor(i.change, cadence) === "flat");
   const range = (group: Moved[]): string => {
     const t = group.map((i) => Math.abs(changeTenths(i.change)));
     const lo = Math.min(...t);
     const hi = Math.max(...t);
     return lo === hi ? ` ${formatCents(lo / 1000)}` : `, ${formatCents(lo / 1000)} to ${formatCents(hi / 1000)}`;
   };
-  const all = items.length === 1 ? `The one ${noun}` : `All ${plural(items.length, noun)}`;
+  const whole = howMany(items, noun, true);
+  const all = items.length === 1 ? `The one ${noun}` : whole.text === "DC" ? "DC" : `All ${whole.text}`;
   if (up.length === items.length) return `${all} rose${range(up)}.`;
   if (down.length === items.length) return `${all} fell${range(down)}.`;
-  if (flat === items.length) return `${all} ${items.length === 1 ? "was" : "were"} about the same.`;
+  if (flat.length === items.length) return `${all} ${whole.one ? "was" : "were"} about the same.`;
   const parts: string[] = [];
-  const lead = (n: number) => (parts.length === 0 ? plural(n, noun) : String(n));
-  if (up.length) parts.push(`${lead(up.length)} rose`);
-  if (down.length) parts.push(`${lead(down.length)} fell`);
-  if (flat) parts.push(`${lead(flat)} ${flat === 1 ? "was" : "were"} about the same`);
+  const lead = (group: Moved[]) => howMany(group, noun, parts.length === 0);
+  if (up.length) parts.push(`${lead(up).text} rose`);
+  if (down.length) parts.push(`${lead(down).text} fell`);
+  if (flat.length) {
+    const f = lead(flat);
+    parts.push(`${f.text} ${f.one ? "was" : "were"} about the same`);
+  }
   return `${list(parts)}.`;
+}
+
+/**
+ * The places that moved one way by the map bins, biggest move first, ties by
+ * name. A move the map calls about the same is in neither list.
+ */
+export function movers<T extends { name: string; change: number }>(items: T[], dir: "up" | "down", cadence: Cadence): T[] {
+  const sign = dir === "up" ? 1 : -1;
+  return items
+    .filter((i) => directionFor(i.change, cadence) === dir)
+    .sort((a, b) => sign * (changeTenths(b.change) - changeTenths(a.change)) || a.name.localeCompare(b.name));
+}
+
+/** Everyone tied for the biggest move at the top of a movers list. */
+export function leaders<T extends { change: number }>(sorted: T[]): T[] {
+  if (sorted.length === 0) return [];
+  const top = changeTenths(sorted[0].change);
+  return sorted.filter((i) => changeTenths(i.change) === top);
+}
+
+/** The first `count` of a movers list, plus anyone tied with the last of them, so a cut never splits a tie. */
+export function topWithTies<T extends { change: number }>(sorted: T[], count: number): T[] {
+  if (sorted.length <= count) return sorted.slice();
+  if (count <= 0) return [];
+  const edge = changeTenths(sorted[count - 1].change);
+  let n = count;
+  while (n < sorted.length && changeTenths(sorted[n].change) === edge) n += 1;
+  return sorted.slice(0, n);
 }
 
 /** "15 states", "5 states and DC", "DC" for a list of member codes. */
@@ -93,17 +140,27 @@ export interface DescriptionInput {
   daily: boolean;
   /** Codes of the states (and DC) that have a price on the page. */
   priced: string[];
+  /**
+   * How many EIA regions the prices come from, while EIA is the source. DOE
+   * prices regions, not states, so the meta says that instead of reading like
+   * 49 state prices.
+   */
+  regions?: number;
 }
 
 /**
  * Home meta description with real numbers. It names only the places that have
  * a price, so it never promises Alaska and Hawaii while EIA doesn't survey them.
  */
-export function homeMeta({ price, change, daily, priced }: DescriptionInput): string {
+export function homeMeta({ price, change, daily, priced, regions }: DescriptionInput): string {
   const where = coverage(priced);
-  const what = daily ? "today's price and change" : "the DOE weekly price and change";
-  if (price === null) return `See ${what} for ${where}.`;
+  const what = daily
+    ? `today's price and change for ${where}`
+    : regions
+      ? `the DOE weekly price for the ${regions} regions that cover ${where}`
+      : `the DOE weekly price and change for ${where}`;
+  if (price === null) return `See ${what}.`;
   const moved = change === null ? "" : `, ${spokenChange(change).replace(" cents", "¢").replace("no change", "unchanged")}`;
   const when = change === null ? "" : daily ? " since yesterday" : " this week";
-  return `U.S. diesel is ${formatPrice(price)} a gallon${moved}${when}. See ${what} for ${where}.`;
+  return `U.S. diesel is ${formatPrice(price)} a gallon${moved}${when}. See ${what}.`;
 }

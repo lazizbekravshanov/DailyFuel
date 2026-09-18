@@ -230,7 +230,12 @@ details.disclosure[open] > summary::before {
 .table-scroll {
   /* positioned so screen reader only text inside can't widen the page */
   position: relative;
-  max-width: 100%;
+  /* A scroll box clips everything at its edges, focus rings too. The padding
+     leaves room for a 3px ring 2px out on the sort buttons and row links at
+     every edge, and the negative margin keeps the table on the page's gutter. */
+  padding: 5px;
+  margin: -5px;
+  max-width: calc(100% + 10px);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   /* A soft shadow on the side that has more table, with no script. The two
@@ -245,7 +250,7 @@ details.disclosure[open] > summary::before {
 }
 
 .table-scroll:focus-visible {
-  outline-offset: 4px;
+  outline-offset: 0;
 }
 
 table.data {
@@ -363,5 +368,19 @@ a.f-flat {
 .table-tall thead th {
   position: sticky;
   top: 0;
+  background: var(--paper);
+}
+
+/* A sticky header stops at the scroll box's padding, so paper fills the 5px
+   above it. A scrolled row never shows there, and a focused sort button still
+   has room for its whole ring, which paints over this. */
+.table-tall thead th::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  top: -5px;
+  height: 5px;
   background: var(--paper);
 }

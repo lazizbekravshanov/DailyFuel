@@ -116,6 +116,28 @@ describe("buildChart for the state chart", () => {
     expect(m.xTicks.filter((t) => t.minor).length).toBeGreaterThan(0);
   });
 
+  it("thins every other major tick for the narrowest phones, keeping the year", () => {
+    const majors = m.xTicks.filter((t) => !t.minor);
+    const kept = majors.filter((t) => !t.thin).map((t) => t.label);
+    // Oct 2025 to Sep 2026: every other month is major, and half of those stay at 320px
+    expect(kept).toContain("2026");
+    expect(kept.length).toBeGreaterThanOrEqual(2);
+    expect(kept.length).toBeLessThan(majors.length);
+    // the ones that stay are 4 months apart, so their labels never touch
+    const days = majors.filter((t) => !t.thin).map((t) => t.value);
+    for (let k = 1; k < days.length; k++) expect(days[k] - days[k - 1]).toBeGreaterThanOrEqual(118);
+    expect(m.xTicks.filter((t) => t.minor).every((t) => !t.thin)).toBe(true);
+  });
+
+  it("leaves a short chart's few month names alone", () => {
+    const days: Point[] = Array.from({ length: 90 }, (_, i) => ({ date: addDays("2026-06-20", i), value: 6 + (i % 7) * 0.01 }));
+    const short = buildChart([{ id: "aaa", label: "AAA daily", kind: "primary", points: days }], {
+      from: days[0].date, to: days[89].date, heightPx: 300, xTicks: "months",
+    });
+    expect(short.xTicks.map((t) => t.label)).toEqual(["Jul", "Aug", "Sep"]);
+    expect(short.xTicks.some((t) => t.thin)).toBe(false);
+  });
+
   it("has no earlier week when the points start at the window", () => {
     expect(m.hover.prev).toBeNull();
   });

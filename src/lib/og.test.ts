@@ -140,6 +140,9 @@ describe("what a card says", () => {
     expect(c.change).toBeNull();
     expect(c.legend).toBe("Diesel in Alaska");
     expect(c.noPrice).toBe("No weekly price");
+    // no survey week under "No weekly price", the same line as the page's sign
+    expect(c.dateLine).toBe("Not in EIA's weekly survey");
+    expect(c.compareLine).toBeNull();
     expect(c.label).toBe("EIA doesn't survey diesel prices in Alaska");
     expect(cardAlt(c)).toBe("Diesel in Alaska: no weekly price. EIA doesn't survey diesel prices in Alaska.");
   });

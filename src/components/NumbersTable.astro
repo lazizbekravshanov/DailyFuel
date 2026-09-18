@@ -83,6 +83,13 @@ const changes = rows.map((row, i) => {
   .numbers .chg {
     padding-left: var(--space-4);
   }
+  /* On a 320px phone the three columns fit only without the air after the last one */
+  @media (max-width: 359px) {
+    .numbers .data th:last-child,
+    .numbers .data td:last-child {
+      padding-right: 0;
+    }
+  }
   .numbers th[data-sort-type] {
     padding-top: 0;
     padding-bottom: 0;

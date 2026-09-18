@@ -85,12 +85,16 @@
       tip.style.top = Math.max(0, y) + "px";
     }
     // small eastern states also have a labeled chip beside the map; light up
-    // the chip, or every chip in the lit region
+    // the chip, or every chip in the lit region, and mark the state's own chip
+    // so a lit region still shows which one has focus
     function setBoxes(code, region) {
-      svg.querySelectorAll(".callout.is-active").forEach(function (b) { b.classList.remove("is-active"); });
+      svg.querySelectorAll(".callout.is-active").forEach(function (b) { b.classList.remove("is-active", "is-current"); });
       if (!code) return;
       var sel = region ? '.callout[data-region="' + region + '"]' : '.callout[data-code="' + code + '"]';
-      svg.querySelectorAll(sel).forEach(function (b) { b.classList.add("is-active"); });
+      svg.querySelectorAll(sel).forEach(function (b) {
+        b.classList.add("is-active");
+        if (b.getAttribute("data-code") === code) b.classList.add("is-current");
+      });
     }
     // Light a whole region by copying its state shapes into three layers:
     // wide paper strokes, ink strokes, then the filled shapes on top. Nothing

@@ -25,7 +25,8 @@ let spoken = "";
 if (change !== null) {
   const t = changeTenths(change);
   direction = cadence ? directionFor(change, cadence) : t > 0 ? "up" : t < 0 ? "down" : "flat";
-  const p = pct ?? (prev ? pctFrom(change, prev) : null);
+  // the raw numbers first, so the percent is rounded once (see pctOf in copy.ts)
+  const p = prev ? pctFrom(change, prev) : pct;
   const shownPct = showPct ? p : null;
   text = signed && shownPct === null ? formatSignedCents(change) : formatChange(change, shownPct);
   const pctSpoken = showPct && p !== null ? `, ${formatPct(p).replace("−", "minus ").replace("+", "plus ")}` : "";

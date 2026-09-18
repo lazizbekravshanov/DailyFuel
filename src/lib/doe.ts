@@ -13,6 +13,9 @@ export const DOE_LINE =
 
 export const DYED_DIESEL_NOTE = "Dyed farm diesel is untaxed and usually costs less.";
 
+/** The same note under a price, saying what it costs less than. */
+export const DYED_DIESEL_HERE = "Dyed farm diesel is untaxed, so it usually costs less than the on-road diesel priced here.";
+
 export const HOME_TITLE = "Diesel prices by state, DOE weekly average";
 
 /** One line about a single series, or null when there's nothing to say. */

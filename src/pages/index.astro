@@ -15,12 +15,13 @@ import chartScript from "../scripts/chart.js?raw";
 import sortScript from "../scripts/table-sort.js?raw";
 import { getSite, SITE_NAME } from "../lib/site.ts";
 import { formatShortDate, formatWeekdayDate, todayInNewYork } from "../lib/dates.ts";
-import { nextEiaRelease } from "../lib/release.ts";
+import { LATE_TEXT, nextEiaRelease } from "../lib/release.ts";
 import { changeTenths, formatCents } from "../lib/format.ts";
-import { missingNote, pctOf, sinceText } from "../lib/copy.ts";
+import { directionFor } from "../lib/bins.ts";
+import { countPlaces, missingNote, pctOf, sinceText } from "../lib/copy.ts";
 import { peakKind } from "../lib/stats.ts";
 import { allRegionsSentence, DOE_LINE, HOME_TITLE } from "../lib/doe.ts";
-import { homeMeta, keyLine } from "../components/home/home.ts";
+import { homeMeta, keyLine, leaders, movers } from "../components/home/home.ts";
 
 const site = getSite();
 const { mode, national, latest } = site;
@@ -42,34 +43,47 @@ const compareLine = !nm || nm.change === null
 const moveItems: MoveItem[] = aaaMode
   ? site.states
       .filter((s) => s.primary && s.primary.change !== null)
-      .map((s) => ({ name: s.name, href: s.href, price: s.primary!.price, change: s.primary!.change!, pct: pctOf(s.primary!) }))
+      .map((s) => ({ code: s.code, name: s.name, href: s.href, price: s.primary!.price, change: s.primary!.change!, pct: pctOf(s.primary!) }))
   : site.regions
       .filter((r) => r.move && r.move.change !== null)
       .map((r) => ({
         name: r.name,
         price: r.move!.price,
         change: r.move!.change!,
-        pct: r.move!.change_pct,
+        pct: pctOf(r.move!),
         members: r.states.map((code) => ({ code, name: site.byCode.get(code)?.name ?? code })),
       }));
-const rises = moveItems.filter((i) => changeTenths(i.change) > 0).sort((a, b) => b.change - a.change);
-const falls = moveItems.filter((i) => changeTenths(i.change) < 0).sort((a, b) => a.change - b.change);
+// Rises and falls follow the map bins, so a move the map and key call about
+// the same is never named as the biggest rise or drop.
+const moveCadence = aaaMode ? "daily" : "weekly";
+const rises = movers(moveItems, "up", moveCadence);
+const falls = movers(moveItems, "down", moveCadence);
 
 // The plain sentences beside the sign.
 const where = daily ? "since yesterday" : "this week";
 const usMove = nm?.change ?? null;
+// The sign's plaque uses the same bins, so a U.S. move under the about the
+// same line isn't called a rise or a fall here either.
+const usDir = usMove === null ? null : directionFor(usMove, national.cadence);
 const usSentence = usMove === null
   ? "Here's where diesel prices stand in every state."
   : changeTenths(usMove) === 0
     ? `Diesel held steady across the U.S. ${where}.`
-    : `Diesel ${changeTenths(usMove) > 0 ? "rose" : "fell"} ${formatCents(usMove)} across the U.S. ${where}.`;
+    : usDir === "flat"
+      ? `Diesel was about the same across the U.S. ${where}, ${changeTenths(usMove) > 0 ? "up" : "down"} ${formatCents(usMove)}.`
+      : `Diesel ${usDir === "up" ? "rose" : "fell"} ${formatCents(usMove)} across the U.S. ${where}.`;
 const noun = aaaMode ? "state" : "region";
 const stateWhere = aaaMode ? sinceText(site) || where : where;
 // Name the period on the rise and fall lines when it differs from the U.S. line,
 // like a skipped AAA day (states since Sep 15, AAA's national since yesterday).
 const moveWhen = stateWhere === where ? "" : ` ${stateWhere}`;
-const topRise = rises[0];
-const topFall = falls[0];
+// Everyone tied for the biggest move gets named, never just the first by name.
+// More than 3 tied reads as a count instead of a long list.
+const tiedRise = leaders(rises);
+const tiedFall = leaders(falls);
+const topRise = tiedRise[0];
+const topFall = tiedFall[0];
+const tiedCount = (tied: MoveItem[]) => (aaaMode ? countPlaces(tied as { code: string }[], false) : `${tied.length} ${noun}s`);
 // Say the high in words, only when it's true: every stored week of a region
 // sits strictly below this one. Computed from the 8 benchmark series.
 // With AAA on, the sign is a daily number, so say these are EIA's regions.
@@ -93,7 +107,10 @@ const nextEia = eiaNext
   : aaaMode
     ? null
     : "EIA posts new prices every Tuesday.";
-const eiaLate = aaaMode ? "EIA's next weekly numbers are running late." : "EIA's next weekly prices are running late.";
+// Our update can miss a release EIA posted on time (the last run of the day is
+// before EIA's latest posting time), so the late line says the update is late
+// and doesn't blame EIA.
+const eiaLate = aaaMode ? "The next weekly EIA update is running late." : LATE_TEXT;
 // The build already knows the date, so a page read with JS off doesn't promise
 // a release day that has passed. The inline script still corrects a page that
 // is served for days after the build.
@@ -116,7 +133,6 @@ const noDataLabel = nodataStates.length === 0
       : "No price this week";
 const mapWhat = aaaMode ? (sinceText(site) || "since the last price") : sinceText(site);
 const mapLabel = `Map of the diesel price change by state ${mapWhat}. Each state links to its page.`;
-const moveCadence = aaaMode ? "daily" : "weekly";
 // One line above the map key, from the data: "All 8 regions rose, 21.2¢ to 49.1¢."
 const keySummary = keyLine(moveItems, noun, moveCadence);
 const periodText = aaaMode
@@ -138,6 +154,7 @@ const description = homeMeta({
   change: nm?.change ?? null,
   daily,
   priced: site.states.filter((s) => s.primary !== null).map((s) => s.code),
+  regions: aaaMode ? undefined : site.regions.length,
 }) + missingNote(site);
 ---
 <Base title={title} description={description}>
@@ -148,7 +165,7 @@ const description = homeMeta({
         price={nm?.price ?? null}
         noPrice="No national price today"
         change={nm?.change ?? null}
-        pct={nm?.change_pct ?? null}
+        pct={nm ? pctOf(nm) : null}
         prev={nm?.prev ?? null}
         cadence={national.cadence}
         dateLine={dateLine}
@@ -170,13 +187,17 @@ const description = homeMeta({
       {dayOne && <p>This is the first day of daily state prices, so there's nothing to compare yet.</p>}
       {topRise && (
         <p>
-          {aaaMode ? <a href={topRise.href}>{topRise.name}</a> : topRise.name} rose the most{moveWhen}, up {formatCents(topRise.change)}.
+          {tiedRise.length > 3 ? `${tiedCount(tiedRise)} tied for the biggest rise${moveWhen}, up ${formatCents(topRise.change)} each.` : (
+            <>{tiedRise.map((i, k) => <>{k > 0 && (k === tiedRise.length - 1 ? " and " : ", ")}{aaaMode ? <a href={i.href}>{i.name}</a> : i.name}</>)} rose the most{moveWhen}, up {formatCents(topRise.change)}.</>
+          )}
         </p>
       )}
       {!topRise && !dayOne && <p>No {noun} went up {stateWhere}.</p>}
       {topFall ? (
         <p>
-          {aaaMode ? <a href={topFall.href}>{topFall.name}</a> : topFall.name} fell the most{moveWhen}, down {formatCents(topFall.change)}.
+          {tiedFall.length > 3 ? `${tiedCount(tiedFall)} tied for the biggest drop${moveWhen}, down ${formatCents(topFall.change)} each.` : (
+            <>{tiedFall.map((i, k) => <>{k > 0 && (k === tiedFall.length - 1 ? " and " : ", ")}{aaaMode ? <a href={i.href}>{i.name}</a> : i.name}</>)} fell the most{moveWhen}, down {formatCents(topFall.change)}.</>
+          )}
         </p>
       ) : !dayOne ? (
         <p>No {noun} went down {stateWhere}.</p>
@@ -208,7 +229,9 @@ const description = homeMeta({
           <p class="map-note small muted">EIA reports diesel by region, so states in the same region share a price.</p>
         )}
       </div>
-      <aside class="map-side" aria-label="Legend and biggest moves">
+      {/* not an aside: a complementary landmark can't sit inside main, and the
+          key and the move list carry their own headings */}
+      <div class="map-side">
         <Legend
           cadence={national.cadence === "daily" || aaaMode ? "daily" : "weekly"}
           noData={noDataLabel}
@@ -223,7 +246,7 @@ const description = homeMeta({
           count={5}
           empty={dayOne ? "No state has a change yet." : `No ${noun} has a change yet.`}
         />
-      </aside>
+      </div>
     </div>
   </section>
 

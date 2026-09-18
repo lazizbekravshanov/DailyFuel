@@ -11,6 +11,7 @@ import { directionFor, type Direction } from "./bins.ts";
 import { pctOf } from "./copy.ts";
 import { formatDate, when } from "./dates.ts";
 import { formatChange, priceParts, spokenChange, type PriceParts } from "./format.ts";
+import { palettePng } from "./png.ts";
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 
@@ -141,6 +142,9 @@ export function cardFor(site: SiteData, key: string): Card {
   const move = s.primary;
   const t = timing(site, daily && aaaMode);
   const parts = moveParts(move, daily);
+  // A state EIA doesn't survey has no reading for any week, so the card says
+  // what its page says instead of printing a survey week.
+  const unsurveyed = !aaaMode && !move && s.eia_series === null;
   return {
     key,
     shield: s.code,
@@ -148,7 +152,7 @@ export function cardFor(site: SiteData, key: string): Card {
     price: move ? priceParts(move.price) : null,
     noPrice: aaaMode ? "No price today" : "No weekly price",
     ...parts,
-    dateLine: t.dateLine,
+    dateLine: unsurveyed ? "Not in EIA's weekly survey" : t.dateLine,
     compareLine: parts.change ? t.compareLine : null,
     label: aaaMode ? "AAA daily average, data by OPIS" : regionLabel(s, site),
   };
@@ -338,12 +342,17 @@ export async function resvgMeasure(): Promise<Measure> {
 
 let measurer: Promise<Measure> | null = null;
 
-/** The card as a PNG. */
+/**
+ * The card as a PNG. A card is opaque and uses far fewer than 256 colors, so it
+ * ships as an indexed PNG with the same pixels at about 40 percent of the size.
+ * resvg's own full color PNG is the fallback.
+ */
 export async function renderCard(card: Card): Promise<Buffer> {
   const { Resvg } = await load();
   measurer ??= resvgMeasure();
   const svg = cardSvg(card, await measurer);
-  return new Resvg(svg, { ...OPTIONS, fitTo: { mode: "original" } }).render().asPng();
+  const img = new Resvg(svg, { ...OPTIONS, fitTo: { mode: "original" } }).render();
+  return palettePng(img.width, img.height, img.pixels) ?? img.asPng();
 }
 
 /** What the page head needs: an absolute image URL and its alt text. */

@@ -11,7 +11,7 @@ import { getSite, REGION_NAMES, type StateView } from "../../lib/site.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
 import { addDays, formatDate, formatMonthYear, formatShortDate, todayInNewYork, when } from "../../lib/dates.ts";
 import { changeOver, highLow, lastDays, newest, peakKind } from "../../lib/stats.ts";
-import { DOE_LINE, DYED_DIESEL_NOTE, peakSentence } from "../../lib/doe.ts";
+import { DOE_LINE, DYED_DIESEL_HERE, peakSentence } from "../../lib/doe.ts";
 import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText, WEEKLY_LEAD } from "../../lib/release.ts";
 import { regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence } from "../../lib/copy.ts";
 import type { Move } from "../../lib/data.ts";
@@ -61,7 +61,12 @@ if (s.flags.includes("gap") && latest.aaa?.prev_as_of) {
   notes.push(`There was no AAA price for the day before, so the change is since ${formatDate(latest.aaa.prev_as_of)}.`);
 }
 if (s.flags.includes("prev_missing")) notes.push("This is the first daily price we have, so there's no change yet.");
-if (s.flags.includes("large_move")) notes.push("That's a big move for one day. It's worth checking again tomorrow.");
+if (s.flags.includes("large_move")) {
+  // After a missed day the change covers more than one day, so don't call it one.
+  const days = s.flags.includes("gap") ? latest.aaa?.gap_days ?? null : 1;
+  const span = days === 1 ? " for one day" : days && days > 1 ? ` for ${days} days` : "";
+  notes.push(`That's a big move${span}. It's worth checking again tomorrow.`);
+}
 if (s.flags.includes("eia_divergence") && s.aaa && s.eia) {
   notes.push(`AAA's price is more than $1 away from EIA's weekly ${s.regionName} price. They survey different stations, so some gap is normal.`);
 }
@@ -205,7 +210,14 @@ if (!aaaMode) {
 }
 const peerNote = noSurvey ? "EIA splits the West Coast in two: California, and the rest of the region." : null;
 
-const title = noSurvey ? `${s.name} diesel prices | DailyFuel` : `${s.name} diesel price${aaaMode ? " today" : " this week"} | DailyFuel`;
+// While EIA is the source, most states show their region's average, so the
+// title names it instead of promising a price for the state itself.
+const sharedPrice = !aaaMode && s.eia_series !== null && s.eia_series !== "SCA";
+const title = noSurvey
+  ? `${s.name} diesel prices | DailyFuel`
+  : sharedPrice
+    ? `${s.name} diesel, DOE ${s.regionName} weekly average | DailyFuel`
+    : `${s.name} diesel price${aaaMode ? " today" : " this week"} | DailyFuel`;
 const legend = noSurvey ? `Diesel in ${s.name}` : `${s.name} diesel average`;
 const description = stateDescription(s, site);
 const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
@@ -252,7 +264,7 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
       {vsUs && <p>{vsUs}</p>}
       {peakLine && <p class="peak">{peakLine}</p>}
       {notes.map((n) => <p>{n}</p>)}
-      <p class="small muted fine">{doeLine && `${doeLine} `}{DYED_DIESEL_NOTE}</p>
+      {s.primary && <p class="small muted fine">{doeLine && `${doeLine} `}{DYED_DIESEL_HERE}</p>}
       <p><a href={aaaLink}>AAA's daily average for {s.name}</a></p>
     </div>
   </section>
@@ -329,12 +341,12 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
         <div>
           <dt>{highLabel}</dt>
           <dd>{yearHL ? <Price price={yearHL.high.value} /> : <span class="muted">None yet</span>}</dd>
-          {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory && !aaaMode ? "Week of " : ""}{formatDate(yearHL.high.date)}</dd>}
+          {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory ? "Week of " : ""}{formatDate(yearHL.high.date)}</dd>}
         </div>
         <div>
           <dt>{lowLabel}</dt>
           <dd>{yearHL ? <Price price={yearHL.low.value} /> : <span class="muted">None yet</span>}</dd>
-          {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory && !aaaMode ? "Week of " : ""}{formatDate(yearHL.low.date)}</dd>}
+          {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory ? "Week of " : ""}{formatDate(yearHL.low.date)}</dd>}
         </div>
       </dl>
     </section>

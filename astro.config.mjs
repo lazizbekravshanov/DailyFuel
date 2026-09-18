@@ -1,8 +1,10 @@
 // @ts-check
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import { transformSync } from "esbuild";
 
 /**
  * The day the prices on the site last changed: EIA's release date, or AAA's
@@ -23,6 +25,34 @@ function dataLastmod() {
 
 const lastmod = dataLastmod();
 
+const SRC = fileURLToPath(new URL("./src/", import.meta.url));
+
+/**
+ * The page scripts are plain files imported with ?raw and inlined with
+ * set:html, where nothing minifies them. For the build this returns each one
+ * minified, so the comments stay in the source files and out of every page.
+ * esbuild comes with Astro. The dev server keeps the readable source.
+ * @returns {import("vite").Plugin}
+ */
+function minifyInlineScripts() {
+  return {
+    name: "dailyfuel:minify-inline-scripts",
+    apply: "build",
+    enforce: "pre",
+    load(id) {
+      const [file, query = ""] = id.split("?");
+      if (!new URLSearchParams(query).has("raw") || !file.endsWith(".js") || !file.startsWith(SRC)) return null;
+      const { code } = transformSync(readFileSync(file, "utf8"), {
+        loader: "js",
+        minify: true,
+        target: "es2017",
+        legalComments: "none",
+      });
+      return `export default ${JSON.stringify(code.trim())};`;
+    },
+  };
+}
+
 export default defineConfig({
   site: "https://dailydiesel.vercel.app",
   output: "static",
@@ -41,5 +71,8 @@ export default defineConfig({
   },
   devToolbar: {
     enabled: false,
+  },
+  vite: {
+    plugins: [minifyInlineScripts()],
   },
 });

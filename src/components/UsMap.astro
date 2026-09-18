@@ -34,12 +34,16 @@ const items = site.states.map((s) => {
   const region = regionsOn && s.eia_series && s.regionName && (members.get(s.eia_series)?.length ?? 0) > 1 ? s.eia_series : null;
   const note = regionsOn && s.eia_series && s.regionName ? regionNote(s.regionName, members.get(s.eia_series) ?? [s.code]) : l.note;
   const parts = s.primary ? priceParts(s.primary.price) : null;
+  // The native tooltip, shown with JS off, says the price is shared too, the
+  // way the aria label and the script's tooltip do.
+  const title = regionsOn && s.eia_series && s.regionName ? `${l.title.replace(/\.$/, "")}. ${note}` : l.title;
   return {
     s,
     shape: stateShape(s.fips),
     l,
     region,
     note,
+    title,
     aria: withNote(l.aria, l.note, note),
     main: parts?.main ?? "",
     tenth: parts?.tenth ?? "",
@@ -59,7 +63,7 @@ const callouts = CALLOUTS.map((code, i) => ({
       </pattern>
     </defs>
     <g class="states">
-      {items.map(({ s, shape, l, region, note, aria, main, tenth }) => (
+      {items.map(({ s, shape, l, region, note, title, aria, main, tenth }) => (
         <a
           class="state"
           href={s.href}
@@ -74,7 +78,7 @@ const callouts = CALLOUTS.map((code, i) => ({
           data-dir={l.dir}
           data-note={note}
         >
-          <title>{l.title}</title>
+          <title>{title}</title>
           <path class={`f f-${s.fill}`} d={shape.d}></path>
         </a>
       ))}
@@ -176,6 +180,36 @@ const callouts = CALLOUTS.map((code, i) => ({
   .us-map .callout.is-active .f {
     stroke: var(--focus);
     stroke-width: 2.5;
+  }
+  /* Every chip in a lit region gets the ring above, so the one under the
+     pointer or keyboard turns ink with paper lettering, like the dashed state
+     line on the map. Its change is still in the tooltip. */
+  .us-map .callout.is-current .f {
+    fill: var(--focus);
+    stroke: var(--focus);
+    stroke-width: 2.5;
+  }
+  .us-map .callout.is-current .t,
+  .us-map .callout.is-current circle,
+  .us-map .callout.is-current path {
+    fill: var(--focus-halo);
+  }
+  @media (forced-colors: active) {
+    .us-map .callout.is-current .f,
+    .us-map .callout.is-current .t,
+    .us-map .callout.is-current circle,
+    .us-map .callout.is-current path {
+      forced-color-adjust: none;
+    }
+    .us-map .callout.is-current .f {
+      fill: Highlight;
+      stroke: CanvasText;
+    }
+    .us-map .callout.is-current .t,
+    .us-map .callout.is-current circle,
+    .us-map .callout.is-current path {
+      fill: HighlightText;
+    }
   }
   .us-map .callout .t {
     font-family: var(--font);
