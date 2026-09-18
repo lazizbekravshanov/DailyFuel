@@ -17,10 +17,13 @@
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
     "@fontsource-variable/overpass": "5.3.0",
+    "@observablehq/plot": "0.6.17",
+    "@resvg/resvg-js": "2.6.2",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "astro": "~7.3.3",
     "d3-geo": "3.1.1",
+    "linkedom": "0.18.13",
     "topojson-client": "3.1.0",
     "us-atlas": "3.0.1"
   },

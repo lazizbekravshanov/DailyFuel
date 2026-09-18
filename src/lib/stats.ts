@@ -97,3 +97,23 @@ export function lastDays(series: Point[], windowDays: number): Point[] {
   const since = addDays(last.date, -(windowDays - 1));
   return series.filter((p) => p.date >= since && p.date <= last.date);
 }
+
+/**
+ * How the newest value compares with what came before it.
+ * "record": strictly above every earlier stored value (our records start June 2022).
+ * "52week": strictly above every earlier value in the 52 week window, but not a record.
+ * Ties never count, so a flat week at the top is not called a new high.
+ */
+export type PeakKind = "record" | "52week" | null;
+
+export function peakKind(series: Point[], windowDays = 364): PeakKind {
+  const v = present(series);
+  if (v.length < 2) return null;
+  const last = v[v.length - 1];
+  const earlier = v.slice(0, -1);
+  if (earlier.every((p) => p.value < last.value)) return "record";
+  const since = addDays(last.date, -(windowDays - 1));
+  const inWindow = earlier.filter((p) => p.date >= since);
+  if (inWindow.length && inWindow.every((p) => p.value < last.value)) return "52week";
+  return null;
+}
