@@ -5,16 +5,34 @@ import "../styles/global.css";
 import fontUrl from "@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2?url";
 import Footer from "../components/Footer.astro";
 import StaleBanner from "../components/StaleBanner.astro";
-import { getSite, SITE_NAME } from "../lib/site.ts";
+import { getSite, SITE_NAME, SITE_URL } from "../lib/site.ts";
+import { CARD_HEIGHT, CARD_WIDTH, cardMeta } from "../lib/og.ts";
 interface Props {
   title: string;
   description: string;
   noindex?: boolean;
+  /** The skip link names what it skips to. Pages with no prices say "Skip to main content". */
+  skipLabel?: string;
 }
-const { title, description, noindex = false } = Astro.props;
+const { title, description, noindex = false, skipLabel = "Skip to prices" } = Astro.props;
 const site = getSite();
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const origin = Astro.site?.href ?? SITE_URL;
+const canonical = new URL(Astro.url.pathname, origin).href;
 const current = Astro.url.pathname;
+// The share card for this page, worked out from the path and the newest data,
+// so page files don't have to pass anything in.
+const card = cardMeta(site, current, origin);
+// Tells search engines the site's name, so results say DailyFuel and not the vercel.app host.
+const website = current === "/"
+  ? JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: SITE_NAME,
+      alternateName: "DailyFuel diesel prices",
+      url: new URL("/", origin).href,
+      inLanguage: "en-US",
+    }).replace(/</g, "\\u003c")
+  : null;
 ---
 <!doctype html>
 <html lang="en">
@@ -33,9 +51,18 @@ const current = Astro.url.pathname;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {!noindex && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={card.url} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(CARD_WIDTH)} />
+    <meta property="og:image:height" content={String(CARD_HEIGHT)} />
+    <meta property="og:image:alt" content={card.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image:alt" content={card.alt} />
+    {website && <script type="application/ld+json" set:html={website} />}
+    <slot name="head" />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to prices</a>
+    <a class="skip-link" href="#main">{skipLabel}</a>
     <header class="site-header">
       <div class="wrap header-row">
         <a class="wordmark" href="/" aria-current={current === "/" ? "page" : undefined}>
@@ -56,7 +83,7 @@ const current = Astro.url.pathname;
     <main id="main" tabindex="-1">
       <slot />
     </main>
-    <Footer site={site} />
+    <Footer site={site} compact={current.startsWith("/about")} />
     <slot name="scripts" />
   </body>
 </html>

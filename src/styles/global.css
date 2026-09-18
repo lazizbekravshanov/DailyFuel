@@ -103,6 +103,10 @@ main:focus {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+  /* the spoken twin of a price stays out of copy and paste, so copying a row
+     gives "$6.027" and not "$6.027$6.027" */
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .skip-link {
@@ -191,7 +195,8 @@ details.numbers {
   margin-top: var(--space-4);
 }
 
-details.numbers > summary {
+details.numbers > summary,
+details.disclosure > summary {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -201,11 +206,13 @@ details.numbers > summary {
   list-style: none;
 }
 
-details.numbers > summary::-webkit-details-marker {
+details.numbers > summary::-webkit-details-marker,
+details.disclosure > summary::-webkit-details-marker {
   display: none;
 }
 
-details.numbers > summary::before {
+details.numbers > summary::before,
+details.disclosure > summary::before {
   content: "";
   width: 0;
   height: 0;
@@ -215,7 +222,8 @@ details.numbers > summary::before {
   transition: transform 120ms ease-out;
 }
 
-details.numbers[open] > summary::before {
+details.numbers[open] > summary::before,
+details.disclosure[open] > summary::before {
   transform: rotate(90deg);
 }
 
@@ -225,6 +233,15 @@ details.numbers[open] > summary::before {
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  /* A soft shadow on the side that has more table, with no script. The two
+     paper covers scroll with the table (local) and hide each shadow once you
+     reach that end. The shadows stay put on the box edges (scroll). */
+  background:
+    linear-gradient(to right, var(--paper) 40%, transparent) left top / 36px 100% no-repeat local,
+    linear-gradient(to left, var(--paper) 40%, transparent) right top / 36px 100% no-repeat local,
+    linear-gradient(to right, var(--scroll-shadow), transparent) left top / 14px 100% no-repeat scroll,
+    linear-gradient(to left, var(--scroll-shadow), transparent) right top / 14px 100% no-repeat scroll;
+  background-color: var(--paper);
 }
 
 .table-scroll:focus-visible {
@@ -281,6 +298,38 @@ table.data caption {
   .glyph {
     fill: CanvasText;
   }
+  /* In a contrast theme the change colors are the content, so the legend
+     swatches, the phone map tiles and the no survey hatch keep their own
+     fills. Every fill already has 4.5:1 text on it. */
+  .sw,
+  .tile,
+  .f-nodata {
+    forced-color-adjust: none;
+  }
+  .tile {
+    outline: 1px solid CanvasText;
+    outline-offset: -1px;
+  }
+  /* a glyph on a tile wears the tile's own text color, not black on dark red */
+  .tile .glyph {
+    fill: currentColor;
+  }
+  /* the chosen chart range keeps its ink and paper pair, so you can see which one is on */
+  .range input:checked + label {
+    forced-color-adjust: none;
+  }
+  /* chart dots are painted backgrounds, which a contrast theme drops */
+  .end-dot,
+  .cross-dot {
+    forced-color-adjust: none;
+    background: CanvasText !important;
+  }
+  /* the disclosure triangle is borders, and only the left one should show */
+  details.numbers > summary::before,
+  details.disclosure > summary::before {
+    forced-color-adjust: none;
+    border-left-color: CanvasText;
+  }
 }
 
 /* change bins, shared by the map, tiles, legend and table swatches */
@@ -314,7 +363,8 @@ a.f-flat {
 }
 
 .table-tall {
-  max-height: 440px;
+  /* short enough that a phone in landscape still shows the page around it */
+  max-height: min(440px, 70vh);
   overflow-y: auto;
 }
 

@@ -62,6 +62,9 @@
   --focus: var(--ink);
   --focus-halo: var(--paper);
 
+  /* edge shadow on a table that scrolls sideways */
+  --scroll-shadow: rgb(29 33 37 / 0.2);
+
   --font: "Overpass Variable", "Overpass", system-ui, -apple-system, "Segoe UI", sans-serif;
   --fs-small: 14px;
   --fs-body: 17px;
@@ -122,5 +125,8 @@
 
     --line-primary: var(--ink);
     --line-bench: #8a8f94;
+
+    /* a dark shadow vanishes on dark paper, so the edge glows faintly instead */
+    --scroll-shadow: rgb(232 233 229 / 0.16);
   }
 }

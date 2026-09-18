@@ -3,42 +3,52 @@ import { formatBadgeDate, formatDate } from "../lib/dates.ts";
 import { REPO_URL, type SiteData } from "../lib/site.ts";
 interface Props {
   site: SiteData;
+  /** On /about/ the page itself carries the full credits, so the footer drops its copy and its link back to the page. */
+  compact?: boolean;
 }
-const { site } = Astro.props;
+const { site, compact = false } = Astro.props;
 const release = site.latest.eia?.release_date ?? site.weekly?.release_date ?? null;
 const aaa = site.mode === "aaa+eia" ? site.latest.aaa : null;
 const tax = site.tax;
 ---
 <footer class="site-footer">
   <div class="wrap">
-    <h2 class="footer-title">Sources and credits</h2>
-    <div class="cols">
-      <div class="credits">
-        {site.weekly && (
-          <p>
-            Weekly prices: U.S. Energy Information Administration, Gasoline and Diesel Fuel Update{release ? ` (released ${formatDate(release)})` : ""}.
-          </p>
-        )}
-        {aaa && (
-          <p>
-            Daily state averages: AAA (<a href="https://gasprices.aaa.com/">gasprices.aaa.com</a>), data by OPIS. Price as of {formatBadgeDate(aaa.as_of)}. DailyFuel is not affiliated with AAA or OPIS.
-          </p>
-        )}
-        {tax && (
-          <p>
-            Diesel tax: Federal Highway Administration, Highway Statistics table MF-121T ({tax.reporting_period} reporting period). U.S. government work, public domain.
-          </p>
-        )}
-        <p class="muted">
-          Map: us-atlas, from U.S. Census Bureau boundaries. Type: Overpass.{" "}
-          <a href="/about/">Where the numbers come from</a>
-        </p>
-      </div>
+    {compact ? (
       <div class="about">
-        <p>DailyFuel is free, with no ads, no tracking and no accounts.</p>
-        <p><a href={REPO_URL}>Code on GitHub</a></p>
+        <p>DailyFuel is free, with no ads, no tracking and no accounts. <a href={REPO_URL}>Code on GitHub</a></p>
       </div>
-    </div>
+    ) : (
+      <>
+        <h2 class="footer-title">Sources and credits</h2>
+        <div class="cols">
+          <div class="credits">
+            {site.weekly && (
+              <p>
+                Weekly prices: U.S. Energy Information Administration, Gasoline and Diesel Fuel Update{release ? ` (released ${formatDate(release)})` : ""}.
+              </p>
+            )}
+            {aaa && (
+              <p>
+                Daily state averages: AAA (<a href="https://gasprices.aaa.com/">gasprices.aaa.com</a>), data by OPIS. Price as of {formatBadgeDate(aaa.as_of)}. DailyFuel is not affiliated with AAA or OPIS.
+              </p>
+            )}
+            {tax && (
+              <p>
+                Diesel tax: Federal Highway Administration, Highway Statistics table MF-121T ({tax.reporting_period} reporting period). U.S. government work, public domain.
+              </p>
+            )}
+            <p class="muted">
+              Map: us-atlas, from U.S. Census Bureau boundaries. Type: Overpass.{" "}
+              <a href="/about/">Where the numbers come from</a>
+            </p>
+          </div>
+          <div class="about">
+            <p>DailyFuel is free, with no ads, no tracking and no accounts.</p>
+            <p><a href={REPO_URL}>Code on GitHub</a></p>
+          </div>
+        </div>
+      </>
+    )}
   </div>
 </footer>
 

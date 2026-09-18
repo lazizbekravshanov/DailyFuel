@@ -24,6 +24,13 @@ export const SITE_NAME = "DailyFuel";
 export const SITE_URL = "https://dailydiesel.vercel.app";
 export const REPO_URL = "https://github.com/lazizbekravshanov/DailyFuel";
 
+/**
+ * Where people report a wrong number. Most drivers don't have a GitHub account,
+ * so an email address works better. Left empty until the owner picks one to
+ * publish; until then /about/ points at GitHub.
+ */
+export const CONTACT_EMAIL: string | null = null;
+
 export const BENCHMARKS: BenchmarkKey[] = ["R1X", "R1Y", "R1Z", "R20", "R30", "R40", "SCA", "R5XCA"];
 
 /** Region names the way a driver would say them. */
