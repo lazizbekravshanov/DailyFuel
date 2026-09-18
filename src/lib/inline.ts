@@ -1,14 +1,19 @@
 // Turns a typed, tested function into an inline <script> body that calls it:
-// `(function name(a, b) { ... })(args);`. The function must stand alone, with
-// no imports and no helpers from outside its body, and must not hold a
-// multi line string, since every line is trimmed. Indents and whole line
-// comments are dropped, which is all the shrinking a script this small needs.
+// `(function n(a,b){...})(args);`. The function must stand alone, with no
+// imports and no helpers from outside its body. esbuild (it comes with Astro)
+// strips the comments and whitespace and shortens local names, like the ?raw
+// page scripts in astro.config.mjs. Syntax minifying stays off: it can drop a
+// call it thinks has no effect, and this call is the whole script.
+
+import { transformSync } from "esbuild";
 
 export function inlineCall(fn: (...args: never[]) => unknown, ...args: string[]): string {
-  const body = String(fn)
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line !== "" && !line.startsWith("//"))
-    .join("\n");
-  return `(${body})(${args.join(",")});`;
+  const { code } = transformSync(`(${String(fn)})(${args.join(",")});`, {
+    loader: "js",
+    minifyWhitespace: true,
+    minifyIdentifiers: true,
+    target: "es2017",
+    legalComments: "none",
+  });
+  return code.trim();
 }
