@@ -9,13 +9,16 @@ import BiggestMoves, { type MoveItem } from "../components/BiggestMoves.astro";
 import RegionMultiples from "../components/RegionMultiples.astro";
 import StateTable from "../components/StateTable.astro";
 import rollScript from "../scripts/roll.js?raw";
-import mapScript from "../scripts/map.js?raw";
+import mapScript from "../components/home/map.js?raw";
 import chartScript from "../scripts/chart.js?raw";
 import sortScript from "../scripts/table-sort.js?raw";
-import { getSite } from "../lib/site.ts";
+import { getSite, SITE_NAME } from "../lib/site.ts";
 import { formatShortDate, formatWeekdayDate, todayInNewYork } from "../lib/dates.ts";
 import { changeTenths, formatCents } from "../lib/format.ts";
-import { homeDescription, pctOf, sinceText } from "../lib/copy.ts";
+import { pctOf, sinceText } from "../lib/copy.ts";
+import { peakKind } from "../lib/stats.ts";
+import { allRegionsSentence, DOE_LINE, HOME_TITLE } from "../lib/doe.ts";
+import { homeMeta, keyLine } from "../components/home/home.ts";
 
 const site = getSite();
 const { mode, national, latest } = site;
@@ -32,14 +35,21 @@ const compareLine = !nm || nm.change === null
       ? `vs week of ${formatShortDate(national.prevDate)}`
       : null;
 
-// Biggest moves: states when AAA is on, regions otherwise.
+// Biggest moves: states when AAA is on, regions otherwise. A region carries its
+// member states so the list can say who shares the price.
 const moveItems: MoveItem[] = aaaMode
   ? site.states
       .filter((s) => s.primary && s.primary.change !== null)
       .map((s) => ({ name: s.name, href: s.href, price: s.primary!.price, change: s.primary!.change!, pct: pctOf(s.primary!) }))
   : site.regions
       .filter((r) => r.move && r.move.change !== null)
-      .map((r) => ({ name: r.name, price: r.move!.price, change: r.move!.change!, pct: r.move!.change_pct }));
+      .map((r) => ({
+        name: r.name,
+        price: r.move!.price,
+        change: r.move!.change!,
+        pct: r.move!.change_pct,
+        members: r.states.map((code) => ({ code, name: site.byCode.get(code)?.name ?? code })),
+      }));
 const rises = moveItems.filter((i) => changeTenths(i.change) > 0).sort((a, b) => b.change - a.change);
 const falls = moveItems.filter((i) => changeTenths(i.change) < 0).sort((a, b) => a.change - b.change);
 
@@ -58,6 +68,9 @@ const stateWhere = aaaMode ? sinceText(site) || where : where;
 const moveWhen = stateWhere === where ? "" : ` ${stateWhere}`;
 const topRise = rises[0];
 const topFall = falls[0];
+// Say the high in words, only when it's true: every stored week of a region
+// sits strictly below this one. Computed from the 8 benchmark series.
+const peakLine = site.weekly ? allRegionsSentence(site.regions.map((r) => peakKind(r.history))) : null;
 const eiaNext = latest.eia?.next_release_date ?? site.weekly?.next_release_date ?? null;
 // The EIA sentence carries its date so the stale script can swap in a late
 // notice when the page is read after that day and nothing new has landed.
@@ -92,6 +105,9 @@ const noDataLabel = nodataStates.length === 0
       : "No price this week";
 const mapWhat = aaaMode ? (sinceText(site) || "since the last price") : sinceText(site);
 const mapLabel = `Map of the diesel price change by state ${mapWhat}. Each state links to its page.`;
+const moveCadence = aaaMode ? "daily" : "weekly";
+// One line above the map key, from the data: "All 8 regions rose, 21.2¢ to 49.1¢."
+const keySummary = keyLine(moveItems, noun, moveCadence);
 const periodText = aaaMode
   ? latest.aaa?.prev_as_of
     ? `Daily AAA averages, ${formatShortDate(latest.aaa.prev_as_of)} to ${formatShortDate(latest.aaa.as_of)}.`
@@ -100,8 +116,18 @@ const periodText = aaaMode
     ? `EIA weekly prices, week of ${formatShortDate(latest.eia.prev_period)} to week of ${formatShortDate(latest.eia.period)}.`
     : "EIA weekly prices.";
 
-const title = "Diesel prices in every state, and which way they moved | DailyFuel";
-const description = homeDescription(site);
+// The DOE name is how drivers and surcharge contracts know the weekly number.
+// It only fits while the sign shows EIA's weekly U.S. average.
+const doeSign = !daily;
+const title = doeSign ? `${HOME_TITLE} | ${SITE_NAME}` : `Diesel prices in every state, and which way they moved | ${SITE_NAME}`;
+// Names only the places that have a price, so it never promises Alaska and
+// Hawaii while EIA doesn't survey them.
+const description = homeMeta({
+  price: nm?.price ?? null,
+  change: nm?.change ?? null,
+  daily,
+  priced: site.states.filter((s) => s.primary !== null).map((s) => s.code),
+});
 ---
 <Base title={title} description={description}>
   <section class="hero wrap" aria-label="U.S. average">
@@ -124,9 +150,12 @@ const description = homeDescription(site);
         )}
       </Sign>
       <script is:inline set:html={rollScript}></script>
+      {doeSign && <p class="doe small muted">{DOE_LINE}</p>}
     </div>
     <div class="summary">
       <p class="lead">{usSentence}</p>
+      {peakLine && <p class="peak">{peakLine}</p>}
+      <!-- US_SPARKLINE -->
       {dayOne && <p>This is the first day of daily state prices, so there's nothing to compare yet.</p>}
       {topRise && (
         <p>
@@ -152,25 +181,46 @@ const description = homeDescription(site);
   <section class="section wrap" aria-labelledby="map-title">
     <div class="section-head">
       <h2 id="map-title">Where diesel went up or down</h2>
-      <p>{periodText}</p>
+      <p>{periodText} Tap a state to see its price and chart.</p>
     </div>
     <div class="map-layout">
       <div class="map-col">
+        <a class="skip-map" href="#after-map">Skip past the map</a>
         <div class="geo-map">
           <UsMap site={site} label={mapLabel} />
         </div>
         <div class="tile-map">
           <TileMap site={site} label={mapLabel} />
         </div>
+        <span id="after-map" tabindex="-1"></span>
         {!aaaMode && (
           <p class="map-note small muted">EIA reports diesel by region, so states in the same region share a price.</p>
         )}
       </div>
       <aside class="map-side" aria-label="Legend and biggest moves">
-        <Legend cadence={national.cadence === "daily" || aaaMode ? "daily" : "weekly"} noData={noDataLabel} title={aaaMode ? `Change ${sinceText(site) || "since the last price"}` : "Change since last week"} />
-        <BiggestMoves items={moveItems} cadence={aaaMode ? "daily" : "weekly"} noun={aaaMode ? "state" : "region"} count={aaaMode ? 5 : 3} />
+        <Legend
+          cadence={national.cadence === "daily" || aaaMode ? "daily" : "weekly"}
+          noData={noDataLabel}
+          title={aaaMode ? `Change ${sinceText(site) || "since the last price"}` : "Change since last week"}
+          summary={keySummary}
+        />
+        <BiggestMoves
+          items={moveItems}
+          cadence={moveCadence}
+          noun={noun}
+          layout={aaaMode ? "split" : "list"}
+          count={5}
+          empty={dayOne ? "No state has a change yet." : `No ${noun} has a change yet.`}
+        />
       </aside>
     </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="states-title">
+    <div class="section-head">
+      <h2 id="states-title">Every state</h2>
+    </div>
+    <StateTable site={site} />
   </section>
 
   {site.weekly && (
@@ -182,13 +232,6 @@ const description = homeDescription(site);
       <RegionMultiples site={site} />
     </section>
   )}
-
-  <section class="section wrap" aria-labelledby="states-title">
-    <div class="section-head">
-      <h2 id="states-title">Every state</h2>
-    </div>
-    <StateTable site={site} />
-  </section>
 
   <Fragment slot="scripts">
     <script is:inline set:html={mapScript}></script>
@@ -220,6 +263,10 @@ const description = homeDescription(site);
   .summary .muted {
     font-size: 17px;
   }
+  .doe {
+    margin: var(--space-3) 0 0;
+    max-width: 62ch;
+  }
   @media (max-width: 899px) {
     .hero {
       grid-template-columns: minmax(0, 1fr);
@@ -249,6 +296,29 @@ const description = homeDescription(site);
   .map-side {
     display: grid;
     gap: var(--space-6);
+  }
+  /* the skip link sits above both maps, so it works for the tiles on a phone too */
+  .map-col {
+    position: relative;
+  }
+  .skip-map {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 6;
+    padding: 8px 12px;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 700;
+    border-radius: 4px;
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .skip-map:focus {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
   }
   /* when the moves list runs longer than the map, the map stays in view beside it */
   @media (min-width: 1024px) {
