@@ -1,28 +1,57 @@
 ---
 // Choropleth of the latest change, drawn at build time. Each state is a link.
-import { CALLOUTS, MAP_HEIGHT, nationOutline, stateShape } from "../lib/geo.ts";
+// While EIA is the source, states share their region's price, so the map also
+// draws the 8 regions: wide paper lines where two regions meet and thin state
+// lines inside them. On hover and focus the script lights the whole region.
+import { CALLOUTS, MAP_HEIGHT, nationOutline, regionEdges, stateShape } from "../lib/geo.ts";
 import { mapLabel } from "../lib/copy.ts";
+import { priceParts } from "../lib/format.ts";
 import type { SiteData } from "../lib/site.ts";
+import { regionNote, withNote } from "./home/home.ts";
 interface Props {
   site: SiteData;
   label: string;
 }
 const { site, label } = Astro.props;
 const WIDTH = 1000;
-const BOX_W = 46;
-const BOX_H = 28;
-const BOX_GAP = 6;
-const BOX_X = 950;
-const BOX_Y = 168;
-const items = site.states.map((s) => ({ s, shape: stateShape(s.fips), l: mapLabel(s, site) }));
+// Callout chips for the small eastern states: about 34 by 24px with a 27px
+// pitch on the 608px map at 1024, which clears the 24px target size.
+const BOX_W = 56;
+const BOX_H = 40;
+const BOX_GAP = 4;
+const BOX_X = 942;
+const BOX_Y = 160;
+const GLYPHS: Record<string, string> = { up: "M5 .8 9.8 9.2H.2Z", down: "M.2 .8H9.8L5 9.2Z" };
+
+const regionsOn = site.mode === "eia_only";
+const members = new Map(site.regions.map((r) => [r.key as string, r.states]));
+const byFips = new Map(site.states.map((s) => [s.fips, s]));
+const edges = regionsOn ? regionEdges((fips) => byFips.get(fips)?.eia_series ?? null) : null;
+
+const items = site.states.map((s) => {
+  const l = mapLabel(s, site);
+  // a region of one (California) lights up like any single state
+  const region = regionsOn && s.eia_series && s.regionName && (members.get(s.eia_series)?.length ?? 0) > 1 ? s.eia_series : null;
+  const note = regionsOn && s.eia_series && s.regionName ? regionNote(s.regionName, members.get(s.eia_series) ?? [s.code]) : l.note;
+  const parts = s.primary ? priceParts(s.primary.price) : null;
+  return {
+    s,
+    shape: stateShape(s.fips),
+    l,
+    region,
+    note,
+    aria: withNote(l.aria, l.note, note),
+    main: parts?.main ?? "",
+    tenth: parts?.tenth ?? "",
+  };
+});
 const callouts = CALLOUTS.map((code, i) => ({
   item: items.find((it) => it.s.code === code)!,
   y: BOX_Y + i * (BOX_H + BOX_GAP),
 }));
 ---
 <div class="map-wrap" data-map>
-  <a class="skip-map" href="#after-map">Skip past the map</a>
-  <svg class="us-map" viewBox={`0 0 ${WIDTH} ${MAP_HEIGHT}`} role="group" aria-label={label} tabindex="-1">
+  <svg class:list={["us-map", { "regions-on": regionsOn }]} viewBox={`0 0 ${WIDTH} ${MAP_HEIGHT}`} role="group" aria-label={label} tabindex="-1">
     <defs>
       <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <rect class="hatch-bg" width="7" height="7"></rect>
@@ -30,73 +59,71 @@ const callouts = CALLOUTS.map((code, i) => ({
       </pattern>
     </defs>
     <g class="states">
-      {items.map(({ s, shape, l }) => (
+      {items.map(({ s, shape, l, region, note, aria, main, tenth }) => (
         <a
           class="state"
           href={s.href}
-          aria-label={l.aria}
+          aria-label={aria}
           data-code={s.code}
           data-name={s.name}
+          data-region={region ?? undefined}
           data-price={l.price}
+          data-main={main || undefined}
+          data-tenth={tenth || undefined}
           data-change={l.change}
           data-dir={l.dir}
-          data-note={l.note}
+          data-note={note}
         >
           <title>{l.title}</title>
           <path class={`f f-${s.fill}`} d={shape.d}></path>
         </a>
       ))}
     </g>
+    {edges && <path class="region-edges" d={edges} aria-hidden="true"></path>}
     <path class="nation" d={nationOutline()} aria-hidden="true"></path>
     <g class="callouts" aria-hidden="true">
-      {callouts.map(({ item: { s, l }, y }) => (
-        <a
-          class="callout"
-          href={s.href}
-          tabindex="-1"
-          data-code={s.code}
-          data-name={s.name}
-          data-price={l.price}
-          data-change={l.change}
-          data-dir={l.dir}
-          data-note={l.note}
-        >
-          <rect class={`f f-${s.fill}`} x={BOX_X} y={y} width={BOX_W} height={BOX_H} rx="4"></rect>
-          <text class={`t t-${s.fill}`} x={BOX_X + BOX_W / 2} y={y + BOX_H / 2 + 6} text-anchor="middle">{s.code}</text>
-        </a>
-      ))}
+      {callouts.map(({ item: { s, l, region, note, main, tenth }, y }) => {
+        const glyph = l.dir ? GLYPHS[l.dir] ?? null : null;
+        const cx = BOX_X + BOX_W / 2;
+        return (
+          <a
+            class="callout"
+            href={s.href}
+            tabindex="-1"
+            data-code={s.code}
+            data-name={s.name}
+            data-region={region ?? undefined}
+            data-price={l.price}
+            data-main={main || undefined}
+            data-tenth={tenth || undefined}
+            data-change={l.change}
+            data-dir={l.dir}
+            data-note={note}
+          >
+            <rect class={`f f-${s.fill}`} x={BOX_X} y={y} width={BOX_W} height={BOX_H} rx="5"></rect>
+            {/* code on the left, direction glyph on the right, both in the fill's text color */}
+            <text class={`t t-${s.fill}`} x={l.dir ? cx - 7 : cx} y={y + BOX_H / 2 + 6.5} text-anchor="middle">{s.code}</text>
+            {l.dir === "flat" && <circle class={`t-${s.fill}`} cx={cx + 16} cy={y + BOX_H / 2} r="4"></circle>}
+            {glyph && <path class={`t-${s.fill}`} d={glyph} transform={`translate(${cx + 11} ${y + BOX_H / 2 - 5})`}></path>}
+          </a>
+        );
+      })}
     </g>
     <g class="map-hi" aria-hidden="true">
+      <g class="hi-rg-halo"></g>
+      <g class="hi-rg-line"></g>
+      <g class="hi-rg-cover"></g>
       <path class="hi-halo" d=""></path>
       <path class="hi-line" d=""></path>
+      <path class="hi-state" d=""></path>
     </g>
   </svg>
   <div class="map-tip" hidden></div>
 </div>
-<span id="after-map" tabindex="-1"></span>
 
 <style is:global>
   .map-wrap {
     position: relative;
-  }
-  .skip-map {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 6;
-    padding: 8px 12px;
-    background: var(--ink);
-    color: var(--paper);
-    font-weight: 700;
-    border-radius: 4px;
-    transform: translateY(-120%);
-    opacity: 0;
-    pointer-events: none;
-  }
-  .skip-map:focus {
-    transform: none;
-    opacity: 1;
-    pointer-events: auto;
   }
   .us-map {
     display: block;
@@ -113,8 +140,21 @@ const callouts = CALLOUTS.map((code, i) => ({
     vector-effect: non-scaling-stroke;
     stroke-linejoin: round;
   }
+  /* inside a region every state has the same price, so its lines go quiet */
+  .us-map.regions-on .states .f {
+    stroke-width: 0.5;
+  }
   .us-map .state .f-nodata {
     stroke: var(--hairline-strong);
+  }
+  .us-map .region-edges {
+    fill: none;
+    stroke: var(--paper);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
   }
   .us-map .nation {
     fill: none;
@@ -139,15 +179,33 @@ const callouts = CALLOUTS.map((code, i) => ({
   }
   .us-map .callout .t {
     font-family: var(--font);
-    font-size: 16px;
+    font-size: 19px;
     font-weight: 700;
     pointer-events: none;
   }
   .us-map .map-hi path {
-    fill: none;
     pointer-events: none;
     vector-effect: non-scaling-stroke;
     stroke-linejoin: round;
+  }
+  .us-map .map-hi > path {
+    fill: none;
+  }
+  /* A lit region: copies of its states, stroked wide in paper and then in ink,
+     with filled copies on top. Only the outer half of the strokes shows, so the
+     outline follows the region's edge and none of the lines inside it. */
+  .us-map .hi-rg-halo path {
+    fill: var(--focus-halo);
+    stroke: var(--focus-halo);
+    stroke-width: 9;
+  }
+  .us-map .hi-rg-line path {
+    fill: var(--focus);
+    stroke: var(--focus);
+    stroke-width: 5;
+  }
+  .us-map .hi-rg-cover .f {
+    stroke-width: 0.5;
   }
   .us-map .hi-halo {
     stroke: var(--focus-halo);
@@ -156,6 +214,12 @@ const callouts = CALLOUTS.map((code, i) => ({
   .us-map .hi-line {
     stroke: var(--focus);
     stroke-width: 2.5;
+  }
+  /* the state under the pointer, inside its lit region */
+  .us-map .hi-state {
+    stroke: var(--focus);
+    stroke-width: 2;
+    stroke-dasharray: 4 3;
   }
   .map-tip {
     position: absolute;
@@ -178,6 +242,15 @@ const callouts = CALLOUTS.map((code, i) => ({
   .map-tip .tip-price {
     font-size: 21px;
     font-weight: 750;
+  }
+  .map-tip .tip-price .tenth {
+    font-size: 0.6em;
+    top: -0.6em;
+  }
+  .map-tip .tip-unit {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink-2);
   }
   .map-tip .tip-change {
     font-weight: 600;

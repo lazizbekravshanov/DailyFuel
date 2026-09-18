@@ -11,8 +11,9 @@ export type FillKey = BinKey | "nodata";
 
 /** Bin edges in tenths of a cent: [about the same below, small below, medium below]. */
 export const EDGES: Record<Cadence, [number, number, number]> = {
-  // under 0.5¢, 0.5 to 5¢, 5 to 15¢, 15¢ or more
-  weekly: [5, 50, 150],
+  // under 1¢, 1 to 5¢, 5 to 15¢, 15¢ or more. About the same is 1¢ wide so a
+  // penny of noise in a quiet week doesn't paint the map red and blue.
+  weekly: [10, 50, 150],
   // under 0.2¢, 0.2 to 2¢, 2 to 6¢, 6¢ or more
   daily: [2, 20, 60],
 };
@@ -58,6 +59,19 @@ export function legendItems(cadence: Cadence): LegendItem[] {
     { key: "up-2", direction: "up", label: `Rose ${ranges[1]}` },
     { key: "up-3", direction: "up", label: `Rose ${ranges[2]}` },
   ];
+}
+
+const MINUS = "\u2212";
+
+/**
+ * The six bin edges for a horizontal key, left to right: "−15¢", "−5¢", "−1¢",
+ * "+1¢", "+5¢", "+15¢". Each one sits under the join between two swatches.
+ */
+export function legendTicks(cadence: Cadence): string[] {
+  const [flat, small, mid] = EDGES[cadence];
+  const falls = [mid, small, flat].map((t) => `${MINUS}${cents(t)}¢`);
+  const rises = [flat, small, mid].map((t) => `+${cents(t)}¢`);
+  return [...falls, ...rises];
 }
 
 /** Fill tokens whose background is dark enough to need white text on it. */

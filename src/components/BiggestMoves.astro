@@ -1,47 +1,65 @@
 ---
-// Top rises and falls: regions in eia_only, states in aaa+eia.
+// Moves beside the map. Regions in eia_only: one list of all 8, biggest rise
+// first, each with its member states in muted text. States in aaa+eia: the top
+// rises and drops, and a group with nothing in it is left out.
 import Change from "./Change.astro";
 import Price from "./Price.astro";
 import type { Cadence } from "../lib/bins.ts";
 import { changeTenths } from "../lib/format.ts";
+import { byChange } from "./home/home.ts";
 export interface MoveItem {
   name: string;
   href?: string;
   price: number;
   change: number;
   pct: number | null;
+  /** Member states for a region, shown as codes after its name. */
+  members?: { code: string; name: string }[];
 }
 interface Props {
   items: MoveItem[];
   cadence: Cadence;
   noun: string;
+  /** "list" shows every item in one list, "split" shows top rises and drops. */
+  layout?: "list" | "split";
   count?: number;
+  title?: string;
+  /** Said when there is nothing to list at all. */
+  empty?: string;
 }
-const { items, cadence, noun, count = 3 } = Astro.props;
+const { items, cadence, noun, layout = "split", count = 3, title = "Change by region", empty = `No ${noun} has a change yet.` } = Astro.props;
 const rises = items.filter((i) => changeTenths(i.change) > 0).sort((a, b) => b.change - a.change).slice(0, count);
 const falls = items.filter((i) => changeTenths(i.change) < 0).sort((a, b) => a.change - b.change).slice(0, count);
-const groups = [
-  { title: "Biggest rises", list: rises, none: `No ${noun} went up.` },
-  { title: "Biggest drops", list: falls, none: `No ${noun} went down.` },
-];
+const groups = layout === "list"
+  ? [{ title, list: byChange(items) }]
+  : [
+      { title: "Biggest rises", list: rises },
+      { title: "Biggest drops", list: falls },
+    ].filter((g) => g.list.length > 0);
 ---
 <div class="moves">
-  {groups.map((g) => (
+  {groups.length === 0 || groups.every((g) => g.list.length === 0) ? (
+    <p class="muted">{empty}</p>
+  ) : groups.map((g) => (
     <div class="group">
       <h3>{g.title}</h3>
-      {g.list.length === 0 ? (
-        <p class="muted">{g.none}</p>
-      ) : (
-        <ol>
-          {g.list.map((i) => (
-            <li>
-              <span class="who">{i.href ? <a href={i.href}>{i.name}</a> : i.name}</span>
-              <Change change={i.change} pct={i.pct} cadence={cadence} showPct={false} />
-              <span class="at muted"><Price price={i.price} /></span>
-            </li>
-          ))}
-        </ol>
-      )}
+      <ol>
+        {g.list.map((i) => (
+          <li>
+            <span class="who">
+              {i.href ? <a href={i.href}>{i.name}</a> : i.name}
+              {i.members && i.members.length > 1 && (
+                <>
+                  <span class="codes" aria-hidden="true">{i.members.map((m) => m.code).join(" ")}</span>
+                  <span class="sr-only">, {i.members.map((m) => m.name).join(", ")}</span>
+                </>
+              )}
+            </span>
+            <Change change={i.change} pct={i.pct} cadence={cadence} showPct={false} />
+            <span class="at muted"><Price price={i.price} /></span>
+          </li>
+        ))}
+      </ol>
     </div>
   ))}
 </div>
@@ -62,7 +80,7 @@ const groups = [
   }
   li {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: baseline;
     gap: 4px 14px;
     padding: 7px 0 5px;
@@ -73,7 +91,16 @@ const groups = [
     border-bottom: 1px solid var(--hairline);
   }
   .who {
+    position: relative;
     min-width: 0;
+    line-height: 1.35;
+  }
+  .codes {
+    display: block;
+    color: var(--ink-2);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    word-spacing: 0.1em;
   }
   .at {
     min-width: 4.2em;

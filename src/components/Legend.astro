@@ -1,39 +1,56 @@
 ---
 // Always visible legend: every bin with its glyph, plus no data when it appears.
+// The key never changes from week to week. Wide screens get a list with words;
+// below 640px it folds into one horizontal strip with the bin edges under the
+// joins, and the words stay for screen readers.
 import Glyph from "./Glyph.astro";
-import { legendItems, type Cadence } from "../lib/bins.ts";
+import { legendItems, legendTicks, type Cadence } from "../lib/bins.ts";
 interface Props {
   cadence: Cadence;
   noData?: string | null;
   title: string;
+  /** One line computed from the data, like "All 8 regions rose, 21.2¢ to 49.1¢." */
+  summary?: string | null;
 }
-const { cadence, noData = null, title } = Astro.props;
+const { cadence, noData = null, title, summary = null } = Astro.props;
 const items = legendItems(cadence);
+const ticks = legendTicks(cadence);
 ---
 <div class="legend">
   <p class="legend-title" id="legend-title">{title}</p>
-  <ul aria-labelledby="legend-title">
+  {summary && <p class="legend-summary">{summary}</p>}
+  <ul class="key" aria-labelledby="legend-title">
     {items.map((i) => (
       <li>
-        <span class={`sw f-${i.key}`} aria-hidden="true"></span>
+        <span class={`sw f-${i.key}`} aria-hidden="true"><Glyph direction={i.direction} /></span>
         <Glyph direction={i.direction} />
-        <span>{i.label}</span>
+        <span class="label">{i.label}</span>
       </li>
     ))}
-    {noData && (
+  </ul>
+  <div class="ticks" aria-hidden="true">
+    {ticks.map((t, n) => <span style={`grid-column:${n + 1}`}>{t}</span>)}
+  </div>
+  {noData && (
+    <ul class="key key-nodata">
       <li>
         <span class="sw f-nodata" aria-hidden="true"></span>
         <span class="glyph" aria-hidden="true"></span>
-        <span>{noData}</span>
+        <span class="label">{noData}</span>
       </li>
-    )}
-  </ul>
+    </ul>
+  )}
 </div>
 
 <style>
   .legend-title {
     font-weight: 700;
     margin-bottom: var(--space-2);
+  }
+  .legend-summary {
+    margin-bottom: var(--space-3);
+    font-size: 15px;
+    line-height: 1.35;
   }
   ul {
     list-style: none;
@@ -44,7 +61,11 @@ const items = legendItems(cadence);
     font-size: 15px;
     line-height: 1.3;
   }
+  .key-nodata {
+    margin-top: 4px;
+  }
   li {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -58,5 +79,82 @@ const items = legendItems(cadence);
   }
   li :global(.glyph) {
     margin-right: 0;
+  }
+  /* the copy of the glyph inside the swatch is only for the phone strip */
+  .sw :global(.glyph) {
+    display: none;
+  }
+  .ticks {
+    display: none;
+  }
+
+  /* phones: one strip, 7 swatches with 2px paper joins */
+  @media (max-width: 639px) {
+    .key:not(.key-nodata) {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 2px;
+      max-width: 420px;
+    }
+    .key:not(.key-nodata) li {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 5px;
+      min-height: 0;
+    }
+    .key:not(.key-nodata) .sw {
+      display: grid;
+      place-items: center;
+      width: auto;
+      height: 20px;
+      border-radius: 0;
+    }
+    /* on the strip the glyph sits on its swatch in the fill's own text color */
+    .key:not(.key-nodata) .sw :global(.glyph) {
+      display: block;
+      width: 9px;
+      height: 9px;
+      fill: currentColor;
+    }
+    .key:not(.key-nodata) li > :global(.glyph) {
+      display: none;
+    }
+    .key:not(.key-nodata) li:first-child .sw {
+      border-radius: 3px 0 0 3px;
+    }
+    .key:not(.key-nodata) li:last-child .sw {
+      border-radius: 0 3px 3px 0;
+    }
+    .key:not(.key-nodata) .label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .ticks {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 2px;
+      max-width: 420px;
+      margin-top: 2px;
+      font-size: 12px;
+      line-height: 1.2;
+      color: var(--ink-2);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    /* each edge label centers on the join to the right of its column */
+    .ticks span {
+      justify-self: end;
+      transform: translateX(calc(50% + 1px));
+    }
+    .key-nodata {
+      margin-top: var(--space-3);
+    }
+    .key-nodata .glyph {
+      display: none;
+    }
   }
 </style>

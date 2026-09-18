@@ -3,7 +3,7 @@
 
 import { geoPath } from "d3-geo";
 import { feature, mesh } from "topojson-client";
-import type { GeometryCollection, Topology } from "topojson-specification";
+import type { GeometryCollection, GeometryObject, Topology } from "topojson-specification";
 import atlas from "us-atlas/states-albers-10m.json";
 
 export const MAP_WIDTH = 975;
@@ -20,6 +20,26 @@ type Atlas = Topology<{ states: GeometryCollection<{ name: string }>; nation: Ge
 
 let shapes: Map<string, StateShape> | null = null;
 let outline: string | null = null;
+let topoCache: Atlas | null = null;
+
+/**
+ * The atlas puts the western Aleutians at x = -58, left of the viewBox, so on a
+ * narrow screen they run off the page. Slide the Alaska inset right until its
+ * ink starts inside the box, and Hawaii right with it so the two insets keep
+ * their spacing. Nothing else moves. FIPS 02 is Alaska, 15 is Hawaii.
+ */
+export const INSET_SHIFT: Record<string, number> = { "02": 60, "15": 44 };
+
+/** Every arc index a geometry uses, with reversed (~i) indices folded back. */
+function arcsOf(g: GeometryObject): Set<number> {
+  const out = new Set<number>();
+  const walk = (a: unknown): void => {
+    if (typeof a === "number") out.add(a < 0 ? ~a : a);
+    else if (Array.isArray(a)) a.forEach(walk);
+  };
+  walk((g as { arcs?: unknown }).arcs);
+  return out;
+}
 
 /**
  * Thin the shared arcs once, before building shapes, so neighbors keep matching
@@ -29,13 +49,21 @@ let outline: string | null = null;
 function simplify(topo: Atlas, tolerance: number): Atlas {
   const t = topo.transform!;
   const tol2 = tolerance * tolerance;
-  const arcs = topo.arcs.map((arc) => {
+  // The insets share no border with any other state, so shifting their arcs
+  // moves the state and its piece of the nation outline together.
+  const shift = new Map<number, number>();
+  for (const g of topo.objects.states.geometries) {
+    const dx = INSET_SHIFT[String(g.id).padStart(2, "0")];
+    if (dx) for (const i of arcsOf(g)) shift.set(i, dx);
+  }
+  const arcs = topo.arcs.map((arc, ai) => {
+    const sx = shift.get(ai) ?? 0;
     let qx = 0;
     let qy = 0;
     const abs = arc.map(([dx, dy]) => {
       qx += dx;
       qy += dy;
-      return [qx * t.scale[0] + t.translate[0], qy * t.scale[1] + t.translate[1]] as [number, number];
+      return [qx * t.scale[0] + t.translate[0] + sx, qy * t.scale[1] + t.translate[1]] as [number, number];
     });
     const kept: [number, number][] = [abs[0]];
     for (let i = 1; i < abs.length - 1; i++) {
@@ -96,27 +124,30 @@ class ShortPath {
   }
 }
 
+function draw(geo: Parameters<ReturnType<typeof geoPath>>[0]): string {
+  const ctx = new ShortPath();
+  geoPath(null, ctx as unknown as CanvasRenderingContext2D)(geo);
+  return ctx.result();
+}
+
 function load(): void {
   if (shapes) return;
   const topo = simplify(atlas as unknown as Atlas, 0.9);
+  topoCache = topo;
   const measure = geoPath(null);
   const fc = feature(topo, topo.objects.states);
   shapes = new Map();
   for (const f of fc.features) {
     const fips = String(f.id).padStart(2, "0");
-    const ctx = new ShortPath();
-    geoPath(null, ctx as unknown as CanvasRenderingContext2D)(f);
     const [cx, cy] = measure.centroid(f);
     shapes.set(fips, {
       fips,
-      d: ctx.result(),
+      d: draw(f),
       centroid: [Math.round(cx * 10) / 10, Math.round(cy * 10) / 10],
       area: measure.area(f),
     });
   }
-  const nctx = new ShortPath();
-  geoPath(null, nctx as unknown as CanvasRenderingContext2D)(mesh(topo, topo.objects.nation));
-  outline = nctx.result();
+  outline = draw(mesh(topo, topo.objects.nation));
 }
 
 export function stateShape(fips: string): StateShape {
@@ -129,6 +160,22 @@ export function stateShape(fips: string): StateShape {
 export function nationOutline(): string {
   load();
   return outline!;
+}
+
+/**
+ * The borders where two price regions meet, as one path. State lines inside a
+ * region and the coast are left out, so a region reads as one block. These are
+ * shared arcs of the topology, so they line up exactly with the state shapes.
+ * The whole region lights up on hover in the browser by copying its member
+ * shapes, which costs no page weight; a merged outline per region would repeat
+ * the coastline and add about 30KB to the home page.
+ * `regionOf` maps a 2 digit FIPS id to its region key, or null for none.
+ */
+export function regionEdges(regionOf: (fips: string) => string | null): string {
+  load();
+  const topo = topoCache!;
+  const key = (g: GeometryObject): string | null => regionOf(String(g.id).padStart(2, "0"));
+  return draw(mesh(topo, topo.objects.states, (a, b) => a !== b && key(a) !== null && key(b) !== null && key(a) !== key(b)));
 }
 
 /**
