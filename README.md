@@ -134,7 +134,7 @@ src/
   components/              sign, map, charts, tables
   icons/                   road sign icons, 24 by 24, one fill in currentColor
   layouts/  pages/  styles/
-  scripts/                 small inline browser scripts: map and chart tooltips, table sort, stale banner, price roll, your state
+  scripts/                 small inline browser scripts: map and chart tooltips, table sort, stale banner, price roll, your state, share button
 public/                    favicon.svg and .ico, home screen icons, site.webmanifest, robots.txt
 ```
 

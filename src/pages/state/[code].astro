@@ -7,6 +7,7 @@ import LineChart from "../../components/LineChart.astro";
 import NumbersTable from "../../components/NumbersTable.astro";
 import TaxPanel from "../../components/TaxPanel.astro";
 import Icon from "../../components/Icon.astro";
+import ShareButton from "../../components/ShareButton.astro";
 import chartScript from "../../scripts/chart.js?raw";
 import { getSite, REGION_NAMES, type StateView } from "../../lib/site.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
@@ -16,6 +17,7 @@ import { DOE_LINE, DYED_DIESEL_HERE, peakSentence } from "../../lib/doe.ts";
 import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText, WEEKLY_LEAD } from "../../lib/release.ts";
 import { regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence } from "../../lib/copy.ts";
 import { regionPlate } from "../../lib/yourstate.ts";
+import { stateShareText } from "../../lib/share.ts";
 import { inlineCall } from "../../lib/inline.ts";
 import { saveOnView } from "../../scripts/your-state.ts";
 import type { Move } from "../../lib/data.ts";
@@ -231,6 +233,8 @@ const description = stateDescription(s, site);
 const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
 // Remember this state for the home page's "your state" row.
 const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return window.localStorage}");
+// What the Share button sends with the link: the number on this sign.
+const shareText = stateShareText(s, site);
 ---
 <Base title={title} description={description}>
   <div class="wrap back-row">
@@ -263,6 +267,7 @@ const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return w
         </p>
       )}
       {dailyLine && <p class="cadence"><Icon name="next-update" size={15} class="cadence-mark" />{dailyLine}</p>}
+      <ShareButton text={shareText} class="share-slot" />
     </div>
     <div class="explain">
       <p class="lead">{source}</p>
@@ -460,6 +465,9 @@ const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return w
   }
   .cadence :global(.cadence-mark) {
     margin-right: 7px;
+  }
+  .sign-col :global(.share-slot) {
+    margin-top: var(--space-3);
   }
   .state-hero :global(.note-mark) {
     margin-right: 8px;

@@ -4,6 +4,7 @@ import "../styles/tokens.css";
 import "../styles/global.css";
 import fontUrl from "@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2?url";
 import Footer from "../components/Footer.astro";
+import Icon from "../components/Icon.astro";
 import StaleBanner from "../components/StaleBanner.astro";
 import { getSite, SITE_NAME, SITE_URL } from "../lib/site.ts";
 import { CARD_HEIGHT, CARD_WIDTH, cardMeta } from "../lib/og.ts";
@@ -79,7 +80,7 @@ const website = current === "/"
           <span>DailyFuel</span>
         </a>
         <nav aria-label="Site">
-          <a href="/about/" aria-current={current.startsWith("/about") ? "page" : undefined}>About</a>
+          <a href="/about/" aria-current={current.startsWith("/about") ? "page" : undefined}><span><Icon name="about" size={17} class="nav-mark" />About</span></a>
         </nav>
       </div>
     </header>
@@ -140,5 +141,14 @@ const website = current === "/"
   nav a[aria-current="page"] {
     text-decoration: underline;
     text-decoration-thickness: 2px;
+  }
+  /* inline in the words, so it stands on the baseline like the other icons */
+  nav :global(.nav-mark) {
+    margin-right: 7px;
+  }
+  @media (forced-colors: active) {
+    nav :global(.nav-mark) {
+      color: inherit;
+    }
   }
 </style>
