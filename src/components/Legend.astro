@@ -1,5 +1,6 @@
 ---
-// Always visible legend: every bin with its glyph, plus no data when it appears.
+// Always visible legend: every bin with its direction arrow (rose, fell, or
+// about the same for the middle bin), plus no data when it appears.
 // The key never changes from week to week. Wide screens get a list with words;
 // below 640px it folds into one horizontal strip with the bin edges under the
 // joins, and the words stay for screen readers.
@@ -108,11 +109,12 @@ const ticks = legendTicks(cadence);
       height: 20px;
       border-radius: 0;
     }
-    /* on the strip the glyph sits on its swatch in the fill's own text color */
+    /* on the strip the arrow sits on its swatch in the fill's own text color */
     .key:not(.key-nodata) .sw :global(.glyph) {
       display: block;
-      width: 9px;
-      height: 9px;
+      width: 12px;
+      height: 12px;
+      margin: 0;
       fill: currentColor;
     }
     .key:not(.key-nodata) li > :global(.glyph) {

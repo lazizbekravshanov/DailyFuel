@@ -3,8 +3,9 @@
 // icon in src/icons. Icon.astro inlines them at build time; the page ships no
 // icon font and no sprite request.
 //
-// Direction data keeps its own ▲ ▼ ● glyphs (Glyph.astro). The rose, fell and
-// about the same icons are here for the set, not for prices.
+// The rose, fell and about the same icons mark which way every price moved.
+// src/lib/arrows.ts turns a direction into one of them for Glyph.astro, the
+// page's ArrowSprite, the map chips and the share cards.
 
 export const ICON_NAMES = [
   "your-state",

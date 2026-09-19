@@ -7,6 +7,7 @@
 // new URL, so a fresh share never shows last week's price.
 
 import { resolve } from "node:path";
+import { arrowPath } from "./arrows.ts";
 import { directionFor, type Direction } from "./bins.ts";
 import { pctOf } from "./copy.ts";
 import { formatDate, when } from "./dates.ts";
@@ -180,7 +181,7 @@ export type Measure = (text: string, weight: 700 | 800) => Ink;
 const GREEN = "#0a6640";
 const WHITE = "#ffffff";
 const PLAQUE_INK = "#1d2125";
-// the plaque's glyph colors, the same as the sign on the page
+// the plaque's arrow colors, the same as the sign on the page
 const GLYPH: Record<Direction, string> = { up: "#c94d47", down: "#3a75bf", flat: "#51565b" };
 
 /**
@@ -209,14 +210,12 @@ function text(x: number, y: number, size: number, weight: 700 | 800, fill: strin
   return `<text x="${n(x)}" y="${n(y)}" font-family="Overpass" font-weight="${weight}" font-size="${n(size)}" fill="${fill}"${anchor ? ` text-anchor="${anchor}"` : ""}>${escapeXml(s)}</text>`;
 }
 
-function glyph(direction: Direction, x: number, y: number, size: number, fill: string): string {
-  const k = size / 10;
-  const shape = direction === "up"
-    ? `<path d="M5 0.8 9.8 9.2H0.2Z"/>`
-    : direction === "down"
-      ? `<path d="M0.2 0.8H9.8L5 9.2Z"/>`
-      : `<circle cx="5" cy="5" r="3.6"/>`;
-  return `<g transform="translate(${n(x)} ${n(y)}) scale(${n(k)})" fill="${fill}">${shape}</g>`;
+/**
+ * The road sign arrow for a direction, the same shape the page shows, in a
+ * `size` box on the 24 unit icon grid with its top left corner at x, y.
+ */
+function arrow(direction: Direction, x: number, y: number, size: number, fill: string): string {
+  return `<path transform="translate(${n(x)} ${n(y)}) scale(${Math.round((size / 24) * 1000) / 1000})" fill="${fill}" d="${arrowPath(direction)}"/>`;
 }
 
 /** Width of `s` at `size`, from the pen position to the end of the ink. */
@@ -276,8 +275,12 @@ export function cardSvg(card: Card, measure: Measure): string {
       const ph = C * 1.62;
       const py = base - C * 0.356 - ph / 2;
       out.push(`<rect x="${n(bx)}" y="${n(py)}" width="${n(plaqueW(C))}" height="${n(ph)}" rx="12" fill="${WHITE}"/>`);
-      const gs = C * 0.7;
-      out.push(glyph(card.direction, bx + C * 0.44, base - C * 0.356 - gs / 2, gs, GLYPH[card.direction]));
+      // The arrow the way the page sets it: a 0.9em box pulled 0.094em under
+      // the baseline, so an up or down arrow stands as tall as the digits.
+      // It centers in the 0.7em slot before the text, which the widest arrow
+      // (about the same) just fills.
+      const as = C * 0.9;
+      out.push(arrow(card.direction, bx + C * 0.79 - as / 2, base + C * 0.094 - as, as, GLYPH[card.direction]));
       out.push(text(bx + C * 0.44 + C * 1.0, base, C, 800, PLAQUE_INK, card.change));
       if (card.compareLine) out.push(text(bx + 2, dateBase, 30, 700, WHITE, card.compareLine));
     }

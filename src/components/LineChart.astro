@@ -96,7 +96,8 @@ const hover = JSON.stringify({ weekly, flat, prev: model.hover.prev, dates: mode
     grid-row: 1;
     touch-action: pan-y;
   }
-  .plot-area :global(svg) {
+  /* the drawn chart only, not the arrow in the tooltip */
+  .plot-area > :global(svg) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -255,39 +256,23 @@ const hover = JSON.stringify({ weekly, flat, prev: model.hover.prev, dates: mode
   .plot-area :global(.tip-key-bench) {
     background: var(--line-bench);
   }
-  /* the week's move under the price: glyph in its color, numbers in ink */
+  /* the week's move under the price: the arrow in its color (the page's
+     ArrowSprite, drawn by src/scripts/chart.js), the numbers in ink. A plain
+     line of text, not a flex row, so the arrow stands on the baseline the
+     way it does everywhere else. */
   .plot-area :global(.tip-change) {
-    gap: 0;
+    display: block;
     padding-left: 22px;
-  }
-  /* direction glyph drawn in CSS, the same shapes as Glyph.astro */
-  .plot-area :global(.tg) {
-    display: inline-block;
-    width: 0.7em;
-    height: 0.7em;
-    margin-right: 0.35em;
-  }
-  .plot-area :global(.tg-up) {
-    background: var(--glyph-up);
-    clip-path: polygon(50% 8%, 98% 92%, 2% 92%);
-  }
-  .plot-area :global(.tg-down) {
-    background: var(--glyph-down);
-    clip-path: polygon(2% 8%, 98% 8%, 50% 92%);
-  }
-  .plot-area :global(.tg-flat) {
-    background: var(--glyph-flat);
-    clip-path: circle(36%);
   }
 
   /* Windows contrast themes drop span backgrounds. The dots, the crosshair and
-     the tooltip key are data marks, so they keep a color the theme picks. */
+     the tooltip key are data marks, so they keep a color the theme picks. The
+     arrow is an SVG fill, which global.css already sets to CanvasText. */
   @media (forced-colors: active) {
     .end-dot,
     .plot-area :global(.cross),
     .plot-area :global(.cross-dot),
-    .plot-area :global(.tip-key),
-    .plot-area :global(.tg) {
+    .plot-area :global(.tip-key) {
       forced-color-adjust: none;
       background: CanvasText;
       box-shadow: none;

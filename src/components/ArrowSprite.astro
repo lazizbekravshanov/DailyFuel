@@ -1,0 +1,14 @@
+---
+// The three direction arrows as symbols, once per page, for the arrows that
+// repeat or that a script builds: the map and chart tooltips, the mini sign
+// and the rows of a numbers table. They point here with
+// <svg class="glyph glyph-up"><use href="#arrow-up"></use></svg>, so a script
+// carries a short string instead of the shapes. Put it on any page that has one.
+//
+// The inline style keeps it out of the layout without display:none, so every
+// browser still draws the symbols wherever a <use> points at them.
+import { DIRECTIONS, arrowId, arrowPath } from "../lib/arrows.ts";
+---
+<svg class="arrow-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+  {DIRECTIONS.map((d) => <symbol id={arrowId(d)} viewBox="0 0 24 24"><path d={arrowPath(d)}></path></symbol>)}
+</svg>

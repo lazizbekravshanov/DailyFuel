@@ -8,6 +8,7 @@ import {
   formatPrice,
   formatSignedCents,
   formatTick,
+  pctHasSign,
   priceParts,
   spokenChange,
   spokenPrice,
@@ -53,6 +54,17 @@ describe("change formatting", () => {
     expect(formatChange(-0.16, -2.17)).toBe("16.0¢ (−2.2%)");
     expect(formatChange(0, 0)).toBe("0.0¢ (0.0%)");
     expect(formatChange(0.012, null)).toBe("1.2¢");
+  });
+
+  it("signs the cents when the percent is too small to carry the sign", () => {
+    // 0.1¢ on $6.25 is 0.016%, which prints as 0.0%
+    expect(formatChange(0.001, 0.016)).toBe("+0.1¢ (0.0%)");
+    expect(formatChange(-0.001, -0.016)).toBe("−0.1¢ (0.0%)");
+    expect(formatChange(0.003, 0.05)).toBe("0.3¢ (+0.1%)");
+    expect(pctHasSign(0.05)).toBe(true);
+    expect(pctHasSign(-0.05)).toBe(true);
+    expect(pctHasSign(0.049)).toBe(false);
+    expect(pctHasSign(0)).toBe(false);
   });
 
   it("rounds four decimal changes half away from zero", () => {

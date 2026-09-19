@@ -41,7 +41,7 @@ function page(opts: { island?: string | null; saved?: boolean; find?: boolean; f
             <span data-ys-price><span data-ys-main></span><span class="tenth" data-ys-tenth></span></span>
             <span data-ys-none hidden></span>
             <span data-ys-plaque>
-              <span data-ys-glyph="up" hidden>▲</span><span data-ys-glyph="down" hidden>▼</span><span data-ys-glyph="flat" hidden>●</span>
+              ${["up", "down", "flat"].map((d) => `<span data-ys-glyph="${d}" hidden><svg class="glyph glyph-${d}" aria-hidden="true"><use href="#arrow-${d}"></use></svg></span>`).join("")}
               <span data-ys-cents></span>
             </span>
           </span>

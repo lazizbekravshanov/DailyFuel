@@ -1,6 +1,6 @@
 ---
 // Phone map: one square per state on a grid, placed from states.json tile row and col.
-// Each tile carries its direction glyph, so up and down never rest on hue alone.
+// Each tile carries its direction arrow, so up and down never rest on hue alone.
 // While EIA is the source, a heavier line runs between tiles in different
 // price regions. The grid itself never moves.
 import Glyph from "./Glyph.astro";
@@ -83,10 +83,12 @@ const differs = (a: string | null, b: string | null | undefined) => b !== undefi
     line-height: 1;
     padding-top: 2px;
   }
-  /* the glyph wears the tile's own text color, which clears 4.5:1 on every fill */
+  /* the arrow wears the tile's own text color, which clears 4.5:1 on every
+     fill. Its 10px box holds an up or down arrow about as tall as the code's
+     capitals, the size the old 8px triangle was. */
   .tile :global(.glyph) {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     margin: 0;
     fill: currentColor;
   }

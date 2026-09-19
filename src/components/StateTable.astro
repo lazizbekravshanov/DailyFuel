@@ -3,7 +3,7 @@
 import Change from "./Change.astro";
 import Price from "./Price.astro";
 import { changeOver } from "../lib/stats.ts";
-import { formatPct } from "../lib/format.ts";
+import { formatPct, pctHasSign } from "../lib/format.ts";
 import { pctOf } from "../lib/copy.ts";
 import { formatCpg, spokenCpg } from "../lib/tax.ts";
 import type { SiteData } from "../lib/site.ts";
@@ -62,11 +62,13 @@ const spokenPct = (p: number) => formatPct(p).replace("−", "minus ").replace("
           {/* One phrase for the absence in the data cells. The Price from cell
               carries the reason, so the row scans as a single statement.
               On a phone the percent steps out so the row fits without a
-              sideways scroll; screen readers still hear it. */}
+              sideways scroll; screen readers still hear it. The percent
+              carries the sign, so the cents get one only when it can't:
+              no percent, or one too small to have a sign ("+0.1¢ (0.0%)"). */}
           <td data-sort={s.primary?.change ?? ""}>
             {s.primary ? (
               <>
-                <Change change={s.primary.change} showPct={false} cadence={s.cadence} empty="No change yet" />
+                <Change change={s.primary.change} showPct={false} signed={pct === null || !pctHasSign(pct)} cadence={s.cadence} empty="No change yet" />
                 {s.primary.change !== null && pct !== null && (
                   <span class="pct"><span class="sr-only">, {spokenPct(pct)}</span><span class="pct-text" aria-hidden="true"> ({formatPct(pct)})</span></span>
                 )}

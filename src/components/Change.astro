@@ -1,9 +1,9 @@
 ---
-// A price change: direction glyph in color, the numbers in ink.
-// "31.8¢ (+5.3%)". With a cadence the glyph follows the map bins, so a change
-// under the about the same line gets a dot. Where no signed percent follows,
-// `signed` puts the sign on the cents ("+49.1¢"), so copied text still says
-// which way it moved once the glyph is gone.
+// A price change: the direction arrow in color, the numbers in ink.
+// "31.8¢ (+5.3%)". With a cadence the arrow follows the map bins, so a change
+// under the about the same line gets the about the same arrow. Where no signed
+// percent follows, `signed` puts the sign on the cents ("+49.1¢"), so copied
+// text still says which way it moved, since the arrow never copies.
 import Glyph from "./Glyph.astro";
 import { directionFor, type Cadence, type Direction } from "../lib/bins.ts";
 import { changeTenths, formatChange, formatPct, formatSignedCents, pctFrom, spokenChange } from "../lib/format.ts";

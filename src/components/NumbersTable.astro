@@ -3,11 +3,14 @@
 // Plain three decimal prices here, since this table is for reading and copying numbers.
 // With one or two price columns it also gets a Change column for the first one
 // (vs the next older row), and its headers sort (src/scripts/twin-sort.js).
-// The markup stays lean on purpose: a state table has over 200 rows.
+// The markup stays lean on purpose: a state table has over 200 rows, so each
+// row's arrow points at the page's ArrowSprite instead of carrying its shape.
+// The cents carry a sign, so a copied row still says which way it moved.
 import sortScript from "../scripts/twin-sort.js?raw";
+import Glyph from "./Glyph.astro";
 import { directionFor, type Cadence } from "../lib/bins.ts";
 import { formatDate } from "../lib/dates.ts";
-import { changeTenths, formatCents, formatPrice, spokenChange, toUnits } from "../lib/format.ts";
+import { changeTenths, formatPrice, formatSignedCents, spokenChange, toUnits } from "../lib/format.ts";
 interface Props {
   caption: string;
   firstColumn: string;
@@ -18,7 +21,7 @@ interface Props {
   tall?: boolean;
   /** Add a Change column after the first price column. Defaults to on for one or two price columns. */
   change?: boolean;
-  /** Which bins the change glyph follows. Defaults to weekly when the first column is "Week of". */
+  /** Which bins the change arrow follows. Defaults to weekly when the first column is "Week of". */
   cadence?: Cadence;
 }
 const { caption, firstColumn, columns, rows, label, tall = false } = Astro.props;
@@ -34,9 +37,9 @@ const changes = rows.map((row, i) => {
   if (!older) return null;
   const change = (toUnits(v) - toUnits(older.values[0]!)) / 10000;
   const dir = directionFor(change, cadence);
-  // the same words the Change component speaks, without its per row SVG
+  // the same words the Change component speaks
   const spoken = `${dir === "flat" && changeTenths(change) !== 0 ? "about the same, " : ""}${spokenChange(change)}`;
-  return { change, dir, spoken, text: formatCents(change) };
+  return { change, dir, spoken, text: formatSignedCents(change) };
 });
 ---
 <details class="numbers">
@@ -63,7 +66,7 @@ const changes = rows.map((row, i) => {
               <>
                 <td class="r">{v === null ? "No price" : formatPrice(v)}</td>
                 {withChange && i === 0 && (changes[r] ? (
-                  <td class="chg" data-sort={changes[r]!.change}><span class={`tg tg-${changes[r]!.dir}`}></span><span class="sr-only">{changes[r]!.spoken}</span><span aria-hidden="true">{changes[r]!.text}</span></td>
+                  <td class="chg" data-sort={changes[r]!.change}><Glyph direction={changes[r]!.dir} sprite /><span class="sr-only">{changes[r]!.spoken}</span><span aria-hidden="true">{changes[r]!.text}</span></td>
                 ) : (
                   <td class="chg muted" data-sort="">{v === null ? "No price" : noneYet}</td>
                 ))}
@@ -95,27 +98,6 @@ const changes = rows.map((row, i) => {
     padding-bottom: 0;
     vertical-align: bottom;
   }
-  /* direction glyphs drawn in CSS, the same shapes as Glyph.astro, so a 200
-     row table doesn't carry 200 inline SVGs */
-  .numbers .tg {
-    display: inline-block;
-    width: 0.7em;
-    height: 0.7em;
-    margin-right: 0.3em;
-    vertical-align: 0.02em;
-  }
-  .numbers .tg-up {
-    background: var(--glyph-up);
-    clip-path: polygon(50% 8%, 98% 92%, 2% 92%);
-  }
-  .numbers .tg-down {
-    background: var(--glyph-down);
-    clip-path: polygon(2% 8%, 98% 8%, 50% 92%);
-  }
-  .numbers .tg-flat {
-    background: var(--glyph-flat);
-    clip-path: circle(36%);
-  }
   .numbers .sort-btn {
     display: inline-flex;
     align-items: center;
@@ -142,10 +124,6 @@ const changes = rows.map((row, i) => {
     fill: var(--ink);
   }
   @media (forced-colors: active) {
-    .numbers .tg {
-      forced-color-adjust: none;
-      background: CanvasText;
-    }
     .numbers .sort-icon {
       fill: GrayText;
     }
