@@ -7,6 +7,7 @@ import LineChart from "../../components/LineChart.astro";
 import NumbersTable from "../../components/NumbersTable.astro";
 import TaxPanel from "../../components/TaxPanel.astro";
 import Icon from "../../components/Icon.astro";
+import ArrowSprite from "../../components/ArrowSprite.astro";
 import chartScript from "../../scripts/chart.js?raw";
 import { getSite, REGION_NAMES, type StateView } from "../../lib/site.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
@@ -233,6 +234,8 @@ const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
 const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return window.localStorage}");
 ---
 <Base title={title} description={description}>
+  {/* the arrows the chart tooltip and the numbers table point at */}
+  {charts.length > 0 && <ArrowSprite />}
   <div class="wrap back-row">
     <a href="/#find-your-state">All states</a>
   </div>

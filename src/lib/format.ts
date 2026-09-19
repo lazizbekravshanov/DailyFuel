@@ -91,10 +91,19 @@ export function pctFrom(change: number, prev: number): number {
   return (toUnits(change) / toUnits(prev)) * 100;
 }
 
-/** "31.8¢ (+5.3%)". The glyph carries direction, the percent carries the sign. */
+/**
+ * "31.8¢ (+5.3%)". The arrow shows the direction and the percent carries the
+ * sign. A move too small for the percent to have a sign signs its cents
+ * instead, "+0.1¢ (0.0%)", so the text alone still says which way it went.
+ */
 export function formatChange(change: number, pct: number | null): string {
-  const cents = formatCents(change);
-  return pct === null ? cents : `${cents} (${formatPct(pct)})`;
+  if (pct === null) return formatCents(change);
+  return `${pctHasSign(pct) ? formatCents(change) : formatSignedCents(change)} (${formatPct(pct)})`;
+}
+
+/** True when a percent prints with a sign: "+5.3%", but not "0.0%". */
+export function pctHasSign(pct: number): boolean {
+  return formatPct(pct) !== "0.0%";
 }
 
 /** "up 31.8 cents", "down 12.0 cents", "no change". */

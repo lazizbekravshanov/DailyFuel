@@ -11,6 +11,7 @@ import StateTable from "../components/StateTable.astro";
 import UsSparkline from "../components/UsSparkline.astro";
 import YourState from "../components/YourState.astro";
 import Icon from "../components/Icon.astro";
+import ArrowSprite from "../components/ArrowSprite.astro";
 import rollScript from "../scripts/roll.js?raw";
 import mapScript from "../components/home/map.js?raw";
 import chartScript from "../scripts/chart.js?raw";
@@ -160,6 +161,8 @@ const description = homeMeta({
 }) + missingNote(site);
 ---
 <Base title={title} description={description}>
+  {/* the arrows the mini sign, the map and chart tooltips point at */}
+  <ArrowSprite />
   <section class="hero wrap" aria-label="U.S. average">
     <div class="hero-sign">
       <Sign

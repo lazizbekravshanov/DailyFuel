@@ -37,9 +37,10 @@ const wire = inlineCall(yourStateList, "document", store, "location.hash");
             <span class="mini-price" data-ys-price><span data-ys-main></span><span class="tenth" data-ys-tenth></span></span>
             <span class="mini-none" data-ys-none hidden></span>
             <span class="mini-plaque" data-ys-plaque>
-              <span class="mini-glyph" data-ys-glyph="up" hidden><Glyph direction="up" /></span>
-              <span class="mini-glyph" data-ys-glyph="down" hidden><Glyph direction="down" /></span>
-              <span class="mini-glyph" data-ys-glyph="flat" hidden><Glyph direction="flat" /></span>
+              {/* all three arrows wait here, drawn from the page's ArrowSprite, and the script shows one */}
+              <span class="mini-glyph" data-ys-glyph="up" hidden><Glyph direction="up" sprite /></span>
+              <span class="mini-glyph" data-ys-glyph="down" hidden><Glyph direction="down" sprite /></span>
+              <span class="mini-glyph" data-ys-glyph="flat" hidden><Glyph direction="flat" sprite /></span>
               <span data-ys-cents></span>
             </span>
           </span>
@@ -215,7 +216,7 @@ const wire = inlineCall(yourStateList, "document", store, "location.hash");
   .mini-plaque {
     flex: none;
     display: inline-flex;
-    align-items: center;
+    align-items: baseline;
     padding: 3px 6px 1px;
     border-radius: 4px;
     background: var(--sign-ink);
@@ -226,8 +227,10 @@ const wire = inlineCall(yourStateList, "document", store, "location.hash");
     --glyph-down: #3a75bf;
     --glyph-flat: #51565b;
   }
+  /* a line of its own inside the plaque, so the arrow keeps its baseline
+     offset and lines up with the cents beside it */
   .mini-glyph {
-    display: inline-flex;
+    display: block;
   }
   .mini-plate {
     align-self: flex-start;

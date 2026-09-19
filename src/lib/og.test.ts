@@ -18,6 +18,7 @@ import {
   type Card,
   type Measure,
 } from "./og.ts";
+import { arrowPath } from "./arrows.ts";
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 
@@ -219,6 +220,35 @@ describe("drawing a card", () => {
     expect(svg).toContain(">EIA Midwest average, 2 states</text>");
     expect(svg).toContain(">DailyFuel</text>");
     expect(svg).not.toMatch(/NaN|undefined/);
+  });
+
+  it("draws the road sign arrow for the direction, not a triangle or a character", () => {
+    const up = cardSvg(cardFor(site, "oh"), fakeMeasure);
+    expect(up).toContain(`fill="#c94d47" d="${arrowPath("up")}"`);
+    expect(up).not.toContain(arrowPath("down"));
+    expect(up).not.toContain("<circle");
+    expect(up).not.toContain("M5 0.8");
+    expect(up).not.toMatch(/[▲▼●]/);
+    // a fall and an about the same move get their own arrows and colors
+    const down = cardFor(site, "oh");
+    down.direction = "down";
+    expect(cardSvg(down, fakeMeasure)).toContain(`fill="#3a75bf" d="${arrowPath("down")}"`);
+    const flat = cardFor(site, "oh");
+    flat.direction = "flat";
+    expect(cardSvg(flat, fakeMeasure)).toContain(`fill="#51565b" d="${arrowPath("flat")}"`);
+  });
+
+  it("sets the arrow as tall as the digits, standing on the plaque's baseline", () => {
+    const svg = cardSvg(cardFor(site, "oh"), fakeMeasure);
+    const m = /<path transform="translate\(([\d.]+) ([\d.]+)\) scale\(([\d.]+)\)" fill="#c94d47"/.exec(svg)!;
+    const [x, y, k] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    const t = /<text x="([\d.]+)" y="([\d.]+)" font-family="Overpass" font-weight="800" font-size="([\d.]+)" fill="#1d2125">30\.4¢/.exec(svg)!;
+    const [tx, base, size] = [Number(t[1]), Number(t[2]), Number(t[3])];
+    // the rose icon's ink runs from y 2.99 to 21.5 on its 24 unit grid
+    expect(Math.abs(y + 21.5 * k - base)).toBeLessThan(0.6);
+    expect(Math.abs(21.5 * k - 2.99 * k - size * 0.7)).toBeLessThan(size * 0.05);
+    // and ends before the text starts
+    expect(x + 19.8 * k).toBeLessThan(tx);
   });
 
   it("shrinks a long name so the legend row fits", () => {

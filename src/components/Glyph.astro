@@ -1,13 +1,21 @@
 ---
-// Direction glyph: triangle up for rose, triangle down for fell, dot for about the same.
+// Direction arrow from the road sign icons: rose, fell or about the same
+// (src/lib/arrows.ts). It sits on the baseline at about the height of the
+// digits beside it and wears the direction color; the numbers stay in ink.
+// Always hidden from screen readers: the words next to it say the direction.
+// `sprite` points at the page's ArrowSprite instead of inlining the path, for
+// a spot that repeats down a long table or that a script shows and hides. That
+// one is the same markup the page scripts build, kept short for 200 row tables.
 import type { Direction } from "../lib/bins.ts";
+import { arrowId, arrowPath } from "../lib/arrows.ts";
 interface Props {
   direction: Direction;
+  sprite?: boolean;
 }
-const { direction } = Astro.props;
+const { direction, sprite = false } = Astro.props;
 ---
-<svg class={`glyph glyph-${direction}`} viewBox="0 0 10 10" aria-hidden="true" focusable="false">
-  {direction === "up" && <path d="M5 0.8 9.8 9.2H0.2Z" />}
-  {direction === "down" && <path d="M0.2 0.8H9.8L5 9.2Z" />}
-  {direction === "flat" && <circle cx="5" cy="5" r="3.6" />}
-</svg>
+{sprite ? (
+  <svg class={`glyph glyph-${direction}`} aria-hidden="true"><use href={`#${arrowId(direction)}`}></use></svg>
+) : (
+  <svg class={`glyph glyph-${direction}`} viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={arrowPath(direction)}></path></svg>
+)}

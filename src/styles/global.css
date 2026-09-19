@@ -151,12 +151,16 @@ main:focus {
   white-space: nowrap;
 }
 
+/* The direction arrow (Glyph.astro). A 0.9em box makes the up and down
+   arrows as tall as the digits, and pulling it 2.5 of its 24 units down
+   stands them on the baseline with the digits' tops. The box keeps 2.5 to 4
+   units of air on each side, so a small margin reads as one space. */
 .glyph {
   display: inline-block;
-  width: 0.7em;
-  height: 0.7em;
-  margin-right: 0.3em;
-  vertical-align: 0.02em;
+  width: 0.9em;
+  height: 0.9em;
+  margin-right: 0.12em;
+  vertical-align: -0.094em;
   flex: none;
 }
 

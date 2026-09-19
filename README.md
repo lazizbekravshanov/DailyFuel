@@ -87,7 +87,7 @@ python scripts/make_fixtures.py --end "$(TZ=America/New_York date +%F)"
 
 ```sh
 npm ci
-npm test              # vitest
+npm test              # vitest, including a build into tmp/dist-test for the built page checks
 npm run dev           # dev server on http://localhost:4321
 npm run build         # static site in dist/, built from data/
 npm run preview       # serve dist/ on http://localhost:4321

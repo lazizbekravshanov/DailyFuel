@@ -4,23 +4,9 @@
 // state itself. The native <title> is removed once this runs so there is only
 // one tooltip. Without JS the <title> and link text still work.
 (function () {
-  var NS = "http://www.w3.org/2000/svg";
-  var GLYPHS = { up: "M5 0.8 9.8 9.2H0.2Z", down: "M0.2 0.8H9.8L5 9.2Z" };
-  function glyph(dir) {
-    var svg = document.createElementNS(NS, "svg");
-    svg.setAttribute("viewBox", "0 0 10 10");
-    svg.setAttribute("class", "glyph glyph-" + dir);
-    svg.setAttribute("aria-hidden", "true");
-    if (dir === "flat") {
-      var c = document.createElementNS(NS, "circle");
-      c.setAttribute("cx", "5"); c.setAttribute("cy", "5"); c.setAttribute("r", "3.6");
-      svg.appendChild(c);
-    } else {
-      var p = document.createElementNS(NS, "path");
-      p.setAttribute("d", GLYPHS[dir]);
-      svg.appendChild(p);
-    }
-    return svg;
+  // the direction arrow, drawn from the page's ArrowSprite (arrow-up, arrow-down, arrow-flat)
+  function arrow(dir) {
+    return '<svg class="glyph glyph-' + dir + '" aria-hidden="true"><use href="#arrow-' + dir + '"></use></svg>';
   }
   function div(cls, text) {
     var d = document.createElement("div");
@@ -67,7 +53,8 @@
       var change = a.getAttribute("data-change");
       if (change) {
         var row = div("tip-change");
-        row.appendChild(glyph(a.getAttribute("data-dir") || "flat"));
+        var dir = a.getAttribute("data-dir");
+        row.innerHTML = arrow(dir === "up" || dir === "down" ? dir : "flat");
         row.appendChild(document.createTextNode(change));
         tip.appendChild(row);
       }

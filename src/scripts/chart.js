@@ -33,13 +33,16 @@
     frag.appendChild(vis);
     return frag;
   }
-  // "▲ 30.4¢ vs week before": format.ts changeTenths rounding, map bin flat line
+  // The direction arrow, then "30.4¢ vs week before": format.ts changeTenths
+  // rounding and the map bins' about the same line. The arrow comes from the
+  // page's ArrowSprite (arrow-up, arrow-down, arrow-flat).
   function changeRow(v, b, date, weekly, flat) {
     var d = Math.round(v * 10000) - Math.round(b[1] * 10000);
     var t = Math.floor((Math.abs(d) + 5) / 10);
+    var dir = t < flat ? "flat" : d > 0 ? "up" : "down";
     var row = document.createElement("div");
     row.className = "tip-row tip-change";
-    row.innerHTML = '<span class="tg tg-' + (t < flat ? "flat" : d > 0 ? "up" : "down") + '"></span>';
+    row.innerHTML = '<svg class="glyph glyph-' + dir + '" aria-hidden="true"><use href="#arrow-' + dir + '"></use></svg>';
     var one = weekly ? 7 : 1;
     row.appendChild(document.createTextNode(Math.floor(t / 10) + "." + (t % 10) + "¢ vs " +
       (day(date) - day(b[0]) === one ? (weekly ? "week" : "day") + " before" : shortDate(b[0]))));
