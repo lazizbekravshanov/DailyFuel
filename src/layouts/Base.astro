@@ -33,6 +33,9 @@ const website = current === "/"
       inLanguage: "en-US",
     }).replace(/</g, "\\u003c")
   : null;
+// Visit counts: Vercel Web Analytics, first party, no cookies. Only in Vercel
+// production builds, so preview deploys and local builds never load it.
+const analytics = process.env.VERCEL_ENV === "production";
 ---
 <!doctype html>
 <html lang="en">
@@ -89,6 +92,12 @@ const website = current === "/"
     </main>
     <Footer site={site} compact={current.startsWith("/about")} />
     <slot name="scripts" />
+    {analytics && (
+      <>
+        <script is:inline>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+        <script is:inline defer src="/_vercel/insights/script.js"></script>
+      </>
+    )}
   </body>
 </html>
 
