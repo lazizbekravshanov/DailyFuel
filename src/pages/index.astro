@@ -12,6 +12,7 @@ import UsSparkline from "../components/UsSparkline.astro";
 import YourState from "../components/YourState.astro";
 import Icon from "../components/Icon.astro";
 import ArrowSprite from "../components/ArrowSprite.astro";
+import ShareButton from "../components/ShareButton.astro";
 import rollScript from "../scripts/roll.js?raw";
 import mapScript from "../components/home/map.js?raw";
 import chartScript from "../scripts/chart.js?raw";
@@ -25,6 +26,7 @@ import { countPlaces, missingNote, pctOf, sinceText } from "../lib/copy.ts";
 import { peakKind } from "../lib/stats.ts";
 import { allRegionsSentence, DOE_LINE, HOME_TITLE } from "../lib/doe.ts";
 import { homeMeta, keyLine, leaders, movers } from "../components/home/home.ts";
+import { homeShareText } from "../lib/share.ts";
 
 const site = getSite();
 const { mode, national, latest } = site;
@@ -159,6 +161,8 @@ const description = homeMeta({
   priced: site.states.filter((s) => s.primary !== null).map((s) => s.code),
   regions: aaaMode ? undefined : site.regions.length,
 }) + missingNote(site);
+// What the Share button sends with the link: the U.S. number on the sign.
+const shareText = homeShareText(site);
 ---
 <Base title={title} description={description}>
   {/* the arrows the mini sign, the map and chart tooltips point at */}
@@ -215,6 +219,7 @@ const description = homeMeta({
           <span data-next-release={eiaNext ?? undefined} data-late={eiaLate}>{eiaIsLate ? eiaLate : nextEia}</span>
         )}
       </p>
+      <ShareButton text={shareText} class="share-slot" />
     </div>
   </section>
 
@@ -307,6 +312,9 @@ const description = homeMeta({
   }
   .summary :global(.next-mark) {
     margin-right: 8px;
+  }
+  .summary :global(.share-slot) {
+    margin-top: var(--space-4);
   }
   .hero-sign :global(.your-state) {
     margin-top: var(--space-5);
