@@ -78,7 +78,7 @@ export function yourState(doc: Document, getStore: () => Storage): void {
     if (!s) return;
 
     // Money the way the rest of the site shows it, on whole numbers so float
-    // noise never flips a digit: $6.25 and a raised 0, and 30.4¢.
+    // noise never flips a digit: $6.25 and a raised 0, and +30.4¢.
     const units = (x: number) => Math.round(x * 10000);
     const half = (u: number) => Math.floor((u + 5) / 10);
     const tenths = (t: number) => Math.floor(t / 10) + "." + (t % 10);
@@ -106,7 +106,9 @@ export function yourState(doc: Document, getStore: () => Storage): void {
       const u = units(s.change as number);
       const t = half(Math.abs(u));
       const dir = s.direction || (t === 0 ? "flat" : u > 0 ? "up" : "down");
-      text("[data-ys-cents]", tenths(t) + "¢");
+      // signed like every change with no percent beside it, so the words say
+      // which way it went even without the arrow: +30.4¢, −2.1¢, 0.0¢
+      text("[data-ys-cents]", (t === 0 ? "" : u > 0 ? "+" : "\u2212") + tenths(t) + "¢");
       for (const g of Array.from(slot.querySelectorAll("[data-ys-glyph]"))) show(g, g.getAttribute("data-ys-glyph") === dir);
       const words = t === 0 ? "no change" : (u > 0 ? "up " : "down ") + tenths(t) + " cents";
       say += ", " + (dir === "flat" && t !== 0 ? "about the same, " : "") + words + (data.when ? " " + data.when : "");

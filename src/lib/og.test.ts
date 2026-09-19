@@ -86,7 +86,7 @@ describe("share card URLs", () => {
 
   it("dates every card with the EIA survey week", () => {
     expect(cardDate(site)).toBe("2026-09-14");
-    expect(cardPath("oh", "2026-09-14")).toBe("/og/oh-2026-09-14.png");
+    expect(cardPath("oh", "2026-09-14")).toBe("/og/oh-2026-09-14-a.png");
   });
 
   it("uses AAA's day when AAA leads", () => {
@@ -108,7 +108,7 @@ describe("share card URLs", () => {
 
   it("builds an absolute image URL and alt text for the page head", () => {
     const meta = cardMeta(site, "/state/oh/", "https://dailydiesel.vercel.app/");
-    expect(meta.url).toBe("https://dailydiesel.vercel.app/og/oh-2026-09-14.png");
+    expect(meta.url).toBe("https://dailydiesel.vercel.app/og/oh-2026-09-14-a.png");
     expect(meta.alt).toContain("Ohio");
   });
 });

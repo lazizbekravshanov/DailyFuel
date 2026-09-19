@@ -33,7 +33,8 @@
     frag.appendChild(vis);
     return frag;
   }
-  // The direction arrow, then "30.4¢ vs week before": format.ts changeTenths
+  // The direction arrow, then "+30.4¢ vs week before", signed like
+  // formatSignedCents so the words hold the direction too: format.ts changeTenths
   // rounding and the map bins' about the same line. The arrow comes from the
   // page's ArrowSprite (arrow-up, arrow-down, arrow-flat).
   function changeRow(v, b, date, weekly, flat) {
@@ -44,7 +45,7 @@
     row.className = "tip-row tip-change";
     row.innerHTML = '<svg class="glyph glyph-' + dir + '" aria-hidden="true"><use href="#arrow-' + dir + '"></use></svg>';
     var one = weekly ? 7 : 1;
-    row.appendChild(document.createTextNode(Math.floor(t / 10) + "." + (t % 10) + "¢ vs " +
+    row.appendChild(document.createTextNode((t === 0 ? "" : d > 0 ? "+" : "\u2212") + Math.floor(t / 10) + "." + (t % 10) + "¢ vs " +
       (day(date) - day(b[0]) === one ? (weekly ? "week" : "day") + " before" : shortDate(b[0]))));
     return row;
   }

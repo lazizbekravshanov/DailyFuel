@@ -83,7 +83,10 @@ const analytics = process.env.VERCEL_ENV === "production";
           <span>DailyFuel</span>
         </a>
         <nav aria-label="Site">
-          <a href="/about/" aria-current={current.startsWith("/about") ? "page" : undefined}><span><Icon name="about" size={17} class="nav-mark" />About</span></a>
+          {/* 16px, so the mark is about as tall as the capitals. Its shape
+              stands 2.5 units up, a 1.67px drop that the browser paints a
+              pixel short; 3 units is a whole 2px and lands it on the baseline. */}
+          <a href="/about/" aria-current={current.startsWith("/about") ? "page" : undefined}><span><Icon name="about" size={16} foot={3} class="nav-mark" />About</span></a>
         </nav>
       </div>
     </header>

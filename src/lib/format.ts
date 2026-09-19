@@ -67,11 +67,15 @@ export function formatCents(change: number): string {
   return `${tenthsString(changeTenths(change))}¢`;
 }
 
+/** The sign a change in cents wears: "+", "−", or none when it rounds to 0.0¢. */
+export function centsSign(change: number): string {
+  const t = changeTenths(change);
+  return t > 0 ? "+" : t < 0 ? MINUS : "";
+}
+
 /** Signed change in cents: "+31.8¢", "−12.0¢", "0.0¢". */
 export function formatSignedCents(change: number): string {
-  const t = changeTenths(change);
-  const sign = t > 0 ? "+" : t < 0 ? MINUS : "";
-  return `${sign}${tenthsString(t)}¢`;
+  return `${centsSign(change)}${formatCents(change)}`;
 }
 
 /** Percent with one decimal and a sign: "+5.3%", "−2.1%", "0.0%". */

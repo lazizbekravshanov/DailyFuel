@@ -2,7 +2,8 @@
 // Phone map: one square per state on a grid, placed from states.json tile row and col.
 // Each tile carries its direction arrow, so up and down never rest on hue alone.
 // While EIA is the source, a heavier line runs between tiles in different
-// price regions. The grid itself never moves.
+// price regions. The grid itself never moves. The arrows point at the home
+// page's ArrowSprite rather than carrying the shape 51 times.
 import Glyph from "./Glyph.astro";
 import { mapLabel } from "../lib/copy.ts";
 import type { SiteData } from "../lib/site.ts";
@@ -51,7 +52,7 @@ const differs = (a: string | null, b: string | null | undefined) => b !== undefi
         style={[`grid-row:${r + 1}`, `grid-column:${c + 1}`, ...ends].join(";")}
       >
         <span class="code">{s.code}</span>
-        {l.dir && <Glyph direction={l.dir} />}
+        {l.dir && <Glyph direction={l.dir} sprite />}
       </a>
     );
   })}
@@ -92,9 +93,13 @@ const differs = (a: string | null, b: string | null | undefined) => b !== undefi
     margin: 0;
     fill: currentColor;
   }
+  /* The narrowest phones keep a smaller arrow, so no tile rests on hue
+     alone: 2px top, the 12px code, a 2px gap and an 8px arrow fill the 26px
+     tile with 2px to spare. */
   @media (max-width: 359px) {
     .tile :global(.glyph) {
-      display: none;
+      width: 8px;
+      height: 8px;
     }
   }
   @media (forced-colors: active) {

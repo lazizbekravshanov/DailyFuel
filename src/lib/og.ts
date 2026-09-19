@@ -3,8 +3,9 @@
 //
 // A price in a picture goes stale, and chat apps cache previews by URL for a
 // long time. So every card prints its week and where the number comes from,
-// and the file name carries the date (/og/oh-2026-09-14.png). A new week is a
-// new URL, so a fresh share never shows last week's price.
+// and the file name carries the date (/og/oh-2026-09-14-a.png). A new week is
+// a new URL, so a fresh share never shows last week's price. The letter after
+// the date is the card's drawing, so a redrawn card gets a new URL too.
 
 import { resolve } from "node:path";
 import { arrowPath } from "./arrows.ts";
@@ -57,9 +58,21 @@ export function cardKeys(site: SiteData): string[] {
   return [US_KEY, ...site.states.map((s) => s.slug)];
 }
 
-/** "/og/oh-2026-09-14.png" */
+/**
+ * The card's drawing. Chat apps cache a preview by its URL, so change this
+ * letter whenever the card looks different ("a" is the road sign arrow), and
+ * links shared the same week pick up the new card.
+ */
+export const CARD_DESIGN = "a";
+
+/** The card's file name without ".png": "oh-2026-09-14-a". */
+export function cardName(key: string, date: string): string {
+  return `${key}-${date}-${CARD_DESIGN}`;
+}
+
+/** "/og/oh-2026-09-14-a.png" */
 export function cardPath(key: string, date: string): string {
-  return `/og/${key}-${date}.png`;
+  return `/og/${cardName(key, date)}.png`;
 }
 
 /** Which card a page shares: its own state, or the U.S. card for everything else. */

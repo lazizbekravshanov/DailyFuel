@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import { parseHTML } from "linkedom";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { formatCents, priceParts, spokenChange } from "../lib/format.ts";
+import { formatSignedCents, priceParts, spokenChange } from "../lib/format.ts";
 import { inlineCall } from "../lib/inline.ts";
 import { rememberPick, saveOnView, yourState, yourStateList } from "./your-state.ts";
 
@@ -131,7 +131,7 @@ describe("your state row, filled from a saved state", () => {
     expect($("[data-ys-name]").textContent).toBe("Ohio");
     expect($("[data-ys-main]").textContent).toBe("$6.25");
     expect($("[data-ys-tenth]").textContent).toBe("0");
-    expect($("[data-ys-cents]").textContent).toBe("30.4¢");
+    expect($("[data-ys-cents]").textContent).toBe("+30.4¢");
     expect(visibleGlyphs($, document)).toEqual(["up"]);
     expect($("[data-ys-plate]").textContent).toBe("EIA Midwest average, 15 states");
     expect($("[data-ys-plate]").hasAttribute("hidden")).toBe(false);
@@ -160,12 +160,12 @@ describe("your state row, filled from a saved state", () => {
 
   it("says fell, about the same and no change the way the site does", () => {
     let r = run({ stored: "FL" });
-    expect(r.$("[data-ys-cents]").textContent).toBe("2.1¢");
+    expect(r.$("[data-ys-cents]").textContent).toBe("−2.1¢");
     expect(visibleGlyphs(r.$, r.document)).toEqual(["down"]);
     expect(spoken(r.$)).toContain(", down 2.1 cents this week,");
 
     r = run({ stored: "TX" });
-    expect(r.$("[data-ys-cents]").textContent).toBe("0.4¢");
+    expect(r.$("[data-ys-cents]").textContent).toBe("+0.4¢");
     expect(visibleGlyphs(r.$, r.document)).toEqual(["flat"]);
     expect(spoken(r.$)).toContain(", about the same, up 0.4 cents this week,");
 
@@ -472,11 +472,11 @@ describe("money on the mini sign matches the rest of the site", () => {
     }
   });
 
-  it("changes read in cents with one decimal, like formatCents and spokenChange", () => {
+  it("changes read in signed cents with one decimal, like formatSignedCents and spokenChange", () => {
     for (const change of changes) {
       const island = JSON.stringify({ when: "", none: "", states: [{ code: "OH", name: "Ohio", price: 6, change, direction: change > 0 ? "up" : "down", plate: null }] });
       const { $ } = run({ stored: "OH", html: page({ island }) });
-      expect($("[data-ys-cents]").textContent, String(change)).toBe(formatCents(change));
+      expect($("[data-ys-cents]").textContent, String(change)).toBe(formatSignedCents(change));
       expect(spoken($), String(change)).toBe(`Ohio, $6.000 per gallon, ${spokenChange(change)}. Your state.`);
     }
   });

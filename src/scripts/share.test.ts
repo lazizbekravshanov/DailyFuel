@@ -6,7 +6,7 @@ import { inlineCall } from "../lib/inline.ts";
 import { shareButton } from "./share.ts";
 
 const URL_OH = "https://dailydiesel.vercel.app/state/oh/";
-const TEXT_OH = "Ohio diesel is $6.250 a gallon, up 30.4 cents this week. DOE weekly Midwest average.";
+const TEXT_OH = "Ohio diesel is $6.250 a gallon, up 30.4 cents this week. DOE Midwest weekly average.";
 const TITLE_OH = "Ohio diesel, DOE Midwest weekly average | DailyFuel";
 
 /** The markup ShareButton.astro renders, hidden until the script shows it. */

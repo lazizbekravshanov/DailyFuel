@@ -62,13 +62,17 @@ const spokenPct = (p: number) => formatPct(p).replace("−", "minus ").replace("
           {/* One phrase for the absence in the data cells. The Price from cell
               carries the reason, so the row scans as a single statement.
               On a phone the percent steps out so the row fits without a
-              sideways scroll; screen readers still hear it. The percent
-              carries the sign, so the cents get one only when it can't:
-              no percent, or one too small to have a sign ("+0.1¢ (0.0%)"). */}
+              sideways scroll; screen readers still hear it. Where the
+              percent shows, it carries the sign, so the cents are signed
+              outright only when it can't: no percent, or one too small to
+              have a sign ("+0.1¢ (0.0%)"). Otherwise the cents' sign waits in
+              .narrow-sign and shows on a phone, where the percent is gone,
+              so "+1.1¢" never reads as a bare 1.1¢ there. The arrows point
+              at the page's ArrowSprite, since the table repeats 51 times. */}
           <td data-sort={s.primary?.change ?? ""}>
             {s.primary ? (
               <>
-                <Change change={s.primary.change} showPct={false} signed={pct === null || !pctHasSign(pct)} cadence={s.cadence} empty="No change yet" />
+                <Change change={s.primary.change} showPct={false} signed={pct === null || !pctHasSign(pct)} narrowSign sprite cadence={s.cadence} empty="No change yet" />
                 {s.primary.change !== null && pct !== null && (
                   <span class="pct"><span class="sr-only">, {spokenPct(pct)}</span><span class="pct-text" aria-hidden="true"> ({formatPct(pct)})</span></span>
                 )}
@@ -102,7 +106,7 @@ const spokenPct = (p: number) => formatPct(p).replace("−", "minus ").replace("
             </td>
           ) : (
             <td class="phone-hide" data-sort={year ? String(year.change) : ""}>
-              {year ? <Change change={year.change} pct={year.pct} /> : <span class="muted">{s.eia_series ? "Not enough history" : "No survey"}</span>}
+              {year ? <Change change={year.change} pct={year.pct} sprite /> : <span class="muted">{s.eia_series ? "Not enough history" : "No survey"}</span>}
             </td>
           )}
         </tr>
@@ -166,6 +170,10 @@ const spokenPct = (p: number) => formatPct(p).replace("−", "minus ").replace("
   .state-table .tax-head + th {
     padding-left: var(--space-6);
   }
+  /* the sign on the cents shows only on a phone, where the percent steps out */
+  .state-table .narrow-sign {
+    display: none;
+  }
   .state-table .sort-btn {
     display: inline-flex;
     align-items: center;
@@ -199,6 +207,9 @@ const spokenPct = (p: number) => formatPct(p).replace("−", "minus ").replace("
     .state-table .pct-text,
     .table-note .phone-hide {
       display: none;
+    }
+    .state-table .narrow-sign {
+      display: inline;
     }
     /* on the narrowest phones the name column stays put if the row scrolls */
     .state-table tbody th,

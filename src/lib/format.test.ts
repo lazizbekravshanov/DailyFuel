@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  centsSign,
   changeTenths,
   changeVerb,
   formatCents,
@@ -80,6 +81,9 @@ describe("change formatting", () => {
     expect(formatSignedCents(0.318)).toBe("+31.8¢");
     expect(formatSignedCents(-0.042)).toBe("−4.2¢");
     expect(formatSignedCents(0.0003)).toBe("0.0¢");
+    expect(centsSign(0.318)).toBe("+");
+    expect(centsSign(-0.042)).toBe("−");
+    expect(centsSign(-0.0004)).toBe("");
     expect(formatPct(5.33)).toBe("+5.3%");
     expect(formatPct(-0.05)).toBe("−0.1%");
     expect(formatPct(0.04)).toBe("0.0%");

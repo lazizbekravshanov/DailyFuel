@@ -24,8 +24,7 @@ const ticks = legendTicks(cadence);
     {items.map((i) => (
       <li>
         <span class={`sw f-${i.key}`} aria-hidden="true"><Glyph direction={i.direction} /></span>
-        <Glyph direction={i.direction} />
-        <span class="label">{i.label}</span>
+        <span class="label"><Glyph direction={i.direction} />{i.label}</span>
       </li>
     ))}
   </ul>
@@ -36,8 +35,7 @@ const ticks = legendTicks(cadence);
     <ul class="key key-nodata">
       <li>
         <span class="sw f-nodata" aria-hidden="true"></span>
-        <span class="glyph" aria-hidden="true"></span>
-        <span class="label">{noData}</span>
+        <span class="label"><span class="glyph" aria-hidden="true"></span>{noData}</span>
       </li>
     </ul>
   )}
@@ -60,7 +58,9 @@ const ticks = legendTicks(cadence);
     display: grid;
     gap: 4px;
     font-size: 15px;
-    line-height: 1.3;
+    /* a whole pixel line, centered in the 26px row, keeps the words on a
+       whole pixel too, so the arrow and the letters round the same way */
+    line-height: 20px;
   }
   .key-nodata {
     margin-top: 4px;
@@ -78,8 +78,11 @@ const ticks = legendTicks(cadence);
     height: 18px;
     border-radius: 3px;
   }
-  li :global(.glyph) {
-    margin-right: 0;
+  /* The arrow runs inline at the start of its label, like every other
+     change on the site, so it stands on the words' baseline. A flex item
+     would center on the line box and hang below the capitals. */
+  .label :global(.glyph) {
+    margin-right: 0.3em;
   }
   /* the copy of the glyph inside the swatch is only for the phone strip */
   .sw :global(.glyph) {
@@ -116,9 +119,6 @@ const ticks = legendTicks(cadence);
       height: 12px;
       margin: 0;
       fill: currentColor;
-    }
-    .key:not(.key-nodata) li > :global(.glyph) {
-      display: none;
     }
     .key:not(.key-nodata) li:first-child .sw {
       border-radius: 3px 0 0 3px;

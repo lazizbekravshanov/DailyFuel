@@ -74,31 +74,31 @@ const by = (code: string, from = S) => from.byCode.get(code)!;
 
 describe("share sentence on a state page", () => {
   it("names the price, the move and whose number it is", () => {
-    expect(stateShareText(by("OH"), S)).toBe("Ohio diesel is $6.250 a gallon, up 30.4 cents this week. DOE weekly Midwest average.");
-    expect(stateShareText(by("FL"), S)).toBe("Florida diesel is $6.096 a gallon, down 2.1 cents this week. DOE weekly Lower Atlantic average.");
+    expect(stateShareText(by("OH"), S)).toBe("Ohio diesel is $6.250 a gallon, up 30.4 cents this week. DOE Midwest weekly average.");
+    expect(stateShareText(by("FL"), S)).toBe("Florida diesel is $6.096 a gallon, down 2.1 cents this week. DOE Lower Atlantic weekly average.");
   });
 
   it("calls California's number its own and the rest of the coast what it is", () => {
-    expect(stateShareText(by("CA"), S)).toBe("California diesel is $8.039 a gallon, up 27.5 cents this week. DOE weekly average.");
+    expect(stateShareText(by("CA"), S)).toBe("California diesel is $8.039 a gallon, up 27.5 cents this week. DOE weekly California price.");
     expect(stateShareText(by("OR"), S)).toBe(
       "Oregon diesel is $6.566 a gallon, up 25.2 cents this week. DOE weekly average for the West Coast outside California.",
     );
   });
 
   it("says unchanged, or leaves the move out when there's no week before", () => {
-    expect(stateShareText(by("UT"), S)).toBe("Utah diesel is $6.066 a gallon, unchanged this week. DOE weekly Rocky Mountain average.");
+    expect(stateShareText(by("UT"), S)).toBe("Utah diesel is $6.066 a gallon, unchanged this week. DOE Rocky Mountain weekly average.");
     const s = site({ noChange: "OH" });
-    expect(stateShareText(by("OH", s), s)).toBe("Ohio diesel is $6.250 a gallon. DOE weekly Midwest average.");
+    expect(stateShareText(by("OH", s), s)).toBe("Ohio diesel is $6.250 a gallon. DOE Midwest weekly average.");
   });
 
   it("calls DC by its short name", () => {
     expect(stateShareText(by("DC"), S)).toMatch(/^DC diesel is \$6\.312 a gallon/);
   });
 
-  it("says Alaska and Hawaii have no EIA weekly price, with no number", () => {
+  it("says Alaska and Hawaii have no DOE weekly number, like their pages, with no number", () => {
     for (const [code, name] of [["AK", "Alaska"], ["HI", "Hawaii"]]) {
       const text = stateShareText(by(code), S);
-      expect(text).toBe(`EIA doesn't survey diesel prices in ${name}, so there's no EIA weekly price. See the closest region it does survey.`);
+      expect(text).toBe(`EIA doesn't survey diesel prices in ${name}, so there's no DOE weekly number. The closest region EIA surveys is the West Coast.`);
       expect(text).not.toMatch(/\$/);
     }
   });
