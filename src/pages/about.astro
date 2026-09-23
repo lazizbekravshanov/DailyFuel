@@ -28,11 +28,12 @@ const description = aaaMode
   : `Where DailyFuel's diesel prices come from: EIA's weekly survey of diesel stations.${usText}`;
 ---
 <Base title="Where the numbers come from | DailyFuel" description={description} skipLabel="Skip to main content">
-  <article class="wrap about">
-    <h1>Where the numbers come from</h1>
+  <article class="prose">
+    <p class="back"><a href="/">‹ All states</a></p>
+    <h1 class="nmbig">Where the numbers come from</h1>
 
     <section aria-labelledby="weekly">
-      <h2 id="weekly">Weekly prices from EIA</h2>
+      <div class="sh"><h2 id="weekly">Weekly prices from EIA</h2></div>
       <p>
         The U.S. Energy Information Administration surveys diesel stations every Monday morning and posts the averages on
         Tuesday, or Wednesday after a Monday holiday. {DOE_LINE}
@@ -49,24 +50,24 @@ const description = aaaMode
     </section>
 
     <section aria-labelledby="not">
-      <h2 id="not">What this number is not</h2>
-      <ul class="plain-list">
+      <div class="sh"><h2 id="not">What this number is not</h2></div>
+      <ul>
         <li>
-          <strong>Not the price at one pump.</strong> It's an average of many stations, so the one down the road can be
+          <b>Not the price at one pump.</b> It's an average of many stations, so the one down the road can be
           higher or lower.
         </li>
         <li>
-          <strong>Not a price before tax.</strong> Federal and state taxes are in it. {DYED_DIESEL_NOTE}
+          <b>Not a price before tax.</b> Federal and state taxes are in it. {DYED_DIESEL_NOTE}
         </li>
         <li>
-          <strong>Not your fleet card price.</strong> Card discounts and cost plus deals work off their own numbers, so what
+          <b>Not your fleet card price.</b> Card discounts and cost plus deals work off their own numbers, so what
           you pay will differ.
         </li>
       </ul>
     </section>
 
     <section aria-labelledby="daily">
-      <h2 id="daily">Daily prices</h2>
+      <div class="sh"><h2 id="daily">Daily prices</h2></div>
       {aaaMode ? (
         <>
           <p>
@@ -87,7 +88,7 @@ const description = aaaMode
 
     {tax && (
       <section aria-labelledby="tax">
-        <h2 id="tax">Tax on every gallon</h2>
+        <div class="sh"><h2 id="tax">Tax on every gallon</h2><p class="meta">FHWA table MF-121T, {tax.reporting_period}</p></div>
         <p>
           Every state taxes diesel, and the federal government adds {spokenCpg(tax.federal_cpg)} on top. Each state page
           shows the tax on a gallon there and where the state ranks.
@@ -119,7 +120,7 @@ const description = aaaMode
     )}
 
     <section aria-labelledby="updates">
-      <h2 id="updates">How often it updates</h2>
+      <div class="sh"><h2 id="updates">How often it updates</h2></div>
       <p>
         {aaaMode
           ? "The site checks for new numbers three times a day. Daily prices usually change each morning, and EIA's weekly prices change on Tuesdays."
@@ -129,7 +130,7 @@ const description = aaaMode
     </section>
 
     <section aria-labelledby="contact">
-      <h2 id="contact">Spot a wrong number?</h2>
+      <div class="sh"><h2 id="contact">Spot a wrong number?</h2></div>
       {CONTACT_EMAIL ? (
         <p>
           Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. Say which page and what looks off, and we'll check it
@@ -144,7 +145,7 @@ const description = aaaMode
     </section>
 
     <section aria-labelledby="credits">
-      <h2 id="credits">Credits</h2>
+      <div class="sh"><h2 id="credits">Credits</h2></div>
       <p>
         Weekly prices: U.S. Energy Information Administration, Gasoline and Diesel Fuel Update{release ? ` (released ${formatDate(release)})` : ""}.
         EIA data is public domain.
@@ -165,9 +166,9 @@ const description = aaaMode
       <p>
         Map: us-atlas © 2013 to 2019 Michael Bostock (ISC license), from U.S. Census Bureau boundaries.
       </p>
-      <details class="disclosure">
+      <details>
         <summary>Full map license</summary>
-        <p class="license small muted">
+        <p class="fine">
           Copyright 2013 to 2019 Michael Bostock. Permission to use, copy, modify, and/or distribute this software for any
           purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice
           appear in all copies. THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
@@ -178,55 +179,12 @@ const description = aaaMode
         </p>
       </details>
       <p>
-        Type: Overpass by The Overpass Project Authors, copyright 2021, under the{" "}
-        <a href="https://openfontlicense.org/">SIL Open Font License 1.1</a>. The share images use the same font, from the{" "}
-        <a href="https://github.com/RedHatOfficial/Overpass">Overpass project</a>.
+        Type: the monospace font already on your phone or computer. The site loads no font of its own. The share images are
+        set in Red Hat Mono by the Red Hat Project Authors, under the{" "}
+        <a href="https://openfontlicense.org/">SIL Open Font License 1.1</a>, from the{" "}
+        <a href="https://github.com/RedHatOfficial/RedHatFont">Red Hat font project</a>.
       </p>
       <p>DailyFuel's own code is MIT licensed.</p>
     </section>
   </article>
 </Base>
-
-<style>
-  .about {
-    padding-block: var(--space-7) var(--space-8);
-  }
-  .about h1 {
-    margin-bottom: var(--space-6);
-    max-width: 20ch;
-  }
-  .about section {
-    padding-top: var(--space-5);
-    margin-top: var(--space-5);
-    border-top: 1px solid var(--hairline);
-  }
-  /* about 70 characters a line in Overpass at 17px */
-  .about p,
-  .about li {
-    max-width: 32em;
-  }
-  .about h2 {
-    font-size: var(--fs-h3);
-    margin-bottom: var(--space-3);
-  }
-  .plain-list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .plain-list li {
-    margin-bottom: var(--space-3);
-  }
-  .plain-list strong {
-    font-weight: 700;
-  }
-  .disclosure {
-    margin: 0 0 var(--space-3);
-  }
-  .disclosure .license {
-    margin-top: var(--space-2);
-  }
-  .license {
-    font-size: 13px;
-  }
-</style>

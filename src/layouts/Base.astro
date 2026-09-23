@@ -1,21 +1,26 @@
 ---
-import "@fontsource-variable/overpass";
 import "../styles/tokens.css";
 import "../styles/global.css";
-import fontUrl from "@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2?url";
 import Footer from "../components/Footer.astro";
-import Icon from "../components/Icon.astro";
+import ShareButton from "../components/ShareButton.astro";
 import StaleBanner from "../components/StaleBanner.astro";
-import { getSite, SITE_NAME, SITE_URL } from "../lib/site.ts";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import { formatShortDate, todayInNewYork } from "../lib/dates.ts";
+import { inlineCall } from "../lib/inline.ts";
 import { CARD_HEIGHT, CARD_WIDTH, cardMeta } from "../lib/og.ts";
+import { formatShortWeekdayDate, nextEiaRelease } from "../lib/release.ts";
+import { getSite, SITE_NAME, SITE_URL } from "../lib/site.ts";
+import { applyStoredTheme } from "../scripts/theme.ts";
 interface Props {
   title: string;
   description: string;
   noindex?: boolean;
   /** The skip link names what it skips to. Pages with no prices say "Skip to main content". */
   skipLabel?: string;
+  /** One plain sentence with the page's numbers. When given, the header shows the Share control. */
+  share?: string;
 }
-const { title, description, noindex = false, skipLabel = "Skip to prices" } = Astro.props;
+const { title, description, noindex = false, skipLabel = "Skip to the numbers", share } = Astro.props;
 const site = getSite();
 const origin = Astro.site?.href ?? SITE_URL;
 const canonical = new URL(Astro.url.pathname, origin).href;
@@ -37,6 +42,19 @@ const website = current === "/"
 // Visit counts: Vercel Web Analytics, first party, no cookies. Only in Vercel
 // production builds, so preview deploys and local builds never load it.
 const analytics = process.env.VERCEL_ENV === "production";
+// A saved light or dark choice goes on <html> before the first paint.
+const themeBoot = inlineCall(applyStoredTheme, "document", "function(){return window.localStorage}");
+
+// The header's meta line: which week the numbers are for and when the next
+// ones land. EIA's own next release date, checked against the holiday
+// schedule, and the stale script turns it into a late notice in the browser
+// once that day has passed.
+const aaa = site.mode === "aaa+eia" ? site.latest.aaa : null;
+const eia = site.latest.eia ?? null;
+const next = eia
+  ? nextEiaRelease(eia.period, eia.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork())
+  : null;
+const LATE = "next update is late";
 ---
 <!doctype html>
 <html lang="en">
@@ -50,9 +68,10 @@ const analytics = process.env.VERCEL_ENV === "production";
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="preload" href={fontUrl} as="font" type="font/woff2" crossorigin />
-    <meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#16191c" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <script is:inline set:html={themeBoot}></script>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={title} />
@@ -69,29 +88,32 @@ const analytics = process.env.VERCEL_ENV === "production";
     <slot name="head" />
   </head>
   <body>
-    <a class="skip-link" href="#main">{skipLabel}</a>
-    <header class="site-header">
-      <div class="wrap header-row">
-        <a class="wordmark" href="/" aria-current={current === "/" ? "page" : undefined}>
-          {/* The app icon's 32px drawing (scripts/make_app_icons.mjs), so the
-              header, the browser tab and the home screen show one mark. */}
-          <svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-            <rect width="32" height="32" rx="7" class="mark-bg"></rect>
-            <rect x="2.5" y="2.5" width="27" height="27" rx="4.5" class="mark-line"></rect>
-            <path class="mark-ink" fill-rule="evenodd" d="M15.12 7.75C15.46 7.75 15.79 7.89 16.03 8.13C16.28 8.37 16.41 8.7 16.41 9.04V14.87H18.03C18.74 14.87 19.4 15.11 19.89 15.6C20.38 16.09 20.62 16.75 20.62 17.46V20.69C20.62 20.96 20.7 21.1 20.78 21.18C20.85 21.25 21 21.34 21.26 21.34C21.53 21.34 21.67 21.25 21.75 21.18C21.83 21.1 21.91 20.96 21.91 20.69V12.68L19.93 10.7C19.55 10.32 19.55 9.71 19.93 9.33C20.31 8.95 20.92 8.95 21.3 9.33L23.57 11.59C23.75 11.78 23.85 12.02 23.85 12.28V20.69C23.85 21.4 23.61 22.06 23.12 22.55C22.63 23.04 21.97 23.28 21.26 23.28C20.56 23.28 19.9 23.04 19.41 22.55C18.92 22.06 18.68 21.4 18.68 20.69V17.46C18.68 17.19 18.59 17.05 18.52 16.97C18.44 16.89 18.29 16.81 18.03 16.81H16.41V24.25H8V9.04C8 8.7 8.14 8.37 8.38 8.13C8.62 7.89 8.95 7.75 9.29 7.75H15.12ZM10.59 9.69C10.23 9.69 9.94 9.98 9.94 10.34V13.25C9.94 13.61 10.23 13.9 10.59 13.9H13.82C14.18 13.9 14.47 13.61 14.47 13.25V10.34C14.47 9.98 14.18 9.69 13.82 9.69H10.59Z"></path>
-          </svg>
-          <span>DailyFuel</span>
-        </a>
-        <nav aria-label="Site">
-          {/* 16px, so the mark is about as tall as the capitals. Its shape
-              stands 2.5 units up, a 1.67px drop that the browser paints a
-              pixel short; 3 units is a whole 2px and lands it on the baseline. */}
-          <a href="/about/" aria-current={current.startsWith("/about") ? "page" : undefined}><span><Icon name="about" size={16} foot={3} class="nav-mark" />About</span></a>
-        </nav>
+    <a class="skip" href="#main">{skipLabel}</a>
+    <header class="top">
+      <div class="wrap top-in">
+        <a class="brand" href="/" aria-current={current === "/" ? "page" : undefined}>DailyFuel</a>
+        <span class="tag tl">U.S. on-highway diesel <span class="dot">·</span> {aaa ? "AAA daily, EIA weekly" : "EIA weekly"}</span>
+        <div class="right">
+          {aaa ? (
+            <span class="tag wk">
+              As of {formatShortDate(aaa.as_of)}
+              {eia && <> <span class="dot">·</span> EIA week of {formatShortDate(eia.period)}</>}
+            </span>
+          ) : eia ? (
+            <span class="tag wk">
+              Week of {formatShortDate(eia.period)}
+              {next && (
+                <> <span class="dot">·</span> <span data-next-release={next.date} data-late={LATE}>{next.late ? LATE : `next ${formatShortWeekdayDate(next.date)}`}</span></>
+              )}
+            </span>
+          ) : null}
+          {share && <ShareButton text={share} />}
+          <ThemeToggle />
+        </div>
       </div>
     </header>
     <StaleBanner site={site} />
-    <main id="main" tabindex="-1">
+    <main id="main" class="wrap" tabindex="-1">
       <slot />
     </main>
     <Footer site={site} compact={current.startsWith("/about")} />
@@ -104,63 +126,3 @@ const analytics = process.env.VERCEL_ENV === "production";
     )}
   </body>
 </html>
-
-<style>
-  .site-header {
-    border-bottom: 1px solid var(--hairline);
-  }
-  .header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 64px;
-  }
-  .wordmark {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 44px;
-    font-size: 21px;
-    font-weight: 800;
-    letter-spacing: 0.01em;
-    text-decoration: none;
-  }
-  .mark {
-    flex: none;
-    width: 30px;
-    height: 30px;
-  }
-  .mark-bg {
-    fill: var(--sign);
-  }
-  .mark-line {
-    fill: none;
-    stroke: var(--sign-ink);
-    stroke-width: 1;
-  }
-  .mark-ink {
-    fill: var(--sign-ink);
-  }
-  nav a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding-inline: 4px;
-    font-weight: 650;
-    text-decoration: none;
-  }
-  nav a:hover,
-  nav a[aria-current="page"] {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-  }
-  /* inline in the words, so it stands on the baseline like the other icons */
-  nav :global(.nav-mark) {
-    margin-right: 7px;
-  }
-  @media (forced-colors: active) {
-    nav :global(.nav-mark) {
-      color: inherit;
-    }
-  }
-</style>

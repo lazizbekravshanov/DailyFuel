@@ -1,10 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  CARD_FONT,
   CARD_HEIGHT,
+  CARD_INK,
   CARD_WIDTH,
   FONT_FILES,
-  PUMP_32,
   cardAlt,
   cardDate,
   cardFor,
@@ -18,7 +19,6 @@ import {
   type Card,
   type Measure,
 } from "./og.ts";
-import { arrowPath } from "./arrows.ts";
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 
@@ -72,21 +72,26 @@ function fakeSite(opts: { aaa?: boolean; period?: string; prev?: string } = {}):
   } as unknown as SiteData;
 }
 
-// A stand in for resvg: every character is 55 units wide at 100px.
-const fakeMeasure: Measure = (s) => ({ left: 0, right: s.length * 55 });
+// A stand in for resvg: every character is 60 units wide at 100px, like a monospace face.
+const fakeMeasure: Measure = (s) => ({ left: 0, right: s.length * 60 });
 
 const DASHES = /[‒–—―]| - /;
 
 function cardText(c: Card): string[] {
-  return [c.legend, c.noPrice, c.change ?? "", c.dateLine, c.compareLine ?? "", c.label, cardAlt(c)];
+  return [c.head, c.legend, c.kicker, c.noPrice, c.change ?? "", c.dateLine, c.compareLine ?? "", c.label, cardAlt(c)];
+}
+
+/** Every <text> element's fill and words. */
+function texts(svg: string): { fill: string; words: string }[] {
+  return [...svg.matchAll(/<text [^>]*fill="([^"]+)"[^>]*>([^<]*)<\/text>/g)].map((m) => ({ fill: m[1], words: m[2] }));
 }
 
 describe("share card URLs", () => {
   const site = fakeSite();
 
-  it("dates every card with the EIA survey week", () => {
+  it("dates every card with the EIA survey week, and the paper drawing is b", () => {
     expect(cardDate(site)).toBe("2026-09-14");
-    expect(cardPath("oh", "2026-09-14")).toBe("/og/oh-2026-09-14-a.png");
+    expect(cardPath("oh", "2026-09-14")).toBe("/og/oh-2026-09-14-b.png");
   });
 
   it("uses AAA's day when AAA leads", () => {
@@ -108,7 +113,7 @@ describe("share card URLs", () => {
 
   it("builds an absolute image URL and alt text for the page head", () => {
     const meta = cardMeta(site, "/state/oh/", "https://dailydiesel.vercel.app/");
-    expect(meta.url).toBe("https://dailydiesel.vercel.app/og/oh-2026-09-14-a.png");
+    expect(meta.url).toBe("https://dailydiesel.vercel.app/og/oh-2026-09-14-b.png");
     expect(meta.alt).toContain("Ohio");
   });
 });
@@ -119,14 +124,27 @@ describe("what a card says", () => {
   it("prints the price, change, week and region for a state", () => {
     const c = cardFor(site, "oh");
     expect(c.shield).toBe("OH");
+    expect(c.head).toBe("Ohio");
     expect(c.legend).toBe("Ohio diesel average");
-    expect(c.price?.main).toBe("$6.25");
-    expect(c.price?.tenth).toBe("0");
+    expect(c.kicker).toBe("U.S. on-highway diesel · EIA weekly");
+    expect(c.price).toBe("$6.250");
     expect(c.direction).toBe("up");
-    expect(c.change).toBe("30.4¢ (+5.1%)");
+    expect(c.change).toBe("+30.4¢ +5.1%");
     expect(c.dateLine).toBe("Week of Sep 14, 2026");
     expect(c.compareLine).toBe("Since the week of Sep 7");
     expect(c.label).toBe("EIA Midwest average, 2 states");
+  });
+
+  it("signs a fall with a real minus and calls a move of exactly nothing flat", () => {
+    const down = fakeSite();
+    down.byCode.get("OH")!.primary = move(5.946, 6.25);
+    const c = cardFor(down, "oh");
+    expect(c.direction).toBe("down");
+    expect(c.change).toBe("−30.4¢ −4.9%");
+    const same = fakeSite();
+    same.byCode.get("OH")!.primary = move(6.25, 6.25);
+    expect(cardFor(same, "oh").direction).toBe("flat");
+    expect(cardFor(same, "oh").change).toBe("0.0¢ 0.0%");
   });
 
   it("counts DC apart from the states", () => {
@@ -146,20 +164,22 @@ describe("what a card says", () => {
     const c = cardFor(site, "ak");
     expect(c.price).toBeNull();
     expect(c.change).toBeNull();
+    expect(c.head).toBe("Alaska");
     expect(c.legend).toBe("Diesel in Alaska");
-    expect(c.noPrice).toBe("No weekly price");
-    // no survey week under "No weekly price", the same line as the page's sign
+    expect(c.noPrice).toBe("No EIA price");
+    // no survey week under "No EIA price", the same line as the page
     expect(c.dateLine).toBe("Not in EIA's weekly survey");
     expect(c.compareLine).toBeNull();
     expect(c.label).toBe("EIA doesn't survey diesel prices in Alaska");
-    expect(cardAlt(c)).toBe("Diesel in Alaska: no weekly price. EIA doesn't survey diesel prices in Alaska.");
+    expect(cardAlt(c)).toBe("Diesel in Alaska: no EIA price. EIA doesn't survey diesel prices in Alaska.");
   });
 
   it("names the U.S. number the way drivers do", () => {
     const c = cardFor(site, "us");
     expect(c.shield).toBeNull();
+    expect(c.head).toBe("U.S. diesel average");
     expect(c.legend).toBe("U.S. diesel average");
-    expect(c.change).toBe("31.8¢ (+5.3%)");
+    expect(c.change).toBe("+31.8¢ +5.3%");
     expect(c.label).toBe("DOE weekly average, published by EIA");
   });
 
@@ -178,12 +198,13 @@ describe("what a card says", () => {
   it("switches to AAA's daily wording in AAA mode", () => {
     const aaa = fakeSite({ aaa: true });
     const c = cardFor(aaa, "oh");
+    expect(c.kicker).toBe("U.S. on-highway diesel · AAA daily, EIA weekly");
     expect(c.dateLine).toBe("Price as of Sep 17, 2026");
     expect(c.compareLine).toBe("Since yesterday");
     expect(c.label).toBe("AAA daily average, data by OPIS");
     expect(cardFor(aaa, "us").label).toBe("AAA daily U.S. average, data by OPIS");
     // Alaska has an AAA price even though EIA skips it
-    expect(cardFor(aaa, "ak").price?.plain).toBe("$6.900");
+    expect(cardFor(aaa, "ak").price).toBe("$6.900");
   });
 
   it("names a skipped AAA day for states but not for AAA's own national change", () => {
@@ -210,73 +231,92 @@ describe("drawing a card", () => {
     expect(escapeXml(`A & B <C> "D" 'E'`)).toBe("A &amp; B &lt;C&gt; &quot;D&quot; &apos;E&apos;");
   });
 
-  it("lays out a 1200 by 630 sign with the price, tenth and plaque", () => {
+  it("lays out a 1200 by 630 white card with the wordmark, head, price, change, week and source", () => {
     const svg = cardSvg(cardFor(site, "oh"), fakeMeasure);
     expect(svg).toContain(`width="${CARD_WIDTH}" height="${CARD_HEIGHT}"`);
-    expect(svg).toContain(">$6.25</text>");
-    expect(svg).toContain(">0</text>");
-    expect(svg).toContain(">30.4¢ (+5.1%)</text>");
-    expect(svg).toContain(">Week of Sep 14, 2026</text>");
+    expect(svg).toContain(`width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="${CARD_INK.bg}"`);
+    expect(svg).toContain(">DAILYFUEL</text>");
+    expect(svg).toContain(">OH</text>");
+    expect(svg).toContain(">OHIO</text>");
+    expect(svg).toContain(">$6.250</text>");
+    expect(svg).toContain(">+30.4¢ +5.1%</text>");
+    expect(svg).toContain(">Week of Sep 14, 2026 · since the week of Sep 7</text>");
     expect(svg).toContain(">EIA Midwest average, 2 states</text>");
-    expect(svg).toContain(">DailyFuel</text>");
+    expect(svg).toContain(">dailydiesel.vercel.app</text>");
     expect(svg).not.toMatch(/NaN|undefined/);
   });
 
-  it("draws the road sign arrow for the direction, not a triangle or a character", () => {
+  it("sets everything in the one monospace face, one weight plus bold", () => {
+    const svg = cardSvg(cardFor(site, "oh"), fakeMeasure);
+    const all = texts(svg);
+    expect(all.length).toBeGreaterThan(6);
+    for (const m of svg.matchAll(/<text [^>]*>/g)) {
+      expect(m[0]).toContain(`font-family="${CARD_FONT}"`);
+      expect(m[0]).toMatch(/font-weight="(400|700)"/);
+    }
+    expect(svg).not.toContain("Overpass");
+  });
+
+  it("colours only the change: red when diesel rose, blue when it fell, gray for no move, and draws no arrow", () => {
     const up = cardSvg(cardFor(site, "oh"), fakeMeasure);
-    expect(up).toContain(`fill="#c94d47" d="${arrowPath("up")}"`);
-    expect(up).not.toContain(arrowPath("down"));
+    expect(texts(up).find((t) => t.words === "+30.4¢ +5.1%")?.fill).toBe(CARD_INK.up);
+    for (const t of texts(up)) if (t.words !== "+30.4¢ +5.1%") expect([CARD_INK.ink, CARD_INK.ink2]).toContain(t.fill);
+    expect(up).not.toContain("<path");
     expect(up).not.toContain("<circle");
-    expect(up).not.toContain("M5 0.8");
-    expect(up).not.toMatch(/[▲▼●]/);
-    // a fall and an about the same move get their own arrows and colors
+    expect(up).not.toMatch(/[▲▼●↑↓]/);
     const down = cardFor(site, "oh");
     down.direction = "down";
-    expect(cardSvg(down, fakeMeasure)).toContain(`fill="#3a75bf" d="${arrowPath("down")}"`);
+    down.change = "−30.4¢ −4.9%";
+    expect(texts(cardSvg(down, fakeMeasure)).find((t) => t.words === "−30.4¢ −4.9%")?.fill).toBe(CARD_INK.down);
     const flat = cardFor(site, "oh");
     flat.direction = "flat";
-    expect(cardSvg(flat, fakeMeasure)).toContain(`fill="#51565b" d="${arrowPath("flat")}"`);
+    flat.change = "0.0¢ 0.0%";
+    expect(texts(cardSvg(flat, fakeMeasure)).find((t) => t.words === "0.0¢ 0.0%")?.fill).toBe(CARD_INK.ink2);
   });
 
-  it("sets the arrow as tall as the digits, standing on the plaque's baseline", () => {
+  it("puts the change after the price on one baseline, inside the card", () => {
     const svg = cardSvg(cardFor(site, "oh"), fakeMeasure);
-    const m = /<path transform="translate\(([\d.]+) ([\d.]+)\) scale\(([\d.]+)\)" fill="#c94d47"/.exec(svg)!;
-    const [x, y, k] = [Number(m[1]), Number(m[2]), Number(m[3])];
-    const t = /<text x="([\d.]+)" y="([\d.]+)" font-family="Overpass" font-weight="800" font-size="([\d.]+)" fill="#1d2125">30\.4¢/.exec(svg)!;
-    const [tx, base, size] = [Number(t[1]), Number(t[2]), Number(t[3])];
-    // the rose icon's ink runs from y 2.99 to 21.5 on its 24 unit grid
-    expect(Math.abs(y + 21.5 * k - base)).toBeLessThan(0.6);
-    expect(Math.abs(21.5 * k - 2.99 * k - size * 0.7)).toBeLessThan(size * 0.05);
-    // and ends before the text starts
-    expect(x + 19.8 * k).toBeLessThan(tx);
+    const price = /<text x="([\d.]+)" y="([\d.]+)" [^>]*font-size="([\d.]+)"[^>]*>\$6\.250</.exec(svg)!;
+    const change = /<text x="([\d.]+)" y="([\d.]+)" [^>]*font-size="([\d.]+)"[^>]*>\+30\.4¢/.exec(svg)!;
+    expect(price[2]).toBe(change[2]);
+    const priceEnd = Number(price[1]) + (Number(price[3]) * "$6.250".length * 60) / 100;
+    expect(Number(change[1])).toBeGreaterThan(priceEnd);
+    expect(Number(change[1]) + (Number(change[3]) * "+30.4¢ +5.1%".length * 60) / 100).toBeLessThanOrEqual(1128.5);
   });
 
-  it("shrinks a long name so the legend row fits", () => {
-    const svg = cardSvg(cardFor(site, "dc"), fakeMeasure);
-    const m = /font-size="([\d.]+)" fill="#ffffff">District of Columbia diesel average</.exec(svg);
+  it("rules the card with a double line under the header and a hairline over the source", () => {
+    const svg = cardSvg(cardFor(site, "oh"), fakeMeasure);
+    expect(svg.match(new RegExp(`height="2" fill="${CARD_INK.ink}"`, "g"))?.length).toBe(2);
+    expect(svg).toContain(`height="2" fill="${CARD_INK.hair}"`);
+  });
+
+  it("keeps a long name at full size while it fits, and shrinks one that doesn't", () => {
+    const dc = cardSvg(cardFor(site, "dc"), fakeMeasure);
+    expect(dc).toMatch(/font-size="40" fill="#111111" letter-spacing="1.6">DISTRICT OF COLUMBIA</);
+    const long = cardFor(site, "dc");
+    long.head = "District of Columbia and the whole Central Atlantic";
+    const svg = cardSvg(long, fakeMeasure);
+    const name = long.head.toUpperCase();
+    const m = new RegExp(`font-size="([\\d.]+)" fill="#111111" letter-spacing="[\\d.]+">${name}<`).exec(svg);
     expect(m).not.toBeNull();
     const size = Number(m![1]);
-    expect(size).toBeLessThan(60);
-    // shield plus gap plus name stays inside the 1032px content width
-    expect(size * 1.7 + 24 + (size * "District of Columbia diesel average".length * 55) / 100).toBeLessThanOrEqual(1032.5);
+    expect(size).toBeLessThan(40);
+    const box = /<rect x="73" y="[\d.]+" width="([\d.]+)"/.exec(svg)!;
+    // box plus gap plus the tracked name stays inside the 1056px content width
+    expect(Number(box[1]) + 20 + (size * name.length * 60) / 100 + (name.length - 1) * size * 0.04).toBeLessThanOrEqual(1056.5);
   });
 
-  it("signs off with the header's pump mark, not the old two bar sign", () => {
-    const base = readFileSync(new URL("../layouts/Base.astro", import.meta.url), "utf8");
-    expect(base).toContain(`d="${PUMP_32}"`);
-    const svg = cardSvg(cardFor(site, "oh"), fakeMeasure);
-    expect(svg).toContain(`d="${PUMP_32}"`);
-    expect(svg).not.toContain('width="20" height="3.5"');
-  });
-
-  it("draws a no price card with no plaque", () => {
+  it("draws a no price card with no change and no coloured ink", () => {
     const svg = cardSvg(cardFor(site, "ak"), fakeMeasure);
-    expect(svg).toContain(">No weekly price</text>");
-    expect(svg).not.toContain("#1d2125");
+    expect(svg).toContain(">No EIA price</text>");
+    expect(svg).toContain(">Not in EIA&apos;s weekly survey</text>");
+    expect(svg).not.toContain(CARD_INK.up);
+    expect(svg).not.toContain(CARD_INK.down);
   });
 
-  it("renders a real PNG with the Overpass files", async () => {
+  it("renders a real PNG with the Red Hat Mono files", async () => {
     for (const f of FONT_FILES) expect(existsSync(f)).toBe(true);
+    expect(readFileSync(FONT_FILES[0].replace(/[^/]+$/, "OFL.txt"), "utf8")).toContain("SIL OPEN FONT LICENSE");
     const png = await renderCard(cardFor(site, "oh"));
     expect(png.subarray(0, 8)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
     expect(png.readUInt32BE(16)).toBe(CARD_WIDTH);

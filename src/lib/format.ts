@@ -1,5 +1,15 @@
 // Money formatting. Prices come in dollars with up to 4 decimals.
 // All rounding happens on integers so float noise never flips a digit.
+//
+// How money prints on the paper terminal:
+//   a price in a heading      $6.285      formatPrice
+//   a price in a table cell   6.285       formatQuote (the column head says $)
+//   a change                  +31.8¢ +5.3%   formatMove, or formatSignedCents
+//                             and formatPct on their own
+//   a change in a table cell  +31.8 and +5.3    signedCents and signedPct
+// The sign carries the direction, so nothing else has to. A real minus sign,
+// not a hyphen. The raised tenth of a cent is retired: priceParts stays only
+// for the parts of the old look that haven't been redrawn yet.
 
 /** Integer ten thousandths of a dollar. Safe for inputs with at most 4 decimals. */
 export function toUnits(dollars: number): number {
@@ -42,6 +52,11 @@ export function formatPrice(price: number): string {
   return priceParts(price).plain;
 }
 
+/** "6.285": a price in a table cell, where the column head says it is dollars. */
+export function formatQuote(price: number): string {
+  return formatPrice(price).slice(1);
+}
+
 /** "$6.285 per gallon" for screen readers. */
 export function spokenPrice(price: number): string {
   return `${formatPrice(price)} per gallon`;
@@ -78,6 +93,18 @@ export function formatSignedCents(change: number): string {
   return `${centsSign(change)}${formatCents(change)}`;
 }
 
+/** Signed cents with no unit, for a table cell under a "CHG ¢" head: "+31.8", "−4.2", "0.0". */
+export function signedCents(change: number): string {
+  return `${centsSign(change)}${tenthsString(changeTenths(change))}`;
+}
+
+/** The class a change wears: "up" when it rose, "down" when it fell, none when it rounds to 0.0¢ or there is no change. */
+export function changeClass(change: number | null): "up" | "down" | "" {
+  if (change === null) return "";
+  const t = changeTenths(change);
+  return t > 0 ? "up" : t < 0 ? "down" : "";
+}
+
 /** Percent with one decimal and a sign: "+5.3%", "−2.1%", "0.0%". */
 export function formatPct(pct: number): string {
   const sign = pct < 0 ? -1 : 1;
@@ -90,15 +117,30 @@ export function formatPct(pct: number): string {
   return `${s}${Math.floor(t / 10)}.${t % 10}%`;
 }
 
+/** Signed percent with no unit, for a table cell under a "%CHG" head: "+5.3", "−2.1", "0.0". */
+export function signedPct(pct: number): string {
+  return formatPct(pct).slice(0, -1);
+}
+
 /** Percent change from the raw numbers when the data file has none. */
 export function pctFrom(change: number, prev: number): number {
   return (toUnits(change) / toUnits(prev)) * 100;
 }
 
 /**
- * "31.8¢ (+5.3%)". The arrow shows the direction and the percent carries the
- * sign. A move too small for the percent to have a sign signs its cents
- * instead, "+0.1¢ (0.0%)", so the text alone still says which way it went.
+ * "+31.8¢ +5.3%": a change the way the paper terminal prints it. The sign
+ * carries the direction, so a move too small for the percent to show one
+ * still says which way it went: "+0.1¢ 0.0%". Without a percent, "+31.8¢".
+ */
+export function formatMove(change: number, pct: number | null): string {
+  const cents = formatSignedCents(change);
+  return pct === null ? cents : `${cents} ${formatPct(pct)}`;
+}
+
+/**
+ * The old look's "31.8¢ (+5.3%)", where an arrow showed the direction and
+ * the percent carried the sign. Still read by the parts of the site that
+ * haven't been redrawn; new code uses formatMove.
  */
 export function formatChange(change: number, pct: number | null): string {
   if (pct === null) return formatCents(change);

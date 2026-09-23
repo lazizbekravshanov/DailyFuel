@@ -1,19 +1,20 @@
-// Share cards: one 1200x630 PNG per page, drawn at build time as an SVG of the
-// green sign and turned into a PNG by resvg. Nothing here reaches the browser.
+// Share cards: one 1200x630 PNG per page, drawn at build time as an SVG in
+// the paper terminal look and turned into a PNG by resvg. Nothing here
+// reaches the browser.
 //
 // A price in a picture goes stale, and chat apps cache previews by URL for a
 // long time. So every card prints its week and where the number comes from,
-// and the file name carries the date (/og/oh-2026-09-14-a.png). A new week is
+// and the file name carries the date (/og/oh-2026-09-14-b.png). A new week is
 // a new URL, so a fresh share never shows last week's price. The letter after
 // the date is the card's drawing, so a redrawn card gets a new URL too.
 
 import { resolve } from "node:path";
-import { arrowPath } from "./arrows.ts";
-import { directionFor, type Direction } from "./bins.ts";
+import type { Direction } from "./bins.ts";
 import { pctOf } from "./copy.ts";
 import { formatDate, when } from "./dates.ts";
-import { formatChange, priceParts, spokenChange, type PriceParts } from "./format.ts";
+import { changeClass, formatMove, formatPrice, spokenChange } from "./format.ts";
 import { palettePng } from "./png.ts";
+import { SITE_URL } from "./url.ts";
 import { regionAverage } from "./yourstate.ts";
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
@@ -27,15 +28,20 @@ export const US_KEY = "us";
 export interface Card {
   /** "us" or a lowercase state code. */
   key: string;
-  /** Two letter code in the white shield, none on the U.S. card. */
+  /** Two letter code in a box before the name, none on the U.S. card. */
   shield: string | null;
-  /** "Ohio diesel average" */
+  /** What the head row prints: "Ohio", "U.S. diesel average". */
+  head: string;
+  /** "Ohio diesel average", for the alt text. */
   legend: string;
-  price: PriceParts | null;
+  /** The header's subtitle: "U.S. on-highway diesel · EIA weekly". */
+  kicker: string;
+  /** "$6.250" */
+  price: string | null;
   /** Shown in place of a price when there is none. */
   noPrice: string;
   direction: Direction | null;
-  /** "30.4¢ (+5.1%)" */
+  /** "+30.4¢ +5.1%" */
   change: string | null;
   /** "up 30.4 cents" */
   spoken: string | null;
@@ -60,17 +66,17 @@ export function cardKeys(site: SiteData): string[] {
 
 /**
  * The card's drawing. Chat apps cache a preview by its URL, so change this
- * letter whenever the card looks different ("a" is the road sign arrow), and
- * links shared the same week pick up the new card.
+ * letter whenever the card looks different ("a" was the green road sign, "b"
+ * is the paper terminal), and links shared the same week pick up the new card.
  */
-export const CARD_DESIGN = "a";
+export const CARD_DESIGN = "b";
 
-/** The card's file name without ".png": "oh-2026-09-14-a". */
+/** The card's file name without ".png": "oh-2026-09-14-b". */
 export function cardName(key: string, date: string): string {
   return `${key}-${date}-${CARD_DESIGN}`;
 }
 
-/** "/og/oh-2026-09-14-a.png" */
+/** "/og/oh-2026-09-14-b.png" */
 export function cardPath(key: string, date: string): string {
   return `/og/${cardName(key, date)}.png`;
 }
@@ -84,7 +90,7 @@ export function cardKeyFor(pathname: string, site: SiteData): string {
 
 /**
  * "EIA Midwest average, 15 states", "EIA Central Atlantic average, 5 states
- * and DC": the same words as the plate on the state sign and the mini sign.
+ * and DC": the same words as the plate under a state's price.
  */
 export function regionLabel(s: StateView, site: SiteData): string {
   if (!s.eia_series || !s.regionName) return `EIA doesn't survey diesel prices in ${s.name}`;
@@ -118,32 +124,39 @@ function timing(site: SiteData, daily: boolean): Timing {
   return { dateLine: `Week of ${formatDate(site.national.date)}`, compareLine: null };
 }
 
-function moveParts(move: Move | null, daily: boolean) {
+function moveParts(move: Move | null) {
   if (!move || move.change === null) return { direction: null, change: null, spoken: null };
-  const cadence = daily ? "daily" : "weekly";
+  const cls = changeClass(move.change);
   return {
-    direction: directionFor(move.change, cadence),
-    change: formatChange(move.change, pctOf(move)),
+    direction: (cls || "flat") as Direction,
+    change: formatMove(move.change, pctOf(move)),
     spoken: spokenChange(move.change),
   };
+}
+
+function kickerFor(site: SiteData): string {
+  return site.mode === "aaa+eia" ? "U.S. on-highway diesel · AAA daily, EIA weekly" : "U.S. on-highway diesel · EIA weekly";
 }
 
 /** What a card says. Pure, so the page head can build the alt text without drawing. */
 export function cardFor(site: SiteData, key: string): Card {
   const aaaMode = site.mode === "aaa+eia";
+  const kicker = kickerFor(site);
   if (key === US_KEY) {
     const daily = site.national.cadence === "daily";
     const move = site.national.move;
     const t = timing(site, daily);
-    const parts = moveParts(move, daily);
+    const parts = moveParts(move);
     // AAA's national change is its own today minus yesterday, even after a
     // missed day, so it's always "since yesterday".
     const compareLine = daily ? "Since yesterday" : t.compareLine;
     return {
       key,
       shield: null,
+      head: "U.S. diesel average",
       legend: "U.S. diesel average",
-      price: move ? priceParts(move.price) : null,
+      kicker,
+      price: move ? formatPrice(move.price) : null,
       noPrice: "No national price",
       ...parts,
       dateLine: t.dateLine,
@@ -156,16 +169,18 @@ export function cardFor(site: SiteData, key: string): Card {
   const daily = s.cadence === "daily";
   const move = s.primary;
   const t = timing(site, daily && aaaMode);
-  const parts = moveParts(move, daily);
+  const parts = moveParts(move);
   // A state EIA doesn't survey has no reading for any week, so the card says
   // what its page says instead of printing a survey week.
   const unsurveyed = !aaaMode && !move && s.eia_series === null;
   return {
     key,
     shield: s.code,
+    head: s.name,
     legend: move ? `${s.name} diesel average` : `Diesel in ${s.name}`,
-    price: move ? priceParts(move.price) : null,
-    noPrice: aaaMode ? "No price today" : "No weekly price",
+    kicker,
+    price: move ? formatPrice(move.price) : null,
+    noPrice: aaaMode ? "No price today" : "No EIA price",
     ...parts,
     dateLine: unsurveyed ? "Not in EIA's weekly survey" : t.dateLine,
     compareLine: parts.change ? t.compareLine : null,
@@ -175,10 +190,10 @@ export function cardFor(site: SiteData, key: string): Card {
 
 /** The picture in words, for og:image:alt. */
 export function cardAlt(card: Card): string {
-  if (!card.price) return `${card.legend}: ${card.noPrice.toLowerCase()}. ${card.label}.`;
+  if (!card.price) return `${card.legend}: ${card.noPrice.charAt(0).toLowerCase()}${card.noPrice.slice(1)}. ${card.label}.`;
   const since = card.compareLine ? ` ${card.compareLine.charAt(0).toLowerCase()}${card.compareLine.slice(1)}` : "";
   const moved = card.spoken ? `, ${card.spoken}${since}` : "";
-  return `${card.legend}: ${card.price.plain} a gallon${moved}. ${card.dateLine}. ${card.label}.`;
+  return `${card.legend}: ${card.price} a gallon${moved}. ${card.dateLine}. ${card.label}.`;
 }
 
 // Drawing
@@ -189,23 +204,26 @@ export interface Ink {
   right: number;
 }
 
-export type Measure = (text: string, weight: 700 | 800) => Ink;
+export type Measure = (text: string, weight: 400 | 700) => Ink;
 
-const GREEN = "#0a6640";
-const WHITE = "#ffffff";
-const PLAQUE_INK = "#1d2125";
-// the plaque's arrow colors, the same as the sign on the page
-const GLYPH: Record<Direction, string> = { up: "#c94d47", down: "#3a75bf", flat: "#51565b" };
+/** The card is always the light page: white paper, near black ink. */
+export const CARD_INK = {
+  bg: "#ffffff",
+  ink: "#111111",
+  ink2: "#595959",
+  hair: "#d6d6d6",
+  up: "#b3151b",
+  down: "#0f4fbf",
+} as const;
 
-/**
- * The fuel pump from the app icon's 32px drawing (scripts/make_app_icons.mjs),
- * the same path the site header draws, so a shared card shows the same mark.
- */
-export const PUMP_32 =
-  "M15.12 7.75C15.46 7.75 15.79 7.89 16.03 8.13C16.28 8.37 16.41 8.7 16.41 9.04V14.87H18.03C18.74 14.87 19.4 15.11 19.89 15.6C20.38 16.09 20.62 16.75 20.62 17.46V20.69C20.62 20.96 20.7 21.1 20.78 21.18C20.85 21.25 21 21.34 21.26 21.34C21.53 21.34 21.67 21.25 21.75 21.18C21.83 21.1 21.91 20.96 21.91 20.69V12.68L19.93 10.7C19.55 10.32 19.55 9.71 19.93 9.33C20.31 8.95 20.92 8.95 21.3 9.33L23.57 11.59C23.75 11.78 23.85 12.02 23.85 12.28V20.69C23.85 21.4 23.61 22.06 23.12 22.55C22.63 23.04 21.97 23.28 21.26 23.28C20.56 23.28 19.9 23.04 19.41 22.55C18.92 22.06 18.68 21.4 18.68 20.69V17.46C18.68 17.19 18.59 17.05 18.52 16.97C18.44 16.89 18.29 16.81 18.03 16.81H16.41V24.25H8V9.04C8 8.7 8.14 8.37 8.38 8.13C8.62 7.89 8.95 7.75 9.29 7.75H15.12ZM10.59 9.69C10.23 9.69 9.94 9.98 9.94 10.34V13.25C9.94 13.61 10.23 13.9 10.59 13.9H13.82C14.18 13.9 14.47 13.61 14.47 13.25V10.34C14.47 9.98 14.18 9.69 13.82 9.69H10.59Z";
+/** The colour a change wears: red rose, blue fell, gray for exactly 0.0¢. */
+const MOVE: Record<Direction, string> = { up: CARD_INK.up, down: CARD_INK.down, flat: CARD_INK.ink2 };
 
-const LEFT = 84;
-const RIGHT = CARD_WIDTH - 84;
+/** The one face on the card. Red Hat Mono stands in for the device's monospace font the page uses. */
+export const CARD_FONT = "Red Hat Mono";
+
+const LEFT = 72;
+const RIGHT = CARD_WIDTH - 72;
 const INNER = RIGHT - LEFT;
 
 export function escapeXml(s: string): string {
@@ -219,112 +237,96 @@ export function escapeXml(s: string): string {
 
 const n = (v: number) => String(Math.round(v * 10) / 10);
 
-function text(x: number, y: number, size: number, weight: 700 | 800, fill: string, s: string, anchor?: "middle" | "end"): string {
-  return `<text x="${n(x)}" y="${n(y)}" font-family="Overpass" font-weight="${weight}" font-size="${n(size)}" fill="${fill}"${anchor ? ` text-anchor="${anchor}"` : ""}>${escapeXml(s)}</text>`;
+interface TextOpts {
+  anchor?: "middle" | "end";
+  /** Letter spacing as a share of the size: 0.14 for the wordmark. */
+  tracking?: number;
 }
 
-/**
- * The road sign arrow for a direction, the same shape the page shows, in a
- * `size` box on the 24 unit icon grid with its top left corner at x, y.
- */
-function arrow(direction: Direction, x: number, y: number, size: number, fill: string): string {
-  return `<path transform="translate(${n(x)} ${n(y)}) scale(${Math.round((size / 24) * 1000) / 1000})" fill="${fill}" d="${arrowPath(direction)}"/>`;
+function text(x: number, y: number, size: number, weight: 400 | 700, fill: string, s: string, opts: TextOpts = {}): string {
+  const anchor = opts.anchor ? ` text-anchor="${opts.anchor}"` : "";
+  const tracking = opts.tracking ? ` letter-spacing="${n(size * opts.tracking)}"` : "";
+  return `<text x="${n(x)}" y="${n(y)}" font-family="${CARD_FONT}" font-weight="${weight}" font-size="${n(size)}" fill="${fill}"${anchor}${tracking}>${escapeXml(s)}</text>`;
 }
 
-/** Width of `s` at `size`, from the pen position to the end of the ink. */
-function width(measure: Measure, s: string, size: number, weight: 700 | 800): number {
-  return (measure(s, weight).right * size) / 100;
+function rect(x: number, y: number, w: number, h: number, fill: string): string {
+  return `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" fill="${fill}"/>`;
 }
 
-/** The card as SVG. `measure` sets text widths, so the plaque hugs its words and long names shrink to fit. */
+/** Width of `s` at `size`, from the pen position to the end of the ink, plus any tracking. */
+function width(measure: Measure, s: string, size: number, weight: 400 | 700, tracking = 0): number {
+  return (measure(s, weight).right * size) / 100 + Math.max(0, s.length - 1) * size * tracking;
+}
+
+/** The card as SVG. `measure` sets text widths, so long names shrink to fit and the change sits after the price. */
 export function cardSvg(card: Card, measure: Measure): string {
+  const { bg, ink, ink2, hair } = CARD_INK;
   const out: string[] = [];
   out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}">`);
-  // The sign fills the frame, with the white inset border a guide sign has.
-  out.push(`<rect width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="${GREEN}"/>`);
-  out.push(`<rect x="18" y="18" width="${CARD_WIDTH - 36}" height="${CARD_HEIGHT - 36}" rx="26" fill="none" stroke="${WHITE}" stroke-width="8"/>`);
+  out.push(rect(0, 0, CARD_WIDTH, CARD_HEIGHT, bg));
 
-  // Legend row: shield and name. Everything in the row scales with the name's
-  // size, so a long name like District of Columbia shrinks the whole row to fit.
-  const rowMid = 118;
-  const shieldGap = card.shield ? 24 : 0;
-  // widths at a 100px name
-  const shield100 = card.shield ? Math.max(170, width(measure, card.shield, 68, 800) + 70) : 0;
-  const legend100 = measure(card.legend, 800).right;
-  const legendSize = Math.min(60, ((INNER - shieldGap) / (shield100 + legend100)) * 100);
-  const shieldW = (shield100 * legendSize) / 100;
+  // The header: the wordmark, the subtitle, and the double rule under them.
+  out.push(text(LEFT, 76, 30, 700, ink, "DAILYFUEL", { tracking: 0.14 }));
+  out.push(text(RIGHT, 76, 22, 400, ink2, card.kicker, { anchor: "end" }));
+  out.push(rect(LEFT, 98, INNER, 2, ink));
+  out.push(rect(LEFT, 104, INNER, 2, ink));
+
+  // The head row: the boxed code and the name in caps, shrunk to fit a long one.
+  const headY = 196;
+  const tracking = 0.04;
+  let headSize = 40;
+  const boxPad = 14;
+  const boxW = (size: number) => (card.shield ? width(measure, card.shield, size * 0.8, 700) + boxPad * 2 : 0);
+  const headW = (size: number) => boxW(size) + (card.shield ? 20 : 0) + width(measure, card.head.toUpperCase(), size, 700, tracking);
+  // the box padding and the gap don't scale, so solve for the size that fits exactly
+  const fixed = card.shield ? boxPad * 2 + 20 : 0;
+  if (headW(headSize) > INNER) headSize = ((INNER - fixed) * headSize) / (headW(headSize) - fixed);
   if (card.shield) {
-    const h = legendSize * 1.18;
-    const font = legendSize * 0.68;
-    out.push(`<rect x="${LEFT}" y="${n(rowMid - h / 2)}" width="${n(shieldW)}" height="${n(h)}" rx="10" fill="${WHITE}"/>`);
-    out.push(text(LEFT + shieldW / 2, rowMid + font * 0.35, font, 800, GREEN, card.shield, "middle"));
+    const w = boxW(headSize);
+    const h = headSize * 1.3;
+    out.push(`<rect x="${n(LEFT + 1)}" y="${n(headY - headSize * 0.95)}" width="${n(w)}" height="${n(h)}" fill="none" stroke="${ink}" stroke-width="2"/>`);
+    out.push(text(LEFT + 1 + w / 2, headY - headSize * 0.06, headSize * 0.8, 700, ink, card.shield, { anchor: "middle" }));
   }
-  out.push(text(LEFT + shieldW + shieldGap, rowMid + legendSize * 0.35, legendSize, 800, WHITE, card.legend));
+  out.push(text(LEFT + boxW(headSize) + (card.shield ? 20 : 0), headY, headSize, 700, ink, card.head.toUpperCase(), { tracking }));
 
-  // Price row: the price on the left, the change plaque on the right, both on one baseline.
-  const base = 366;
-  const dateBase = 430;
+  // The price row: the price, and the change after it on the same baseline.
+  const base = 392;
   if (card.price) {
-    let P = 210;
-    let C = 46;
-    const mainW = (s: number) => width(measure, card.price!.main, s, 800);
-    const priceW = (s: number) => mainW(s) + s * 0.05 + width(measure, card.price!.tenth, s / 2, 800);
-    const plaqueW = (c: number) => (card.change ? c * 0.44 + c * 1.0 + width(measure, card.change, c, 800) + c * 0.48 : 0);
-    const compareW = (card.compareLine ? width(measure, card.compareLine, 30, 700) : 0);
-    const blockW = (c: number) => Math.max(plaqueW(c), compareW);
-    const gap = 56;
-    const need = priceW(P) + (card.change ? gap + blockW(C) : 0);
+    let P = 168;
+    let C = 56;
+    const gap = 40;
+    const need = width(measure, card.price, P, 700) + (card.change ? gap + width(measure, card.change, C, 700) : 0);
     if (need > INNER) {
-      const k = Math.max(0.6, INNER / need);
+      const k = INNER / need;
       P *= k;
       C *= k;
     }
-    // "$6.25" then the raised tenth, its top in line with the digits
-    out.push(text(LEFT, base, P, 800, WHITE, card.price.main));
-    out.push(text(LEFT + mainW(P) + P * 0.05, base - P * 0.36, P / 2, 800, WHITE, card.price.tenth));
+    out.push(text(LEFT, base, P, 700, ink, card.price));
     if (card.change && card.direction) {
-      const bw = blockW(C);
-      const bx = RIGHT - bw;
-      const ph = C * 1.62;
-      const py = base - C * 0.356 - ph / 2;
-      out.push(`<rect x="${n(bx)}" y="${n(py)}" width="${n(plaqueW(C))}" height="${n(ph)}" rx="12" fill="${WHITE}"/>`);
-      // The arrow the way the page sets it: a 0.9em box pulled 0.094em under
-      // the baseline, so an up or down arrow stands as tall as the digits.
-      // It centers in the 0.7em slot before the text, which the widest arrow
-      // (about the same) just fills.
-      const as = C * 0.9;
-      out.push(arrow(card.direction, bx + C * 0.79 - as / 2, base + C * 0.094 - as, as, GLYPH[card.direction]));
-      out.push(text(bx + C * 0.44 + C * 1.0, base, C, 800, PLAQUE_INK, card.change));
-      if (card.compareLine) out.push(text(bx + 2, dateBase, 30, 700, WHITE, card.compareLine));
+      out.push(text(LEFT + width(measure, card.price, P, 700) + gap, base, C, 700, MOVE[card.direction], card.change));
     }
   } else {
-    let size = 110;
-    const w = width(measure, card.noPrice, size, 800);
+    let size = 96;
+    const w = width(measure, card.noPrice, size, 700);
     if (w > INNER) size *= INNER / w;
-    out.push(text(LEFT, base - 20, size, 800, WHITE, card.noPrice));
+    out.push(text(LEFT, base - 24, size, 700, ink, card.noPrice));
   }
-  out.push(text(LEFT, dateBase, 32, 700, WHITE, card.dateLine));
+  // The week, and what the change is measured against.
+  const dateLine = card.compareLine ? `${card.dateLine} · ${card.compareLine.charAt(0).toLowerCase()}${card.compareLine.slice(1)}` : card.dateLine;
+  out.push(text(LEFT, 450, 26, 400, ink2, dateLine));
 
-  // A rule, then where the number comes from and the site name.
-  out.push(`<rect x="${LEFT}" y="484" width="${INNER}" height="3" fill="${WHITE}" fill-opacity="0.35"/>`);
-  const bottom = 552;
-  const brandSize = 30;
-  const brandW = width(measure, "DailyFuel", brandSize, 800);
-  // The header's mark: a small green sign with a white inset line and the
-  // pump. On the green card its own green melts in, so the line and the pump
-  // carry it, drawn a touch heavier to hold up when the card is shown small.
-  const markW = 40;
-  const brandX = RIGHT - brandW - markW - 10;
-  const markY = bottom - brandSize * 0.35 - markW / 2;
-  out.push(`<g transform="translate(${n(brandX)} ${n(markY)}) scale(${markW / 32})">`
-    + `<rect x="2.5" y="2.5" width="27" height="27" rx="4.5" fill="none" stroke="${WHITE}" stroke-width="2"/>`
-    + `<path fill="${WHITE}" fill-rule="evenodd" d="${PUMP_32}"/></g>`);
-  out.push(text(RIGHT, bottom, brandSize, 800, WHITE, "DailyFuel", "end"));
-  let labelSize = 30;
-  const labelRoom = brandX - 48 - LEFT;
-  const labelW = width(measure, card.label, labelSize, 700);
+  // A hairline, then where the number comes from and where to read more.
+  out.push(rect(LEFT, 498, INNER, 2, hair));
+  const bottom = 556;
+  const host = new URL(SITE_URL).host;
+  const hostSize = 24;
+  const hostW = width(measure, host, hostSize, 400);
+  out.push(text(RIGHT, bottom, hostSize, 400, ink2, host, { anchor: "end" }));
+  let labelSize = 26;
+  const labelRoom = INNER - hostW - 40;
+  const labelW = width(measure, card.label, labelSize, 400);
   if (labelW > labelRoom) labelSize *= labelRoom / labelW;
-  out.push(text(LEFT, bottom, labelSize, 700, WHITE, card.label));
+  out.push(text(LEFT, bottom, labelSize, 400, ink2, card.label));
 
   out.push("</svg>");
   return out.join("");
@@ -332,8 +334,8 @@ export function cardSvg(card: Card, measure: Measure): string {
 
 // Rendering
 
-/** The Overpass files resvg draws with. resvg reads TTF, not the site's woff2. */
-export const FONT_FILES = ["Overpass-ExtraBold.ttf", "Overpass-Bold.ttf"].map((f) =>
+/** The Red Hat Mono files resvg draws with. Build time only: the pages use the device's own monospace font. */
+export const FONT_FILES = ["RedHatMono-Regular.ttf", "RedHatMono-Bold.ttf"].map((f) =>
   resolve(process.cwd(), "src/assets/fonts", f),
 );
 
@@ -346,11 +348,11 @@ async function load(): Promise<ResvgModule> {
 }
 
 const OPTIONS = {
-  font: { loadSystemFonts: false, fontFiles: FONT_FILES, defaultFontFamily: "Overpass" },
+  font: { loadSystemFonts: false, fontFiles: FONT_FILES, defaultFontFamily: CARD_FONT },
   logLevel: "error" as const,
 };
 
-/** Text measured by resvg itself with the same fonts, so the layout matches the pixels. */
+/** Text measured by resvg itself with the same font, so the layout matches the pixels. */
 export async function resvgMeasure(): Promise<Measure> {
   const { Resvg } = await load();
   const cache = new Map<string, Ink>();
@@ -358,7 +360,7 @@ export async function resvgMeasure(): Promise<Measure> {
     const k = `${weight}|${s}`;
     const hit = cache.get(k);
     if (hit) return hit;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="4000" height="400"><text x="100" y="200" font-family="Overpass" font-weight="${weight}" font-size="100">${escapeXml(s)}</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="6000" height="400"><text x="100" y="200" font-family="${CARD_FONT}" font-weight="${weight}" font-size="100">${escapeXml(s)}</text></svg>`;
     const b = new Resvg(svg, OPTIONS).getBBox();
     const ink = b ? { left: b.x - 100, right: b.x - 100 + b.width } : { left: 0, right: 0 };
     cache.set(k, ink);

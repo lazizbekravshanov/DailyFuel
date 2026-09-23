@@ -1,82 +1,69 @@
 ---
-import { formatBadgeDate, formatDate } from "../lib/dates.ts";
+// The footer: where the numbers come from, what they are, and what the page
+// keeps. Every date and name in it comes from the data, never typed by hand.
+import { formatBadgeDate, formatDate, todayInNewYork } from "../lib/dates.ts";
+import { formatShortWeekdayDate, nextEiaRelease } from "../lib/release.ts";
 import { REPO_URL, type SiteData } from "../lib/site.ts";
 interface Props {
   site: SiteData;
-  /** On /about/ the page itself carries the full credits, so the footer drops its copy and its link back to the page. */
+  /** On /about/ the page itself carries the full credits, so the footer drops its link to the page and says how visits are counted. */
   compact?: boolean;
 }
 const { site, compact = false } = Astro.props;
-const release = site.latest.eia?.release_date ?? site.weekly?.release_date ?? null;
+const eia = site.latest.eia ?? null;
+const release = eia?.release_date ?? site.weekly?.release_date ?? null;
+// The next EIA week, with EIA's own date and the holiday schedule behind it.
+// Late at build time, or later in the browser (src/scripts/stale.js), it says so.
+const next = eia
+  ? nextEiaRelease(eia.period, eia.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork())
+  : null;
+const LATE = "The next release is late.";
 const aaa = site.mode === "aaa+eia" ? site.latest.aaa : null;
 const tax = site.tax;
+// "Alaska and Hawaii": the states EIA leaves out, said from the data.
+const unsurveyed = site.mode === "eia_only" ? site.states.filter((s) => s.eia_series === null).map((s) => s.name) : [];
+const andList = (names: string[]) =>
+  names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 ---
-<footer class="site-footer">
+<footer class="foot">
   <div class="wrap">
-    {compact ? (
-      <div class="about">
-        <p>DailyFuel is free, with no ads, no cookies and no accounts.</p>
-        <p>We count visits with Vercel Web Analytics. It uses no cookies and keeps nothing that could identify you, just totals like how many people came by today.</p>
-        <p>Your last state is saved on this phone only.</p>
-        <p><a href={REPO_URL}>Code on GitHub</a></p>
-      </div>
-    ) : (
-      <>
-        <h2 class="footer-title">Sources and credits</h2>
-        <div class="cols">
-          <div class="credits">
-            {site.weekly && (
-              <p>
-                Weekly prices: U.S. Energy Information Administration, Gasoline and Diesel Fuel Update{release ? ` (released ${formatDate(release)})` : ""}.
-              </p>
-            )}
-            {aaa && (
-              <p>
-                Daily state averages: AAA (<a href="https://gasprices.aaa.com/">gasprices.aaa.com</a>), data by OPIS. Price as of {formatBadgeDate(aaa.as_of)}. DailyFuel is not affiliated with AAA or OPIS.
-              </p>
-            )}
-            {tax && (
-              <p>
-                Diesel tax: Federal Highway Administration, Highway Statistics table MF-121T ({tax.reporting_period} reporting period). U.S. government work, public domain.
-              </p>
-            )}
-            <p class="muted">
-              Map: us-atlas, from U.S. Census Bureau boundaries. Type: Overpass.{" "}
-              <a href="/about/">Where the numbers come from</a>
-            </p>
-          </div>
-          <div class="about">
-            <p>DailyFuel is free, with no ads, no cookies and no accounts.</p>
-            <p><a href={REPO_URL}>Code on GitHub</a></p>
-          </div>
-        </div>
-      </>
-    )}
+    <p>
+      <b>Sources.</b>{" "}
+      {site.weekly && (
+        <>
+          Prices: U.S. Energy Information Administration, weekly retail on-highway diesel{release ? `, released ${formatDate(release)}` : ""}.
+          {next && (
+            <>
+              {" "}<span data-next-release={next.date} data-late={LATE}>{next.late ? LATE : `Next release ${formatShortWeekdayDate(next.date)}.`}</span>
+            </>
+          )}
+        </>
+      )}
+      {aaa && (
+        <>
+          {" "}Daily state averages: AAA (<a href="https://gasprices.aaa.com/">gasprices.aaa.com</a>), data by OPIS, as of {formatBadgeDate(aaa.as_of)}. DailyFuel is not affiliated with AAA or OPIS.
+        </>
+      )}
+      {tax && <>{" "}Taxes: Federal Highway Administration, Highway Statistics table MF-121T, {tax.reporting_period}.</>}
+    </p>
+    <p>
+      Prices are what a driver pays at the pump, with federal and state taxes in them.
+      {aaa
+        ? " AAA's daily average is for one state. EIA's weekly number covers a region, so states in one region share it."
+        : " EIA surveys regions, not every state, so states in one region share a price."}
+      {unsurveyed.length > 0 && ` ${andList(unsurveyed)} ${unsurveyed.length === 1 ? "is" : "are"} not in the survey.`}
+    </p>
+    <p>
+      No ads, no cookies, no accounts. The only things this page keeps on your phone are the state you save and your light or dark choice.
+      {compact && " Visits are counted with Vercel Web Analytics, which uses no cookies and keeps nothing that could identify you."}
+    </p>
+    <p>
+      {!compact && (
+        <>
+          <a href="/about/">Where the numbers come from</a> <span class="dot">·</span>{" "}
+        </>
+      )}
+      <a href={REPO_URL}>Code on GitHub</a>
+    </p>
   </div>
 </footer>
-
-<style>
-  .site-footer {
-    border-top: 1px solid var(--hairline);
-    padding-block: var(--space-7) var(--space-8);
-    font-size: 15px;
-    line-height: 1.5;
-  }
-  .footer-title {
-    font-size: var(--fs-h3);
-    margin-bottom: var(--space-4);
-  }
-  .cols {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-    gap: var(--space-5) var(--space-7);
-  }
-  @media (max-width: 767px) {
-    .cols {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-  p {
-    margin-bottom: var(--space-2);
-  }
-</style>

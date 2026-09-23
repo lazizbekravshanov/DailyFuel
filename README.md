@@ -6,6 +6,10 @@ Live at **[dailydiesel.vercel.app](https://dailydiesel.vercel.app)**
 
 DailyFuel is a free site for truck drivers, owner operators, dispatchers, farmers and anyone else who fills up with diesel. It answers one question fast: what does diesel cost in my state right now, and did it go up or down? No ads, no cookies, no accounts. Visits are counted with Vercel Web Analytics, which uses no cookies and stores no personal data.
 
+## Design
+
+The site is a paper terminal: a white page, near black ink, the monospace font already on your device (`ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`), hairline rules, and colour in exactly one place, on a change (red when diesel rose, blue when it fell). No web font, no icons, no arrows, no cards, nothing animates. Prices print as `$6.285` in headings and `6.285` in tables, changes as `+31.8¢ +5.3%`, with the sign carrying the direction. Dark mode is the true inverse, white ink on black; it follows the system setting and the DARK button in the header can force either one, remembered on that phone only. The tokens live in `src/styles/tokens.css` and the shared classes in `src/styles/global.css`.
+
 ## How the data works
 
 There's no server and no database. A scheduled GitHub Actions job fetches prices, saves them as JSON in `data/`, and commits the change. Every commit to `main` makes Vercel rebuild the static site from those files. Vercel never fetches prices itself.
@@ -39,7 +43,7 @@ The switch is the repo variable `AAA_ENABLED`. Only the exact string `true` turn
 | Daily state prices (off for now) | AAA, [gasprices.aaa.com](https://gasprices.aaa.com/), data by OPIS | Not covered by this repo's license. See [data/aaa/README.md](data/aaa/README.md). |
 | US map shapes | [us-atlas](https://github.com/topojson/us-atlas) © 2013 to 2019 Michael Bostock, from U.S. Census Bureau boundaries | ISC |
 | Map drawing | [d3-geo](https://github.com/d3/d3-geo) and [topojson-client](https://github.com/topojson/topojson-client) | ISC |
-| Font | [Overpass](https://github.com/RedHatOfficial/Overpass) by The Overpass Project Authors, self hosted through Fontsource | SIL Open Font License 1.1 |
+| Share image font | [Red Hat Mono](https://github.com/RedHatOfficial/RedHatFont) by the Red Hat Project Authors, in `src/assets/fonts/`, drawn into the `/og/` PNGs at build time only. The pages load no font. | SIL Open Font License 1.1 |
 | DailyFuel code | this repo | MIT, see [LICENSE](LICENSE) |
 
 The MIT license covers the code only. Each data source keeps its own terms. DailyFuel isn't affiliated with EIA, USDA, FHWA, AAA or OPIS.
@@ -129,12 +133,12 @@ scripts/
   dailyfuel/               the Python package: states, http, store, eia, aaa, derive, pipeline, health, taxes
 tests/                     pytest, synthetic fixtures only
 src/
+  assets/fonts/            Red Hat Mono, for the share images only
   data/states.json         every state with its FIPS code, EIA region and tile map spot
-  lib/                     data loading, formatting, stats and color bins, with vitest tests
-  components/              sign, map, charts, tables
-  icons/                   road sign icons, 24 by 24, one fill in currentColor
-  layouts/  pages/  styles/
-  scripts/                 small inline browser scripts: map and chart tooltips, table sort, stale banner, price roll, your state, share button
+  lib/                     data loading, formatting, stats and share cards, with vitest tests
+  components/              header controls, footer, tables, charts
+  layouts/  pages/  styles/  the page shell, the pages, the paper terminal tokens and base styles
+  scripts/                 small inline browser scripts: chart readouts, table sort, stale banner, your state, share button, dark mode
 public/                    favicon.svg and .ico, home screen icons, site.webmanifest, robots.txt
 ```
 
