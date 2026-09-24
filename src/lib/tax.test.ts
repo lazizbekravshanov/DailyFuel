@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { loadRawData, type TaxFile } from "./data.ts";
 import {
-  formatCpg, inSentence, newestRate, ordinal, quoteCpg, rankLabel, rankedNote, sinceLabel, spokenCpg, spokenRank,
+  formatCpg, inSentence, newestRate, ordinal, quoteCpg, rankLabel, sinceLabel, spokenCpg,
   taxViews, taxVintage, toMils,
 } from "./tax.ts";
 
@@ -147,16 +147,13 @@ describe("labels", () => {
     const views = taxViews(file({ PA: 74.1, IN: 59, OH: 47, AL: 30, AZ: 26, AK: 8 }));
     expect(rankLabel(views.get("IN")!)).toBe("2nd highest");
     expect(rankLabel(views.get("OH")!)).toBe("3rd highest");
-    expect(spokenRank(views.get("OH")!)).toBe("the 3rd highest state diesel tax of 6");
   });
 
   it("counts from the low end when that's nearer, and names the ends", () => {
     const views = taxViews(file({ PA: 74.1, IN: 59, OH: 47, AL: 30, AZ: 26, AK: 8 }));
     expect(rankLabel(views.get("PA")!)).toBe("Highest");
-    expect(spokenRank(views.get("PA")!)).toBe("the highest state diesel tax of 6");
     expect(rankLabel(views.get("AZ")!)).toBe("2nd lowest");
     expect(rankLabel(views.get("AK")!)).toBe("Lowest");
-    expect(spokenRank(views.get("AK")!)).toBe("the lowest state diesel tax of 6");
   });
 
   it("shares the low end on a tie", () => {
@@ -168,16 +165,10 @@ describe("labels", () => {
   it("has no rank line for a state with no rate", () => {
     const views = taxViews(file({ PA: 74.1, DC: null }));
     expect(rankLabel(views.get("DC")!)).toBeNull();
-    expect(spokenRank(views.get("DC")!)).toBeNull();
   });
 
-  it("explains the count only when someone isn't ranked", () => {
-    expect(rankedNote(file({ PA: 74.1, AK: 8 }))).toBeNull();
-    expect(rankedNote(file({ PA: 74.1, DC: null }))).toBe(
-      "The rank counts the 1 of the 2 with a current rate in FHWA's table.");
-    expect(rankedNote(file({ PA: 74.1, UT: 31, DC: null, AK: 8 }, {}, { out_of_date: ["UT"] }))).toBe(
-      "The rank counts the 2 of the 4 with a current rate in FHWA's table.");
-  });
+  // spokenRank and rankedNote went with the road sign's tax panel: the paper
+  // terminal's RANK box says "of 49 with a current rate" itself
 
   it("gives DC its article in a sentence and leaves states alone", () => {
     expect(inSentence("District of Columbia")).toBe("the District of Columbia");

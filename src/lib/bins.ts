@@ -10,7 +10,6 @@ import { changeTenths } from "./format.ts";
 export type Cadence = "weekly" | "daily";
 export type Direction = "up" | "down" | "flat";
 export type BinKey = "down-3" | "down-2" | "down-1" | "flat" | "up-1" | "up-2" | "up-3";
-export type FillKey = BinKey | "nodata";
 
 /** Bin edges in tenths of a cent: [about the same below, small below, medium below]. */
 export const EDGES: Record<Cadence, [number, number, number]> = {

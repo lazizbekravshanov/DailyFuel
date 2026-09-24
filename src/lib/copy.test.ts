@@ -3,11 +3,10 @@ import statesFile from "../data/states.json";
 import type { BenchmarkKey, Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 import {
-  countPlaces, missingNote, noSurveyNote, pctOf, regionMates, samePriceCaption, samePriceLead, samePriceMeta,
-  sourceSentence, stateDescription, vsUsSentence,
+  countPlaces, missingNote, noSurveyNote, pctOf, samePriceCaption, samePriceMeta, stateDescription,
 } from "./copy.ts";
 import { homeMeta } from "../components/home/home.ts";
-import { formatChange } from "./format.ts";
+import { formatMove } from "./format.ts";
 
 const REGION: Record<BenchmarkKey, string> = {
   R1X: "New England",
@@ -121,17 +120,8 @@ describe("state meta description", () => {
 });
 
 describe("state page sentences", () => {
-  it("counts the region with DC apart", () => {
-    expect(sourceSentence(by("OH"), S)).toMatch(/Midwest region, which covers 15 states\.$/);
-    expect(sourceSentence(by("PA"), S)).toMatch(/Central Atlantic region, which covers 5 states and DC\.$/);
-  });
-
-  it("collapses identical peers into one line", () => {
-    expect(samePriceLead(by("OH"), regionMates(by("OH"), S))).toBe("Same price in 14 other Midwest states:");
-    expect(samePriceLead(by("MD"), regionMates(by("MD"), S))).toBe("Same price in 4 other Central Atlantic states and DC:");
-    expect(samePriceLead(by("DC"), regionMates(by("DC"), S))).toBe("Same price in 5 Central Atlantic states:");
-    expect(samePriceLead(by("WA"), regionMates(by("WA"), S))).toBe("Same price in 3 other West Coast states outside California:");
-  });
+  // sourceSentence, samePriceLead and vsUsSentence went with the road sign:
+  // the paper terminal's plate, SAME PRICE head and U.S. line say it instead
 
   it("heads the same price table with who shares the number", () => {
     expect(samePriceMeta(by("OH"), S)).toBe("15 states read $6.250 this week");
@@ -154,15 +144,6 @@ describe("state page sentences", () => {
     expect(noSurveyNote(by("AK"), null)).toBe(
       "EIA doesn't survey diesel in Alaska, so there is no weekly number for it. The nearest region EIA does survey is the West Coast.",
     );
-  });
-
-  it("compares with the U.S. average from the numbers", () => {
-    expect(vsUsSentence(by("OH"), S)).toBe("That's 3.5¢ below the U.S. average.");
-    expect(vsUsSentence(by("CA"), S)).toBe("That's 175.4¢ above the U.S. average.");
-    expect(vsUsSentence(by("AK"), S)).toBeNull();
-    const same = site({ us: move(6.25, 0.3) });
-    expect(vsUsSentence(same.byCode.get("OH")!, same)).toBe("That's the same as the U.S. average.");
-    expect(vsUsSentence(by("OH"), site({ us: null }))).toBeNull();
   });
 });
 
@@ -210,13 +191,13 @@ describe("the percent on a move", () => {
     // change_pct is 3.75, and rounding that again printed +3.8%.
     const us: Move = { price: 5.454, prev: 5.257, change: 0.197, change_pct: 3.75, direction: "up" };
     expect(pctOf(us)).toBeCloseTo(3.7474, 4);
-    expect(formatChange(us.change!, pctOf(us))).toBe("19.7¢ (+3.7%)");
+    expect(formatMove(us.change!, pctOf(us))).toBe("+19.7¢ +3.7%");
     // West Coast outside California, week of Mar 16, 2026: +5.3459%.
     const wc: Move = { price: 5.0506, prev: 4.7943, change: 0.2563, change_pct: 5.35, direction: "up" };
-    expect(formatChange(wc.change!, pctOf(wc))).toBe("25.6¢ (+5.3%)");
+    expect(formatMove(wc.change!, pctOf(wc))).toBe("+25.6¢ +5.3%");
     // a fall: −0.021 on $6.072 is −0.3458%, not −0.4%
     const va: Move = { price: 6.051, prev: 6.072, change: -0.021, change_pct: -0.35, direction: "down" };
-    expect(formatChange(va.change!, pctOf(va))).toBe("2.1¢ (−0.3%)");
+    expect(formatMove(va.change!, pctOf(va))).toBe("−2.1¢ −0.3%");
   });
 
   it("falls back to the stored percent with no previous price", () => {

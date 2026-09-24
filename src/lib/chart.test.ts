@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildChart, chartLabel, readoutX, sharedDollarDomain, sparseMonths, spokenMove, windowStart, yLabels } from "./chart.ts";
+import { buildChart, chartLabel, readoutX, spokenMove, yLabels } from "./chart.ts";
 import { addDays } from "./dates.ts";
 import type { Point } from "./stats.ts";
 
@@ -7,88 +7,10 @@ function weekly(start: string, values: (number | null)[]): Point[] {
   return values.map((value, i) => ({ date: addDays(start, 7 * i), value }));
 }
 
-describe("sharedDollarDomain", () => {
-  it("covers the data on half dollars and labels $4, $6, $8", () => {
-    const d = sharedDollarDomain([
-      [{ date: "2026-01-12", value: 3.365 }],
-      [{ date: "2026-09-14", value: 8.039 }],
-    ]);
-    expect(d.lo).toBe(3);
-    expect(d.hi).toBe(8.5);
-    expect(d.ticks).toEqual([4, 6, 8]);
-  });
-
-  it("uses a finer step for a narrow range, still three labels at most", () => {
-    const d = sharedDollarDomain([[{ date: "2026-01-12", value: 3.6 }, { date: "2026-01-19", value: 4.4 }]]);
-    expect(d.lo).toBe(3.5);
-    expect(d.hi).toBe(4.5);
-    expect(d.ticks).toEqual([4, 4.5]);
-  });
-
-  it("keeps a flat series off the frame", () => {
-    const d = sharedDollarDomain([[{ date: "2026-01-12", value: 4 }]]);
-    expect(d.hi).toBeGreaterThan(d.lo);
-  });
-
-  it("never labels the bottom edge", () => {
-    const d = sharedDollarDomain([[{ date: "2026-01-12", value: 4.1 }, { date: "2026-01-19", value: 5.9 }]]);
-    expect(d.ticks).not.toContain(d.lo);
-  });
-});
-
-describe("sparseMonths", () => {
-  it("names the first, middle and last month in a 52 week window", () => {
-    expect(sparseMonths(windowStart("2026-09-14", 364), "2026-09-14")).toEqual(["2025-10-01", "2026-03-01", "2026-09-01"]);
-  });
-
-  it("counts a window that starts on the 1st", () => {
-    expect(sparseMonths("2026-01-01", "2026-03-15")).toEqual(["2026-01-01", "2026-02-01", "2026-03-01"]);
-  });
-
-  it("returns what there is for a short window", () => {
-    expect(sparseMonths("2026-08-20", "2026-09-14")).toEqual(["2026-09-01"]);
-  });
-});
-
-describe("buildChart for small multiples", () => {
-  const history = weekly("2025-06-02", Array.from({ length: 67 }, (_, i) => 3.5 + i * 0.03));
-  const to = history[history.length - 1].date; // 2026-09-07
-  const from = windowStart(to, 364);
-  const domain = sharedDollarDomain([history.filter((p) => p.date >= from)]);
-  const m = buildChart([{ id: "R20", label: "Midwest", kind: "primary", points: history }], {
-    from,
-    to,
-    yDomain: domain,
-    heightPx: 132,
-    xTicks: "sparse",
-    wholeDollarTicks: true,
-  });
-
-  it("labels round dollars and rules the bottom edge too", () => {
-    expect(m.yTicks.map((t) => t.label)).toEqual(domain.ticks!.map((v) => `$${v}`));
-    expect(m.grid[0]).toBe(domain.lo);
-    expect(m.grid.slice(1)).toEqual(domain.ticks);
-  });
-
-  it("puts three month names at their month starts, reading from the start", () => {
-    expect(m.xTicks.map((t) => t.label)).toEqual(["Oct", "Mar", "Sep"]);
-    expect(m.xTicks.every((t) => t.anchor === "start")).toBe(true);
-    expect(m.xTicks[0].pos).toBeLessThan(m.xTicks[1].pos);
-  });
-
-  it("draws only the window, and keeps the week before it for the first change", () => {
-    // the window opens on a Tuesday, so the first weekly point is the Monday after
-    expect(from).toBe("2025-09-09");
-    expect(m.paths[0].points[0].date).toBe("2025-09-15");
-    expect(m.hover.dates[0]).toBe("2025-09-15");
-    expect(m.hover.prev).toEqual(["2025-09-08", history.find((p) => p.date === "2025-09-08")!.value]);
-  });
-
-  it("ends at the right edge", () => {
-    expect(m.ends[0].x).toBe(100);
-    expect(m.hover.x[m.hover.x.length - 1]).toBe(100);
-  });
-});
+// The sharedDollarDomain, sparseMonths and small multiples tests went with the
+// old home page's region multiples, the only chart that used a shared dollar
+// scale and three sparse month names. The window and first change checks
+// they carried live on in the state chart tests below.
 
 describe("buildChart for the state chart", () => {
   const pts = weekly("2025-09-22", Array.from({ length: 52 }, (_, i) => 3.7 + (i % 10) * 0.1));

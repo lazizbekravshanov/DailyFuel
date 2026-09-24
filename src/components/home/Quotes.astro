@@ -10,7 +10,7 @@ import { moveClass } from "../../lib/bins.ts";
 import { pctOf, sinceText } from "../../lib/copy.ts";
 import { formatDate, formatShortDate } from "../../lib/dates.ts";
 import { changeTenths, formatQuote, signedCents, signedPct } from "../../lib/format.ts";
-import { formatCpg } from "../../lib/tax.ts";
+import { quoteCpg } from "../../lib/tax.ts";
 import type { SiteData } from "../../lib/site.ts";
 interface Props {
   site: SiteData;
@@ -21,8 +21,6 @@ const daily = site.mode === "aaa+eia";
 const eia = site.latest.eia;
 const tax = site.tax;
 const states = [...site.states].sort((a, b) => a.name.localeCompare(b.name));
-/** "30.0", "46.85": the state tax the way the TAX ¢ head expects it. */
-const cpg = (v: number) => formatCpg(v).replace("¢", "");
 /** Numbers for the sort keys: cents and percent to one decimal, as printed. */
 const centsKey = (change: number) => String(changeTenths(change) / 10);
 const pctKey = (pct: number) => String(Math.round(pct * 10) / 10);
@@ -36,13 +34,14 @@ const since = daily ? sinceText(site) : "";
 // squeezes the columns on the first paint only to widen them as rows arrive.
 const width = `min-width:calc(${86 + (tax ? 6.5 : 0)}ch + ${242 + (tax ? 20 : 0)}px)`;
 ---
-<section class="q" aria-labelledby="states-title">
+{/* #states is where a state page's "All states" link lands */}
+<section class="q" id="states" aria-labelledby="states-title">
   <div class="sh">
     <h2 id="states-title">All states</h2>
     <p class="meta" id="count" role="status">{states.length} states</p>
-    <span class="find"><label class="sr-only" for="find">Find a state</label><input id="find" type="text" autocomplete="off" spellcheck="false" placeholder="find a state" list="states" /><span class="k" aria-hidden="true">/</span></span>
+    <span class="find"><label class="sr-only" for="find">Find a state</label><input id="find" type="text" autocomplete="off" spellcheck="false" placeholder="find a state" list="state-names" /><span class="k" aria-hidden="true">/</span></span>
   </div>
-  <datalist id="states">{states.map((s) => <option value={s.name}></option>)}</datalist>
+  <datalist id="state-names">{states.map((s) => <option value={s.name}></option>)}</datalist>
   <div class="scroll" tabindex="0" role="region" aria-label="All states table, scrolls sideways">
     <table id="quotes" aria-describedby="quotes-cap" style={width}>
       {/* Every column's width is settled here, before a row arrives, so the
@@ -108,7 +107,7 @@ const width = `min-width:calc(${86 + (tax ? 6.5 : 0)}ch + ${242 + (tax ? 20 : 0)
               ) : (
                 <td colspan="4" class="muted">{s.eia_series === null && !daily ? "No EIA survey" : "No price yet"}</td>
               )}
-              {tax && (taxed === null ? <td class="num muted">n/a</td> : <td class="num">{cpg(taxed)}</td>)}
+              {tax && (taxed === null ? <td class="num muted">n/a</td> : <td class="num">{quoteCpg(taxed)}</td>)}
               {spark ? (
                 <>
                   <td class="num">{formatQuote(spark.low.value)}</td>

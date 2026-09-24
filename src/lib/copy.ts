@@ -1,11 +1,7 @@
 // Words shared across pages: tooltips, labels for screen readers, sentences.
 
-import { directionFor, type Direction } from "./bins.ts";
 import { formatDate, formatShortDate, formatWeekdayDate } from "./dates.ts";
-import {
-  changeTenths, changeVerb, formatCents, formatChange, formatPrice, formatSignedCents, pctFrom, spokenChange, spokenPrice,
-  toUnits,
-} from "./format.ts";
+import { changeTenths, changeVerb, formatPrice, formatSignedCents, pctFrom, spokenChange } from "./format.ts";
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 
@@ -39,52 +35,6 @@ export function noPriceReason(s: StateView, site: SiteData): string {
   return `This is the first price we have for ${s.name}, so there's no change yet.`;
 }
 
-export interface MapLabel {
-  aria: string;
-  price: string;
-  change: string;
-  dir: Direction | "";
-  note: string;
-  title: string;
-}
-
-export function mapLabel(s: StateView, site: SiteData): MapLabel {
-  const since = sinceText(site);
-  const note =
-    site.mode === "eia_only" && s.regionName
-      ? s.eia_series === "SCA"
-        ? "EIA's California price"
-        : `${s.regionName} region price`
-      : "";
-  if (!s.primary) {
-    const reason = noPriceReason(s, site);
-    return { aria: `${s.name}. ${reason}`, price: "", change: "", dir: "", note: reason, title: `${s.name}: ${reason}` };
-  }
-  const price = `${formatPrice(s.primary.price)} a gallon`;
-  if (s.primary.change === null) {
-    const reason = noPriceReason(s, site);
-    return {
-      aria: `${s.name}, ${spokenPrice(s.primary.price)}. ${reason}`,
-      price,
-      change: "",
-      dir: "",
-      note: reason,
-      title: `${s.name}: ${price}. ${reason}`,
-    };
-  }
-  const change = `${formatChange(s.primary.change, pctOf(s.primary))} ${since}`.trim();
-  const dir = directionFor(s.primary.change, s.cadence);
-  const spoken = `${dir === "flat" && spokenChange(s.primary.change) !== "no change" ? "about the same, " : ""}${spokenChange(s.primary.change)}`;
-  return {
-    aria: `${s.name}, ${spokenPrice(s.primary.price)}, ${spoken}${since ? ` ${since}` : ""}.${note ? ` ${note}.` : ""}`,
-    price,
-    change,
-    dir,
-    note,
-    title: `${s.name}: ${price}, ${spoken}${since ? ` ${since}` : ""}`,
-  };
-}
-
 /** "DC" in running text, where "District of Columbia" reads long. */
 export function shortName(s: { code: string; name: string }): string {
   return s.code === "DC" ? "DC" : s.name;
@@ -111,18 +61,6 @@ export function countPlaces(places: { code: string }[], other: boolean, adjectiv
 export function regionMates(s: StateView, site: SiteData): StateView[] {
   if (s.eia_series === null) return [];
   return site.states.filter((o) => o.eia_series === s.eia_series && o.code !== s.code);
-}
-
-/** How a driver would name the region in "3 other West Coast states outside California". */
-function regionWords(s: StateView): { adjective: string; suffix: string } {
-  if (s.eia_series === "R5XCA") return { adjective: "West Coast", suffix: " outside California" };
-  return { adjective: s.regionName ?? "", suffix: "" };
-}
-
-/** "Same price in 14 other Midwest states:" before the list of links. */
-export function samePriceLead(s: StateView, mates: { code: string }[]): string {
-  const { adjective, suffix } = regionWords(s);
-  return `Same price in ${countPlaces(mates, s.code !== "DC", adjective)}${suffix}:`;
 }
 
 /**
@@ -157,25 +95,6 @@ export function noSurveyNote(s: StateView, west: Move | null): string {
   if (!west) return `${lead} The nearest region EIA does survey is the West Coast.`;
   const moved = west.change === null ? "" : `, ${formatSignedCents(west.change)} on the week`;
   return `${lead} The nearest region EIA does survey is the West Coast, which read ${formatPrice(west.price)} this week${moved}.`;
-}
-
-/** Where the number on a state sign comes from, in one sentence. */
-export function sourceSentence(s: StateView, site: SiteData): string {
-  if (site.mode === "aaa+eia") return `This is AAA's daily average for ${s.name}.`;
-  if (s.eia_series === null) return `EIA doesn't survey diesel prices in ${s.name}.`;
-  if (s.eia_series === "SCA") return "This is EIA's weekly price for California, the one state EIA prices on its own.";
-  const covers = countPlaces([s, ...regionMates(s, site)], false);
-  return `EIA doesn't price diesel state by state here, so this is its weekly average for the ${s.regionName} region, which covers ${covers}.`;
-}
-
-/** "That's 3.5¢ below the U.S. average." Null when the two numbers aren't the same kind. */
-export function vsUsSentence(s: StateView, site: SiteData): string | null {
-  const us = site.national.move;
-  if (!s.primary || !us || site.national.cadence !== s.cadence) return null;
-  const diff = (toUnits(s.primary.price) - toUnits(us.price)) / 10000;
-  const t = changeTenths(diff);
-  if (t === 0) return "That's the same as the U.S. average.";
-  return `That's ${formatCents(diff)} ${t > 0 ? "above" : "below"} the U.S. average.`;
 }
 
 /** "That's the DOE Midwest average Ohio shares with 14 other states." */

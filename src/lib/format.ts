@@ -8,8 +8,8 @@
 //                             and formatPct on their own
 //   a change in a table cell  +31.8 and +5.3    signedCents and signedPct
 // The sign carries the direction, so nothing else has to. A real minus sign,
-// not a hyphen. The raised tenth of a cent is retired: priceParts stays only
-// for the parts of the old look that haven't been redrawn yet.
+// not a hyphen. The raised tenth of a cent is retired: priceParts is only the
+// rounding behind formatPrice now.
 
 /** Integer ten thousandths of a dollar. Safe for inputs with at most 4 decimals. */
 export function toUnits(dollars: number): number {
@@ -135,21 +135,6 @@ export function pctFrom(change: number, prev: number): number {
 export function formatMove(change: number, pct: number | null): string {
   const cents = formatSignedCents(change);
   return pct === null ? cents : `${cents} ${formatPct(pct)}`;
-}
-
-/**
- * The old look's "31.8¢ (+5.3%)", where an arrow showed the direction and
- * the percent carried the sign. Still read by the parts of the site that
- * haven't been redrawn; new code uses formatMove.
- */
-export function formatChange(change: number, pct: number | null): string {
-  if (pct === null) return formatCents(change);
-  return `${pctHasSign(pct) ? formatCents(change) : formatSignedCents(change)} (${formatPct(pct)})`;
-}
-
-/** True when a percent prints with a sign: "+5.3%", but not "0.0%". */
-export function pctHasSign(pct: number): boolean {
-  return formatPct(pct) !== "0.0%";
 }
 
 /** "up 31.8 cents", "down 12.0 cents", "no change". */

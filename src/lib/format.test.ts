@@ -5,14 +5,12 @@ import {
   changeTenths,
   changeVerb,
   formatCents,
-  formatChange,
   formatMove,
   formatPct,
   formatPrice,
   formatQuote,
   formatSignedCents,
   formatTick,
-  pctHasSign,
   priceParts,
   signedCents,
   signedPct,
@@ -105,23 +103,8 @@ describe("price parts, kept for the parts of the old look not yet redrawn", () =
 });
 
 describe("change formatting", () => {
-  it("shows cents with one decimal and a signed percent", () => {
-    expect(formatChange(0.318, 5.33)).toBe("31.8¢ (+5.3%)");
-    expect(formatChange(-0.16, -2.17)).toBe("16.0¢ (−2.2%)");
-    expect(formatChange(0, 0)).toBe("0.0¢ (0.0%)");
-    expect(formatChange(0.012, null)).toBe("1.2¢");
-  });
-
-  it("signs the cents when the percent is too small to carry the sign", () => {
-    // 0.1¢ on $6.25 is 0.016%, which prints as 0.0%
-    expect(formatChange(0.001, 0.016)).toBe("+0.1¢ (0.0%)");
-    expect(formatChange(-0.001, -0.016)).toBe("−0.1¢ (0.0%)");
-    expect(formatChange(0.003, 0.05)).toBe("0.3¢ (+0.1%)");
-    expect(pctHasSign(0.05)).toBe(true);
-    expect(pctHasSign(-0.05)).toBe(true);
-    expect(pctHasSign(0.049)).toBe(false);
-    expect(pctHasSign(0)).toBe(false);
-  });
+  // the "31.8¢ (+5.3%)" tests went with formatChange and pctHasSign: the
+  // arrow that carried the sign is gone, and every change prints with formatMove
 
   it("rounds four decimal changes half away from zero", () => {
     expect(changeTenths(0.0123)).toBe(12);

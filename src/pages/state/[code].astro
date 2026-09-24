@@ -407,8 +407,7 @@ const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return w
     min-width: 0;
     max-width: 520px;
   }
-  /* every link on the page is a 24px target, even the small ones */
-  .back a,
+  /* every link on the page is a 24px target, even the small ones (.back a is the shell's) */
   main .note a,
   .peers tbody a {
     display: inline-block;

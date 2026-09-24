@@ -800,6 +800,13 @@ th[aria-sort] .sortb {
   text-transform: uppercase;
 }
 
+/* a 24px target on every page it appears on */
+.back a {
+  display: inline-block;
+  min-height: 24px;
+  line-height: 24px;
+}
+
 /* --------------------------------------------------------------- prose --- */
 
 /* the about page and the 404 page: plain sentences under section heads */

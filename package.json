@@ -21,16 +21,11 @@
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "astro": "~7.3.3",
-    "d3-geo": "3.1.1",
     "esbuild": "0.28.2",
-    "linkedom": "0.18.13",
-    "topojson-client": "3.1.0",
-    "us-atlas": "3.0.1"
+    "linkedom": "0.18.13"
   },
   "devDependencies": {
-    "@types/d3-geo": "3.1.0",
     "@types/node": "24.13.5",
-    "@types/topojson-client": "3.1.5",
     "typescript": "7.0.2",
     "vitest": "5.0.1"
   }

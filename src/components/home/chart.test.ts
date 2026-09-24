@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { addDays } from "../../lib/dates.ts";
-import { chart, H, shortMonthYear, spark, sparkLabel, ticks, W } from "./chart.ts";
+import { chart, H, spark, sparkLabel, ticks, W } from "./chart.ts";
 
 /** A weekly series from a start Monday. */
 function weeks(start: string, values: (number | null)[]) {
@@ -91,10 +91,8 @@ describe("the U.S. line", () => {
     expect(chart([], { label: "x", mobileHeight: 130 })).toBeNull();
   });
 
-  it("names where the line starts the short way", () => {
-    expect(shortMonthYear("2022-06-13")).toBe("Jun 2022");
-    expect(shortMonthYear("2026-01-05")).toBe("Jan 2026");
-  });
+  // shortMonthYear ("Jun 2022") went: the label says "June 2022" with
+  // formatMonthYear, the same words as the state page and the record sentence
 });
 
 describe("the sparklines", () => {

@@ -4,7 +4,7 @@
 // shrinks on a phone. The hover data feeds the crosshair script in
 // src/scripts/chart.js, which is the only chart code that runs in the browser.
 
-import { addDays, dayNumber, daysBetween, formatDate, formatMonthTick } from "./dates.ts";
+import { dayNumber, daysBetween, formatDate, formatMonthTick } from "./dates.ts";
 import { changeTenths, formatPrice, formatTick, spokenChange } from "./format.ts";
 import { frameScales } from "./plotting.ts";
 import { present, type Point, type Valued } from "./stats.ts";
@@ -34,8 +34,6 @@ export interface YDomain {
   lo: number;
   hi: number;
   step: number;
-  /** Labeled values. Defaults to every step from lo to hi. */
-  ticks?: number[];
 }
 
 /** One line to draw: the points inside the window, ready for Plot. */
@@ -114,31 +112,6 @@ export function yDomainFor(series: Point[][], maxTicks = 5): YDomain {
   return niceDomain(e[0], e[1], maxTicks);
 }
 
-/**
- * One scale for a set of small multiples, in round dollars: the edges sit on the
- * half dollar just outside the data and only whole dollar steps get a label,
- * three or fewer of them. $3.36 to $8.04 gives $3.00 to $8.50 with $4, $6, $8.
- */
-export function sharedDollarDomain(series: Point[][], maxTicks = 3): YDomain {
-  const e = extent(series);
-  if (!e) return { lo: 0, hi: 1, step: 1, ticks: [] };
-  let lo = Math.floor(e[0] * 2 + 1e-9) / 2;
-  let hi = Math.ceil(e[1] * 2 - 1e-9) / 2;
-  if (!(hi > lo)) {
-    lo -= 0.5;
-    hi += 0.5;
-  }
-  for (const step of [0.5, 1, 2, 5]) {
-    const ticks: number[] = [];
-    for (let v = Math.ceil(lo / step - 1e-9) * step; v <= hi + 1e-9; v += step) {
-      // a label on the very edge would sit on the frame, not in the plot
-      if (v > lo + 1e-9) ticks.push(round2(v));
-    }
-    if (ticks.length && ticks.length <= maxTicks) return { lo, hi, step, ticks };
-  }
-  return { lo, hi, step: hi - lo, ticks: [hi] };
-}
-
 /** Value in effect on `date`: the newest point dated on or before it. */
 export function valueInEffect(points: Point[], date: string): number | null {
   let v: number | null = null;
@@ -152,8 +125,6 @@ export function valueInEffect(points: Point[], date: string): number | null {
 export interface BuildOptions {
   from: string;
   to: string;
-  /** Shared y domain for small multiples. */
-  yDomain?: YDomain;
   maxYTicks?: number;
   /** Plot height in px, used to decide whether end labels would collide. */
   heightPx: number;
@@ -161,11 +132,8 @@ export interface BuildOptions {
    * months: every month start, every other one minor.
    * quarters: Jan, Apr, Jul and Oct, named by month even in January (the state chart's 52 weeks).
    * years: each January.
-   * sparse: three month names (first, middle, last month start), each starting at its month.
    */
-  xTicks?: "months" | "quarters" | "years" | "sparse" | "none";
-  /** "$4" instead of "$4.00" when every tick is a whole dollar. */
-  wholeDollarTicks?: boolean;
+  xTicks?: "months" | "quarters" | "years" | "none";
 }
 
 function monthStarts(from: string, to: string): string[] {
@@ -187,20 +155,6 @@ function monthStarts(from: string, to: string): string[] {
   return out;
 }
 
-/**
- * First, middle and last month start. The middle one is the month the halfway
- * day falls in, since each name reads from its month start.
- */
-export function sparseMonths(from: string, to: string): string[] {
-  const all = monthStarts(from, to);
-  if (all.length <= 3) return all;
-  const first = all[0];
-  const last = all[all.length - 1];
-  const half = addDays(first, Math.floor(daysBetween(first, last) / 2));
-  const mid = `${half.slice(0, 7)}-01`;
-  return [first, all.includes(mid) && mid !== first && mid !== last ? mid : all[Math.floor(all.length / 2)], last];
-}
-
 export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartModel {
   const series = seriesIn.map((s) => {
     const inRange = s.points.filter((p) => p.date >= opt.from && p.date <= opt.to);
@@ -214,30 +168,23 @@ export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartMod
     return { ...s, inRange };
   });
 
-  const dom = opt.yDomain ?? yDomainFor(series.map((s) => s.inRange), opt.maxYTicks ?? 5);
+  const dom = yDomainFor(series.map((s) => s.inRange), opt.maxYTicks ?? 5);
   const sc = frameScales({ from: opt.from, to: opt.to, lo: dom.lo, hi: dom.hi });
   const xp = sc.x;
   const yp = sc.y;
 
-  const tickValues = dom.ticks ?? [];
-  if (!dom.ticks) {
-    for (let v = dom.lo; v <= dom.hi + 1e-9; v += dom.step) tickValues.push(round2(v));
-  }
-  const whole = opt.wholeDollarTicks && tickValues.every((v) => Number.isInteger(v));
+  const tickValues: number[] = [];
+  for (let v = dom.lo; v <= dom.hi + 1e-9; v += dom.step) tickValues.push(round2(v));
   const yTicks: Tick[] = tickValues.map((value) => ({
     value,
-    label: whole ? `$${value}` : formatTick(value),
+    label: formatTick(value),
     pos: r(yp(value)),
   }));
   const grid = [...tickValues];
   if (!grid.some((v) => Math.abs(v - dom.lo) < 1e-9)) grid.unshift(dom.lo);
 
   const xTicks: Tick[] = [];
-  if (opt.xTicks === "sparse") {
-    for (const iso of sparseMonths(opt.from, opt.to)) {
-      xTicks.push({ value: dayNumber(iso), label: formatMonthTick(iso), pos: r(xp(iso)), anchor: "start" });
-    }
-  } else if (opt.xTicks === "quarters") {
+  if (opt.xTicks === "quarters") {
     // a quarter that starts within the first days of the window still gets
     // its name, reading from the left edge instead of centred on its tick
     for (const iso of monthStarts(opt.from, opt.to)) {
@@ -319,11 +266,6 @@ export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartMod
   };
 
   return { from: opt.from, to: opt.to, yDomain: dom, yTicks, grid, xTicks, paths, ends, showEndLabels, hover };
-}
-
-/** Date `days` before `to`, for window starts. */
-export function windowStart(to: string, days: number): string {
-  return addDays(to, -(days - 1));
 }
 
 /**

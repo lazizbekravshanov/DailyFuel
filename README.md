@@ -41,8 +41,6 @@ The switch is the repo variable `AAA_ENABLED`. Only the exact string `true` turn
 | Backup copy of the same EIA prices, only used when EIA's workbook fails | USDA Agricultural Marketing Service, [agtransport.usda.gov](https://agtransport.usda.gov/) | U.S. government data |
 | State diesel tax rates | Federal Highway Administration, Highway Statistics [table MF-121T](https://www.fhwa.dot.gov/policyinformation/statistics/2024/mf121t.cfm) | U.S. government work, public domain. The site credits FHWA with the reporting period. |
 | Daily state prices (off for now) | AAA, [gasprices.aaa.com](https://gasprices.aaa.com/), data by OPIS | Not covered by this repo's license. See [data/aaa/README.md](data/aaa/README.md). |
-| US map shapes | [us-atlas](https://github.com/topojson/us-atlas) © 2013 to 2019 Michael Bostock, from U.S. Census Bureau boundaries | ISC |
-| Map drawing | [d3-geo](https://github.com/d3/d3-geo) and [topojson-client](https://github.com/topojson/topojson-client) | ISC |
 | Share image font | [Red Hat Mono](https://github.com/RedHatOfficial/RedHatFont) by the Red Hat Project Authors, in `src/assets/fonts/`, drawn into the `/og/` PNGs at build time only. The pages load no font. | SIL Open Font License 1.1 |
 | DailyFuel code | this repo | MIT, see [LICENSE](LICENSE) |
 
@@ -79,7 +77,7 @@ It needs `openpyxl`, which is in the dev packages only. It writes `data/taxes/st
 
 FHWA's footnotes are old (every one is dated 2002) and some describe taxes states have since changed, so the site never repeats a footnote just because FHWA prints it. The few state notes in `scripts/dailyfuel/taxes.py` were each checked against the state's own law or tax agency, with the source written beside them. The same goes for `OUT_OF_DATE`, the rates FHWA still prints that are known to be stale (Utah's 2021 rate in the 2024 table). A new reporting period stops the run until someone checks those again and bumps `NOTES_CHECKED_FOR`. A rate that moves more than 10 cents against the file on disk stops it too; check it, then pass `--allow-big-moves`.
 
-Tax is shown on its own. It never goes into a price, a change, or a map color.
+Tax is shown on its own. It never goes into a price or a change.
 
 `scripts/make_fixtures.py` writes a complete `aaa+eia` data folder with made up AAA numbers to `tmp/fixture-data/` (also ignored by git). Nothing in it comes from AAA. By default the newest fake day is 3 days after EIA's newest week. For a preview without the "older than usual" banner, date it today:
 

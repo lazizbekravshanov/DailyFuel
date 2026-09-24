@@ -16,19 +16,10 @@ export const DYED_DIESEL_NOTE = "Dyed farm diesel is untaxed and usually costs l
 /** The same note under a price, saying what it costs less than. */
 export const DYED_DIESEL_HERE = "Dyed farm diesel is untaxed, so it usually costs less than the on-road diesel priced here.";
 
-export const HOME_TITLE = "Diesel prices by state, DOE weekly average";
-
 /** One line about a single series, or null when there's nothing to say. */
 export function peakSentence(kind: PeakKind, seriesLabel: string): string | null {
   if (kind === "record") return `Highest ${seriesLabel} price in our records, which start ${RECORDS_START}.`;
   if (kind === "52week") return `Highest ${seriesLabel} price in 52 weeks.`;
-  return null;
-}
-
-/** Short tag for a card or chart. */
-export function peakTag(kind: PeakKind): string | null {
-  if (kind === "record") return "Highest in our records";
-  if (kind === "52week") return "New 52 week high";
   return null;
 }
 

@@ -15,8 +15,6 @@ import { present, type Point, type Valued } from "../../lib/stats.ts";
 export const W = 1000;
 export const H = 300;
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
 /** Whole units: a unit is under half a pixel once the box is stretched to its cell. */
 function r0(n: number): string {
   return String(Math.round(n));
@@ -152,11 +150,6 @@ export function chart(series: Point[], opts: ChartOptions): Chart | null {
     high,
     count: p.length,
   };
-}
-
-/** "Jun 2022", the way the chart's label names where the line starts. */
-export function shortMonthYear(iso: string): string {
-  return `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${iso.slice(0, 4)}`;
 }
 
 export interface Spark {

@@ -1,6 +1,6 @@
 // Turns the raw data files into what the pages render.
 
-import { binFor, type Cadence, type FillKey } from "./bins.ts";
+import type { Cadence } from "./bins.ts";
 import { addDays } from "./dates.ts";
 import { toUnits } from "./format.ts";
 import {
@@ -66,7 +66,6 @@ export interface StateView extends StateInfo {
   aaa: Move | null;
   eia: Move | null;
   flags: Flag[];
-  fill: FillKey;
   /** Daily AAA history in aaa+eia mode, else the EIA region's weekly history. */
   history: Point[];
   /** The EIA region's weekly history, empty for AK and HI. */
@@ -125,11 +124,6 @@ export function weeklyMove(series: Point[]): Move | null {
   };
 }
 
-export function fillFor(move: Move | null, cadence: Cadence): FillKey {
-  if (!move || move.change === null) return "nodata";
-  return binFor(move.change, cadence);
-}
-
 let cached: SiteData | null = null;
 
 export function getSite(): SiteData {
@@ -176,7 +170,6 @@ export function getSite(): SiteData {
       aaa: row.aaa,
       eia: row.eia,
       flags: row.flags,
-      fill: fillFor(primary, cadence),
       history: mode === "aaa+eia" ? dailySeries(daily, s.code) : eiaHistory,
       eiaHistory,
       tax: taxes?.get(s.code) ?? null,

@@ -122,22 +122,6 @@ export function rankLabel(view: TaxView): string | null {
   return view.rankFromBottom < view.rank ? `${ordinal(view.rankFromBottom)} lowest` : `${ordinal(view.rank)} highest`;
 }
 
-/** Said out loud: "the 9th highest state diesel tax of 49". */
-export function spokenRank(view: TaxView): string | null {
-  const label = rankLabel(view);
-  if (label === null) return null;
-  return `the ${label.toLowerCase()} state diesel tax of ${view.ranked}`;
-}
-
-/** Only when some aren't ranked, so the "of 49" isn't a mystery. */
-export function rankedNote(tax: TaxFile): string | null {
-  const views = [...taxViews(tax).values()];
-  const total = views.length;
-  const ranked = views.filter((v) => v.rank !== null).length;
-  if (ranked === total) return null;
-  return `The rank counts the ${ranked} of the ${total} with a current rate in FHWA's table.`;
-}
-
 /** "the District of Columbia" needs its article in a sentence. State names don't. */
 export function inSentence(name: string): string {
   return name === "District of Columbia" ? `the ${name}` : name;

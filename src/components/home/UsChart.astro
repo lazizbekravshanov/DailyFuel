@@ -2,8 +2,8 @@
 // The U.S. average since our records start, beside the headline price: a
 // static line drawn at build time (chart.ts), with a readout above it that
 // src/components/home/readout.ts moves with the pointer or the arrow keys.
-import { chart, H, shortMonthYear, W } from "./chart.ts";
-import { formatDate } from "../../lib/dates.ts";
+import { chart, H, W } from "./chart.ts";
+import { formatDate, formatMonthYear } from "../../lib/dates.ts";
 import { formatPrice } from "../../lib/format.ts";
 import type { Point } from "../../lib/stats.ts";
 interface Props {
@@ -21,7 +21,7 @@ const c = chart(series, { label: spoken, mobileHeight: mobile });
 ---
 {c && (
   <div class="us-chart">
-    <p class="lbl">{name}, weekly since {shortMonthYear(c.start)}</p>
+    <p class="lbl">{name}, weekly since {formatMonthYear(c.start)}</p>
     <figure class="chart" id={id} style={`--h:${height}px;--hm:${mobile}px`}>
       <p class="rdout" aria-live="polite"><span class="rd-d">{formatDate(c.last.date)}</span> <b class="rd-v">{formatPrice(c.last.value)}</b><span class="rd-h muted"> Point at the line, or press the arrow keys, to read a week.</span></p>
       <div class="plot" tabindex="0" role="img" aria-label={c.aria} data-start={c.start} data-v={c.values}>
