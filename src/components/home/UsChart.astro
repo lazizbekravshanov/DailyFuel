@@ -1,0 +1,44 @@
+---
+// The U.S. average since our records start, beside the headline price: a
+// static line drawn at build time (chart.ts), with a readout above it that
+// src/components/home/readout.ts moves with the pointer or the arrow keys.
+import { chart, H, shortMonthYear, W } from "./chart.ts";
+import { formatDate } from "../../lib/dates.ts";
+import { formatPrice } from "../../lib/format.ts";
+import type { Point } from "../../lib/stats.ts";
+interface Props {
+  series: Point[];
+  /** The label over the chart: "U.S. average", "EIA U.S. average". */
+  name: string;
+  /** What the line is for a screen reader: "U.S. weekly diesel average". */
+  spoken: string;
+  id: string;
+  height?: number;
+  mobile?: number;
+}
+const { series, name, spoken, id, height = 148, mobile = 130 } = Astro.props;
+const c = chart(series, { label: spoken, mobileHeight: mobile });
+---
+{c && (
+  <div class="us-chart">
+    <p class="lbl">{name}, weekly since {shortMonthYear(c.start)}</p>
+    <figure class="chart" id={id} style={`--h:${height}px;--hm:${mobile}px`}>
+      <p class="rdout" aria-live="polite"><span class="rd-d">{formatDate(c.last.date)}</span> <b class="rd-v">{formatPrice(c.last.value)}</b><span class="rd-h muted"> Point at the line, or press the arrow keys, to read a week.</span></p>
+      <div class="plot" tabindex="0" role="img" aria-label={c.aria} data-start={c.start} data-v={c.values}>
+        <div class="pa">
+          <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true" focusable="false"><path class="grid" d={c.grid}></path><path class="ln" d={c.line}></path><path class="pt" d={c.dot}></path></svg>
+          <span class="cross" hidden></span>
+          {c.yLabels.map((l) => <span class="yl" style={`top:${l.at}%`}>{l.text}</span>)}
+          <b class="ytag" style={`top:${c.tag.at}%`}>{c.tag.text}</b>
+          {c.xLabels.map((l) => <span class:list={["xl", l.at === 0 && "first"]} style={`left:${l.at}%`}>{l.text}</span>)}
+        </div>
+      </div>
+    </figure>
+  </div>
+)}
+
+<style is:global>
+  .us-chart {
+    min-width: 0;
+  }
+</style>

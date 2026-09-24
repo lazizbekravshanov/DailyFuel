@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { byChange, coverage, homeMeta, keyLine, leaders, memberCount, movers, regionNote, topWithTies, withNote } from "./home.ts";
+import {
+  biggestNote, coverage, fromLine, homeMeta, homeTitle, keyLine, leaders, memberCount, movers, recordLine, sharedNote,
+} from "./home.ts";
+
+// regionNote, withNote, byChange and topWithTies went with the map and the
+// move list: the paper terminal has neither, so nothing calls them.
 
 const c = (...changes: number[]) => changes.map((change) => ({ change }));
+const NO_DASH = /[–—]| - /;
 
-describe("keyLine above the map key", () => {
+describe("keyLine beside the REGIONS head", () => {
   it("gives the range when every region rose", () => {
     expect(keyLine(c(0.212, 0.261, 0.491, 0.304, 0.273, 0.261, 0.275, 0.252), "region", "weekly")).toBe(
       "All 8 regions rose, 21.2¢ to 49.1¢.",
@@ -14,8 +20,8 @@ describe("keyLine above the map key", () => {
     expect(keyLine(c(-0.05, -0.05), "region", "weekly")).toBe("All 2 regions fell 5.0¢.");
   });
 
-  it("counts a mixed week, with about the same following the map bins", () => {
-    // 0.9¢ is about the same on the weekly map, 1.0¢ is a rise
+  it("counts a mixed week, with about the same following the bins", () => {
+    // 0.9¢ is about the same in a weekly number, 1.0¢ is a rise
     expect(keyLine(c(0.3, 0.01, -0.02, 0.009, -0.004), "region", "weekly")).toBe(
       "2 regions rose, 1 fell and 2 were about the same.",
     );
@@ -46,51 +52,11 @@ describe("keyLine above the map key", () => {
   });
 });
 
-describe("region note in the map tooltip", () => {
-  it("names the region and how many share its price", () => {
-    expect(regionNote("Midwest", ["IL", "IN", "IA", "KS", "KY", "MI", "MN", "MO", "NE", "ND", "OH", "OK", "SD", "TN", "WI"])).toBe(
-      "Midwest price, shared by 15 states",
-    );
-    expect(regionNote("Central Atlantic", ["DE", "DC", "MD", "NJ", "NY", "PA"])).toBe(
-      "Central Atlantic price, shared by 5 states and DC",
-    );
-    expect(regionNote("California", ["CA"])).toBe("EIA's California price");
-  });
-
-  it("counts members", () => {
-    expect(memberCount(["DC"])).toBe("DC");
-    expect(memberCount(["OR"])).toBe("1 state");
-  });
-
-  it("swaps the note at the end of a label and leaves other labels alone", () => {
-    expect(withNote("Ohio, $6.250 per gallon, up 30.4 cents. Midwest region price.", "Midwest region price", "Midwest price, shared by 15 states")).toBe(
-      "Ohio, $6.250 per gallon, up 30.4 cents. Midwest price, shared by 15 states.",
-    );
-    expect(withNote("Alaska. EIA doesn't survey diesel prices in Alaska.", "", "x")).toBe(
-      "Alaska. EIA doesn't survey diesel prices in Alaska.",
-    );
-    expect(withNote("Ohio, no note here.", "Midwest region price", "x")).toBe("Ohio, no note here.");
-  });
-});
-
-describe("move list order", () => {
-  it("puts the biggest rise first and the biggest drop last, ties by name", () => {
-    const sorted = byChange([
-      { name: "B", change: 0.1 },
-      { name: "A", change: 0.1 },
-      { name: "C", change: -0.3 },
-      { name: "D", change: 0.49 },
-      { name: "E", change: 0 },
-    ]);
-    expect(sorted.map((s) => s.name)).toEqual(["D", "A", "B", "E", "C"]);
-  });
-});
-
-describe("biggest moves", () => {
+describe("movers", () => {
   const m = (name: string, change: number) => ({ name, change });
 
-  it("leaves out a move the map calls about the same", () => {
-    // 0.8¢ is about the same on the weekly map, so it's not the biggest drop
+  it("leaves out a move the bins call about the same", () => {
+    // 0.8¢ is about the same in a weekly number, so it's not the biggest drop
     const items = [m("California", -0.008), m("Midwest", 0.2), m("Gulf Coast", 0.009)];
     expect(movers(items, "down", "weekly")).toEqual([]);
     expect(movers(items, "up", "weekly").map((i) => i.name)).toEqual(["Midwest"]);
@@ -103,12 +69,101 @@ describe("biggest moves", () => {
     expect(leaders(falls).map((i) => i.name)).toEqual(["Midwest", "Rocky Mountain"]);
     expect(leaders([])).toEqual([]);
   });
+});
 
-  it("never cuts a tie at the end of a short list", () => {
-    const falls = movers([m("HI", -0.045), m("MT", -0.045), m("TN", -0.045), m("DE", -0.092), m("OH", -0.01)], "down", "daily");
-    expect(topWithTies(falls, 2).map((i) => i.name)).toEqual(["DE", "HI", "MT", "TN"]);
-    expect(topWithTies(falls, 1).map((i) => i.name)).toEqual(["DE"]);
-    expect(topWithTies(falls, 9)).toHaveLength(5);
+describe("the BIGGEST RISE note beside the board", () => {
+  const m = (name: string, change: number) => ({ name, change });
+  const week = [
+    m("New England", 0.212), m("Central Atlantic", 0.261), m("Lower Atlantic", 0.491), m("Midwest", 0.304),
+    m("Gulf Coast", 0.273), m("Rocky Mountain", 0.261), m("California", 0.275), m("West Coast outside California", 0.252),
+  ];
+
+  it("names the biggest and, when all rose, the smallest", () => {
+    expect(biggestNote(week, "weekly")).toEqual({ head: "Biggest rise.", text: "Lower Atlantic, +49.1¢. Smallest, New England, +21.2¢." });
+  });
+
+  it("names both ends of a mixed week and drops the smallest", () => {
+    const mixed = [m("Midwest", 0.304), m("California", -0.025), m("Gulf Coast", 0.005), m("New England", 0.1)];
+    expect(biggestNote(mixed, "weekly")).toEqual({ head: "Biggest rise.", text: "Midwest, +30.4¢. Biggest fall. California, −2.5¢." });
+    const fell = [m("Midwest", -0.304), m("California", -0.025)];
+    expect(biggestNote(fell, "weekly")).toEqual({ head: "Biggest fall.", text: "Midwest, −30.4¢. Smallest, California, −2.5¢." });
+  });
+
+  it("names ties together and counts more than three", () => {
+    const tied = [m("B", 0.3), m("A", 0.3), m("C", 0.1)];
+    expect(biggestNote(tied, "weekly")!.text).toBe("A and B, +30.0¢. Smallest, C, +10.0¢.");
+    const many = [m("A", 0.3), m("B", 0.3), m("C", 0.3), m("D", 0.3), m("E", 0.1)];
+    expect(biggestNote(many, "weekly")!.text).toBe("4 tied, +30.0¢. Smallest, E, +10.0¢.");
+  });
+
+  it("says nothing when every move is about the same, or when all tie", () => {
+    expect(biggestNote([m("A", 0.004), m("B", -0.009)], "weekly")).toBeNull();
+    expect(biggestNote([m("A", 0.3), m("B", 0.3)], "weekly")).toEqual({ head: "Biggest rise.", text: "A and B, +30.0¢." });
+    expect(biggestNote([m("A", 0.3)], "weekly")).toEqual({ head: "Biggest rise.", text: "A, +30.0¢." });
+  });
+});
+
+describe("the sentence under the headline price", () => {
+  it("says where the price came from", () => {
+    expect(fromLine(0.318, 5.967, "the week of Sep 7")).toBe("Up from $5.967 the week of Sep 7.");
+    expect(fromLine(-0.021, 6.117, "yesterday")).toBe("Down from $6.117 yesterday.");
+    expect(fromLine(0.0004, 6.285, "the week of Sep 7")).toBe("Unchanged from $6.285 the week of Sep 7.");
+  });
+
+  it("says how high it is, with the regions in the same breath when they agree", () => {
+    const all = Array<"record">(8).fill("record");
+    expect(recordLine("record", all)).toBe(
+      "Highest U.S. price in our records, which start June 2022, and every region is at its own high too.",
+    );
+    expect(recordLine("record", ["record", "record", null, "52week", "record", "record", "record", "record"])).toBe(
+      "Highest U.S. price in our records, which start June 2022. 6 of 8 regions are at their own high too.",
+    );
+    expect(recordLine("record", [null, null])).toBe("Highest U.S. price in our records, which start June 2022.");
+    expect(recordLine("52week", all)).toBe(
+      "Highest U.S. price in 52 weeks. Every region is at its highest in our records, which start June 2022.",
+    );
+    expect(recordLine(null, ["record", null, null])).toBe("1 of 3 regions are at their highest in our records, which start June 2022.");
+    expect(recordLine(null, [null, null])).toBeNull();
+    expect(recordLine(null, [])).toBeNull();
+  });
+
+  it("never uses a dash", () => {
+    for (const s of [fromLine(0.3, 6, "yesterday"), recordLine("record", ["record"]), recordLine("52week", [null])]) {
+      expect(s).not.toMatch(NO_DASH);
+    }
+  });
+});
+
+describe("the ONE PRICE, MANY STATES note", () => {
+  const midwest = { name: "Midwest", codes: ["IL", "IN", "IA", "KS", "KY", "MI", "MN", "MO", "NE", "ND", "OH", "OK", "SD", "TN", "WI"], price: 6.25 };
+
+  it("uses the biggest region's real count and price", () => {
+    expect(sharedNote(midwest, false)).toBe("EIA surveys regions, not every state, so all 15 Midwest states read $6.250 this week.");
+    expect(sharedNote({ name: "Central Atlantic", codes: ["DE", "DC", "MD", "NJ", "NY", "PA"], price: 6.312 }, false)).toBe(
+      "EIA surveys regions, not every state, so all 5 Central Atlantic states and DC read $6.312 this week.",
+    );
+  });
+
+  it("says whose daily price the table has once AAA is on", () => {
+    expect(sharedNote(midwest, true)).toBe(
+      "EIA surveys regions, not every state, so its weekly Midwest number covers 15 states. The daily price for each state in the table below is AAA's.",
+    );
+  });
+
+  it("counts members", () => {
+    expect(memberCount(["DC"])).toBe("DC");
+    expect(memberCount(["OR"])).toBe("1 state");
+    expect(memberCount(["DE", "DC", "MD"])).toBe("2 states and DC");
+  });
+});
+
+describe("the title", () => {
+  it("carries the U.S. number and which way it went", () => {
+    expect(homeTitle(6.285, 0.318)).toBe("DailyFuel: U.S. diesel $6.285 a gallon, up 31.8¢");
+    expect(homeTitle(6.285, -0.021)).toBe("DailyFuel: U.S. diesel $6.285 a gallon, down 2.1¢");
+    expect(homeTitle(6.285, 0)).toBe("DailyFuel: U.S. diesel $6.285 a gallon, unchanged");
+    expect(homeTitle(6.285, null)).toBe("DailyFuel: U.S. diesel $6.285 a gallon");
+    expect(homeTitle(null, null)).toBe("DailyFuel: diesel prices in every state");
   });
 });
 
@@ -129,7 +184,7 @@ describe("home meta description", () => {
     const d = homeMeta({ price: 6.285, change: 0.318, daily: false, priced: surveyed });
     expect(d).toBe("U.S. diesel is $6.285 a gallon, up 31.8¢ this week. See the DOE weekly price and change for 48 states and DC.");
     expect(d).not.toMatch(/all 50/);
-    expect(d).not.toMatch(/[–—]| - /);
+    expect(d).not.toMatch(NO_DASH);
   });
 
   it("says DOE prices regions, not states, while EIA is the source", () => {

@@ -1,295 +1,56 @@
 ---
-// The your state row under the U.S. sign. The server renders the "Find your
-// state" list, which is what anyone sees with no saved state, with JS off, or
-// when storage is blocked. When a state was picked from the list before, the
-// first inline script (src/scripts/your-state.ts) fills the hidden mini sign
-// from the JSON island and marks the row, before the parser reaches the list,
-// and CSS keeps the list out of the row. Both take the same 64px, so the page
-// under the row never moves. The second script, after the list, wires Change
-// state and Forget.
+// The your state strip under the U.S. average: one boxed line with the saved
+// state's code, name, price, change and where the number comes from, and the
+// OPEN, CHANGE and FORGET controls. The server renders "Nothing saved yet"
+// with the Find your state list under it, which is what anyone sees with no
+// saved state, with JS off, or when storage is blocked. When a state was saved
+// before (a state page was opened, or one was picked from the list), the
+// inline script right after the list (src/scripts/your-state.ts) fills the
+// hidden saved strip from that state's link in the list and swaps it in, and
+// CSS keeps the list out of the way. Both strips are one line tall, so the
+// page under them never moves. The same script wires CHANGE and FORGET.
 import FindYourState from "./FindYourState.astro";
-import Glyph from "./Glyph.astro";
-import Icon from "./Icon.astro";
-import { getSite } from "../lib/site.ts";
 import { inlineCall } from "../lib/inline.ts";
-import { islandJson, yourStateData } from "../lib/yourstate.ts";
-import { yourState, yourStateList } from "../scripts/your-state.ts";
+import { yourState } from "../scripts/your-state.ts";
 
-const data = yourStateData(getSite());
-// Reaching localStorage can throw by itself, so the scripts ask for it inside their own try.
-const store = "function(){return window.localStorage}";
-const fill = inlineCall(yourState, "document", store);
-const wire = inlineCall(yourStateList, "document", store, "location.hash");
+// Reaching localStorage can throw by itself, so the script asks for it inside its own try.
+const wire = inlineCall(yourState, "document", "function(){return window.localStorage}", "location.hash");
 ---
-<section class="your-state" aria-label="Your state">
-  <div class="ys" data-ys>
-    <div class="ys-saved" data-ys-saved hidden>
-      <Icon name="your-state" size={22} class="ys-mark" />
-      <a class="mini" href="/#find-your-state" data-ys-link>
-        {/* the link's name for screen readers; the sign below says the same for the eye */}
-        <span class="sr-only" data-ys-spoken></span>
-        <span class="mini-row" aria-hidden="true">
-          <span class="mini-id">
-            <span class="mini-code" data-ys-code></span>
-            <span class="mini-name" data-ys-name></span>
-          </span>
-          <span class="mini-num">
-            <span class="mini-price" data-ys-price><span data-ys-main></span><span class="tenth" data-ys-tenth></span></span>
-            <span class="mini-none" data-ys-none hidden></span>
-            <span class="mini-plaque" data-ys-plaque>
-              {/* all three arrows wait here, drawn from the page's ArrowSprite, and the script shows one */}
-              <span class="mini-glyph" data-ys-glyph="up" hidden><Glyph direction="up" sprite /></span>
-              <span class="mini-glyph" data-ys-glyph="down" hidden><Glyph direction="down" sprite /></span>
-              <span class="mini-glyph" data-ys-glyph="flat" hidden><Glyph direction="flat" sprite /></span>
-              <span data-ys-cents></span>
-            </span>
-          </span>
-        </span>
-        <span class="mini-plate" data-ys-plate aria-hidden="true"></span>
-      </a>
-      <div class="ys-actions">
-        <button type="button" class="ys-change" data-ys-change aria-controls="find-your-state" aria-expanded="false">Change state</button>
-        <button type="button" class="ys-forget" data-ys-forget>Forget</button>
-      </div>
-    </div>
-    <script type="application/json" id="your-state-data" set:html={islandJson(data)}></script>
-    <script is:inline set:html={fill}></script>
-    <FindYourState />
-    <script is:inline set:html={wire}></script>
+<section class="ys" aria-label="Your state" data-ys>
+  <div class="strip" data-ys-saved hidden>
+    <p class="lbl">Your state</p>
+    <span class="sym" data-ys-code></span>
+    <span class="nm" data-ys-name></span>
+    <span class="px" data-ys-price></span>
+    <span class="ch muted" data-ys-move></span>
+    <span class="muted pl" data-ys-plate></span>
+    <span class="acts">
+      <a class="btn" href="/#find-your-state" data-ys-open>Open</a>
+      <button type="button" class="btn" data-ys-change aria-controls="find-your-state" aria-expanded="false">Change</button>
+      <button type="button" class="btn" data-ys-forget>Forget</button>
+    </span>
   </div>
+  <div class="strip" data-ys-none>
+    <p class="lbl">Your state</p>
+    <span class="muted">Nothing saved yet. Open any state, or pick one from the list, and it stays on this phone.</span>
+  </div>
+  <FindYourState strip />
+  <script is:inline set:html={wire}></script>
 </section>
 
-<style>
-  .ys {
-    min-height: 64px;
-  }
-  /* A saved state takes the row. The list shows under it only when asked for,
-     and then 16px down, clear of Forget's tap area, which reaches 12px below
-     the row. Opening it is a tap, so the move doesn't count as a shift. */
-  .ys[data-ys-state]:not([data-ys-list]) :global(.find) {
-    display: none;
-  }
-  .ys[data-ys-state][data-ys-list] :global(.find) {
-    margin-top: 16px;
-  }
-  .ys-saved {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    height: 64px;
-  }
-  /* the shield stands where the search mark stands in the Find your state
-     row, so the row keeps its lead when a saved state fills it */
-  @media (min-width: 640px) {
-    .ys-saved {
-      gap: 12px;
-      padding-left: 16px;
-    }
-  }
-  .ys-saved[hidden] {
-    display: none;
-  }
-  .ys-saved :global(.ys-mark) {
-    color: var(--ink-2);
-  }
-  /* Under 400px every pixel goes to the sign, so a long name like District of
-     Columbia fits from 360 up. The shield is only a marker; the sign says the rest. */
-  @media (max-width: 399px) {
-    .ys-saved :global(.ys-mark) {
-      display: none;
-    }
-  }
-
-  /* a small copy of the guide sign: green panel, thin white inset border */
-  .mini {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 3px;
-    min-width: 0;
-    height: 64px;
-    padding: 0 14px;
-    background: var(--sign);
-    color: var(--sign-ink);
-    border-radius: 10px;
-    box-shadow:
-      inset 0 0 0 3px var(--sign),
-      inset 0 0 0 5px var(--sign-ink);
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    line-height: 1.1;
-    text-decoration: none;
-  }
-  .mini:hover .mini-name {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.15em;
-  }
-  .mini:focus-visible {
-    outline-offset: 3px;
-  }
-  .mini-row,
-  .mini-id,
-  .mini-num {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    white-space: nowrap;
-  }
-  .mini-num {
-    flex: none;
-  }
-  /* On a phone the plate goes, and the price moves under the name, so a long
-     name like District of Columbia still fits beside Change state. */
-  @media (max-width: 639px) {
-    .mini {
-      padding: 0 12px;
-    }
-    .mini-row {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 3px;
-    }
-    .mini-id {
-      max-width: 100%;
-    }
-    .ys-saved .ys-actions button {
-      font-size: 14px;
-    }
-  }
-  .mini-code {
-    flex: none;
-    display: inline-grid;
-    place-items: center;
-    min-width: 30px;
-    height: 20px;
-    padding: 1px 4px 0;
-    border-radius: 4px;
-    background: var(--sign-ink);
-    color: var(--sign);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.03em;
-  }
-  .mini-name {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 17px;
-    font-weight: 750;
-  }
-  /* Under the spec's 360 floor the code chip goes and the name steps down a
-     size, so District of Columbia still fits whole at 320. */
-  @media (max-width: 359px) {
-    .mini-code {
-      display: none;
-    }
-    .mini-name {
-      font-size: 16px;
-    }
-  }
-  .mini-price,
-  .mini-none {
-    flex: none;
-    font-size: 21px;
-    font-weight: 800;
-    font-variant-numeric: proportional-nums;
-  }
-  .mini-none {
-    font-size: 15px;
-    font-weight: 700;
-  }
-  .mini-price .tenth {
-    font-size: 0.55em;
-    top: -0.62em;
-  }
-  .mini-price[hidden],
-  .mini-none[hidden],
-  .mini-plaque[hidden],
-  .mini-plate[hidden],
-  .mini-glyph[hidden] {
-    display: none;
-  }
-  /* the change sits on white, like the big sign's plaque, so the direction
-     colors keep their contrast in both themes */
-  .mini-plaque {
-    flex: none;
-    display: inline-flex;
-    align-items: baseline;
-    padding: 3px 6px 1px;
-    border-radius: 4px;
-    background: var(--sign-ink);
-    color: #1d2125;
-    font-size: 14px;
-    font-weight: 750;
-    --glyph-up: #c94d47;
-    --glyph-down: #3a75bf;
-    --glyph-flat: #51565b;
-  }
-  /* a line of its own inside the plaque, so the arrow keeps its baseline
-     offset and lines up with the cents beside it */
-  .mini-glyph {
-    display: block;
-  }
-  .mini-plate {
-    align-self: flex-start;
-    padding: 1px 6px 0;
-    border: 1.5px solid var(--sign-ink);
-    border-radius: 3px;
-    font-size: 12px;
-    font-weight: 650;
-    line-height: 1.35;
-    white-space: nowrap;
-  }
-  /* on a phone the plate's type would drop under 11px, so it goes; the spoken
-     label and the state page still say it */
-  @media (max-width: 639px) {
-    .mini-plate {
-      display: none;
-    }
-  }
-
-  /* Change state and Forget sit on paper beside the sign, never inside the
-     link. Each is a 44px tall tap target; stacked they're 88px, so they reach
-     12px past the 64px row into the space around it. */
-  .ys-actions {
-    flex: none;
-    display: flex;
-    flex-direction: column;
-    margin-block: -12px;
-  }
-  .ys-actions button {
-    display: inline-flex;
-    align-items: center;
+<style is:global>
+  /* both strips stand the same 44px tall on one line, so a saved state and
+     "nothing saved" take the same room and nothing below them moves */
+  .ys .strip {
     min-height: 44px;
-    padding: 0 4px;
-    border: 0;
-    background: none;
-    color: var(--ink);
-    font: inherit;
-    font-size: 15px;
-    font-weight: 650;
-    text-align: left;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
-    cursor: pointer;
   }
-  .ys-actions button:hover {
-    text-decoration-thickness: 2px;
+  /* a saved state takes the row; the list shows under it only when asked for */
+  .ys[data-ys-state]:not([data-ys-list]) .pick {
+    display: none;
   }
-  .ys-actions .ys-forget {
-    color: var(--ink-2);
-  }
-
-  @media (forced-colors: active) {
-    .mini {
-      border: 2px solid CanvasText;
-    }
-    .mini-plaque,
-    .mini-code {
-      border: 1px solid CanvasText;
+  @media (max-width: 479px) {
+    .ys .acts {
+      margin-left: 0;
     }
   }
 </style>

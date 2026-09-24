@@ -1,0 +1,153 @@
+---
+// The REGIONS board: EIA's weekly number for the U.S. and its 8 regions, with
+// the 52 week range, a sparkline and who each price covers, and the notes
+// beside it. Every word comes from the data.
+import Spark from "./Spark.astro";
+import { biggestNote, coverage, keyLine, memberCount, sharedNote } from "./home.ts";
+import type { Spark as SparkLine } from "./chart.ts";
+import { moveClass } from "../../lib/bins.ts";
+import { pctOf } from "../../lib/copy.ts";
+import { formatDate, formatShortDate, todayInNewYork } from "../../lib/dates.ts";
+import { formatQuote, signedCents, signedPct } from "../../lib/format.ts";
+import { formatShortWeekdayDate, nextEiaRelease } from "../../lib/release.ts";
+import { weeklySeries, type SiteData } from "../../lib/site.ts";
+import type { Move } from "../../lib/data.ts";
+interface Props {
+  site: SiteData;
+  /** The 52 week lines, by series key, drawn once into the page's sprite. */
+  sparks: Map<string, SparkLine>;
+}
+const { site, sparks } = Astro.props;
+const eia = site.latest.eia;
+const daily = site.mode === "aaa+eia";
+
+interface Row {
+  key: string;
+  name: string;
+  move: Move | null;
+  covers: string;
+  us?: boolean;
+}
+// California last, after the rest of the West Coast, the way the board reads
+const order = ["R1X", "R1Y", "R1Z", "R20", "R30", "R40", "R5XCA", "SCA"];
+const regions = order.map((k) => site.regions.find((r) => r.key === k)).filter((r): r is NonNullable<typeof r> => Boolean(r));
+const surveyed = site.states.filter((s) => s.eia_series !== null).map((s) => s.code);
+const rows: Row[] = [
+  { key: "NUS", name: "U.S.", move: site.eiaUs, covers: coverage(surveyed), us: true },
+  ...regions.map((r) => ({ key: r.key, name: r.name, move: r.move, covers: memberCount(r.states) })),
+];
+
+// The line beside the head and the notes beside the board.
+const moved = regions.filter((r) => r.move && r.move.change !== null).map((r) => ({ name: r.name, change: r.move!.change! }));
+const key = keyLine(moved, "region", "weekly");
+const biggest = biggestNote(moved, "weekly");
+const largest = regions.reduce((a, b) => (b.states.length > a.states.length ? b : a), regions[0]);
+const shared = largest && largest.move ? sharedNote({ name: largest.name, codes: largest.states, price: largest.move.price }, daily) : null;
+const unsurveyed = site.states.filter((s) => s.eia_series === null).map((s) => s.name);
+const andList = (names: string[]) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`);
+const release = eia ? nextEiaRelease(eia.period, eia.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork()) : null;
+const lastRelease = eia?.release_date ?? site.weekly?.release_date ?? null;
+const LATE = "It is running late.";
+const period = eia ? formatDate(eia.period) : null;
+const prev = eia?.prev_period ? formatShortDate(eia.prev_period) : null;
+---
+<section class="board" aria-labelledby="regions-title">
+  <div class="sh"><h2 id="regions-title">Regions</h2>{key && <p class="meta">{key}</p>}</div>
+  <div class="cols">
+    <div>
+      <div class="scroll" tabindex="0" role="region" aria-label="Regions table, scrolls sideways">
+        <table aria-describedby="board-cap" style="min-width:calc(77.5ch + 222px)">
+          {/* Widths settled before a row arrives, as on the quote table, and
+              the table's floor is their sum, so nothing moves as the board
+              streams in. */}
+          <colgroup>
+            <col style="width:calc(29ch + 10px)" />
+            <col style="width:calc(7ch + 20px)" />
+            <col style="width:calc(6.5ch + 20px)" />
+            <col style="width:calc(5.5ch + 20px)" />
+            <col style="width:calc(6.5ch + 20px)" />
+            <col style="width:calc(7ch + 20px)" />
+            <col style="width:92px" />
+            <col style="width:calc(16ch + 20px)" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">Region</th>
+              <th scope="col" class="num" aria-label="Last price, dollars a gallon">Last $</th>
+              <th scope="col" class="num" aria-label="Change in cents from last week">Chg ¢</th>
+              <th scope="col" class="num" aria-label="Change in percent from last week">%Chg</th>
+              <th scope="col" class="num" aria-label="Lowest price in the last 52 weeks">52w low</th>
+              <th scope="col" class="num" aria-label="Highest price in the last 52 weeks">52w high</th>
+              <th scope="col" aria-label="Line of the last 52 weeks">52w</th>
+              <th scope="col">Covers</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => {
+              const s = sparks.get(r.key);
+              const m = r.move;
+              const pct = m ? pctOf(m) : null;
+              const ink = m ? moveClass(m.change, "weekly") : "muted";
+              return (
+                <tr class:list={[r.us && "us"]}>
+                  <th scope="row">{r.name}</th>
+                  {m ? (
+                    <>
+                      <td class="num">{formatQuote(m.price)}</td>
+                      <td class:list={["num", ink]}>{m.change === null ? "n/a" : signedCents(m.change)}</td>
+                      <td class:list={["num", ink]}>{pct === null ? "n/a" : signedPct(pct)}</td>
+                    </>
+                  ) : (
+                    <td class="muted" colspan="3">No price this week</td>
+                  )}
+                  {s ? (
+                    <>
+                      <td class="num">{formatQuote(s.low.value)}</td>
+                      <td class="num">{formatQuote(s.high.value)}</td>
+                      <td><Spark id={r.key} name={r.name} spark={s} /></td>
+                    </>
+                  ) : (
+                    <>
+                      <td class="num muted">n/a</td>
+                      <td class="num muted">n/a</td>
+                      <td></td>
+                    </>
+                  )}
+                  <td class="muted">{r.covers}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p class="cap swipe">Swipe the board sideways for the rest of the columns.</p>
+      <p class="cap" id="board-cap">
+        EIA prices {regions.length} regions, California on its own.
+        {period && ` Dollars a gallon for the week of ${period}`}{period && prev && `, change in cents from the week of ${prev}`}{period && "."}
+      </p>
+    </div>
+    <div class="notes">
+      {shared && <p><b>One price, many states.</b> {shared}</p>}
+      {biggest && <p><b>{biggest.head}</b> {biggest.text}</p>}
+      {unsurveyed.length > 0 && (
+        <p><b>No survey.</b> {andList(unsurveyed)} {unsurveyed.length === 1 ? "is" : "are"} not in the EIA survey, so {unsurveyed.length === 1 ? "it has" : "they have"} no weekly price.</p>
+      )}
+      {release && (
+        <p>
+          <b>Next print.</b> <span data-next-release={release.date} data-late={LATE}>{release.late ? LATE : `${formatShortWeekdayDate(release.date)}.`}</span>
+          {lastRelease && ` The last one was ${formatDate(lastRelease)}.`}
+        </p>
+      )}
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* the board is about 830px wide beside its 290px of notes, so it scrolls
+     sideways under 1200px, and on its own under 900px */
+  @media (max-width: 1199px) {
+    .board .swipe {
+      display: block;
+    }
+  }
+</style>

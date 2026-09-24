@@ -1,0 +1,171 @@
+---
+// The ALL STATES quote table: every state on one line, in name order, with a
+// find box in the head. src/components/home/quotes.ts sorts it, filters it
+// and opens a row; with JS off every code is still a link and the table
+// reads in name order. The SYM column stays put while the rest scrolls on a
+// phone (the shell's sticky row head).
+import Spark from "./Spark.astro";
+import type { Spark as SparkLine } from "./chart.ts";
+import { moveClass } from "../../lib/bins.ts";
+import { pctOf, sinceText } from "../../lib/copy.ts";
+import { formatDate, formatShortDate } from "../../lib/dates.ts";
+import { changeTenths, formatQuote, signedCents, signedPct } from "../../lib/format.ts";
+import { formatCpg } from "../../lib/tax.ts";
+import type { SiteData } from "../../lib/site.ts";
+interface Props {
+  site: SiteData;
+  sparks: Map<string, SparkLine>;
+}
+const { site, sparks } = Astro.props;
+const daily = site.mode === "aaa+eia";
+const eia = site.latest.eia;
+const tax = site.tax;
+const states = [...site.states].sort((a, b) => a.name.localeCompare(b.name));
+/** "30.0", "46.85": the state tax the way the TAX ¢ head expects it. */
+const cpg = (v: number) => formatCpg(v).replace("¢", "");
+/** Numbers for the sort keys: cents and percent to one decimal, as printed. */
+const centsKey = (change: number) => String(changeTenths(change) / 10);
+const pctKey = (pct: number) => String(Math.round(pct * 10) / 10);
+const noTax = tax ? states.filter((s) => s.tax && s.tax.state === null).map((s) => s.code) : [];
+const staleTax = tax ? states.filter((s) => s.tax?.outOfDate).map((s) => s.code) : [];
+const andList = (codes: string[]) => (codes.length < 2 ? codes.join("") : `${codes.slice(0, -1).join(", ")} and ${codes[codes.length - 1]}`);
+const aaa = site.latest.aaa;
+const since = daily ? sinceText(site) : "";
+// The columns below, summed: their widths in the table's ch plus the cell
+// padding in px. The table is at least that wide, so a narrow box never
+// squeezes the columns on the first paint only to widen them as rows arrive.
+const width = `min-width:calc(${86 + (tax ? 6.5 : 0)}ch + ${242 + (tax ? 20 : 0)}px)`;
+---
+<section class="q" aria-labelledby="states-title">
+  <div class="sh">
+    <h2 id="states-title">All states</h2>
+    <p class="meta" id="count" role="status">{states.length} states</p>
+    <span class="find"><label class="sr-only" for="find">Find a state</label><input id="find" type="text" autocomplete="off" spellcheck="false" placeholder="find a state" list="states" /><span class="k" aria-hidden="true">/</span></span>
+  </div>
+  <datalist id="states">{states.map((s) => <option value={s.name}></option>)}</datalist>
+  <div class="scroll" tabindex="0" role="region" aria-label="All states table, scrolls sideways">
+    <table id="quotes" aria-describedby="quotes-cap" style={width}>
+      {/* Every column's width is settled here, before a row arrives, so the
+          table never re-lays its columns as it streams in (that would count
+          as layout shift). Monospace makes the widest cell a known number
+          of characters: "District of Columbia" is 20, "West Coast outside
+          California" 29, and the heads run 0.85ch a character at 11px. */}
+      <colgroup>
+        <col style="width:calc(4.5ch + 10px)" />
+        <col style="width:calc(20ch + 20px)" />
+        <col style="width:calc(7ch + 20px)" />
+        <col style="width:calc(6.5ch + 20px)" />
+        <col style="width:calc(5.5ch + 20px)" />
+        <col style="width:calc(29ch + 20px)" />
+        {tax && <col style="width:calc(6.5ch + 20px)" />}
+        <col style="width:calc(6.5ch + 20px)" />
+        <col style="width:calc(7ch + 20px)" />
+        <col style="width:92px" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col" data-k="s" aria-label="State code">Sym<span class="ar" aria-hidden="true"></span></th>
+          <th scope="col" data-k="n" aria-sort="ascending" aria-label="State name">Name<span class="ar" aria-hidden="true"></span></th>
+          <th scope="col" class="num" data-k="l" data-num="1" aria-label="Last price, dollars a gallon">Last $<span class="ar" aria-hidden="true"></span></th>
+          <th scope="col" class="num" data-k="c" data-num="1" aria-label={`Change in cents ${daily ? since || "since yesterday" : "from last week"}`}>Chg ¢<span class="ar" aria-hidden="true"></span></th>
+          <th scope="col" class="num" data-k="q" data-num="1" aria-label={`Change in percent ${daily ? since || "since yesterday" : "from last week"}`}>%Chg<span class="ar" aria-hidden="true"></span></th>
+          <th scope="col" data-k="r" aria-label="EIA region">Region<span class="ar" aria-hidden="true"></span></th>
+          {tax && <th scope="col" class="num" data-k="t" data-num="1" aria-label="State diesel tax, cents a gallon">Tax ¢<span class="ar" aria-hidden="true"></span></th>}
+          <th scope="col" class="num" aria-label="Lowest EIA region price in the last 52 weeks">52w low</th>
+          <th scope="col" class="num" aria-label="Highest EIA region price in the last 52 weeks">52w high</th>
+          <th scope="col" aria-label="Line of the EIA region price over the last 52 weeks">52w</th>
+        </tr>
+      </thead>
+      <tbody>
+        {states.map((s) => {
+          const m = s.primary;
+          const pct = m ? pctOf(m) : null;
+          const ink = m ? moveClass(m.change, s.cadence) : "muted";
+          const region = s.regionName;
+          const spark = s.eia_series ? sparks.get(s.eia_series) : undefined;
+          const t = s.tax;
+          const taxed = t && t.state !== null && !t.outOfDate ? t.state : null;
+          return (
+            <tr
+              data-s={s.code}
+              data-n={s.name}
+              data-l={m ? formatQuote(m.price) : ""}
+              data-c={m && m.change !== null ? centsKey(m.change) : ""}
+              data-q={pct === null ? "" : pctKey(pct)}
+              data-r={region ?? ""}
+              data-t={tax ? (taxed === null ? "" : String(taxed)) : undefined}
+              data-h={s.href}
+            >
+              <th scope="row"><span class="mk" aria-hidden="true"></span><a href={s.href}>{s.code}</a></th>
+              <td>{s.name}</td>
+              {m ? (
+                <>
+                  <td class="num">{formatQuote(m.price)}</td>
+                  <td class:list={["num", "c-chg", ink]}>{m.change === null ? "n/a" : signedCents(m.change)}</td>
+                  <td class:list={["num", "c-pct", ink]}>{pct === null ? "n/a" : signedPct(pct)}</td>
+                  <td class:list={[!region && "muted"]}>{region ?? "No EIA survey"}</td>
+                </>
+              ) : (
+                <td colspan="4" class="muted">{s.eia_series === null && !daily ? "No EIA survey" : "No price yet"}</td>
+              )}
+              {tax && (taxed === null ? <td class="num muted">n/a</td> : <td class="num">{cpg(taxed)}</td>)}
+              {spark ? (
+                <>
+                  <td class="num">{formatQuote(spark.low.value)}</td>
+                  <td class="num">{formatQuote(spark.high.value)}</td>
+                  <td><Spark id={s.eia_series!} name={region ?? s.name} spark={spark} /></td>
+                </>
+              ) : (
+                <>
+                  <td class="num muted">n/a</td>
+                  <td class="num muted">n/a</td>
+                  <td></td>
+                </>
+              )}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+  <p class="cap swipe">Swipe the table sideways for region{tax ? ", tax" : ""} and the 52 week range.</p>
+  <p class="cap" id="quotes-cap">
+    Pick a heading to sort.
+    {daily && aaa
+      ? ` Prices are AAA's daily average in dollars a gallon as of ${formatDate(aaa.as_of)}${aaa.prev_as_of ? `, change is cents since ${formatShortDate(aaa.prev_as_of)}` : ""}.`
+      : eia
+        ? ` Prices are dollars a gallon for the week of ${formatDate(eia.period)}${eia.prev_period ? `, change is cents from the week of ${formatShortDate(eia.prev_period)}` : ""}.`
+        : ""}
+    {daily ? " Region, 52 week low, 52 week high and the line are EIA's weekly price for the region." : " States in one EIA region share a price."}
+    {tax && ` Tax is the state tax in cents a gallon from FHWA's ${tax.reporting_period} table.`}
+    {tax && (staleTax.length > 0 || noTax.length > 0) && (
+      <> n/a in the tax column means {staleTax.length > 0 && `FHWA's rate is out of date (${andList(staleTax)})`}{staleTax.length > 0 && noTax.length > 0 && " or "}{noTax.length > 0 && `${staleTax.length > 0 ? "" : "FHWA's rate is "}missing (${andList(noTax)})`}.</>
+    )}
+  </p>
+</section>
+
+<style is:global>
+  /* The heads keep the height and width their sort buttons will have, so
+     the script moves nothing when it wraps the words in a button and puts
+     the sort mark in the slot after them. */
+  .q thead th[data-k] {
+    padding-top: 0;
+    line-height: 24px;
+  }
+  .q .sortb {
+    padding: 0;
+    line-height: 24px;
+    vertical-align: top;
+  }
+  .q .ar {
+    display: inline-block;
+    width: 2ch;
+    white-space: nowrap;
+  }
+  /* the table is about 990px wide, so it scrolls sideways under 1024px */
+  @media (max-width: 1023px) {
+    .q .swipe {
+      display: block;
+    }
+  }
+</style>

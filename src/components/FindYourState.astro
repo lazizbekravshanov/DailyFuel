@@ -1,183 +1,91 @@
 ---
-// "Find your state": every state in one tap target list, inside a plain
-// <details>, so it opens and closes with JS off. On the home page it's the
-// your state row until a state is picked. The 404 page shows it open. A tap on
-// a state saves it for the home page (src/scripts/your-state.ts), then the
-// link goes to its page. With JS off the link still works; nothing is saved.
+// "Find your state": every state in one list, inside a plain <details>, so it
+// opens and closes with JS off. On the home page it sits under the your state
+// strip: closed until asked for, hidden once a state is saved, and back when
+// CHANGE is pressed. The 404 page shows it open. A tap on a state saves it for
+// the home page (src/scripts/your-state.ts), then the link goes to its page.
+// With JS off the link still works; nothing is saved.
+//
+// On the home page each link also carries that state's line for the strip
+// (price, change, ink, plate), printed at build time, so the script that
+// fills the strip only copies strings. That script (YourState.astro) also
+// saves a pick, so the home page skips the pick script here.
 //
 // The /#find-your-state target is the list inside the <details>, not the
 // <details> itself, so Chrome opens the closed list when a link lands on it,
 // even with JS off.
-import Icon from "./Icon.astro";
 import { getSite } from "../lib/site.ts";
 import { inlineCall } from "../lib/inline.ts";
+import { yourStateData } from "../lib/yourstate.ts";
 import { rememberPick } from "../scripts/your-state.ts";
 interface Props {
   open?: boolean;
+  /** Carry each state's strip line on its link (the home page). */
+  strip?: boolean;
 }
-const { open = false } = Astro.props;
-const states = [...getSite().states].sort((a, b) => a.name.localeCompare(b.name));
+const { open = false, strip = false } = Astro.props;
+const site = getSite();
+const lines = strip ? new Map(yourStateData(site).map((e) => [e.code, e])) : null;
+const states = [...site.states].sort((a, b) => a.name.localeCompare(b.name));
 const pick = inlineCall(rememberPick, "document", "function(){return window.localStorage}");
 ---
-<details class="find" data-ys-find open={open}>
-  <summary>
-    <Icon name="find-a-state" size={22} class="find-mark" />
-    <span class="find-words">
-      <span class="find-title">Find your state</span>
-      <span class="find-sub">Pick once and it stays on this phone</span>
-    </span>
-    <span class="chevron" aria-hidden="true"></span>
-  </summary>
-  <ul class="find-list" id="find-your-state" data-ys-list tabindex="-1" aria-label="All states">
-    {states.map((s) => (
-      <li><a href={s.href} data-ys-pick={s.code}><span class="code" aria-hidden="true">{s.code}</span><span class="name">{s.name}</span></a></li>
-    ))}
+<details class="pick" data-ys-find open={open}>
+  <summary class="btn">Find your state</summary>
+  <ul class="pick-list" id="find-your-state" data-ys-list tabindex="-1" aria-label="All states">
+    {states.map((s) => {
+      const l = lines?.get(s.code);
+      return (
+        <li><a href={s.href} data-ys-pick={s.code} data-px={l?.price} data-ch={l?.move || undefined} data-ink={l && l.ink !== "muted" ? l.ink : undefined} data-pl={l?.plate ?? undefined}><b>{s.code}</b> {s.name}</a></li>
+      );
+    })}
   </ul>
 </details>
-<script is:inline set:html={pick}></script>
+{!strip && <script is:inline set:html={pick}></script>}
 
-<style>
-  .find {
-    --find-line: var(--sign);
-    border: 2px dashed var(--find-line);
-    border-radius: 10px;
+<style is:global>
+  .pick {
+    margin-top: 10px;
   }
-  @media (prefers-color-scheme: dark) {
-    .find {
-      /* guide sign green is too dark to see as a line on dark paper */
-      --find-line: #4f9f78;
-    }
-  }
-  summary {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    /* 60 plus the 2px dashed border top and bottom: the same 64px the saved
-       row takes, so nothing below moves when a saved state fills the row */
-    min-height: 60px;
-    padding: 0 14px;
-    cursor: pointer;
+  /* the summary is the control, drawn like every other small control */
+  .pick > summary {
     list-style: none;
-    border-radius: 8px;
   }
-  summary::-webkit-details-marker {
+  .pick > summary::-webkit-details-marker {
     display: none;
   }
-  summary :global(.find-mark) {
-    color: var(--ink-2);
-  }
-  .find-words {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    flex: 1;
-    line-height: 1.25;
-  }
-  .find-title {
-    font-size: 17px;
-    font-weight: 700;
-  }
-  .find-sub {
-    font-size: 14px;
-    color: var(--ink-2);
-  }
-  .chevron {
-    flex: none;
-    width: 10px;
-    height: 10px;
-    margin: 0 4px 4px;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
-    transform: rotate(45deg);
-    transition: transform 120ms ease-out;
-  }
-  .find[open] .chevron {
-    transform: translateY(4px) rotate(225deg);
-  }
-  .find-list {
+  .pick-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: var(--space-4);
-    margin: 0;
-    padding: 4px 14px 10px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0 24px;
+    margin: 8px 0 0;
+    padding: 0;
     list-style: none;
-    border-top: 1px solid var(--hairline);
-    /* where /#find-your-state lands: the 64px summary stays in view above the
-       list, with a little air over it */
-    scroll-margin-top: calc(64px + var(--space-4));
+    font-size: var(--fs-t);
+    /* where /#find-your-state lands: the summary stays in view above the list */
+    scroll-margin-top: 48px;
   }
-  .find-list:focus-visible {
-    outline-offset: -3px;
+  .pick-list:focus-visible {
+    outline-offset: 4px;
   }
-  .find-list li {
-    border-bottom: 1px solid var(--hairline);
+  .pick-list li {
     min-width: 0;
+    border-bottom: 1px solid var(--hair);
   }
-  .find-list a {
+  .pick-list a {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-height: 44px;
-    padding: 4px 0;
-    font-weight: 600;
-    line-height: 1.2;
+    min-height: 26px;
+    padding: 2px 0;
     text-decoration: none;
   }
-  .find-list a:hover .name {
-    text-decoration: underline;
+  .pick-list a:hover {
+    background: var(--mark);
   }
-  .name {
-    min-width: 0;
-    hyphens: auto;
-  }
-  /* two columns on a phone: a little tighter so Massachusetts fits at 375 */
-  @media (max-width: 639px) {
-    .find-list {
-      column-gap: 12px;
-      padding-inline: 12px;
-    }
-    .find-list a {
-      gap: 8px;
-      font-size: 16px;
-    }
-  }
-  /* Narrower still, the type steps down so no name breaks inside a word:
-     Massachusetts and Pennsylvania fit whole at 350. Under that, one column. */
-  @media (max-width: 379px) {
-    .find-list {
-      column-gap: 8px;
-      padding-inline: 10px;
-    }
-    .find-list a {
-      gap: 6px;
-      font-size: 15px;
-    }
-    .name {
-      hyphens: manual;
-    }
-  }
-  @media (max-width: 349px) {
-    .find-list {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-  .code {
+  .pick-list b {
     flex: none;
-    display: inline-grid;
-    place-items: center;
-    min-width: 30px;
-    height: 20px;
-    padding: 1px 4px 0;
-    border-radius: 4px;
-    background: var(--sign);
-    color: var(--sign-ink);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.03em;
-  }
-  @media (forced-colors: active) {
-    .code {
-      border: 1px solid CanvasText;
-    }
+    width: 2.5ch;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 </style>

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { binFor, directionFor, legendItems, legendTicks } from "./bins.ts";
+import { binFor, directionFor, moveClass } from "./bins.ts";
+
+// The legend tests (legendItems, legendTicks) are gone with the map: the paper
+// terminal has no key to label. The bins themselves stay, since they decide
+// what counts as a rise, a fall and about the same everywhere on the page.
 
 describe("weekly bins (cents): under 1, 1 to 5, 5 to 15, 15 or more", () => {
   const cases: [number, string][] = [
@@ -54,7 +58,7 @@ describe("daily bins (cents): under 0.2, 0.2 to 2, 2 to 6, 6 or more", () => {
   }
 });
 
-describe("direction and legend", () => {
+describe("direction", () => {
   it("treats sub threshold changes as about the same", () => {
     expect(directionFor(0.003, "weekly")).toBe("flat");
     expect(directionFor(0.009, "weekly")).toBe("flat");
@@ -63,27 +67,25 @@ describe("direction and legend", () => {
     expect(directionFor(0.003, "daily")).toBe("up");
     expect(directionFor(-0.3, "daily")).toBe("down");
   });
+});
 
-  it("writes ranges with 'to', never a dash", () => {
-    const weekly = legendItems("weekly").map((i) => i.label);
-    expect(weekly).toEqual([
-      "Fell 15¢ or more",
-      "Fell 5 to 15¢",
-      "Fell 1 to 5¢",
-      "About the same, under 1¢",
-      "Rose 1 to 5¢",
-      "Rose 5 to 15¢",
-      "Rose 15¢ or more",
-    ]);
-    const daily = legendItems("daily").map((i) => i.label);
-    expect(daily[3]).toBe("About the same, under 0.2¢");
-    expect(daily[6]).toBe("Rose 6¢ or more");
-    for (const l of [...weekly, ...daily]) expect(l).not.toMatch(/[–—]| - /);
+describe("the ink a printed change wears", () => {
+  it("is red for a rise and blue for a fall", () => {
+    expect(moveClass(0.318, "weekly")).toBe("up");
+    expect(moveClass(0.01, "weekly")).toBe("up");
+    expect(moveClass(-0.021, "weekly")).toBe("down");
+    expect(moveClass(0.002, "daily")).toBe("up");
+    expect(moveClass(-0.002, "daily")).toBe("down");
   });
 
-  it("labels the joins of the horizontal key with a real minus sign", () => {
-    expect(legendTicks("weekly")).toEqual(["\u221215¢", "\u22125¢", "\u22121¢", "+1¢", "+5¢", "+15¢"]);
-    expect(legendTicks("daily")).toEqual(["\u22126¢", "\u22122¢", "\u22120.2¢", "+0.2¢", "+2¢", "+6¢"]);
-    for (const t of [...legendTicks("weekly"), ...legendTicks("daily")]) expect(t).not.toMatch(/[-–—]/);
+  it("is muted for a weekly move under 1¢, which still prints as +0.3¢", () => {
+    expect(moveClass(0.003, "weekly")).toBe("muted");
+    expect(moveClass(-0.009, "weekly")).toBe("muted");
+    expect(moveClass(0, "weekly")).toBe("muted");
+    expect(moveClass(0.0014, "daily")).toBe("muted");
+  });
+
+  it("is muted when there is nothing to compare with", () => {
+    expect(moveClass(null, "weekly")).toBe("muted");
   });
 });
