@@ -1,4 +1,4 @@
-"""Fleet points: a hand built geofence list, reduced to public pins.
+"""Fleet points: a hand built point list, reduced to public pins.
 
 Not part of the scheduled job. scripts/import_fleet_points.py runs this by
 hand on a CSV that never enters the repo (it has addresses, notes and
@@ -240,7 +240,7 @@ class Row:
 
 
 def read_rows(path: Path | str) -> list[Row]:
-    """Read the geofence CSV. Only Name, Address, Notes and the coordinates are kept in memory."""
+    """Read the point list CSV. Only Name, Address, Notes and the coordinates are kept in memory."""
     with open(path, newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         fields = tuple(reader.fieldnames or ())

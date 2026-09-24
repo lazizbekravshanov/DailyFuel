@@ -44,10 +44,18 @@ export function rowsHtml(points: MapPoint[]): string {
  * the strip says it is EIA's regional average), the region plate, and the
  * FHWA state tax, "n/a" where the table has none or it is out of date.
  */
+/** Short caveats for the states whose per gallon figure isn't what every truck pays; the state pages carry the full notes. */
+const TAX_CAVEAT: Record<string, string> = {
+  AZ: "the truck rate",
+  KY: "motor carriers also pay a surtax",
+  OR: "trucks over 26,000 lb pay weight mile tax instead",
+};
+
 export function priceRows(site: SiteData): PriceRow[] {
   return site.states.map((s) => {
     const m = s.eia;
-    const tax = s.tax && s.tax.state !== null && !s.tax.outOfDate ? formatCpg(s.tax.state) : "n/a";
+    let tax = s.tax && s.tax.state !== null && !s.tax.outOfDate ? formatCpg(s.tax.state) : "n/a";
+    if (tax !== "n/a" && TAX_CAVEAT[s.code]) tax += `, ${TAX_CAVEAT[s.code]}`;
     return [
       s.code,
       s.name,

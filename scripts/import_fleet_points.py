@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Import a hand built geofence list into data/map/fleet_points.json.
+"""Import a hand built point list into data/map/fleet_points.json.
 
 A maintenance tool, not part of the scheduled job. The CSV (ID, Address,
 Name, Latitude, Longitude, Radius, Tags, Notes, Type) stays outside the
@@ -22,9 +22,8 @@ printed here. --dropped-report writes the dropped rows with their reason
 for the owner; it is refused inside the repo, the main checkout of a
 worktree included.
 
---boundaries also takes a us-atlas TopoJSON or a GeoJSON FeatureCollection
-of the states; without it the tool reads node_modules/us-atlas when it is
-there. Both are coarser than the Census file. A pin in no state polygon is
+--boundaries is required. It also takes a us-atlas TopoJSON or a GeoJSON
+FeatureCollection of the states; both are coarser than the Census file. A pin in no state polygon is
 tried again 1 km away, for causeways and piers the coast line cuts off.
 Every run checks each assigned state against the "XX 12345" state and ZIP
 the CSV wrote in its Address and Notes and prints every disagreement; there
@@ -144,13 +143,14 @@ def report(built: fleetpoints.Build, data_dir: Path, out=print) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--csv", required=True, type=Path, metavar="PATH", help="the geofence CSV (kept out of the repo)")
+    parser.add_argument("--csv", required=True, type=Path, metavar="PATH", help="the point list CSV (kept out of the repo)")
     parser.add_argument(
         "--boundaries",
+        required=True,
         type=Path,
         metavar="FILE",
         help="state polygons: the Census cb_2023_us_state_500k .zip or .kml (use this), "
-        "a us-atlas TopoJSON or a GeoJSON FeatureCollection; default node_modules/us-atlas",
+        "a us-atlas TopoJSON or a GeoJSON FeatureCollection",
     )
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR, help="data folder to update (default: data/)")
     parser.add_argument("--dropped-report", type=Path, metavar="PATH", help="write the dropped rows with their reason here")
@@ -165,10 +165,7 @@ def main(argv: list[str] | None = None) -> int:
 
     states = load_states()
     try:
-        if args.boundaries is not None:
-            boundaries = fleetpoints.load_boundaries(args.boundaries, states)
-        else:
-            boundaries = mapdata.Boundaries.from_us_atlas(states)
+        boundaries = fleetpoints.load_boundaries(args.boundaries, states)
         rows = fleetpoints.read_rows(args.csv)
         imported = args.imported or utc_now().date().isoformat()
         built = fleetpoints.build(rows, boundaries, imported)

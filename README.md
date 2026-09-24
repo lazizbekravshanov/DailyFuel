@@ -132,9 +132,9 @@ scripts/
   update_data.py           the data job
   health.py                fails the job on errors or stale data
   update_taxes.py          refreshes the tax file from FHWA, run by hand, not by the job
-  update_map_data.py       builds data/map/stations.json, the weigh station files and coverage.json from a local cache of OpenStreetMap, NTAD and Iowa DOT; run by hand
+  update_map_data.py       builds data/map/stations.json, the weigh station files and coverage.json from a local cache of OpenStreetMap, NTAD and Iowa DOT and the us-atlas 3 boundary files; run by hand
   update_map_roads.py      builds data/map/roads_nhfn.json, states.json and places.json from a local cache; run by hand
-  import_fleet_points.py   builds data/map/fleet_points.json (weigh stations and truck service pins) from a hand built geofence list, which stays out of the repo, and the Census state boundaries; run by hand
+  import_fleet_points.py   builds data/map/fleet_points.json (weigh stations and truck service pins) from a hand built point list, which stays out of the repo, and the Census state boundaries; run by hand
   make_fixtures.py         synthetic aaa+eia data for CI and previews
   make_app_icons.mjs       renders the favicon and home screen icons into public/, run by hand
   requirements.txt         requests, beautifulsoup4, xlrd, jsonschema (pinned)

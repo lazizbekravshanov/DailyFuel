@@ -149,7 +149,7 @@ describe("the route strip", () => {
     expect(il).toContain("IL Illinois $6.250 +30.4¢ +5.1% EIA Midwest average, 15 states State tax 54.5¢ Miles 0 to");
     expect(strips[0].querySelector(".up")!.textContent).toMatch(/^\+\d/);
     expect(strips[3].querySelector(".down")!.textContent).toMatch(/^−\d/);
-    expect(d.querySelector(".rsum")!.textContent).toMatch(/^Chicago, IL to Cheyenne, WY · 8\d\d miles in a straight line · 4 states · 4 stops within 25 miles$/);
+    expect(d.querySelector(".rsum")!.textContent).toMatch(/^Chicago, IL to Cheyenne, WY · 8\d\d miles in a straight line · 4 states · 4 places within 25 miles$/);
     const text = d.body.textContent!;
     expect(text).not.toMatch(/[–—]|\s-\s/);
     expect(text).not.toMatch(/cheapest|truck route/i);
@@ -194,10 +194,12 @@ describe("finding A and B", () => {
 
   it("matches a picked label, a start, a bare name or lat, lon", () => {
     expect(findPlace("Chicago, IL", places)).toEqual({ label: "Chicago, IL", lat: 41.85, lon: -87.65 });
-    expect(findPlace("  chicago, il ", places)!.label).toBe("Chicago, IL");
-    expect(findPlace("chey", places)!.label).toBe("Cheyenne, WY");
-    expect(findPlace("Springfield, MO", places)!.label).toBe("Springfield, MO");
-    expect(findPlace("springfield", places)!.label).toMatch(/^Springfield, (IL|MO)$/);
+    expect(findPlace("  chicago, il ", places)).toMatchObject({ label: "Chicago, IL" });
+    expect(findPlace("chicago", places)).toMatchObject({ label: "Chicago, IL" });
+    expect(findPlace("chey", places)).toMatchObject({ label: "Cheyenne, WY" });
+    expect(findPlace("Springfield, MO", places)).toMatchObject({ label: "Springfield, MO" });
+    // a bare name in two states asks which, rather than picking the first state in the alphabet
+    expect(findPlace("springfield", places)).toBe("Springfield, IL");
     expect(findPlace("41.878, -87.630", null)).toEqual({ label: "41.878, −87.630", lat: 41.878, lon: -87.63 });
     expect(findPlace("41.878, −87.63", null)).toEqual({ label: "41.878, −87.630", lat: 41.878, lon: -87.63 });
     expect(findPlace("Nowhere", places)).toBeNull();

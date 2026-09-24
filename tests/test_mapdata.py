@@ -303,7 +303,7 @@ def test_coast_tolerance_only_reaches_1_km_and_only_when_asked(boundaries):
     assert boundaries.state_of(*WINNIPEG, mapdata.COAST_TOLERANCE_KM) is None
 
 
-@pytest.mark.skipif(not mapdata.US_ATLAS_STATES.exists(), reason="us-atlas is not installed (npm ci)")
+@pytest.mark.skipif(not mapdata.US_ATLAS_STATES.exists(), reason="us-atlas 3 is not in node_modules; see scripts/update_map_data.py")
 def test_us_filter_with_the_real_us_atlas_boundaries(states):
     b = mapdata.Boundaries.from_us_atlas(states)
     for lat, lon in (WINNIPEG, TIJUANA, (43.6532, -79.3832), (49.2827, -123.1207), (25.6866, -100.3161)):

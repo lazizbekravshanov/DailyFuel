@@ -35,14 +35,14 @@ const description =
   (t.service ? `, plus ${fmt(t.service)} truck service points,` : "") +
   " on one map from open data, with a route strip that lists the EIA diesel price and the state tax along a straight line.";
 ---
-<Base title={title} description={description} skipLabel="Skip to the map">
+<Base title={title} description={description} skipLabel="Skip to the page">
   <link slot="head" rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
   <div class="mp">
     <div class="mp-head">
       <h1 class="lbl">Truck stops and weigh stations <span class="dot">·</span> open data, partial coverage</h1>
       <p class="fine">
         {fmt(t.stops)} truck stops, {fmt(t.weigh)} weigh stations{t.service ? ` and ${fmt(t.service)} truck service points` : ""}.
-        Tap a marker for the chain's own page.
+        Pick a marker for the chain's own page.
       </p>
     </div>
 
@@ -119,8 +119,8 @@ const description =
       <form id="rt" class="rt" autocomplete="off">
         <fieldset disabled>
           <legend class="sr-only">The two ends of a straight line</legend>
-          <label class="rt-f"><span>A</span><input name="a" list="pl" placeholder="Chicago, IL" spellcheck="false" /></label>
-          <label class="rt-f"><span>B</span><input name="b" list="pl" placeholder="Cheyenne, WY" spellcheck="false" /></label>
+          <label class="rt-f"><span>A<span class="sr-only">, from</span></span><input name="a" list="pl" placeholder="Chicago, IL" spellcheck="false" /></label>
+          <label class="rt-f"><span>B<span class="sr-only">, to</span></span><input name="b" list="pl" placeholder="Cheyenne, WY" spellcheck="false" /></label>
           <button class="btn" type="submit">Go</button>
           <button class="btn" type="button" data-pick aria-pressed="false">Use the map</button>
         </fieldset>
@@ -137,6 +137,7 @@ const description =
     <section class="mp-ls" aria-labelledby="ls-h">
       <div class="sh"><h2 id="ls-h">List</h2><p class="meta" id="ls-n">{fmt(total)} places</p></div>
       <p class="fine">Every marker on the map. With the map on, the list keeps to what is in view, and a name opens its marker.</p>
+      <a class="skip" href="#ls-end">Skip past the list</a>
       <div class="scroll mlist" tabindex="0" role="region" aria-label="List of every place on the map, scrolls">
         <table id="ls">
           <thead>
@@ -145,6 +146,7 @@ const description =
           <tbody set:html={rowsHtml(data.points)} />
         </table>
       </div>
+      <p class="fine" id="ls-end" tabindex="-1">End of the list.</p>
     </section>
   </div>
   <script is:inline type="application/json" id="mapcfg" set:html={jsonBlock(cfg)} />
@@ -160,6 +162,13 @@ const description =
     background: var(--ink);
     color: var(--bg);
     border-color: var(--ink);
+  }
+  @media (forced-colors: active) {
+    .top .btn[aria-current="page"] {
+      forced-color-adjust: none;
+      background: Highlight;
+      color: HighlightText;
+    }
   }
   .mp-head {
     padding: 18px 0 2px;
@@ -397,6 +406,9 @@ const description =
   }
   .pp-in:focus {
     outline: none;
+  }
+  .pp-in:focus-visible {
+    outline: 2px solid var(--ink);
   }
   .pp-s {
     font-size: var(--fs-s);

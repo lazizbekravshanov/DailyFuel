@@ -16,8 +16,12 @@ data/map/README.md).
 
 Writes data/map/stations.json, weigh_osm.json, weigh_ntad.json, weigh_ia.json
 and coverage.json, each validated against its schema in schemas/. A rerun on
-the same cache rewrites nothing. Needs node_modules/us-atlas (npm ci) for the
-state boundaries.
+the same cache rewrites nothing. The state boundaries and the national
+outline are the us-atlas 3 TopoJSON files states-10m.json and nation-10m.json,
+passed with --states and --nation; the package is no longer a dependency of
+the site, so fetch it outside the repo (npm pack us-atlas@3, then untar):
+
+    python scripts/update_map_data.py --states ~/us-atlas/states-10m.json --nation ~/us-atlas/nation-10m.json
 """
 
 from __future__ import annotations
@@ -51,6 +55,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--live", action="store_true", help="refresh the cache from Overpass, NTAD and Iowa DOT first")
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR, help="data folder to update (default: data/)")
+    parser.add_argument("--states", required=True, type=Path, metavar="FILE", help="us-atlas 3 states-10m.json")
+    parser.add_argument("--nation", required=True, type=Path, metavar="FILE", help="us-atlas 3 nation-10m.json")
     args = parser.parse_args(argv)
 
     cache_dir: Path = args.from_cache
@@ -60,8 +66,8 @@ def main(argv: list[str] | None = None) -> int:
             cache_dir.mkdir(parents=True, exist_ok=True)
             written = mapdata.fetch_live(cache_dir, RequestsClient(), utc_now(), time.sleep)
             print(f"cache refreshed: {', '.join(written)}")
-        boundaries = mapdata.Boundaries.from_us_atlas(states)
-        outline = mapdata.Outline.from_us_atlas()
+        boundaries = mapdata.Boundaries.from_us_atlas(states, args.states)
+        outline = mapdata.Outline.from_us_atlas(args.nation)
         result = mapdata.build(cache_dir, args.data_dir, states, boundaries, outline)
     except (mapdata.MapDataError, store.SchemaError) as e:
         print(f"error: {e}", file=sys.stderr)

@@ -473,7 +473,7 @@ class Boundaries:
     def from_us_atlas(cls, states: StateTable, path: Path | str = US_ATLAS_STATES) -> "Boundaries":
         path = Path(path)
         if not path.exists():
-            raise MapDataError(f"{path} is missing. Run npm ci first; us-atlas is a package of the site.")
+            raise MapDataError(f"{path} is missing. Pass the us-atlas 3 file; see scripts/update_map_data.py.")
         return cls.from_topology(store.read_json(path), states)
 
     def _state_at(self, lat: float, lon: float) -> str | None:
@@ -536,7 +536,7 @@ class Outline:
     def from_us_atlas(cls, path: Path | str = US_ATLAS_NATION) -> "Outline":
         path = Path(path)
         if not path.exists():
-            raise MapDataError(f"{path} is missing. Run npm ci first; us-atlas is a package of the site.")
+            raise MapDataError(f"{path} is missing. Pass the us-atlas 3 file; see scripts/update_map_data.py.")
         return cls.from_topology(store.read_json(path))
 
     def distance_km(self, lat: float, lon: float) -> float:

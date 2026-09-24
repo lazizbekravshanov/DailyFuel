@@ -186,7 +186,7 @@ export function cleanName(name: string): string {
   return name
     .replace(/\s+[-–—]+\s+|\s*[–—]\s*/g, ", ")
     .replace(/\s+/g, " ")
-    .replace(/^[,\s]+|[,\s]+$/g, "")
+    .replace(/^[,\s-]+|[,\s-]+$/g, "")
     .trim();
 }
 
@@ -512,6 +512,8 @@ export function mergeWeigh(input: WeighIn[], within = DEDUPE_M): WeighOut[] {
         for (const i of grid.get(`${cy + dy}:${cx + dx}`) ?? []) {
           const k = kept[i];
           if (k.dir && w.dir && k.dir !== w.dir) continue;
+          // DailyFuel's own list is already deduplicated at 25 metres, so two of its points are two places
+          if (w.src === "f" && k.set.has("f")) continue;
           const m = metres(k, w);
           if (m <= within && m < bestM) {
             best = i;

@@ -117,11 +117,12 @@ export function decodePlaces(doc: { p: number; s: Record<string, [string, number
 }
 
 /**
- * What the driver typed, as a point: a place on the list (exact, then the
- * first that starts with it, then a bare name), or "lat, lon". Null when
- * nothing fits.
+ * What the driver typed, as a point: a place on the list (exact, then a bare
+ * name in one state only, then the first that starts with it), or "lat, lon".
+ * A bare name in more than one state gives the first of them as a string, to
+ * ask which. Null when nothing fits.
  */
-export function findPlace(q: string, pl: Places | null): { label: string; lat: number; lon: number } | null {
+export function findPlace(q: string, pl: Places | null): { label: string; lat: number; lon: number } | string | null {
   const t = q.trim().toLowerCase().replace(/\s+/g, " ");
   if (!t) return null;
   // the page prints a real minus sign; a typed hyphen works too
@@ -133,8 +134,11 @@ export function findPlace(q: string, pl: Places | null): { label: string; lat: n
   if (!pl) return null;
   const L = pl.label.map((s) => s.toLowerCase());
   let i = L.indexOf(t);
-  if (i < 0) i = L.findIndex((s) => s.startsWith(t));
-  if (i < 0) i = L.findIndex((s) => s.split(",")[0] === t.split(",")[0]);
+  if (i < 0) {
+    const bare = L.flatMap((s, j) => (s.split(",")[0] === t ? [j] : []));
+    if (bare.length > 1) return pl.label[bare[0]];
+    i = bare.length ? bare[0] : L.findIndex((s) => s.startsWith(t));
+  }
   return i < 0 ? null : { label: pl.label[i], lat: pl.lat[i], lon: pl.lon[i] };
 }
 
@@ -216,7 +220,7 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
   const byCode: Record<string, PriceRow> = {};
   for (const r of cfg.px) byCode[r[0]] = r;
   const states = res.runs.filter((r) => r.code).length;
-  let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b> <span class="dot">·</span> ${fmt(Math.round(res.miles))} miles in a straight line <span class="dot">·</span> ${states} ${states === 1 ? "state" : "states"} <span class="dot">·</span> ${fmt(res.hits)} ${res.hits === 1 ? "stop" : "stops"} within ${BAND_MI} miles</p>`;
+  let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b> <span class="dot">·</span> ${fmt(Math.round(res.miles))} miles in a straight line <span class="dot">·</span> ${states} ${states === 1 ? "state" : "states"} <span class="dot">·</span> ${fmt(res.hits)} ${res.hits === 1 ? "place" : "places"} within ${BAND_MI} miles</p>`;
   if (res.outside) h += `<p class="fine">Part of the line runs over water or outside the 50 states.</p>`;
   for (const r of res.runs) {
     const row = r.code ? byCode[r.code] : null;
@@ -376,15 +380,19 @@ export function init(doc: Document, win: any): void {
     loadPlaces().then(() => {
       const a = findPlace(inA.value, places),
         b = findPlace(inB.value, places),
-        miss = !a ? inA : !b ? inB : null;
+        miss = !a || typeof a == "string" ? inA : !b || typeof b == "string" ? inB : null;
       if (miss) {
-        say(miss.value.trim()
-          ? `No place called ${miss.value.trim()} on the list. Pick one from the list, type lat, lon, or use the map.`
+        const v = miss.value.trim(), f = miss === inA ? a : b;
+        say(f
+          ? `Which ${v}? Add the state, like ${f}.`
+          : v
+          ? `No place called ${v} on the list. Pick one from the list, type lat, lon, or use the map.`
           : `Type a place for ${miss === inA ? "A" : "B"}, or use the map.`);
         return miss.focus();
       }
-      if (a!.lat === b!.lat && a!.lon === b!.lon) return say("A and B are the same place.");
-      run([a!.lat, a!.lon], [b!.lat, b!.lon], a!.label, b!.label, true);
+      const p = a as Exclude<typeof a, string | null>, q = b as typeof p;
+      if (p.lat === q.lat && p.lon === q.lon) return say("A and B are the same place.");
+      run([p.lat, p.lon], [q.lat, q.lon], p.label, q.label, true);
     });
   if (form && inA && inB) {
     inA.addEventListener("focus", loadPlaces);

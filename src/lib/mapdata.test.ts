@@ -252,6 +252,13 @@ describe("merging weigh stations", () => {
     expect(DEDUPE_M).toBe(600);
   });
 
+  it("keeps two of DailyFuel's own points apart, since that list is already deduplicated", () => {
+    expect(mergeWeigh([at(41.5, -95, "f", null), at(41.502, -95, "f", null)])).toHaveLength(2);
+    // an open source point still joins the nearer of the two
+    const out = mergeWeigh([at(41.5, -95, "f", null), at(41.502, -95, "f", null), at(41.5005, -95, "o", null)]);
+    expect(out.map((w) => w.sources)).toEqual(["of", "f"]);
+  });
+
   it("keeps the two sides of a road apart, and gives a point with no direction to the nearer side", () => {
     const out = mergeWeigh([at(41.5, -95, "f", "EB"), at(41.5, -95.004, "f", "WB"), at(41.5, -95.003, "o", null), at(41.5, -95.001, "n", null, "Scale", "I-80E")]);
     expect(out.map((w) => [w.dir, w.sources])).toEqual([["eastbound", "nf"], ["westbound", "of"]]);
