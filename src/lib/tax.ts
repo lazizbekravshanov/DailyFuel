@@ -29,6 +29,11 @@ export function formatCpg(cpg: number): string {
   return `${mils < 0 ? "−" : ""}${text.includes(".") ? text : `${text}.0`}¢`;
 }
 
+/** "30.0", "46.85": the rate in a table cell, where the column head says TAX ¢. */
+export function quoteCpg(cpg: number): string {
+  return formatCpg(cpg).slice(0, -1);
+}
+
 /** "30 cents a gallon" for screen readers, with decimals only when there are some. */
 export function spokenCpg(cpg: number): string {
   return `${centsText(toMils(cpg))} cents a gallon`;

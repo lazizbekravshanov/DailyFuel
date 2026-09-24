@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   expectedRelease, federalHolidays, formatShortWeekdayDate, isFederalHoliday, LATE_TEXT, nextEiaRelease, nextUpdateText,
-  WEEKLY_LEAD,
 } from "./release.ts";
 
 describe("short weekday dates", () => {
@@ -76,11 +75,14 @@ describe("next EIA release", () => {
 });
 
 describe("wording", () => {
-  it("reads the way the plan says", () => {
-    expect(`${WEEKLY_LEAD} ${nextUpdateText("2026-09-22")}`).toBe("Weekly number. Next update Tue, Sep 22.");
+  // The paper terminal's week line ends "Next release Tue, Sep 22.", and the
+  // "Weekly number." lead of the old sign went with the sign.
+  it("reads the way the mockup's week line says", () => {
+    expect(nextUpdateText("2026-09-22")).toBe("Next release Tue, Sep 22.");
+    expect(LATE_TEXT).toBe("The next release is late.");
   });
 
   it("never uses dashes as punctuation", () => {
-    for (const t of [WEEKLY_LEAD, LATE_TEXT, nextUpdateText("2026-09-22")]) expect(t).not.toMatch(/[–—]| - /);
+    for (const t of [LATE_TEXT, nextUpdateText("2026-09-22")]) expect(t).not.toMatch(/[–—]| - /);
   });
 });

@@ -69,6 +69,7 @@ export interface ChartModel {
 }
 
 const STEPS = [0.05, 0.1, 0.25, 0.5, 1, 2, 5];
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export function niceDomain(min: number, max: number, maxTicks = 5): YDomain {
   if (!(max > min)) {
@@ -158,10 +159,11 @@ export interface BuildOptions {
   heightPx: number;
   /**
    * months: every month start, every other one minor.
+   * quarters: Jan, Apr, Jul and Oct, named by month even in January (the state chart's 52 weeks).
    * years: each January.
    * sparse: three month names (first, middle, last month start), each starting at its month.
    */
-  xTicks?: "months" | "years" | "sparse" | "none";
+  xTicks?: "months" | "quarters" | "years" | "sparse" | "none";
   /** "$4" instead of "$4.00" when every tick is a whole dollar. */
   wholeDollarTicks?: boolean;
 }
@@ -234,6 +236,15 @@ export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartMod
   if (opt.xTicks === "sparse") {
     for (const iso of sparseMonths(opt.from, opt.to)) {
       xTicks.push({ value: dayNumber(iso), label: formatMonthTick(iso), pos: r(xp(iso)), anchor: "start" });
+    }
+  } else if (opt.xTicks === "quarters") {
+    // a quarter that starts within the first days of the window still gets
+    // its name, reading from the left edge instead of centred on its tick
+    for (const iso of monthStarts(opt.from, opt.to)) {
+      if (!/-(01|04|07|10)-01$/.test(iso)) continue;
+      const pos = xp(iso);
+      if (pos > 97) continue;
+      xTicks.push({ value: dayNumber(iso), label: MONTHS_SHORT[Number(iso.slice(5, 7)) - 1], pos: r(pos), anchor: pos < 3 ? "start" : "middle" });
     }
   } else if (opt.xTicks !== "none") {
     const years = opt.xTicks === "years";
@@ -313,6 +324,28 @@ export function buildChart(seriesIn: ChartSeries[], opt: BuildOptions): ChartMod
 /** Date `days` before `to`, for window starts. */
 export function windowStart(to: string, days: number): string {
   return addDays(to, -(days - 1));
+}
+
+/**
+ * Where the readout script (src/scripts/chart.js) puts a date, in percent
+ * from the left: days into the window over the window's days. That is the
+ * same linear utc scale Plot placed the line with, so the crosshair lands on
+ * the point. The script reads the dates and prices from the numbers table
+ * under the chart, so the page carries every value once.
+ */
+export function readoutX(from: string, to: string, date: string): number {
+  const span = daysBetween(from, to) || 1;
+  return (daysBetween(from, date) / span) * 100;
+}
+
+/**
+ * The y axis labels beside a chart: every tick, except any that would sit
+ * under the tag on the newest price. `room` is the clearance in percent of
+ * the plot height; 20px of a 160px phone chart is 12.5.
+ */
+export function yLabels(model: ChartModel, room = 12.5): Tick[] {
+  const end = model.ends.find((e) => e.kind === "primary") ?? model.ends[0];
+  return model.yTicks.filter((t) => !end || Math.abs(t.pos - end.y) > room);
 }
 
 /** "up 30.4 cents", or "up $2.54" once the move is a dollar or more. */

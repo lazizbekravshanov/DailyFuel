@@ -1,134 +1,83 @@
 ---
-// What tax is on a gallon of diesel in one state.
-//
-// This is a separate fact from the prices DailyFuel measures, so it never
-// borrows the pump price styling: no sign green, no raised tenth of a cent,
-// hairline rules instead of the solid ink rules the price stats use.
-import Icon from "./Icon.astro";
-import { formatCpg, rankLabel, rankedNote, sinceLabel, spokenCpg, spokenRank, taxVintage } from "../lib/tax.ts";
+// What tax is on a gallon of diesel in one state: four boxes in the hairline
+// grid the key stats use, then the scope note. Tax is a separate fact from the
+// prices DailyFuel measures, so it never wears the change colours. DC reads
+// "Not listed" (FHWA prints no rate), and Utah and Minnesota read "Out of
+// date" (FHWA still prints a rate the state has since replaced), with no
+// total and no rank for any of the three.
+import { formatCpg, rankLabel, sinceLabel, taxVintage } from "../lib/tax.ts";
 import type { SiteData, StateView } from "../lib/site.ts";
 
 interface Props {
   site: SiteData;
   state: StateView;
+  /** True when a pump price sits above the panel, so the note can say the tax is inside it. */
+  priced?: boolean;
 }
-const { site, state: s } = Astro.props;
+const { site, state: s, priced = false } = Astro.props;
 const tax = site.tax!;
 const v = s.tax!;
-const spoken = spokenRank(v);
-const counted = rankedNote(tax);
+const rank = rankLabel(v);
 const since = sinceLabel(v);
 // "District of Columbia tax" wraps on a phone, and DC is what people call it.
 const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
 ---
-<section class="section wrap tax" aria-labelledby="tax-title">
-  <div class="section-head">
-    <h2 id="tax-title"><Icon name="state-tax" size={24} class="head-mark" />Tax on every gallon</h2>
-    <p>Tax is part of what you pay at the pump. These rates come from a yearly federal table, not from the price survey.</p>
-  </div>
-
-  <dl class="tax-stats">
+<section aria-labelledby="tax-title">
+  <div class="sh"><h2 id="tax-title">Tax</h2><p class="meta">FHWA table MF-121T, {tax.reporting_period}</p></div>
+  <dl class="stats">
     <div>
       <dt>{stateLabel}</dt>
       {v.outOfDate ? (
-        <dd class="muted">Out of date</dd>
+        <>
+          <dd class="w">Out of date</dd>
+          <dd class="s">FHWA's rate is old</dd>
+        </>
       ) : v.state !== null ? (
         <>
-          <dd><span class="sr-only">{spokenCpg(v.state)}</span><span aria-hidden="true">{formatCpg(v.state)}</span></dd>
-          {since && <dd class="small muted">{since}</dd>}
+          <dd>{formatCpg(v.state)}</dd>
+          <dd class="s">{since ?? "A gallon"}</dd>
         </>
       ) : (
-        <dd class="muted">Not in FHWA's table</dd>
+        <>
+          <dd class="w">Not listed</dd>
+          <dd class="s">FHWA's table has no rate</dd>
+        </>
       )}
     </div>
     <div>
       <dt>Federal tax</dt>
-      <dd><span class="sr-only">{spokenCpg(v.federal)}</span><span aria-hidden="true">{formatCpg(v.federal)}</span></dd>
-      <dd class="small muted">Same in every state</dd>
+      <dd>{formatCpg(v.federal)}</dd>
+      <dd class="s">Same everywhere</dd>
     </div>
-    {v.total !== null && (
-      <div class="total">
-        <dt>Total tax</dt>
-        <dd><span class="sr-only">{spokenCpg(v.total)}</span><span aria-hidden="true">{formatCpg(v.total)}</span></dd>
-        <dd class="small muted">State plus federal</dd>
-      </div>
-    )}
-    {v.rank !== null && (
-      <div>
-        <dt>Rank among states</dt>
-        <dd><span class="sr-only">{spoken}</span><span aria-hidden="true">{rankLabel(v)}</span></dd>
-        <dd class="small muted" aria-hidden="true">of {v.ranked}</dd>
-      </div>
-    )}
+    <div>
+      <dt>Total tax</dt>
+      {v.total !== null ? (
+        <>
+          <dd>{formatCpg(v.total)}</dd>
+          <dd class="s">State plus federal</dd>
+        </>
+      ) : (
+        <>
+          <dd class="w">n/a</dd>
+          <dd class="s">Needs a state rate</dd>
+        </>
+      )}
+    </div>
+    <div>
+      <dt>Rank</dt>
+      {rank ? (
+        <>
+          <dd>{rank}</dd>
+          <dd class="s">of {v.ranked} with a current rate</dd>
+        </>
+      ) : (
+        <>
+          <dd class="w">Not ranked</dd>
+          <dd class="s">No current rate</dd>
+        </>
+      )}
+    </div>
   </dl>
-
-  {v.note && <p class="tax-note">{v.note}</p>}
-  <p class="small muted fine">{tax.scope}</p>
-  <p class="small muted fine">
-    {taxVintage(tax)}{counted ? ` ${counted}` : ""}
-  </p>
+  {v.note && <p class="fine note">{v.note}</p>}
+  <p class="fine note">{tax.scope} {taxVintage(tax)}{priced && " Tax is already inside the pump price above."}</p>
 </section>
-
-<style>
-  .section-head :global(.head-mark) {
-    margin-right: 10px;
-  }
-  .tax-stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-5);
-    margin: 0;
-  }
-  @media (max-width: 899px) {
-    .tax-stats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  .tax-stats > div {
-    /* a hairline, not the 2px ink rule the measured price stats wear */
-    border-top: 1px solid var(--hairline-strong);
-    padding-top: var(--space-3);
-    min-width: 0;
-  }
-  .tax-stats > div.total {
-    border-top-color: var(--ink);
-  }
-  .tax-stats dt {
-    font-size: 15px;
-    color: var(--ink-2);
-    font-weight: 600;
-  }
-  .tax-stats dd {
-    margin: 4px 0 0;
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 1.25;
-    font-variant-numeric: tabular-nums;
-  }
-  .tax-stats dd.muted {
-    font-weight: 600;
-  }
-  .tax-stats dd.small {
-    font-size: var(--fs-small);
-    font-weight: 400;
-  }
-  @media (max-width: 479px) {
-    .tax-stats dd {
-      font-size: 18px;
-    }
-  }
-  .tax-note {
-    max-width: 68ch;
-    margin-top: var(--space-5);
-  }
-  .fine {
-    max-width: 68ch;
-    margin-top: var(--space-3);
-  }
-  .tax-stats + .fine {
-    margin-top: var(--space-5);
-  }
-  .fine + .fine {
-    margin-top: var(--space-1);
-  }
-</style>

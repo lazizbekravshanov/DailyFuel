@@ -4,8 +4,8 @@ import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { loadRawData, type TaxFile } from "./data.ts";
 import {
-  formatCpg, inSentence, newestRate, ordinal, rankLabel, rankedNote, sinceLabel, spokenCpg, spokenRank, taxViews,
-  taxVintage, toMils,
+  formatCpg, inSentence, newestRate, ordinal, quoteCpg, rankLabel, rankedNote, sinceLabel, spokenCpg, spokenRank,
+  taxViews, taxVintage, toMils,
 } from "./tax.ts";
 
 function file(
@@ -44,6 +44,12 @@ describe("cents a gallon", () => {
     expect(formatCpg(29.75)).toBe("29.75¢");
     expect(formatCpg(32.299)).toBe("32.299¢");
     expect(formatCpg(74.099999999999994)).toBe("74.1¢");
+  });
+
+  it("drops the unit in a table cell, where the head says TAX ¢", () => {
+    expect(quoteCpg(30)).toBe("30.0");
+    expect(quoteCpg(46.85)).toBe("46.85");
+    expect(quoteCpg(74.1)).toBe("74.1");
   });
 
   it("counts in thousandths of a cent so sums are exact", () => {
