@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dailyfuel/map-places/1",
+  "title": "The most populous US places plus every state capital, from GeoNames, for the corridor tool's picker",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "source", "source_url", "licence", "licence_url", "attribution", "attribution_url", "fetched",
+    "modified", "rule", "top", "fields", "precision", "encoding", "counts", "places"
+  ],
+  "properties": {
+    "schema": { "const": "dailyfuel/map-places/1" },
+    "source": { "type": "string", "pattern": "GeoNames" },
+    "source_url": { "type": "string", "format": "uri" },
+    "licence": { "type": "string", "pattern": "CC BY 4\\.0" },
+    "licence_url": { "type": "string", "format": "uri" },
+    "attribution": { "const": "Place names: GeoNames, CC BY 4.0" },
+    "attribution_url": { "type": "string", "format": "uri" },
+    "fetched": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "modified": { "type": ["string", "null"], "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "rule": { "type": "string", "minLength": 1 },
+    "top": { "type": "integer", "minimum": 1 },
+    "fields": { "const": ["name", "state", "lat", "lon"] },
+    "precision": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "encoding": { "type": "string", "minLength": 1 },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["us_rows", "eligible", "places", "top", "capitals_added", "capitals"],
+      "properties": {
+        "us_rows": { "type": "integer", "minimum": 0 },
+        "eligible": { "type": "integer", "minimum": 0 },
+        "places": { "type": "integer", "minimum": 51 },
+        "top": { "type": "integer", "minimum": 0 },
+        "capitals_added": { "type": "integer", "minimum": 0, "maximum": 51 },
+        "capitals": { "type": "integer", "minimum": 51 }
+      }
+    },
+    "places": {
+      "description": "Columns of equal length, one entry per place",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "state", "lat", "lon"],
+      "properties": {
+        "name": { "type": "array", "minItems": 51, "items": { "type": "string", "minLength": 1 } },
+        "state": { "type": "array", "minItems": 51, "items": { "type": "string", "pattern": "^[A-Z]{2}$" } },
+        "lat": { "type": "array", "minItems": 51, "items": { "type": "integer" } },
+        "lon": { "type": "array", "minItems": 51, "items": { "type": "integer" } }
+      }
+    }
+  }
+}
