@@ -1,0 +1,168 @@
+{
+  "schema": "dailyfuel/map-coverage/1",
+  "note": "How much of the real world the OpenStreetMap layers hold, so the map legend can say so. Chain names are used only to identify locations; DailyFuel is not affiliated with or endorsed by any chain.",
+  "chains": {
+    "measured": "2026-09-21",
+    "measured_osm_base": "2026-09-20T01:32:50Z",
+    "match_m": 500,
+    "note": "Measured once against each chain's own locator. Their terms forbid keeping copies, so the lists are not in this repo and these figures are not recomputed by the build.",
+    "rows": [
+      {
+        "brands": [
+          "loves"
+        ],
+        "osm_sites": 480,
+        "osm_sites_measured": 480,
+        "official_sites": 680,
+        "matched": 479,
+        "share": 0.704,
+        "method": "official sites with an OSM site within 500 m",
+        "official_source": "Love's store list on loves.com"
+      },
+      {
+        "brands": [
+          "pilot",
+          "flyingj"
+        ],
+        "osm_sites": 459,
+        "osm_sites_measured": 459,
+        "official_sites": 817,
+        "matched": null,
+        "share": 0.562,
+        "method": "OSM sites over the official count",
+        "official_source": "Pilot Flying J US store pages, pilotflyingj.com sitemap"
+      },
+      {
+        "brands": [
+          "ta"
+        ],
+        "osm_sites": 72,
+        "osm_sites_measured": 72,
+        "official_sites": 272,
+        "matched": 69,
+        "share": 0.254,
+        "method": "official sites with an OSM site within 500 m",
+        "official_source": "TA and TA Express site list on ta-petro.com"
+      },
+      {
+        "brands": [
+          "petro"
+        ],
+        "osm_sites": 58,
+        "osm_sites_measured": 58,
+        "official_sites": 77,
+        "matched": 30,
+        "share": 0.39,
+        "method": "official sites with an OSM site within 500 m",
+        "official_source": "Petro site list on ta-petro.com"
+      },
+      {
+        "brands": [
+          "roadranger"
+        ],
+        "osm_sites": 32,
+        "osm_sites_measured": 32,
+        "official_sites": 55,
+        "matched": 29,
+        "share": 0.527,
+        "method": "official sites with an OSM site within 500 m",
+        "official_source": "Road Ranger locator on roadrangerusa.com"
+      },
+      {
+        "brands": [
+          "one9"
+        ],
+        "osm_sites": 30,
+        "osm_sites_measured": 30,
+        "official_sites": null,
+        "matched": null,
+        "share": null,
+        "method": "no official count",
+        "official_source": "no public count found"
+      }
+    ]
+  },
+  "weigh": {
+    "measured": "2026-09-19",
+    "osm_base": "2026-09-20T01:22:43Z",
+    "match_km": 1.5,
+    "official": 255,
+    "matched": 110,
+    "share": 0.431,
+    "states": {
+      "AK": {
+        "official": 9,
+        "matched": 9,
+        "layer_filter": null
+      },
+      "AZ": {
+        "official": 13,
+        "matched": 7,
+        "layer_filter": "Active equals YES"
+      },
+      "CA": {
+        "official": 53,
+        "matched": 21,
+        "layer_filter": null
+      },
+      "CO": {
+        "official": 15,
+        "matched": 13,
+        "layer_filter": "Port_Name excludes Future"
+      },
+      "FL": {
+        "official": 21,
+        "matched": 20,
+        "layer_filter": "Facility_T excludes Rest Area"
+      },
+      "IA": {
+        "official": 11,
+        "matched": 7,
+        "layer_filter": null
+      },
+      "IL": {
+        "official": 28,
+        "matched": 10,
+        "layer_filter": null
+      },
+      "LA": {
+        "official": 20,
+        "matched": 8,
+        "layer_filter": "StationType startswith Station"
+      },
+      "MD": {
+        "official": 25,
+        "matched": 3,
+        "layer_filter": null
+      },
+      "MT": {
+        "official": 18,
+        "matched": 2,
+        "layer_filter": "TYPE contains Staff"
+      },
+      "NC": {
+        "official": 16,
+        "matched": 6,
+        "layer_filter": "Type startswith Phys"
+      },
+      "OK": {
+        "official": 13,
+        "matched": 2,
+        "layer_filter": "FAC_STATUS startswith IN OPERATION"
+      },
+      "WI": {
+        "official": 13,
+        "matched": 2,
+        "layer_filter": null
+      }
+    },
+    "note": "Official points from state DOT layers with an OSM candidate within match_km. The layers are only used for this count; several carry no reuse licence.",
+    "reference": {
+      "count": 680,
+      "year": 2009,
+      "text": "approximately 680 weigh stations are in operation in the United States",
+      "source": "FHWA, Concept of Operations for Virtual Weigh Station, section 2, 2009",
+      "source_url": "https://ops.fhwa.dot.gov/publications/fhwahop09051/sec02.htm"
+    }
+  }
+}

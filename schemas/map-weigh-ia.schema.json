@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dailyfuel/map-weigh-ia/1",
+  "title": "Iowa DOT weigh scales",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "source", "source_url", "licence", "licence_url", "terms_url", "attribution",
+    "query_url", "records_edited", "fetched", "counts", "sites"
+  ],
+  "properties": {
+    "schema": { "const": "dailyfuel/map-weigh-ia/1" },
+    "source": { "type": "string", "minLength": 1 },
+    "source_url": { "type": "string", "format": "uri" },
+    "licence": { "type": "string", "pattern": "CC BY 4.0" },
+    "licence_url": { "type": "string", "format": "uri" },
+    "terms_url": { "type": "string", "format": "uri" },
+    "attribution": { "type": "string", "pattern": "Iowa Department of Transportation" },
+    "query_url": { "type": "string", "format": "uri" },
+    "records_edited": { "type": ["string", "null"], "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "fetched": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rows", "sites", "dropped_outside_iowa"],
+      "properties": {
+        "rows": { "type": "integer", "minimum": 0 },
+        "sites": { "type": "integer", "minimum": 0 },
+        "dropped_outside_iowa": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "sites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lat", "lon", "name", "route", "direction", "city", "id"],
+        "properties": {
+          "lat": { "type": "number", "minimum": 40, "maximum": 44 },
+          "lon": { "type": "number", "minimum": -97, "maximum": -90 },
+          "name": { "type": "string", "minLength": 1 },
+          "route": { "type": ["string", "null"], "minLength": 1 },
+          "direction": { "type": ["string", "null"], "minLength": 1 },
+          "city": { "type": ["string", "null"], "minLength": 1 },
+          "id": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

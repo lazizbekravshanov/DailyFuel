@@ -1,0 +1,10815 @@
+{
+  "schema": "dailyfuel/map-stations/1",
+  "source": "OpenStreetMap, fetched through the Overpass API",
+  "source_url": "https://www.openstreetmap.org",
+  "licence": "Open Database License (ODbL) 1.0",
+  "licence_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "attribution": "© OpenStreetMap contributors",
+  "attribution_url": "https://www.openstreetmap.org/copyright",
+  "query": "[out:json][timeout:240];area[\"ISO3166-1\"=\"US\"][\"admin_level\"=\"2\"]->.us;(nwr(area.us)[amenity=fuel][\"brand:wikidata\"~\"^(Q1872496|Q64128179|Q64130592|Q7835892|Q64051305|Q7339377)$\"];nwr(area.us)[amenity=fuel][brand~\"^(ONE9|One9)$\"];nwr(area.us)[amenity=fuel][~\"^(name|brand|operator|network)$\"~\"ambest\",i];);out center tags;",
+  "osm_base": "2026-09-20T01:32:50Z",
+  "fetched": "2026-09-19",
+  "cluster_m": 300,
+  "brands": {
+    "loves": {
+      "name": "Love's",
+      "wikidata": "Q1872496",
+      "sites": 480
+    },
+    "pilot": {
+      "name": "Pilot",
+      "wikidata": "Q64128179",
+      "sites": 336
+    },
+    "flyingj": {
+      "name": "Flying J",
+      "wikidata": "Q64130592",
+      "sites": 123
+    },
+    "ta": {
+      "name": "TA",
+      "wikidata": "Q7835892",
+      "sites": 72
+    },
+    "petro": {
+      "name": "Petro",
+      "wikidata": "Q64051305",
+      "sites": 58
+    },
+    "one9": {
+      "name": "ONE9",
+      "wikidata": null,
+      "sites": 30
+    },
+    "roadranger": {
+      "name": "Road Ranger",
+      "wikidata": "Q7339377",
+      "sites": 32
+    }
+  },
+  "counts": {
+    "elements": 1712,
+    "sites": 1131,
+    "dropped_ambest": 3,
+    "dropped_outside_us": 0
+  },
+  "sites": [
+    {
+      "lat": 26.336,
+      "lon": -98.14335,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w236128110",
+        "w236128108"
+      ]
+    },
+    {
+      "lat": 27.68572,
+      "lon": -99.4652,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w229304831",
+        "w229304828"
+      ]
+    },
+    {
+      "lat": 28.01006,
+      "lon": -82.30357,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w226885968",
+        "w226885966"
+      ]
+    },
+    {
+      "lat": 28.32621,
+      "lon": -82.32209,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w223428886",
+        "w223428884"
+      ]
+    },
+    {
+      "lat": 28.45268,
+      "lon": -99.23827,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w837508329",
+        "w837508331"
+      ]
+    },
+    {
+      "lat": 29.44637,
+      "lon": -98.36164,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w229315097",
+        "w229315095"
+      ]
+    },
+    {
+      "lat": 29.77125,
+      "lon": -95.12521,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12164999677",
+        "n12164999676"
+      ]
+    },
+    {
+      "lat": 29.79519,
+      "lon": -95.03283,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w225720059",
+        "w225720064"
+      ]
+    },
+    {
+      "lat": 29.99872,
+      "lon": -95.42741,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w236128752",
+        "w236128750"
+      ]
+    },
+    {
+      "lat": 30.11669,
+      "lon": -93.82007,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w236133148",
+        "w236133147"
+      ]
+    },
+    {
+      "lat": 30.19301,
+      "lon": -95.19276,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w236130699",
+        "w236130697"
+      ]
+    },
+    {
+      "lat": 30.49298,
+      "lon": -84.42925,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230492665",
+        "w230492663"
+      ]
+    },
+    {
+      "lat": 30.64161,
+      "lon": -83.19028,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w226930517",
+        "w1010818259",
+        "w226930516"
+      ]
+    },
+    {
+      "lat": 31.1406,
+      "lon": -81.57856,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n10062606870",
+        "n10062606869"
+      ]
+    },
+    {
+      "lat": 31.19087,
+      "lon": -101.44975,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n6324408991"
+      ]
+    },
+    {
+      "lat": 31.19132,
+      "lon": -85.40063,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230484017"
+      ]
+    },
+    {
+      "lat": 31.40075,
+      "lon": -103.48635,
+      "brand": "flyingj",
+      "name": "Flying J Travel Plaza",
+      "osm": [
+        "n1580677199"
+      ]
+    },
+    {
+      "lat": 31.5079,
+      "lon": -97.14536,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w236134447",
+        "w236134445"
+      ]
+    },
+    {
+      "lat": 31.85351,
+      "lon": -103.06767,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w1284777366",
+        "w1284777367"
+      ]
+    },
+    {
+      "lat": 31.8646,
+      "lon": -102.30207,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w415836423",
+        "w415836422"
+      ]
+    },
+    {
+      "lat": 32.44431,
+      "lon": -93.97928,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w225809552",
+        "w225809550"
+      ]
+    },
+    {
+      "lat": 32.46133,
+      "lon": -99.87259,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w236134093",
+        "w236134091"
+      ]
+    },
+    {
+      "lat": 32.73206,
+      "lon": -111.5498,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n4719302823",
+        "n4719302824"
+      ]
+    },
+    {
+      "lat": 33.20748,
+      "lon": -84.06366,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w219843901"
+      ]
+    },
+    {
+      "lat": 33.34497,
+      "lon": -96.5888,
+      "brand": "flyingj",
+      "name": "flying j",
+      "osm": [
+        "w225736502",
+        "w544250303"
+      ]
+    },
+    {
+      "lat": 33.46077,
+      "lon": -112.20498,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w130280941",
+        "n1660172680"
+      ]
+    },
+    {
+      "lat": 33.51322,
+      "lon": -93.94839,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230490202",
+        "w230490200"
+      ]
+    },
+    {
+      "lat": 33.56224,
+      "lon": -86.83109,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230483737",
+        "w230483735"
+      ]
+    },
+    {
+      "lat": 33.59289,
+      "lon": -101.84132,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w236129760",
+        "w236129763"
+      ]
+    },
+    {
+      "lat": 33.60208,
+      "lon": -114.52303,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12007395538",
+        "w230486089"
+      ]
+    },
+    {
+      "lat": 33.89058,
+      "lon": -98.48316,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w236135485",
+        "w236135484"
+      ]
+    },
+    {
+      "lat": 34.01541,
+      "lon": -117.52533,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w978157524",
+        "w978157523"
+      ]
+    },
+    {
+      "lat": 34.06326,
+      "lon": -117.49378,
+      "brand": "flyingj",
+      "name": "flying J",
+      "osm": [
+        "n12101468445"
+      ]
+    },
+    {
+      "lat": 34.0647,
+      "lon": -81.02351,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n3076780914"
+      ]
+    },
+    {
+      "lat": 34.20029,
+      "lon": -97.1677,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n1608318101"
+      ]
+    },
+    {
+      "lat": 34.4081,
+      "lon": -117.39864,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w125111198"
+      ]
+    },
+    {
+      "lat": 34.57681,
+      "lon": -84.94704,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230493063",
+        "w230493064"
+      ]
+    },
+    {
+      "lat": 34.81722,
+      "lon": -118.88673,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w473000129"
+      ]
+    },
+    {
+      "lat": 34.8541,
+      "lon": -117.08114,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12101432337",
+        "n10088156760"
+      ]
+    },
+    {
+      "lat": 34.85572,
+      "lon": -81.00589,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n11087112606",
+        "n12196955564"
+      ]
+    },
+    {
+      "lat": 34.92884,
+      "lon": -89.79341,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230879553",
+        "w230879554"
+      ]
+    },
+    {
+      "lat": 35.01574,
+      "lon": -110.67434,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w144341226",
+        "w144341264"
+      ]
+    },
+    {
+      "lat": 35.07894,
+      "lon": -106.74652,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w888809753"
+      ]
+    },
+    {
+      "lat": 35.15388,
+      "lon": -90.14435,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w219424151"
+      ]
+    },
+    {
+      "lat": 35.15906,
+      "lon": -103.70364,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w226328543"
+      ]
+    },
+    {
+      "lat": 35.19372,
+      "lon": -101.72403,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w236120078"
+      ]
+    },
+    {
+      "lat": 35.21982,
+      "lon": -114.00721,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230486476",
+        "w230486477"
+      ]
+    },
+    {
+      "lat": 35.28371,
+      "lon": -93.0901,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230489757"
+      ]
+    },
+    {
+      "lat": 35.47588,
+      "lon": -95.53873,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12327624253",
+        "n12327624251",
+        "n12327624252"
+      ]
+    },
+    {
+      "lat": 35.48056,
+      "lon": -108.43318,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12126022978"
+      ]
+    },
+    {
+      "lat": 35.53116,
+      "lon": -119.18746,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n1230095129"
+      ]
+    },
+    {
+      "lat": 35.57468,
+      "lon": -78.14593,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n5486357422"
+      ]
+    },
+    {
+      "lat": 35.60972,
+      "lon": -115.39171,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w264215609"
+      ]
+    },
+    {
+      "lat": 36.16223,
+      "lon": -95.83247,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w99402458",
+        "w99402478"
+      ]
+    },
+    {
+      "lat": 36.48674,
+      "lon": -80.74659,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w265727846",
+        "w265727848"
+      ]
+    },
+    {
+      "lat": 36.69691,
+      "lon": -87.45471,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n11367132284"
+      ]
+    },
+    {
+      "lat": 36.78331,
+      "lon": -114.14032,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w818872556",
+        "w818873126"
+      ]
+    },
+    {
+      "lat": 36.93596,
+      "lon": -80.99286,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w220888560"
+      ]
+    },
+    {
+      "lat": 36.94472,
+      "lon": -80.94624,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12245925364",
+        "n11004530277"
+      ]
+    },
+    {
+      "lat": 37.7523,
+      "lon": -99.98028,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n2906575203",
+        "n12636139245"
+      ]
+    },
+    {
+      "lat": 37.93336,
+      "lon": -77.47373,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w220795018"
+      ]
+    },
+    {
+      "lat": 37.93874,
+      "lon": -77.46706,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w220794341"
+      ]
+    },
+    {
+      "lat": 38.11716,
+      "lon": -121.39384,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n9826816447"
+      ]
+    },
+    {
+      "lat": 38.15647,
+      "lon": -85.06746,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n10075493296",
+        "n10075493298"
+      ]
+    },
+    {
+      "lat": 38.17484,
+      "lon": -87.55221,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w223487410",
+        "n12105236858"
+      ]
+    },
+    {
+      "lat": 38.29301,
+      "lon": -112.65342,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w235915020",
+        "w1524706692",
+        "w235915022"
+      ]
+    },
+    {
+      "lat": 38.76041,
+      "lon": -90.06546,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w223480507"
+      ]
+    },
+    {
+      "lat": 38.78863,
+      "lon": -112.08189,
+      "brand": "flyingj",
+      "name": "Flying J Travel Plaza",
+      "osm": [
+        "w235915876",
+        "w235915879"
+      ]
+    },
+    {
+      "lat": 38.84007,
+      "lon": -91.22767,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n13273784145"
+      ]
+    },
+    {
+      "lat": 38.85762,
+      "lon": -84.62551,
+      "brand": "flyingj",
+      "name": "Flying J Walton",
+      "osm": [
+        "w119961008",
+        "w119960983"
+      ]
+    },
+    {
+      "lat": 38.87912,
+      "lon": -97.59304,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12450059201"
+      ]
+    },
+    {
+      "lat": 39.13052,
+      "lon": -94.49708,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w229624739",
+        "w1322076060"
+      ]
+    },
+    {
+      "lat": 39.13381,
+      "lon": -88.5664,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w223479936",
+        "w223479935"
+      ]
+    },
+    {
+      "lat": 39.25555,
+      "lon": -112.11661,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w1176017369",
+        "w235915986"
+      ]
+    },
+    {
+      "lat": 39.27552,
+      "lon": -103.709,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n9984605765"
+      ]
+    },
+    {
+      "lat": 39.29061,
+      "lon": -78.08659,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w220739938"
+      ]
+    },
+    {
+      "lat": 39.54947,
+      "lon": -86.03636,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n941981026",
+        "n941981030"
+      ]
+    },
+    {
+      "lat": 39.63834,
+      "lon": -75.80596,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w1120241304"
+      ]
+    },
+    {
+      "lat": 39.68547,
+      "lon": -111.8369,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n13953887861",
+        "w235915348"
+      ]
+    },
+    {
+      "lat": 39.69306,
+      "lon": -86.19096,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w221382313",
+        "r15004903"
+      ]
+    },
+    {
+      "lat": 39.7626,
+      "lon": -104.79334,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n3243666016",
+        "w226616572"
+      ]
+    },
+    {
+      "lat": 39.85138,
+      "lon": -85.41298,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12163118085",
+        "n12163118084"
+      ]
+    },
+    {
+      "lat": 39.90169,
+      "lon": -84.19238,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w1195987447"
+      ]
+    },
+    {
+      "lat": 40.17002,
+      "lon": -79.73219,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w220626590"
+      ]
+    },
+    {
+      "lat": 40.1872,
+      "lon": -111.64161,
+      "brand": "flyingj",
+      "name": "Flying J Truck Lanes",
+      "osm": [
+        "w241716672",
+        "w241716670"
+      ]
+    },
+    {
+      "lat": 40.23491,
+      "lon": -77.12253,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w717770300",
+        "w888021667"
+      ]
+    },
+    {
+      "lat": 40.26732,
+      "lon": -82.92451,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w229323376",
+        "w229323378"
+      ]
+    },
+    {
+      "lat": 40.6858,
+      "lon": -112.26653,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w229595013",
+        "w229595012"
+      ]
+    },
+    {
+      "lat": 40.72682,
+      "lon": -111.91609,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w229730980",
+        "w229730979"
+      ]
+    },
+    {
+      "lat": 40.8364,
+      "lon": -111.93386,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12197868155",
+        "n12197868154"
+      ]
+    },
+    {
+      "lat": 40.96033,
+      "lon": -117.74771,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230880672",
+        "w1099977426"
+      ]
+    },
+    {
+      "lat": 41.01901,
+      "lon": -76.79601,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n10923121075"
+      ]
+    },
+    {
+      "lat": 41.02819,
+      "lon": -77.52279,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w220645845",
+        "w220645843"
+      ]
+    },
+    {
+      "lat": 41.05219,
+      "lon": -102.07052,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n7502086792"
+      ]
+    },
+    {
+      "lat": 41.05971,
+      "lon": -84.9803,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n4593620430"
+      ]
+    },
+    {
+      "lat": 41.07217,
+      "lon": -111.97903,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w34196745"
+      ]
+    },
+    {
+      "lat": 41.10147,
+      "lon": -100.72634,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n13443771149"
+      ]
+    },
+    {
+      "lat": 41.23097,
+      "lon": -112.0072,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12142985739",
+        "n10923316992"
+      ]
+    },
+    {
+      "lat": 41.3687,
+      "lon": -89.0985,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230774785",
+        "w230774787"
+      ]
+    },
+    {
+      "lat": 41.42369,
+      "lon": -112.05165,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w160558029",
+        "w160558018"
+      ]
+    },
+    {
+      "lat": 41.60329,
+      "lon": -90.62518,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w235551493"
+      ]
+    },
+    {
+      "lat": 41.60926,
+      "lon": -109.23084,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12167548978",
+        "n3931967108"
+      ]
+    },
+    {
+      "lat": 41.7897,
+      "lon": -80.85577,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w220780613",
+        "w220780610"
+      ]
+    },
+    {
+      "lat": 41.82455,
+      "lon": -75.6826,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w220548459",
+        "w220548462"
+      ]
+    },
+    {
+      "lat": 42.08702,
+      "lon": -110.94793,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n6556592496",
+        "n9199725897"
+      ]
+    },
+    {
+      "lat": 42.13678,
+      "lon": -83.24008,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n8592563133"
+      ]
+    },
+    {
+      "lat": 42.49377,
+      "lon": -88.999,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w827484727",
+        "w832747309"
+      ]
+    },
+    {
+      "lat": 42.66034,
+      "lon": -112.20651,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w230495145",
+        "w230495147"
+      ]
+    },
+    {
+      "lat": 42.78716,
+      "lon": -84.67762,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n8255967372"
+      ]
+    },
+    {
+      "lat": 43.43965,
+      "lon": -112.11571,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w375323035",
+        "w375323034"
+      ]
+    },
+    {
+      "lat": 43.4515,
+      "lon": -83.89407,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n8038471969"
+      ]
+    },
+    {
+      "lat": 43.53907,
+      "lon": -123.28864,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w261971113"
+      ]
+    },
+    {
+      "lat": 43.60323,
+      "lon": -96.76717,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n2449961873",
+        "n2449961903"
+      ]
+    },
+    {
+      "lat": 43.66207,
+      "lon": -116.65474,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n9225653472"
+      ]
+    },
+    {
+      "lat": 44.27722,
+      "lon": -105.49509,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w226827099",
+        "w226827097"
+      ]
+    },
+    {
+      "lat": 44.29523,
+      "lon": -90.8298,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n2395415489",
+        "n597551581"
+      ]
+    },
+    {
+      "lat": 45.23401,
+      "lon": -122.80991,
+      "brand": "flyingj",
+      "name": "Flying J Gasoline",
+      "osm": [
+        "w1018155712",
+        "w1018155713"
+      ]
+    },
+    {
+      "lat": 45.2974,
+      "lon": -118.0435,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n5048592723"
+      ]
+    },
+    {
+      "lat": 45.77434,
+      "lon": -111.19965,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w923620017"
+      ]
+    },
+    {
+      "lat": 46.83339,
+      "lon": -96.8444,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w225056624",
+        "w225056623"
+      ]
+    },
+    {
+      "lat": 46.92949,
+      "lon": -104.00887,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w231125134",
+        "w231125135"
+      ]
+    },
+    {
+      "lat": 46.9518,
+      "lon": -122.94077,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "w1148694683",
+        "w974517700"
+      ]
+    },
+    {
+      "lat": 47.66335,
+      "lon": -117.31554,
+      "brand": "flyingj",
+      "name": "Flying J",
+      "osm": [
+        "n12300433387"
+      ]
+    },
+    {
+      "lat": 26.24947,
+      "lon": -97.72653,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12141597455",
+        "n12141597456"
+      ]
+    },
+    {
+      "lat": 26.71433,
+      "lon": -81.81502,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w577003309"
+      ]
+    },
+    {
+      "lat": 27.41368,
+      "lon": -80.39778,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w223432255",
+        "w223432257"
+      ]
+    },
+    {
+      "lat": 27.52985,
+      "lon": -97.8422,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225727156",
+        "w225727153"
+      ]
+    },
+    {
+      "lat": 28.01145,
+      "lon": -97.53262,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1228047570",
+        "w1228047571"
+      ]
+    },
+    {
+      "lat": 28.04554,
+      "lon": -99.34884,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225727437",
+        "w225727435"
+      ]
+    },
+    {
+      "lat": 28.15529,
+      "lon": -81.80074,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224604084",
+        "n11684406538"
+      ]
+    },
+    {
+      "lat": 28.24379,
+      "lon": -81.65769,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1222403122",
+        "w1178121548"
+      ]
+    },
+    {
+      "lat": 28.66673,
+      "lon": -80.87342,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1086560745"
+      ]
+    },
+    {
+      "lat": 29.18466,
+      "lon": -98.84645,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w708340708",
+        "w708340707"
+      ]
+    },
+    {
+      "lat": 29.19646,
+      "lon": -95.45658,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w940756099",
+        "w940756098"
+      ]
+    },
+    {
+      "lat": 29.2679,
+      "lon": -82.1982,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1033376810",
+        "w1033376811"
+      ]
+    },
+    {
+      "lat": 29.33943,
+      "lon": -81.13494,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224604392"
+      ]
+    },
+    {
+      "lat": 29.39218,
+      "lon": -96.07712,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w919952205",
+        "w919952207"
+      ]
+    },
+    {
+      "lat": 29.56222,
+      "lon": -98.03459,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1012538956",
+        "w1012538957"
+      ]
+    },
+    {
+      "lat": 29.60223,
+      "lon": -82.08646,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5571348088",
+        "n11695252750"
+      ]
+    },
+    {
+      "lat": 29.65355,
+      "lon": -97.5923,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w75445625",
+        "w241955599"
+      ]
+    },
+    {
+      "lat": 29.69027,
+      "lon": -96.77704,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259765560",
+        "w1259765561"
+      ]
+    },
+    {
+      "lat": 29.70789,
+      "lon": -95.09252,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1310637934",
+        "w1310637933"
+      ]
+    },
+    {
+      "lat": 29.79742,
+      "lon": -95.36971,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225726413",
+        "w225726412"
+      ]
+    },
+    {
+      "lat": 29.7984,
+      "lon": -95.0328,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w622930650",
+        "w225720247"
+      ]
+    },
+    {
+      "lat": 29.79856,
+      "lon": -95.26908,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225725928",
+        "w225725927"
+      ]
+    },
+    {
+      "lat": 29.98209,
+      "lon": -98.90298,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w798305127"
+      ]
+    },
+    {
+      "lat": 30.00263,
+      "lon": -82.598,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w920174640"
+      ]
+    },
+    {
+      "lat": 30.06469,
+      "lon": -95.90549,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225734716",
+        "w225734717"
+      ]
+    },
+    {
+      "lat": 30.173,
+      "lon": -93.58772,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225870549"
+      ]
+    },
+    {
+      "lat": 30.25184,
+      "lon": -92.19437,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n8451778047"
+      ]
+    },
+    {
+      "lat": 30.25323,
+      "lon": -93.01343,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n8452005342"
+      ]
+    },
+    {
+      "lat": 30.29126,
+      "lon": -81.98532,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1058592380",
+        "w1058592373"
+      ]
+    },
+    {
+      "lat": 30.35426,
+      "lon": -95.09125,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n3613030734"
+      ]
+    },
+    {
+      "lat": 30.3767,
+      "lon": -83.29825,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224604104"
+      ]
+    },
+    {
+      "lat": 30.41908,
+      "lon": -89.19048,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10816216823"
+      ]
+    },
+    {
+      "lat": 30.45242,
+      "lon": -88.93358,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w165891523",
+        "w225872934"
+      ]
+    },
+    {
+      "lat": 30.46278,
+      "lon": -81.67472,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259760539",
+        "w1259760537"
+      ]
+    },
+    {
+      "lat": 30.46759,
+      "lon": -89.68804,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n13759161246",
+        "w1378110024"
+      ]
+    },
+    {
+      "lat": 30.53195,
+      "lon": -88.23803,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11711684938",
+        "n11711684937"
+      ]
+    },
+    {
+      "lat": 30.57111,
+      "lon": -100.58563,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w997224844",
+        "w997224843"
+      ]
+    },
+    {
+      "lat": 30.73409,
+      "lon": -86.34882,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11684347254",
+        "n4396520321"
+      ]
+    },
+    {
+      "lat": 30.74214,
+      "lon": -88.11039,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12187064869"
+      ]
+    },
+    {
+      "lat": 30.74899,
+      "lon": -85.38293,
+      "brand": "loves",
+      "name": "Love's Gas (Autos)",
+      "osm": [
+        "n2508814089"
+      ]
+    },
+    {
+      "lat": 30.89354,
+      "lon": -102.85247,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259614187",
+        "w1259614188"
+      ]
+    },
+    {
+      "lat": 30.89524,
+      "lon": -96.60232,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12263024034",
+        "n12263024033"
+      ]
+    },
+    {
+      "lat": 31.04024,
+      "lon": -104.8194,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w995061215",
+        "w995061214"
+      ]
+    },
+    {
+      "lat": 31.13776,
+      "lon": -81.57172,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5486357522",
+        "n10062549715"
+      ]
+    },
+    {
+      "lat": 31.19045,
+      "lon": -90.48629,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225872641",
+        "w225872643"
+      ]
+    },
+    {
+      "lat": 31.1914,
+      "lon": -97.31226,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1117057025",
+        "w1117057024"
+      ]
+    },
+    {
+      "lat": 31.36078,
+      "lon": -92.58848,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11711803164",
+        "n11114476149"
+      ]
+    },
+    {
+      "lat": 31.41608,
+      "lon": -83.50304,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225050954"
+      ]
+    },
+    {
+      "lat": 31.42759,
+      "lon": -85.61937,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1147422697",
+        "w1147422695"
+      ]
+    },
+    {
+      "lat": 31.58055,
+      "lon": -84.10712,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n8813073085"
+      ]
+    },
+    {
+      "lat": 31.72839,
+      "lon": -96.18257,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225725168",
+        "w225725165"
+      ]
+    },
+    {
+      "lat": 31.78327,
+      "lon": -89.05725,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1325280421",
+        "w1084278791"
+      ]
+    },
+    {
+      "lat": 31.81714,
+      "lon": -102.38099,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w211532667",
+        "w211532665"
+      ]
+    },
+    {
+      "lat": 31.85269,
+      "lon": -103.07041,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1284777363",
+        "w1284777364"
+      ]
+    },
+    {
+      "lat": 31.87458,
+      "lon": -89.75584,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n4960778722"
+      ]
+    },
+    {
+      "lat": 31.947,
+      "lon": -102.141,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w970498213"
+      ]
+    },
+    {
+      "lat": 31.96246,
+      "lon": -110.34542,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w188242058",
+        "w188242060",
+        "w188242064"
+      ]
+    },
+    {
+      "lat": 31.9765,
+      "lon": -83.75811,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1037320855"
+      ]
+    },
+    {
+      "lat": 31.9986,
+      "lon": -106.58119,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225718776",
+        "w225718777"
+      ]
+    },
+    {
+      "lat": 32.00922,
+      "lon": -97.09345,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w439602063"
+      ]
+    },
+    {
+      "lat": 32.10237,
+      "lon": -81.19488,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9559399059"
+      ]
+    },
+    {
+      "lat": 32.1612,
+      "lon": -94.31915,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257611846",
+        "w1257611845"
+      ]
+    },
+    {
+      "lat": 32.18385,
+      "lon": -81.45573,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n13665409842"
+      ]
+    },
+    {
+      "lat": 32.19401,
+      "lon": -96.89883,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n7724941762",
+        "n7724941761"
+      ]
+    },
+    {
+      "lat": 32.19614,
+      "lon": -86.41493,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259755651",
+        "w1259755653"
+      ]
+    },
+    {
+      "lat": 32.26682,
+      "lon": -109.8473,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12008950151",
+        "n12008950157"
+      ]
+    },
+    {
+      "lat": 32.2873,
+      "lon": -96.54428,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w829869340"
+      ]
+    },
+    {
+      "lat": 32.30552,
+      "lon": -102.54135,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w843603843",
+        "w843603842"
+      ]
+    },
+    {
+      "lat": 32.3221,
+      "lon": -89.34347,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9392696127"
+      ]
+    },
+    {
+      "lat": 32.33664,
+      "lon": -81.2595,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10091524181"
+      ]
+    },
+    {
+      "lat": 32.35397,
+      "lon": -108.73586,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226328204",
+        "w1034926392"
+      ]
+    },
+    {
+      "lat": 32.36253,
+      "lon": -90.66711,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11691931797",
+        "n10858239573"
+      ]
+    },
+    {
+      "lat": 32.3879,
+      "lon": -91.19775,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225869992",
+        "w225869988"
+      ]
+    },
+    {
+      "lat": 32.40321,
+      "lon": -99.38425,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1125955119",
+        "w1125955118"
+      ]
+    },
+    {
+      "lat": 32.4346,
+      "lon": -103.12096,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1040550612",
+        "w1040550611"
+      ]
+    },
+    {
+      "lat": 32.44188,
+      "lon": -98.69451,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225729682",
+        "w225729683"
+      ]
+    },
+    {
+      "lat": 32.44451,
+      "lon": -93.98311,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225809913",
+        "w225809912"
+      ]
+    },
+    {
+      "lat": 32.45099,
+      "lon": -100.44119,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w965456749",
+        "w965456750"
+      ]
+    },
+    {
+      "lat": 32.48294,
+      "lon": -97.01117,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225729185",
+        "w225729184"
+      ]
+    },
+    {
+      "lat": 32.49312,
+      "lon": -91.99148,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10967879439",
+        "n12175750098"
+      ]
+    },
+    {
+      "lat": 32.50828,
+      "lon": -95.64251,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w202119693",
+        "w225734266"
+      ]
+    },
+    {
+      "lat": 32.53678,
+      "lon": -85.08242,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11691918939",
+        "n10134120317"
+      ]
+    },
+    {
+      "lat": 32.58206,
+      "lon": -93.2489,
+      "brand": "loves",
+      "name": "Love's Gas Station",
+      "osm": [
+        "w225869958",
+        "w225869960"
+      ]
+    },
+    {
+      "lat": 32.59605,
+      "lon": -93.82936,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1355059987",
+        "w1355059988"
+      ]
+    },
+    {
+      "lat": 32.59857,
+      "lon": -97.31778,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w509072595",
+        "w225725249"
+      ]
+    },
+    {
+      "lat": 32.6041,
+      "lon": -90.07259,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225871274",
+        "w225871275"
+      ]
+    },
+    {
+      "lat": 32.64077,
+      "lon": -96.83968,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225721294"
+      ]
+    },
+    {
+      "lat": 32.68622,
+      "lon": -114.58279,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12263053681",
+        "n12263053680"
+      ]
+    },
+    {
+      "lat": 32.70561,
+      "lon": -80.8747,
+      "brand": "loves",
+      "name": "Love's Travel Stop",
+      "osm": [
+        "w585535320",
+        "w585534949"
+      ]
+    },
+    {
+      "lat": 32.7173,
+      "lon": -83.73309,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11691981009",
+        "n11691981008"
+      ]
+    },
+    {
+      "lat": 32.74286,
+      "lon": -97.74288,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1149476618",
+        "w225734869"
+      ]
+    },
+    {
+      "lat": 32.91821,
+      "lon": -96.41933,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225730086",
+        "w225730085"
+      ]
+    },
+    {
+      "lat": 32.94401,
+      "lon": -112.73331,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n914190265"
+      ]
+    },
+    {
+      "lat": 33.0382,
+      "lon": -115.62913,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12263051098",
+        "n12263051099"
+      ]
+    },
+    {
+      "lat": 33.11749,
+      "lon": -95.63682,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w895057544",
+        "w895057545"
+      ]
+    },
+    {
+      "lat": 33.15985,
+      "lon": -84.87129,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225050448"
+      ]
+    },
+    {
+      "lat": 33.16397,
+      "lon": -95.21803,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225729421",
+        "w225729423"
+      ]
+    },
+    {
+      "lat": 33.20798,
+      "lon": -84.05824,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9678370749"
+      ]
+    },
+    {
+      "lat": 33.22132,
+      "lon": -97.73809,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1054505828",
+        "w1054505830"
+      ]
+    },
+    {
+      "lat": 33.26198,
+      "lon": -94.15172,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w607517062",
+        "w607517061"
+      ]
+    },
+    {
+      "lat": 33.26315,
+      "lon": -97.17938,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w864708186",
+        "w864708188"
+      ]
+    },
+    {
+      "lat": 33.27895,
+      "lon": -87.09924,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w218492796",
+        "w218492781"
+      ]
+    },
+    {
+      "lat": 33.28025,
+      "lon": -111.96226,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n4854438923"
+      ]
+    },
+    {
+      "lat": 33.33072,
+      "lon": -91.29281,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11136615064",
+        "n11702013971"
+      ]
+    },
+    {
+      "lat": 33.34486,
+      "lon": -96.58439,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225718668",
+        "w225718671"
+      ]
+    },
+    {
+      "lat": 33.43115,
+      "lon": -112.5918,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w223537901",
+        "w223537903"
+      ]
+    },
+    {
+      "lat": 33.45802,
+      "lon": -80.73543,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11687451783",
+        "n11687451782"
+      ]
+    },
+    {
+      "lat": 33.45842,
+      "lon": -112.23953,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1004594293",
+        "w1004594292"
+      ]
+    },
+    {
+      "lat": 33.47223,
+      "lon": -94.46105,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1324215643",
+        "w1324215644"
+      ]
+    },
+    {
+      "lat": 33.51419,
+      "lon": -82.50365,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225050855",
+        "w225050857"
+      ]
+    },
+    {
+      "lat": 33.56239,
+      "lon": -83.49706,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1071762769"
+      ]
+    },
+    {
+      "lat": 33.59191,
+      "lon": -80.355,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n8792673039"
+      ]
+    },
+    {
+      "lat": 33.64227,
+      "lon": -101.83737,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w472419729",
+        "w472419731"
+      ]
+    },
+    {
+      "lat": 33.64745,
+      "lon": -85.50588,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n13770704750",
+        "n13770704758"
+      ]
+    },
+    {
+      "lat": 33.69132,
+      "lon": -85.18964,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225051151",
+        "w225051155"
+      ]
+    },
+    {
+      "lat": 33.69583,
+      "lon": -95.55535,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w764072053",
+        "w764072054"
+      ]
+    },
+    {
+      "lat": 33.79136,
+      "lon": -87.24245,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1258811613",
+        "w1258811614"
+      ]
+    },
+    {
+      "lat": 33.82889,
+      "lon": -93.39484,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224315972",
+        "w224315974"
+      ]
+    },
+    {
+      "lat": 33.88107,
+      "lon": -96.50007,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w988170790",
+        "w988170789"
+      ]
+    },
+    {
+      "lat": 33.88666,
+      "lon": -98.46847,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225735091"
+      ]
+    },
+    {
+      "lat": 33.92397,
+      "lon": -81.29087,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10780957295",
+        "n8196434810"
+      ]
+    },
+    {
+      "lat": 33.93357,
+      "lon": -86.19115,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w220391029",
+        "n12262904376"
+      ]
+    },
+    {
+      "lat": 33.99229,
+      "lon": -96.38179,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1694541779"
+      ]
+    },
+    {
+      "lat": 33.99875,
+      "lon": -96.42874,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1077589682",
+        "w1077589681"
+      ]
+    },
+    {
+      "lat": 34.00236,
+      "lon": -96.37312,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w608126120"
+      ]
+    },
+    {
+      "lat": 34.00479,
+      "lon": -95.10125,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12726420298"
+      ]
+    },
+    {
+      "lat": 34.02254,
+      "lon": -94.73974,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w971036495"
+      ]
+    },
+    {
+      "lat": 34.08651,
+      "lon": -96.76996,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n2084118446"
+      ]
+    },
+    {
+      "lat": 34.0929,
+      "lon": -88.00509,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1323594923",
+        "w1323594922"
+      ]
+    },
+    {
+      "lat": 34.11908,
+      "lon": -84.7429,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w756613780",
+        "w756613771"
+      ]
+    },
+    {
+      "lat": 34.13969,
+      "lon": -80.74858,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10293712741",
+        "n10228325504"
+      ]
+    },
+    {
+      "lat": 34.17291,
+      "lon": -98.49874,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1080391283",
+        "w1080391282"
+      ]
+    },
+    {
+      "lat": 34.1742,
+      "lon": -97.14106,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1255423420"
+      ]
+    },
+    {
+      "lat": 34.18806,
+      "lon": -97.17111,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n2351384153",
+        "n1608318103"
+      ]
+    },
+    {
+      "lat": 34.19368,
+      "lon": -91.92019,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11137705973",
+        "n11137705972"
+      ]
+    },
+    {
+      "lat": 34.22734,
+      "lon": -83.4994,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11684386991",
+        "n895095946"
+      ]
+    },
+    {
+      "lat": 34.31626,
+      "lon": -88.79105,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225873290",
+        "w225873292"
+      ]
+    },
+    {
+      "lat": 34.33451,
+      "lon": -112.11755,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1086560669"
+      ]
+    },
+    {
+      "lat": 34.35173,
+      "lon": -89.91583,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225871183",
+        "w225871186"
+      ]
+    },
+    {
+      "lat": 34.36676,
+      "lon": -96.141,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226285320",
+        "w226285319"
+      ]
+    },
+    {
+      "lat": 34.36726,
+      "lon": -86.89362,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w220388750",
+        "w220388749"
+      ]
+    },
+    {
+      "lat": 34.36807,
+      "lon": -97.96397,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11825075010"
+      ]
+    },
+    {
+      "lat": 34.38733,
+      "lon": -92.84659,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12166267719"
+      ]
+    },
+    {
+      "lat": 34.44341,
+      "lon": -84.91548,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n13149411586",
+        "n13149411554"
+      ]
+    },
+    {
+      "lat": 34.50065,
+      "lon": -97.9477,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1255420955"
+      ]
+    },
+    {
+      "lat": 34.5047,
+      "lon": -82.96075,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10842785603"
+      ]
+    },
+    {
+      "lat": 34.64021,
+      "lon": -97.9582,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257618745"
+      ]
+    },
+    {
+      "lat": 34.6442,
+      "lon": -99.33433,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1255421843"
+      ]
+    },
+    {
+      "lat": 34.6524,
+      "lon": -106.79342,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w759264388",
+        "w759264386"
+      ]
+    },
+    {
+      "lat": 34.65692,
+      "lon": -97.95808,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12258472967"
+      ]
+    },
+    {
+      "lat": 34.65693,
+      "lon": -92.41304,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w893136393",
+        "w893136392"
+      ]
+    },
+    {
+      "lat": 34.67491,
+      "lon": -82.53954,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259603796",
+        "w1222602386"
+      ]
+    },
+    {
+      "lat": 34.68193,
+      "lon": -99.91475,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12026588938"
+      ]
+    },
+    {
+      "lat": 34.69683,
+      "lon": -87.63609,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5474122686"
+      ]
+    },
+    {
+      "lat": 34.70818,
+      "lon": -97.24202,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w319313635"
+      ]
+    },
+    {
+      "lat": 34.71355,
+      "lon": -98.40184,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226292117"
+      ]
+    },
+    {
+      "lat": 34.7246,
+      "lon": -114.31546,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w264993829",
+        "w264993831"
+      ]
+    },
+    {
+      "lat": 34.7398,
+      "lon": -97.22266,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12760087525"
+      ]
+    },
+    {
+      "lat": 34.74481,
+      "lon": -89.45365,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1323593375",
+        "w1323593377"
+      ]
+    },
+    {
+      "lat": 34.77693,
+      "lon": -96.66961,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257114858"
+      ]
+    },
+    {
+      "lat": 34.78613,
+      "lon": -92.12605,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w218548170"
+      ]
+    },
+    {
+      "lat": 34.79869,
+      "lon": -80.40544,
+      "brand": "loves",
+      "name": "Love's store 847",
+      "osm": [
+        "n9965048105"
+      ]
+    },
+    {
+      "lat": 34.80941,
+      "lon": -102.40758,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5554526823"
+      ]
+    },
+    {
+      "lat": 34.81537,
+      "lon": -91.56736,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1245725280"
+      ]
+    },
+    {
+      "lat": 34.87651,
+      "lon": -99.503,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1255420462"
+      ]
+    },
+    {
+      "lat": 34.94676,
+      "lon": -104.63782,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226328495",
+        "w226328498"
+      ]
+    },
+    {
+      "lat": 34.95486,
+      "lon": -110.31166,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9952938547"
+      ]
+    },
+    {
+      "lat": 34.98656,
+      "lon": -90.90564,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224315865"
+      ]
+    },
+    {
+      "lat": 35.0006,
+      "lon": -80.97788,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225349683",
+        "w225349684"
+      ]
+    },
+    {
+      "lat": 35.01499,
+      "lon": -97.36625,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12299538264"
+      ]
+    },
+    {
+      "lat": 35.03617,
+      "lon": -85.58227,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1189064745",
+        "w1189064746"
+      ]
+    },
+    {
+      "lat": 35.03722,
+      "lon": -97.93707,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12282002224"
+      ]
+    },
+    {
+      "lat": 35.05204,
+      "lon": -97.94579,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1258802993"
+      ]
+    },
+    {
+      "lat": 35.06411,
+      "lon": -106.78481,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w894444117",
+        "w894444119"
+      ]
+    },
+    {
+      "lat": 35.10768,
+      "lon": -106.64893,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1678893882"
+      ]
+    },
+    {
+      "lat": 35.11742,
+      "lon": -101.90728,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225718482"
+      ]
+    },
+    {
+      "lat": 35.12599,
+      "lon": -118.40811,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n957482066",
+        "n11711792211"
+      ]
+    },
+    {
+      "lat": 35.15692,
+      "lon": -81.47839,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11670175018",
+        "n11670175019"
+      ]
+    },
+    {
+      "lat": 35.15886,
+      "lon": -103.70113,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226328565",
+        "w226328566"
+      ]
+    },
+    {
+      "lat": 35.1731,
+      "lon": -92.74351,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224315667",
+        "w224315666"
+      ]
+    },
+    {
+      "lat": 35.18304,
+      "lon": -107.89962,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11471626969"
+      ]
+    },
+    {
+      "lat": 35.1834,
+      "lon": -97.49921,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w669010289"
+      ]
+    },
+    {
+      "lat": 35.19177,
+      "lon": -101.76068,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w221639649",
+        "w221639653"
+      ]
+    },
+    {
+      "lat": 35.19961,
+      "lon": -113.90399,
+      "brand": "loves",
+      "name": "Love's Truck Lanes",
+      "osm": [
+        "w223539583"
+      ]
+    },
+    {
+      "lat": 35.21871,
+      "lon": -101.38178,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w837260551",
+        "w225720538"
+      ]
+    },
+    {
+      "lat": 35.21902,
+      "lon": -91.71645,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11684379542",
+        "n11684379543"
+      ]
+    },
+    {
+      "lat": 35.22404,
+      "lon": -99.86937,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5161151923"
+      ]
+    },
+    {
+      "lat": 35.25541,
+      "lon": -80.98069,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11711708211",
+        "w875867767",
+        "n11711708210"
+      ]
+    },
+    {
+      "lat": 35.29163,
+      "lon": -84.8172,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226609164"
+      ]
+    },
+    {
+      "lat": 35.30559,
+      "lon": -95.58837,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226291362",
+        "w226291360"
+      ]
+    },
+    {
+      "lat": 35.34176,
+      "lon": -96.92954,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259756105"
+      ]
+    },
+    {
+      "lat": 35.37748,
+      "lon": -97.57371,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n3727990443"
+      ]
+    },
+    {
+      "lat": 35.38154,
+      "lon": -96.67057,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12250930175",
+        "w226296501"
+      ]
+    },
+    {
+      "lat": 35.3818,
+      "lon": -97.08913,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n13160121046"
+      ]
+    },
+    {
+      "lat": 35.41188,
+      "lon": -99.41585,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11612240675"
+      ]
+    },
+    {
+      "lat": 35.41951,
+      "lon": -86.01506,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11701937119",
+        "n11235481596"
+      ]
+    },
+    {
+      "lat": 35.42099,
+      "lon": -96.30068,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11684356604",
+        "n11684356605"
+      ]
+    },
+    {
+      "lat": 35.42282,
+      "lon": -99.37218,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11711407863",
+        "n11711407862"
+      ]
+    },
+    {
+      "lat": 35.43966,
+      "lon": -95.97678,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12282006018"
+      ]
+    },
+    {
+      "lat": 35.45983,
+      "lon": -93.48044,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1255415807",
+        "w1255415806"
+      ]
+    },
+    {
+      "lat": 35.48652,
+      "lon": -95.14874,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226297129",
+        "w1254374135"
+      ]
+    },
+    {
+      "lat": 35.49088,
+      "lon": -94.97143,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1256813848",
+        "w1256813856"
+      ]
+    },
+    {
+      "lat": 35.49774,
+      "lon": -97.90272,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259752266",
+        "w1259752265",
+        "n13160021110"
+      ]
+    },
+    {
+      "lat": 35.50574,
+      "lon": -108.83374,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n8356711882"
+      ]
+    },
+    {
+      "lat": 35.51798,
+      "lon": -98.87096,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n3408987912"
+      ]
+    },
+    {
+      "lat": 35.52643,
+      "lon": -98.35163,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226291693",
+        "n11687479398"
+      ]
+    },
+    {
+      "lat": 35.57987,
+      "lon": -97.54962,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w348753725"
+      ]
+    },
+    {
+      "lat": 35.59382,
+      "lon": -97.43661,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w229834795"
+      ]
+    },
+    {
+      "lat": 35.60889,
+      "lon": -80.51771,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11670164686",
+        "n11670164687"
+      ]
+    },
+    {
+      "lat": 35.61666,
+      "lon": -119.65891,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n13327447248"
+      ]
+    },
+    {
+      "lat": 35.6198,
+      "lon": -105.20788,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11687464539",
+        "n8149672733"
+      ]
+    },
+    {
+      "lat": 35.63634,
+      "lon": -95.96301,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11447971674",
+        "n12250925022"
+      ]
+    },
+    {
+      "lat": 35.64364,
+      "lon": -86.8914,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226610044"
+      ]
+    },
+    {
+      "lat": 35.65823,
+      "lon": -81.9631,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224604562"
+      ]
+    },
+    {
+      "lat": 35.67919,
+      "lon": -88.74243,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226611050",
+        "w226611047"
+      ]
+    },
+    {
+      "lat": 35.72405,
+      "lon": -86.3191,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226609376"
+      ]
+    },
+    {
+      "lat": 35.73318,
+      "lon": -84.39993,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11808068375"
+      ]
+    },
+    {
+      "lat": 35.75179,
+      "lon": -96.68994,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w159180916",
+        "w159180850",
+        "w159180886"
+      ]
+    },
+    {
+      "lat": 35.80494,
+      "lon": -90.63512,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w557804578"
+      ]
+    },
+    {
+      "lat": 35.81237,
+      "lon": -80.83333,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1255392369"
+      ]
+    },
+    {
+      "lat": 35.83927,
+      "lon": -88.08482,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9860692275"
+      ]
+    },
+    {
+      "lat": 35.84038,
+      "lon": -98.3944,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w971478234",
+        "w971478233"
+      ]
+    },
+    {
+      "lat": 35.8414,
+      "lon": -98.41579,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12512526527"
+      ]
+    },
+    {
+      "lat": 35.853,
+      "lon": -95.42161,
+      "brand": "loves",
+      "name": "Loves",
+      "osm": [
+        "w111262504",
+        "w111262509",
+        "w111262493"
+      ]
+    },
+    {
+      "lat": 35.86534,
+      "lon": -97.42558,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w388498847"
+      ]
+    },
+    {
+      "lat": 35.8726,
+      "lon": -84.32322,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11261967725",
+        "n12251212282"
+      ]
+    },
+    {
+      "lat": 35.87868,
+      "lon": -97.39616,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w192368922"
+      ]
+    },
+    {
+      "lat": 35.87933,
+      "lon": -101.97366,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w974810336",
+        "w974810335"
+      ]
+    },
+    {
+      "lat": 35.8795,
+      "lon": -97.39208,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w604785797"
+      ]
+    },
+    {
+      "lat": 35.88477,
+      "lon": -89.91734,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1324847198",
+        "w1324847197"
+      ]
+    },
+    {
+      "lat": 35.91537,
+      "lon": -94.96871,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11050138528"
+      ]
+    },
+    {
+      "lat": 35.94639,
+      "lon": -97.59491,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n3432374920"
+      ]
+    },
+    {
+      "lat": 35.99189,
+      "lon": -87.48867,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12167312036"
+      ]
+    },
+    {
+      "lat": 36.01199,
+      "lon": -83.53231,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n6616599586"
+      ]
+    },
+    {
+      "lat": 36.06769,
+      "lon": -86.42836,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1323940616"
+      ]
+    },
+    {
+      "lat": 36.06808,
+      "lon": -79.31326,
+      "brand": "loves",
+      "name": "Love’s Travel Stop",
+      "osm": [
+        "w905877390"
+      ]
+    },
+    {
+      "lat": 36.07095,
+      "lon": -89.39528,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w965096282",
+        "w964801723"
+      ]
+    },
+    {
+      "lat": 36.07634,
+      "lon": -102.53697,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12263311457"
+      ]
+    },
+    {
+      "lat": 36.17565,
+      "lon": -94.57355,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w650426297",
+        "w650426298"
+      ]
+    },
+    {
+      "lat": 36.18083,
+      "lon": -119.33016,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224317917",
+        "w224317919"
+      ]
+    },
+    {
+      "lat": 36.20555,
+      "lon": -86.77165,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226612937",
+        "w226612936"
+      ]
+    },
+    {
+      "lat": 36.27236,
+      "lon": -98.48011,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12281897357"
+      ]
+    },
+    {
+      "lat": 36.29091,
+      "lon": -97.32536,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1217664686",
+        "w1217664684"
+      ]
+    },
+    {
+      "lat": 36.32654,
+      "lon": -79.64083,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10918298097"
+      ]
+    },
+    {
+      "lat": 36.38157,
+      "lon": -114.8962,
+      "brand": "loves",
+      "name": "Love's Truck Lanes",
+      "osm": [
+        "w225364820",
+        "w1042438870",
+        "w225364818"
+      ]
+    },
+    {
+      "lat": 36.41769,
+      "lon": -99.38474,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w996128752"
+      ]
+    },
+    {
+      "lat": 36.43322,
+      "lon": -99.41517,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w854208361"
+      ]
+    },
+    {
+      "lat": 36.50645,
+      "lon": -101.77445,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w819933271",
+        "w1255419624"
+      ]
+    },
+    {
+      "lat": 36.57912,
+      "lon": -80.74051,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n6212093822"
+      ]
+    },
+    {
+      "lat": 36.60548,
+      "lon": -77.56062,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224605260",
+        "w224605259"
+      ]
+    },
+    {
+      "lat": 36.65948,
+      "lon": -121.61903,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11464495305"
+      ]
+    },
+    {
+      "lat": 36.66235,
+      "lon": -76.93947,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5225548348"
+      ]
+    },
+    {
+      "lat": 36.67724,
+      "lon": -101.48122,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10802051166"
+      ]
+    },
+    {
+      "lat": 36.70933,
+      "lon": -87.45572,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11367150508"
+      ]
+    },
+    {
+      "lat": 36.71965,
+      "lon": -95.62868,
+      "brand": "loves",
+      "name": "Loves",
+      "osm": [
+        "w1101471545",
+        "w1101471544"
+      ]
+    },
+    {
+      "lat": 36.72922,
+      "lon": -102.50024,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w226285797",
+        "w226285798"
+      ]
+    },
+    {
+      "lat": 36.74847,
+      "lon": -78.09895,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n6594802098"
+      ]
+    },
+    {
+      "lat": 36.75624,
+      "lon": -81.85623,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n7556562928",
+        "n11712125861"
+      ]
+    },
+    {
+      "lat": 36.75831,
+      "lon": -89.5407,
+      "brand": "loves",
+      "name": "Loves Truck stop",
+      "osm": [
+        "n4445874189"
+      ]
+    },
+    {
+      "lat": 36.79737,
+      "lon": -98.64999,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n14017293023"
+      ]
+    },
+    {
+      "lat": 36.81003,
+      "lon": -100.51934,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12281863180"
+      ]
+    },
+    {
+      "lat": 36.84156,
+      "lon": -99.6302,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w935228073"
+      ]
+    },
+    {
+      "lat": 36.85379,
+      "lon": -89.58387,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259731684",
+        "w1259731683"
+      ]
+    },
+    {
+      "lat": 36.87136,
+      "lon": -94.86804,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1323783553"
+      ]
+    },
+    {
+      "lat": 36.91993,
+      "lon": -89.31415,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1504216472",
+        "w1504216471"
+      ]
+    },
+    {
+      "lat": 36.95158,
+      "lon": -80.88267,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n6224489101"
+      ]
+    },
+    {
+      "lat": 36.97493,
+      "lon": -91.94053,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257614603",
+        "w1257614605"
+      ]
+    },
+    {
+      "lat": 36.97754,
+      "lon": -84.11631,
+      "brand": "loves",
+      "name": "Love’s",
+      "osm": [
+        "w225807458",
+        "w225807459"
+      ]
+    },
+    {
+      "lat": 36.99602,
+      "lon": -120.09683,
+      "brand": "loves",
+      "name": "Loves",
+      "osm": [
+        "n9968752417"
+      ]
+    },
+    {
+      "lat": 37.00383,
+      "lon": -88.31864,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225806479",
+        "w225806477"
+      ]
+    },
+    {
+      "lat": 37.03217,
+      "lon": -100.92757,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1251729110"
+      ]
+    },
+    {
+      "lat": 37.11143,
+      "lon": -121.01613,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1151869485"
+      ]
+    },
+    {
+      "lat": 37.15638,
+      "lon": -77.27443,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1117027718"
+      ]
+    },
+    {
+      "lat": 37.17853,
+      "lon": -81.13993,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n7516177088",
+        "w842802842"
+      ]
+    },
+    {
+      "lat": 37.20146,
+      "lon": -85.93526,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225807864",
+        "w225807863"
+      ]
+    },
+    {
+      "lat": 37.2762,
+      "lon": -93.1123,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12260528167",
+        "n12260528166"
+      ]
+    },
+    {
+      "lat": 37.28584,
+      "lon": -100.34042,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1306484699"
+      ]
+    },
+    {
+      "lat": 37.31262,
+      "lon": -108.60882,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12256393837"
+      ]
+    },
+    {
+      "lat": 37.34067,
+      "lon": -94.29441,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1558974974"
+      ]
+    },
+    {
+      "lat": 37.36638,
+      "lon": -97.32247,
+      "brand": "loves",
+      "name": "Loves",
+      "osm": [
+        "w756673921"
+      ]
+    },
+    {
+      "lat": 37.40292,
+      "lon": -102.61636,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10824498619"
+      ]
+    },
+    {
+      "lat": 37.41607,
+      "lon": -87.47454,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w954765169",
+        "w954765168"
+      ]
+    },
+    {
+      "lat": 37.46281,
+      "lon": -121.17523,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1214436331",
+        "w1214436330"
+      ]
+    },
+    {
+      "lat": 37.50119,
+      "lon": -77.09025,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5224098300"
+      ]
+    },
+    {
+      "lat": 37.57838,
+      "lon": -106.13725,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1256813208"
+      ]
+    },
+    {
+      "lat": 37.61684,
+      "lon": -104.75651,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259749989",
+        "w1259487323"
+      ]
+    },
+    {
+      "lat": 37.64609,
+      "lon": -98.72224,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5615439852"
+      ]
+    },
+    {
+      "lat": 37.64676,
+      "lon": -95.47575,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1100890473",
+        "w1100890474"
+      ]
+    },
+    {
+      "lat": 37.72354,
+      "lon": -97.32059,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1446020455",
+        "w1446020456"
+      ]
+    },
+    {
+      "lat": 37.72589,
+      "lon": -113.05149,
+      "brand": "loves",
+      "name": "Love's Truck Lanes",
+      "osm": [
+        "w225054742",
+        "w225054740"
+      ]
+    },
+    {
+      "lat": 37.74449,
+      "lon": -99.98031,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n2906575809"
+      ]
+    },
+    {
+      "lat": 37.74528,
+      "lon": -88.94918,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9249608667"
+      ]
+    },
+    {
+      "lat": 37.75326,
+      "lon": -100.01198,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12760078840"
+      ]
+    },
+    {
+      "lat": 37.75371,
+      "lon": -100.0287,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257113036"
+      ]
+    },
+    {
+      "lat": 37.7552,
+      "lon": -121.14149,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11687497157",
+        "n5659924691"
+      ]
+    },
+    {
+      "lat": 37.79409,
+      "lon": -79.88465,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1061161519"
+      ]
+    },
+    {
+      "lat": 37.8431,
+      "lon": -84.32466,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225808104",
+        "w225808105"
+      ]
+    },
+    {
+      "lat": 37.9376,
+      "lon": -77.46631,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w781067019"
+      ]
+    },
+    {
+      "lat": 37.96087,
+      "lon": -100.8329,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1258806413",
+        "w1258806414"
+      ]
+    },
+    {
+      "lat": 37.97949,
+      "lon": -85.69435,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225808185",
+        "w225808186"
+      ]
+    },
+    {
+      "lat": 37.98166,
+      "lon": -91.71937,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w677336596",
+        "w677336597"
+      ]
+    },
+    {
+      "lat": 37.98778,
+      "lon": -103.53855,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257603069"
+      ]
+    },
+    {
+      "lat": 38.01436,
+      "lon": -97.94127,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11487080977"
+      ]
+    },
+    {
+      "lat": 38.02198,
+      "lon": -79.1425,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1021489859",
+        "w1021489856"
+      ]
+    },
+    {
+      "lat": 38.07955,
+      "lon": -117.25337,
+      "brand": "loves",
+      "name": "Love's Travel Stop",
+      "osm": [
+        "w1187700572",
+        "w1187700573"
+      ]
+    },
+    {
+      "lat": 38.08859,
+      "lon": -102.61623,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257118181"
+      ]
+    },
+    {
+      "lat": 38.09571,
+      "lon": -96.57934,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w757203635",
+        "w757203634",
+        "w757203633"
+      ]
+    },
+    {
+      "lat": 38.09588,
+      "lon": -102.62018,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224603809",
+        "w224603810"
+      ]
+    },
+    {
+      "lat": 38.11768,
+      "lon": -121.39245,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9826816446"
+      ]
+    },
+    {
+      "lat": 38.15155,
+      "lon": -85.07002,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10075493295"
+      ]
+    },
+    {
+      "lat": 38.15516,
+      "lon": -88.91088,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n2382882894"
+      ]
+    },
+    {
+      "lat": 38.17325,
+      "lon": -87.55142,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w223485832",
+        "w223485831"
+      ]
+    },
+    {
+      "lat": 38.24468,
+      "lon": -86.35757,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1323938371",
+        "w1323938368"
+      ]
+    },
+    {
+      "lat": 38.34118,
+      "lon": -82.94231,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1712443268"
+      ]
+    },
+    {
+      "lat": 38.34245,
+      "lon": -104.62315,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224603773",
+        "w224603774"
+      ]
+    },
+    {
+      "lat": 38.36114,
+      "lon": -98.75389,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n2903190360"
+      ]
+    },
+    {
+      "lat": 38.37025,
+      "lon": -97.61541,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11691875860",
+        "n4497332429"
+      ]
+    },
+    {
+      "lat": 38.37991,
+      "lon": -84.57267,
+      "brand": "loves",
+      "name": "Love’s",
+      "osm": [
+        "w793335026",
+        "w793382632"
+      ]
+    },
+    {
+      "lat": 38.4493,
+      "lon": -105.15618,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11946507645"
+      ]
+    },
+    {
+      "lat": 38.48844,
+      "lon": -102.78479,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1255415414",
+        "w1255415415"
+      ]
+    },
+    {
+      "lat": 38.49057,
+      "lon": -85.76994,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225342534"
+      ]
+    },
+    {
+      "lat": 38.54419,
+      "lon": -106.93448,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1426720590"
+      ]
+    },
+    {
+      "lat": 38.57273,
+      "lon": -95.2655,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1881267062",
+        "n2341493516"
+      ]
+    },
+    {
+      "lat": 38.72321,
+      "lon": -104.72951,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w720404028"
+      ]
+    },
+    {
+      "lat": 38.79413,
+      "lon": -90.44917,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w598192767"
+      ]
+    },
+    {
+      "lat": 38.85082,
+      "lon": -106.13873,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w692646609"
+      ]
+    },
+    {
+      "lat": 38.87394,
+      "lon": -89.38765,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225051745",
+        "w225051747"
+      ]
+    },
+    {
+      "lat": 38.89011,
+      "lon": -89.83455,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w594352184",
+        "w1324624103"
+      ]
+    },
+    {
+      "lat": 38.89726,
+      "lon": -91.45449,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9951429321",
+        "n9951429320"
+      ]
+    },
+    {
+      "lat": 38.93197,
+      "lon": -111.8539,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w494917451"
+      ]
+    },
+    {
+      "lat": 38.93342,
+      "lon": -97.25846,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257615932",
+        "w1257615931"
+      ]
+    },
+    {
+      "lat": 38.93394,
+      "lon": -92.77965,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w554597211",
+        "w554597214"
+      ]
+    },
+    {
+      "lat": 38.94837,
+      "lon": -112.35263,
+      "brand": "loves",
+      "name": "Love's Travel Stop",
+      "osm": [
+        "w1092683302",
+        "w1038853917"
+      ]
+    },
+    {
+      "lat": 38.96596,
+      "lon": -78.43924,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11403825514"
+      ]
+    },
+    {
+      "lat": 38.99484,
+      "lon": -110.18451,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w325139235",
+        "w325139236",
+        "w325139238"
+      ]
+    },
+    {
+      "lat": 39.01272,
+      "lon": -94.06706,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1137651161",
+        "w1323785574"
+      ]
+    },
+    {
+      "lat": 39.01934,
+      "lon": -95.50835,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w379404861",
+        "w379404858"
+      ]
+    },
+    {
+      "lat": 39.02017,
+      "lon": -95.13484,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w279277299"
+      ]
+    },
+    {
+      "lat": 39.08191,
+      "lon": -95.72591,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11390050274"
+      ]
+    },
+    {
+      "lat": 39.11403,
+      "lon": -108.64568,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n14017650083",
+        "n14017650084"
+      ]
+    },
+    {
+      "lat": 39.16778,
+      "lon": -122.14421,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n7650919360",
+        "n12263050980"
+      ]
+    },
+    {
+      "lat": 39.24183,
+      "lon": -114.86911,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w894694544",
+        "w894694545"
+      ]
+    },
+    {
+      "lat": 39.25297,
+      "lon": -88.1527,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1324623220",
+        "n12257901084"
+      ]
+    },
+    {
+      "lat": 39.39727,
+      "lon": -101.04805,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1439016897"
+      ]
+    },
+    {
+      "lat": 39.45516,
+      "lon": -108.04376,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1324454487"
+      ]
+    },
+    {
+      "lat": 39.57406,
+      "lon": -91.40388,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257599262",
+        "w1257599261"
+      ]
+    },
+    {
+      "lat": 39.61602,
+      "lon": -86.47851,
+      "brand": "loves",
+      "name": "Love's Gas Station",
+      "osm": [
+        "w229464669",
+        "w229464672"
+      ]
+    },
+    {
+      "lat": 39.62108,
+      "lon": -83.6129,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225055311",
+        "w225055314"
+      ]
+    },
+    {
+      "lat": 39.67266,
+      "lon": -78.71667,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w659637042"
+      ]
+    },
+    {
+      "lat": 39.68962,
+      "lon": -90.23033,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11297337653",
+        "n11297337652"
+      ]
+    },
+    {
+      "lat": 39.70051,
+      "lon": -77.73347,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w659634611",
+        "w659634610"
+      ]
+    },
+    {
+      "lat": 39.72244,
+      "lon": -94.78739,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12233625789"
+      ]
+    },
+    {
+      "lat": 39.73265,
+      "lon": -94.21856,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1136346009",
+        "w1136346039"
+      ]
+    },
+    {
+      "lat": 39.73338,
+      "lon": -84.20906,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w298511931",
+        "w298511934"
+      ]
+    },
+    {
+      "lat": 39.74098,
+      "lon": -104.43427,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224603696",
+        "w224603698"
+      ]
+    },
+    {
+      "lat": 39.75571,
+      "lon": -99.31862,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1557765274"
+      ]
+    },
+    {
+      "lat": 39.79321,
+      "lon": -88.26578,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1084498997",
+        "w1084498996"
+      ]
+    },
+    {
+      "lat": 39.83503,
+      "lon": -97.63761,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11494876813",
+        "w1135802508"
+      ]
+    },
+    {
+      "lat": 39.83871,
+      "lon": -99.89254,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1458456182"
+      ]
+    },
+    {
+      "lat": 39.84328,
+      "lon": -85.55736,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9588805132"
+      ]
+    },
+    {
+      "lat": 39.84491,
+      "lon": -82.93771,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w987240263",
+        "w987240262"
+      ]
+    },
+    {
+      "lat": 39.87125,
+      "lon": -84.933,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225345411"
+      ]
+    },
+    {
+      "lat": 39.89388,
+      "lon": -83.72225,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5827482088"
+      ]
+    },
+    {
+      "lat": 39.90719,
+      "lon": -122.19638,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n7021122818"
+      ]
+    },
+    {
+      "lat": 39.94466,
+      "lon": -82.67913,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1028201586",
+        "w1236321435"
+      ]
+    },
+    {
+      "lat": 39.96857,
+      "lon": -81.90293,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w220778962"
+      ]
+    },
+    {
+      "lat": 39.97938,
+      "lon": -86.39575,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225347312",
+        "w225347318"
+      ]
+    },
+    {
+      "lat": 39.99247,
+      "lon": -85.84393,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n6308702367"
+      ]
+    },
+    {
+      "lat": 40.05689,
+      "lon": -81.05326,
+      "brand": "loves",
+      "name": "Love's Travel Stop Gas Station",
+      "osm": [
+        "n14017460433"
+      ]
+    },
+    {
+      "lat": 40.07761,
+      "lon": -104.64874,
+      "brand": "loves",
+      "name": "Love's (Cars)",
+      "osm": [
+        "n4182375326",
+        "n4182375319"
+      ]
+    },
+    {
+      "lat": 40.12005,
+      "lon": -74.70775,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w217783539",
+        "w217783540"
+      ]
+    },
+    {
+      "lat": 40.13067,
+      "lon": -87.77735,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1212472210",
+        "w1212472209"
+      ]
+    },
+    {
+      "lat": 40.16257,
+      "lon": -111.65169,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w923227497",
+        "w923227496"
+      ]
+    },
+    {
+      "lat": 40.22599,
+      "lon": -76.72053,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w358223915",
+        "w1324383526"
+      ]
+    },
+    {
+      "lat": 40.23035,
+      "lon": -77.14411,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w659716944",
+        "w217788215"
+      ]
+    },
+    {
+      "lat": 40.2664,
+      "lon": -103.63961,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w695758521",
+        "w695758523"
+      ]
+    },
+    {
+      "lat": 40.27604,
+      "lon": -86.13005,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1082768311"
+      ]
+    },
+    {
+      "lat": 40.34044,
+      "lon": -88.76093,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225052151",
+        "w225052149"
+      ]
+    },
+    {
+      "lat": 40.45259,
+      "lon": -86.85009,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1365688114",
+        "w1365688113"
+      ]
+    },
+    {
+      "lat": 40.46631,
+      "lon": -93.97928,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w959688144"
+      ]
+    },
+    {
+      "lat": 40.51747,
+      "lon": -76.1115,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w645515149"
+      ]
+    },
+    {
+      "lat": 40.54164,
+      "lon": -88.99798,
+      "brand": "loves",
+      "name": "Love's Travel Stop",
+      "osm": [
+        "n11889678419",
+        "n11889678420"
+      ]
+    },
+    {
+      "lat": 40.65287,
+      "lon": -82.54632,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1017955731",
+        "w1017955890"
+      ]
+    },
+    {
+      "lat": 40.6746,
+      "lon": -96.17822,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w990216182"
+      ]
+    },
+    {
+      "lat": 40.76991,
+      "lon": -111.94029,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225054893",
+        "w225054895"
+      ]
+    },
+    {
+      "lat": 40.81891,
+      "lon": -97.99787,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225056800"
+      ]
+    },
+    {
+      "lat": 40.88781,
+      "lon": -85.52349,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11464545123"
+      ]
+    },
+    {
+      "lat": 40.89884,
+      "lon": -90.66058,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9653503780"
+      ]
+    },
+    {
+      "lat": 40.91865,
+      "lon": -90.29327,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1324938623",
+        "w1324938624"
+      ]
+    },
+    {
+      "lat": 40.95069,
+      "lon": -117.75781,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1019258336",
+        "w1019258337"
+      ]
+    },
+    {
+      "lat": 40.96301,
+      "lon": -80.65845,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1380115089",
+        "w1380115090"
+      ]
+    },
+    {
+      "lat": 40.99642,
+      "lon": -81.99501,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225055026",
+        "w225055027"
+      ]
+    },
+    {
+      "lat": 41.0728,
+      "lon": -87.86728,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225052008",
+        "w225052011"
+      ]
+    },
+    {
+      "lat": 41.09813,
+      "lon": -104.84861,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225052649",
+        "w225052650"
+      ]
+    },
+    {
+      "lat": 41.09897,
+      "lon": -114.96024,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w220070308",
+        "w220070309"
+      ]
+    },
+    {
+      "lat": 41.10274,
+      "lon": -100.72385,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225057377",
+        "w225057381"
+      ]
+    },
+    {
+      "lat": 41.10761,
+      "lon": -81.05017,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9779834417"
+      ]
+    },
+    {
+      "lat": 41.10936,
+      "lon": -102.95078,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1255423749",
+        "w1255423748"
+      ]
+    },
+    {
+      "lat": 41.11404,
+      "lon": -88.41511,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w887545188"
+      ]
+    },
+    {
+      "lat": 41.14094,
+      "lon": -84.84958,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12250931448"
+      ]
+    },
+    {
+      "lat": 41.14385,
+      "lon": -87.26088,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225342474"
+      ]
+    },
+    {
+      "lat": 41.15733,
+      "lon": -96.13756,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11707846796",
+        "n9318631667"
+      ]
+    },
+    {
+      "lat": 41.16091,
+      "lon": -96.12026,
+      "brand": "loves",
+      "name": "Love's Alternative Energy",
+      "osm": [
+        "w896841399"
+      ]
+    },
+    {
+      "lat": 41.1732,
+      "lon": -80.56931,
+      "brand": "loves",
+      "name": "Unleaded & Diesel",
+      "osm": [
+        "w220784541"
+      ]
+    },
+    {
+      "lat": 41.17334,
+      "lon": -83.65188,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11113139587"
+      ]
+    },
+    {
+      "lat": 41.2938,
+      "lon": -89.08629,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w961722167",
+        "w961722168"
+      ]
+    },
+    {
+      "lat": 41.32124,
+      "lon": -82.61425,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1495894413"
+      ]
+    },
+    {
+      "lat": 41.32862,
+      "lon": -105.6109,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10219971318"
+      ]
+    },
+    {
+      "lat": 41.36218,
+      "lon": -86.34865,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n12257837310"
+      ]
+    },
+    {
+      "lat": 41.36997,
+      "lon": -89.00923,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n2091337927",
+        "n2338775147"
+      ]
+    },
+    {
+      "lat": 41.41063,
+      "lon": -90.01687,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1256838183",
+        "w1256838182"
+      ]
+    },
+    {
+      "lat": 41.45174,
+      "lon": -97.08505,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11517971925",
+        "n11517971924"
+      ]
+    },
+    {
+      "lat": 41.49661,
+      "lon": -95.45232,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n5842299479",
+        "n11739504717"
+      ]
+    },
+    {
+      "lat": 41.50913,
+      "lon": -112.05427,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w942931982",
+        "w942931981"
+      ]
+    },
+    {
+      "lat": 41.5373,
+      "lon": -83.46628,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w223010493",
+        "w223010495"
+      ]
+    },
+    {
+      "lat": 41.56215,
+      "lon": -87.35685,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w219703182",
+        "w219703187"
+      ]
+    },
+    {
+      "lat": 41.59974,
+      "lon": -87.57964,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259728861",
+        "w1259728858"
+      ]
+    },
+    {
+      "lat": 41.6047,
+      "lon": -90.62324,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w700945335",
+        "n12260536845",
+        "n14045153121"
+      ]
+    },
+    {
+      "lat": 41.61373,
+      "lon": -93.78025,
+      "brand": "loves",
+      "name": "Love's Truck Stop - Truck Diesel",
+      "osm": [
+        "w225359016",
+        "w225359015"
+      ]
+    },
+    {
+      "lat": 41.6337,
+      "lon": -85.05054,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1215649105",
+        "w1215649103"
+      ]
+    },
+    {
+      "lat": 41.67565,
+      "lon": -107.98256,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1038018936",
+        "n11691971429"
+      ]
+    },
+    {
+      "lat": 41.68036,
+      "lon": -92.99812,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n4222961596",
+        "n947850836"
+      ]
+    },
+    {
+      "lat": 41.75655,
+      "lon": -81.04639,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11741967407"
+      ]
+    },
+    {
+      "lat": 41.89808,
+      "lon": -89.06688,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n7729842306",
+        "w1526546319",
+        "n11707829623"
+      ]
+    },
+    {
+      "lat": 41.91414,
+      "lon": -80.57026,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n8082089658",
+        "n14017725770"
+      ]
+    },
+    {
+      "lat": 41.92612,
+      "lon": -72.25975,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10857848288",
+        "n10857848281"
+      ]
+    },
+    {
+      "lat": 41.96478,
+      "lon": -83.34502,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n6928859177"
+      ]
+    },
+    {
+      "lat": 41.98201,
+      "lon": -114.67246,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1306230470"
+      ]
+    },
+    {
+      "lat": 41.99876,
+      "lon": -87.96056,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1259770386",
+        "w1259770389"
+      ]
+    },
+    {
+      "lat": 42.0117,
+      "lon": -97.42775,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1258805550",
+        "w1258805549"
+      ]
+    },
+    {
+      "lat": 42.07645,
+      "lon": -83.66752,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n7836942385"
+      ]
+    },
+    {
+      "lat": 42.1016,
+      "lon": -75.83579,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w217816928",
+        "w217816933"
+      ]
+    },
+    {
+      "lat": 42.14905,
+      "lon": -88.51425,
+      "brand": "loves",
+      "name": "Love's (Trucks)",
+      "osm": [
+        "w1026251693",
+        "w1026251694"
+      ]
+    },
+    {
+      "lat": 42.21559,
+      "lon": -89.10745,
+      "brand": "loves",
+      "name": "Loves",
+      "osm": [
+        "w1324607131",
+        "w1324607132"
+      ]
+    },
+    {
+      "lat": 42.25898,
+      "lon": -79.74371,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n10926790752",
+        "n10926790757"
+      ]
+    },
+    {
+      "lat": 42.28019,
+      "lon": -84.93058,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w224604417"
+      ]
+    },
+    {
+      "lat": 42.37528,
+      "lon": -85.65947,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11050087528"
+      ]
+    },
+    {
+      "lat": 42.4348,
+      "lon": -96.37937,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225361262"
+      ]
+    },
+    {
+      "lat": 42.45597,
+      "lon": -88.99808,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225052242",
+        "n13613531810"
+      ]
+    },
+    {
+      "lat": 42.46178,
+      "lon": -92.40395,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1073996102",
+        "w1073996101"
+      ]
+    },
+    {
+      "lat": 42.48889,
+      "lon": -87.95321,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9446683206",
+        "n11711832126"
+      ]
+    },
+    {
+      "lat": 42.65278,
+      "lon": -88.54273,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1076995595",
+        "w1076995596"
+      ]
+    },
+    {
+      "lat": 42.78308,
+      "lon": -86.02311,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n8238942763"
+      ]
+    },
+    {
+      "lat": 42.78552,
+      "lon": -84.66747,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11787814590"
+      ]
+    },
+    {
+      "lat": 42.86365,
+      "lon": -82.55836,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n7242834326"
+      ]
+    },
+    {
+      "lat": 42.87091,
+      "lon": -87.94141,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11691932934",
+        "n635243687"
+      ]
+    },
+    {
+      "lat": 42.9247,
+      "lon": -114.94073,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n9953834469",
+        "n9953834470"
+      ]
+    },
+    {
+      "lat": 42.96441,
+      "lon": -76.84736,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11343370864"
+      ]
+    },
+    {
+      "lat": 42.98966,
+      "lon": -82.92951,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11711729189",
+        "n5842363688"
+      ]
+    },
+    {
+      "lat": 43.12244,
+      "lon": -92.7352,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1256837490",
+        "w1256837489"
+      ]
+    },
+    {
+      "lat": 43.15088,
+      "lon": -123.36807,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225047274"
+      ]
+    },
+    {
+      "lat": 43.34861,
+      "lon": -83.86162,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n8019952856"
+      ]
+    },
+    {
+      "lat": 43.38935,
+      "lon": -89.46991,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1058435666",
+        "w1058435665"
+      ]
+    },
+    {
+      "lat": 43.43672,
+      "lon": -112.12058,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1119091060"
+      ]
+    },
+    {
+      "lat": 43.60391,
+      "lon": -96.7127,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n1345443282"
+      ]
+    },
+    {
+      "lat": 43.67709,
+      "lon": -87.75774,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w982057634",
+        "w1256825583"
+      ]
+    },
+    {
+      "lat": 43.73642,
+      "lon": -98.95708,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1255422748",
+        "w1255422749"
+      ]
+    },
+    {
+      "lat": 43.74895,
+      "lon": -88.46479,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n4108451498",
+        "n4108451495"
+      ]
+    },
+    {
+      "lat": 43.95419,
+      "lon": -92.06418,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n8497500704",
+        "n8946735189"
+      ]
+    },
+    {
+      "lat": 43.96106,
+      "lon": -90.37777,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n993718581",
+        "n11687461335"
+      ]
+    },
+    {
+      "lat": 44.00201,
+      "lon": -75.92117,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11700067709"
+      ]
+    },
+    {
+      "lat": 44.04459,
+      "lon": -116.97597,
+      "brand": "loves",
+      "name": "Love's RV",
+      "osm": [
+        "w1317725115"
+      ]
+    },
+    {
+      "lat": 44.61274,
+      "lon": -121.13735,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1063414011",
+        "w1063414009"
+      ]
+    },
+    {
+      "lat": 44.69941,
+      "lon": -123.05473,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w953106011"
+      ]
+    },
+    {
+      "lat": 44.78467,
+      "lon": -117.80781,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n13208831054"
+      ]
+    },
+    {
+      "lat": 45.24883,
+      "lon": -93.02282,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w1257994748",
+        "w1202439215"
+      ]
+    },
+    {
+      "lat": 45.54397,
+      "lon": -122.39201,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225048018",
+        "w225048020"
+      ]
+    },
+    {
+      "lat": 45.74957,
+      "lon": -107.61134,
+      "brand": "loves",
+      "name": "Love’s",
+      "osm": [
+        "n7527860521"
+      ]
+    },
+    {
+      "lat": 45.82515,
+      "lon": -119.79859,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w550546851",
+        "w550546860"
+      ]
+    },
+    {
+      "lat": 46.21972,
+      "lon": -119.79288,
+      "brand": "loves",
+      "name": "Loves",
+      "osm": [
+        "n11254003235"
+      ]
+    },
+    {
+      "lat": 46.26446,
+      "lon": -119.08244,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11687476869"
+      ]
+    },
+    {
+      "lat": 46.60382,
+      "lon": -122.90751,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w705008099",
+        "w705008098"
+      ]
+    },
+    {
+      "lat": 46.83166,
+      "lon": -96.84473,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225056490",
+        "w225056492"
+      ]
+    },
+    {
+      "lat": 46.90962,
+      "lon": -98.00636,
+      "brand": "loves",
+      "name": "Love's Travel Stop",
+      "osm": [
+        "n11162107479"
+      ]
+    },
+    {
+      "lat": 46.94746,
+      "lon": -114.13353,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n7798799746",
+        "n7798799747"
+      ]
+    },
+    {
+      "lat": 47.00773,
+      "lon": -120.58619,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225046491",
+        "w225046490"
+      ]
+    },
+    {
+      "lat": 47.11321,
+      "lon": -118.36684,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w722961169",
+        "w722961167"
+      ]
+    },
+    {
+      "lat": 47.24514,
+      "lon": -122.38483,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w225046866",
+        "w225046867"
+      ]
+    },
+    {
+      "lat": 47.47505,
+      "lon": -111.36114,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "n11209326297"
+      ]
+    },
+    {
+      "lat": 47.71105,
+      "lon": -117.00336,
+      "brand": "loves",
+      "name": "Love's",
+      "osm": [
+        "w223313114",
+        "w223313117"
+      ]
+    },
+    {
+      "lat": 27.52832,
+      "lon": -82.51219,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w236421274",
+        "w236421275"
+      ]
+    },
+    {
+      "lat": 28.35912,
+      "lon": -80.79243,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n12094850506",
+        "n12094850507"
+      ]
+    },
+    {
+      "lat": 32.08561,
+      "lon": -83.7602,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "r13942553"
+      ]
+    },
+    {
+      "lat": 33.17888,
+      "lon": -87.44663,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w221638573",
+        "w221638574"
+      ]
+    },
+    {
+      "lat": 34.06325,
+      "lon": -117.4913,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n12990846164"
+      ]
+    },
+    {
+      "lat": 34.50892,
+      "lon": -81.85819,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n12094829374",
+        "n12094829373"
+      ]
+    },
+    {
+      "lat": 34.68719,
+      "lon": -85.00018,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n583671977",
+        "n12094848197"
+      ]
+    },
+    {
+      "lat": 34.91259,
+      "lon": -91.19632,
+      "brand": "one9",
+      "name": "One9 Fuel Stop",
+      "osm": [
+        "w1130257135",
+        "w1130257136"
+      ]
+    },
+    {
+      "lat": 34.91326,
+      "lon": -80.97952,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n9087731380",
+        "n9087731395"
+      ]
+    },
+    {
+      "lat": 34.97859,
+      "lon": -85.41388,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w236503078",
+        "w1305275145"
+      ]
+    },
+    {
+      "lat": 35.84331,
+      "lon": -88.08473,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w1075138272",
+        "w1075138273"
+      ]
+    },
+    {
+      "lat": 36.0378,
+      "lon": -83.44451,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w268180977"
+      ]
+    },
+    {
+      "lat": 36.06085,
+      "lon": -79.6621,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n5772086398",
+        "n12094793966"
+      ]
+    },
+    {
+      "lat": 36.11082,
+      "lon": -84.0204,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n4438092874"
+      ]
+    },
+    {
+      "lat": 36.51846,
+      "lon": -89.59772,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n2707974363",
+        "n2707974384"
+      ]
+    },
+    {
+      "lat": 36.52353,
+      "lon": -77.58732,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w1058585146",
+        "w1058585147"
+      ]
+    },
+    {
+      "lat": 36.71626,
+      "lon": -86.5259,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n12094830610",
+        "n12094830611"
+      ]
+    },
+    {
+      "lat": 37.38882,
+      "lon": -79.90075,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w1073690493",
+        "w1073690491"
+      ]
+    },
+    {
+      "lat": 37.52198,
+      "lon": -85.88255,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n3301689817",
+        "n12094829380"
+      ]
+    },
+    {
+      "lat": 39.43321,
+      "lon": -87.33231,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w267163017",
+        "w267163016"
+      ]
+    },
+    {
+      "lat": 39.52277,
+      "lon": -83.84598,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w236712153",
+        "w236632054"
+      ]
+    },
+    {
+      "lat": 39.55894,
+      "lon": -119.48982,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n12094860355",
+        "n12094860354"
+      ]
+    },
+    {
+      "lat": 39.58967,
+      "lon": -76.06543,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w328685382"
+      ]
+    },
+    {
+      "lat": 40.12278,
+      "lon": -87.45048,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n12094830608",
+        "n11030420484"
+      ]
+    },
+    {
+      "lat": 40.35163,
+      "lon": -76.71661,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w220629019",
+        "w220629021"
+      ]
+    },
+    {
+      "lat": 40.69227,
+      "lon": -99.38135,
+      "brand": "one9",
+      "name": "ONE9 Fuel Stop",
+      "osm": [
+        "n12094850511",
+        "n12094850510"
+      ]
+    },
+    {
+      "lat": 40.71979,
+      "lon": -116.1061,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "w1172769715",
+        "w1172769712"
+      ]
+    },
+    {
+      "lat": 41.24539,
+      "lon": -112.0194,
+      "brand": "one9",
+      "name": "One 9 Fuel Stop",
+      "osm": [
+        "w41751886",
+        "w220298964"
+      ]
+    },
+    {
+      "lat": 41.64423,
+      "lon": -91.14996,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n12092853723"
+      ]
+    },
+    {
+      "lat": 42.88312,
+      "lon": -85.07396,
+      "brand": "one9",
+      "name": "ONE9",
+      "osm": [
+        "n4146890256",
+        "n12094860348"
+      ]
+    },
+    {
+      "lat": 27.70554,
+      "lon": -97.37088,
+      "brand": "petro",
+      "name": "Petro American LLC",
+      "osm": [
+        "n7206708082"
+      ]
+    },
+    {
+      "lat": 28.89988,
+      "lon": -99.11593,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w253458609",
+        "w253458611"
+      ]
+    },
+    {
+      "lat": 29.7364,
+      "lon": -84.87937,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w636364333"
+      ]
+    },
+    {
+      "lat": 30.43419,
+      "lon": -84.32734,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w635990660"
+      ]
+    },
+    {
+      "lat": 30.46482,
+      "lon": -84.21574,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w315893260"
+      ]
+    },
+    {
+      "lat": 30.79421,
+      "lon": -81.66662,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n11332080373",
+        "n12323249549"
+      ]
+    },
+    {
+      "lat": 30.82419,
+      "lon": -83.9925,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w696150946"
+      ]
+    },
+    {
+      "lat": 31.20643,
+      "lon": -82.34647,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w1001234730"
+      ]
+    },
+    {
+      "lat": 31.67112,
+      "lon": -83.63551,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "r13620810"
+      ]
+    },
+    {
+      "lat": 31.71421,
+      "lon": -83.65434,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w421120291"
+      ]
+    },
+    {
+      "lat": 32.40584,
+      "lon": -85.95589,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n12323045415"
+      ]
+    },
+    {
+      "lat": 32.44435,
+      "lon": -93.90043,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w219823638"
+      ]
+    },
+    {
+      "lat": 32.4636,
+      "lon": -86.45044,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n2505472265"
+      ]
+    },
+    {
+      "lat": 32.49782,
+      "lon": -86.39737,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w862792839"
+      ]
+    },
+    {
+      "lat": 32.84955,
+      "lon": -85.1869,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n894539576"
+      ]
+    },
+    {
+      "lat": 32.89894,
+      "lon": -83.70347,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n8977728504"
+      ]
+    },
+    {
+      "lat": 33.27962,
+      "lon": -87.09251,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n5576342822"
+      ]
+    },
+    {
+      "lat": 33.28653,
+      "lon": -82.97478,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n10097980048"
+      ]
+    },
+    {
+      "lat": 33.40855,
+      "lon": -112.0111,
+      "brand": "petro",
+      "name": "Petro Stop",
+      "osm": [
+        "w515104135"
+      ]
+    },
+    {
+      "lat": 33.45953,
+      "lon": -112.1176,
+      "brand": "petro",
+      "name": "Petro Stop",
+      "osm": [
+        "n6292478119"
+      ]
+    },
+    {
+      "lat": 33.57528,
+      "lon": -83.17785,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n9589483229"
+      ]
+    },
+    {
+      "lat": 33.72273,
+      "lon": -85.14114,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w542447087"
+      ]
+    },
+    {
+      "lat": 33.78928,
+      "lon": -84.48829,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w219426001"
+      ]
+    },
+    {
+      "lat": 33.99508,
+      "lon": -86.08274,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n12302815184"
+      ]
+    },
+    {
+      "lat": 34.05106,
+      "lon": -86.87214,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n12323068362"
+      ]
+    },
+    {
+      "lat": 34.17128,
+      "lon": -85.17605,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n9097769020"
+      ]
+    },
+    {
+      "lat": 34.34993,
+      "lon": -83.32112,
+      "brand": "petro",
+      "name": "Petro Stopping Centers #377",
+      "osm": [
+        "w219429368"
+      ]
+    },
+    {
+      "lat": 34.98501,
+      "lon": -118.94844,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w99596771"
+      ]
+    },
+    {
+      "lat": 35.04278,
+      "lon": -81.97758,
+      "brand": "petro",
+      "name": "Petro Pointe",
+      "osm": [
+        "n6327011207"
+      ]
+    },
+    {
+      "lat": 35.19128,
+      "lon": -101.74334,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w220362826",
+        "w220362825"
+      ]
+    },
+    {
+      "lat": 35.50234,
+      "lon": -86.08654,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n2719921768"
+      ]
+    },
+    {
+      "lat": 35.5845,
+      "lon": -78.14685,
+      "brand": "petro",
+      "name": "Petro Stopping Center",
+      "osm": [
+        "n5280124497"
+      ]
+    },
+    {
+      "lat": 35.87647,
+      "lon": -84.23502,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n12323181649"
+      ]
+    },
+    {
+      "lat": 37.37486,
+      "lon": -79.16064,
+      "brand": "petro",
+      "name": "Petro-Webb Commercial Fueling",
+      "osm": [
+        "w934060659"
+      ]
+    },
+    {
+      "lat": 37.63111,
+      "lon": -79.44789,
+      "brand": "petro",
+      "name": "Petro Power",
+      "osm": [
+        "n6292445776"
+      ]
+    },
+    {
+      "lat": 37.9296,
+      "lon": -79.22888,
+      "brand": "petro",
+      "name": "Petro Dealer",
+      "osm": [
+        "n1294042514"
+      ]
+    },
+    {
+      "lat": 37.97608,
+      "lon": -100.88374,
+      "brand": "petro",
+      "name": "Dillons Fuel Center",
+      "osm": [
+        "w1456896620"
+      ]
+    },
+    {
+      "lat": 38.48598,
+      "lon": -90.35737,
+      "brand": "petro",
+      "name": "Petro Mart",
+      "osm": [
+        "w578817357"
+      ]
+    },
+    {
+      "lat": 38.87892,
+      "lon": -97.61362,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w219790191"
+      ]
+    },
+    {
+      "lat": 39.119,
+      "lon": -88.5729,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w219668192",
+        "w219668189"
+      ]
+    },
+    {
+      "lat": 39.36186,
+      "lon": -101.05307,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n10001538995"
+      ]
+    },
+    {
+      "lat": 39.83556,
+      "lon": -84.80968,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n1231936477"
+      ]
+    },
+    {
+      "lat": 40.4588,
+      "lon": -74.35115,
+      "brand": "petro",
+      "name": "Petro Hub",
+      "osm": [
+        "w922995913"
+      ]
+    },
+    {
+      "lat": 41.32954,
+      "lon": -105.62022,
+      "brand": "petro",
+      "name": "Petro Laramie",
+      "osm": [
+        "w584750936"
+      ]
+    },
+    {
+      "lat": 41.34499,
+      "lon": -88.19728,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n11453061898"
+      ]
+    },
+    {
+      "lat": 41.41756,
+      "lon": -84.10494,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w220265880"
+      ]
+    },
+    {
+      "lat": 41.42614,
+      "lon": -87.75536,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w219669692",
+        "w219669690"
+      ]
+    },
+    {
+      "lat": 41.56344,
+      "lon": -87.35497,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w219702639",
+        "w360716807"
+      ]
+    },
+    {
+      "lat": 41.93561,
+      "lon": -89.03284,
+      "brand": "petro",
+      "name": "Petro Rochelle",
+      "osm": [
+        "w640367846",
+        "w219673982"
+      ]
+    },
+    {
+      "lat": 42.28032,
+      "lon": -122.81107,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n2012534822"
+      ]
+    },
+    {
+      "lat": 42.7253,
+      "lon": -87.95567,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w220282566",
+        "w158305465"
+      ]
+    },
+    {
+      "lat": 42.96666,
+      "lon": -76.84507,
+      "brand": "petro",
+      "name": "Petro (Diesel)",
+      "osm": [
+        "n2124257272"
+      ]
+    },
+    {
+      "lat": 45.41192,
+      "lon": -94.05345,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w219828249"
+      ]
+    },
+    {
+      "lat": 46.54679,
+      "lon": -122.87099,
+      "brand": "petro",
+      "name": "Petro America",
+      "osm": [
+        "w510967269"
+      ]
+    },
+    {
+      "lat": 46.85073,
+      "lon": -96.86302,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w220149948"
+      ]
+    },
+    {
+      "lat": 47.59023,
+      "lon": -117.56016,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w218186572"
+      ]
+    },
+    {
+      "lat": 48.89165,
+      "lon": -122.6011,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "n6534228358"
+      ]
+    },
+    {
+      "lat": 48.99149,
+      "lon": -122.73402,
+      "brand": "petro",
+      "name": "Petro",
+      "osm": [
+        "w1476998465"
+      ]
+    },
+    {
+      "lat": 26.66648,
+      "lon": -80.71682,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "w1137871975"
+      ]
+    },
+    {
+      "lat": 27.2117,
+      "lon": -98.14176,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1007185332",
+        "w1007185330"
+      ]
+    },
+    {
+      "lat": 27.68407,
+      "lon": -99.4614,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w229303908",
+        "w229303911"
+      ]
+    },
+    {
+      "lat": 27.69919,
+      "lon": -80.9018,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1126109965"
+      ]
+    },
+    {
+      "lat": 27.87353,
+      "lon": -81.59317,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12261047751"
+      ]
+    },
+    {
+      "lat": 27.91708,
+      "lon": -81.71894,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w775433987",
+        "w775433989"
+      ]
+    },
+    {
+      "lat": 28.70979,
+      "lon": -100.46369,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12670619541"
+      ]
+    },
+    {
+      "lat": 28.87377,
+      "lon": -82.09046,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w787215717",
+        "w787215718"
+      ]
+    },
+    {
+      "lat": 29.02515,
+      "lon": -82.15906,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236427139"
+      ]
+    },
+    {
+      "lat": 29.21964,
+      "lon": -98.41509,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w840617964",
+        "w840617965"
+      ]
+    },
+    {
+      "lat": 29.26619,
+      "lon": -82.18892,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w224604318",
+        "w224604315"
+      ]
+    },
+    {
+      "lat": 29.26795,
+      "lon": -82.1916,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w398449943",
+        "w224604269"
+      ]
+    },
+    {
+      "lat": 29.43989,
+      "lon": -98.38054,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220380966",
+        "w220380964"
+      ]
+    },
+    {
+      "lat": 29.49557,
+      "lon": -95.91136,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w907858195",
+        "w919942962"
+      ]
+    },
+    {
+      "lat": 29.6951,
+      "lon": -96.90219,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w75464985"
+      ]
+    },
+    {
+      "lat": 29.80017,
+      "lon": -95.26786,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w225726027",
+        "w225726028"
+      ]
+    },
+    {
+      "lat": 29.81426,
+      "lon": -82.16907,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n4169772043"
+      ]
+    },
+    {
+      "lat": 30.06595,
+      "lon": -81.49461,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w404512431"
+      ]
+    },
+    {
+      "lat": 30.10825,
+      "lon": -96.04738,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "r14338463"
+      ]
+    },
+    {
+      "lat": 30.21358,
+      "lon": -97.13893,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1121963489"
+      ]
+    },
+    {
+      "lat": 30.25343,
+      "lon": -93.0148,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n4169753069",
+        "n4169753065"
+      ]
+    },
+    {
+      "lat": 30.37139,
+      "lon": -81.76383,
+      "brand": "pilot",
+      "name": "Pilot Truck Stop",
+      "osm": [
+        "n5486357424",
+        "n11986376399"
+      ]
+    },
+    {
+      "lat": 30.43842,
+      "lon": -88.52844,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5104264387"
+      ]
+    },
+    {
+      "lat": 30.4852,
+      "lon": -84.42108,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w230492900",
+        "w230492899"
+      ]
+    },
+    {
+      "lat": 30.50579,
+      "lon": -99.77683,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w995768100",
+        "w995768099"
+      ]
+    },
+    {
+      "lat": 30.70045,
+      "lon": -101.20695,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w730955703"
+      ]
+    },
+    {
+      "lat": 30.72548,
+      "lon": -85.18659,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w226885134",
+        "w226885136"
+      ]
+    },
+    {
+      "lat": 30.75995,
+      "lon": -81.65582,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10010181374",
+        "n10010181375"
+      ]
+    },
+    {
+      "lat": 30.76081,
+      "lon": -81.64921,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10010181376",
+        "n10010181377"
+      ]
+    },
+    {
+      "lat": 31.03598,
+      "lon": -104.82993,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w268167135",
+        "w268167133"
+      ]
+    },
+    {
+      "lat": 31.3387,
+      "lon": -110.96625,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12248018520"
+      ]
+    },
+    {
+      "lat": 31.42834,
+      "lon": -83.51595,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n9555474521"
+      ]
+    },
+    {
+      "lat": 31.44854,
+      "lon": -96.07921,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w346232661",
+        "w346232664"
+      ]
+    },
+    {
+      "lat": 31.45583,
+      "lon": -97.17199,
+      "brand": "pilot",
+      "name": "Pilot Travel Plaza",
+      "osm": [
+        "n2966950532"
+      ]
+    },
+    {
+      "lat": 31.58077,
+      "lon": -84.08638,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n7542459014"
+      ]
+    },
+    {
+      "lat": 31.6142,
+      "lon": -102.81155,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1280084992",
+        "w1280084991"
+      ]
+    },
+    {
+      "lat": 31.77849,
+      "lon": -102.36889,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n13099697573"
+      ]
+    },
+    {
+      "lat": 31.78455,
+      "lon": -102.47792,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11203970626"
+      ]
+    },
+    {
+      "lat": 31.82592,
+      "lon": -103.90892,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n6841989163"
+      ]
+    },
+    {
+      "lat": 31.84357,
+      "lon": -103.10396,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1284680841",
+        "w1284680842"
+      ]
+    },
+    {
+      "lat": 31.87606,
+      "lon": -102.42219,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w856570785"
+      ]
+    },
+    {
+      "lat": 31.91502,
+      "lon": -102.21556,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w292983423",
+        "w292983422"
+      ]
+    },
+    {
+      "lat": 31.95987,
+      "lon": -83.74669,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236479358",
+        "w236479359"
+      ]
+    },
+    {
+      "lat": 31.9675,
+      "lon": -102.25225,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1187729545",
+        "w1187729544"
+      ]
+    },
+    {
+      "lat": 31.99713,
+      "lon": -106.5862,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236124449"
+      ]
+    },
+    {
+      "lat": 32.04047,
+      "lon": -96.44825,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1506228112"
+      ]
+    },
+    {
+      "lat": 32.08427,
+      "lon": -110.80336,
+      "brand": "pilot",
+      "name": "Pilot Express",
+      "osm": [
+        "w855741041",
+        "w855741035"
+      ]
+    },
+    {
+      "lat": 32.12066,
+      "lon": -103.18863,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1190974185",
+        "w1190974186"
+      ]
+    },
+    {
+      "lat": 32.12602,
+      "lon": -110.87447,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w728194668"
+      ]
+    },
+    {
+      "lat": 32.1887,
+      "lon": -81.19452,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5224799022"
+      ]
+    },
+    {
+      "lat": 32.26564,
+      "lon": -101.47481,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w908975969",
+        "w908975970"
+      ]
+    },
+    {
+      "lat": 32.26887,
+      "lon": -81.08131,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w565043844",
+        "w565043845"
+      ]
+    },
+    {
+      "lat": 32.29666,
+      "lon": -106.81034,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n9309225781"
+      ]
+    },
+    {
+      "lat": 32.30713,
+      "lon": -102.54227,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w843566165"
+      ]
+    },
+    {
+      "lat": 32.34611,
+      "lon": -88.7278,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236749236"
+      ]
+    },
+    {
+      "lat": 32.45068,
+      "lon": -95.28355,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w292983817",
+        "w292983820"
+      ]
+    },
+    {
+      "lat": 32.45929,
+      "lon": -91.7592,
+      "brand": "pilot",
+      "name": "Pilot Truck Stop",
+      "osm": [
+        "w264709754",
+        "w264709752"
+      ]
+    },
+    {
+      "lat": 32.46352,
+      "lon": -97.26304,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1365847076"
+      ]
+    },
+    {
+      "lat": 32.50793,
+      "lon": -92.19246,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10945137308"
+      ]
+    },
+    {
+      "lat": 32.51622,
+      "lon": -96.82102,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10857087925"
+      ]
+    },
+    {
+      "lat": 32.54488,
+      "lon": -93.51611,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "w264709081",
+        "w264709078"
+      ]
+    },
+    {
+      "lat": 32.56879,
+      "lon": -116.95288,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w262315571",
+        "w262315574"
+      ]
+    },
+    {
+      "lat": 32.6124,
+      "lon": -83.74448,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236476512",
+        "w236476511"
+      ]
+    },
+    {
+      "lat": 32.68597,
+      "lon": -114.57967,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1460946972",
+        "w1449928553"
+      ]
+    },
+    {
+      "lat": 32.69109,
+      "lon": -113.95416,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1454020193"
+      ]
+    },
+    {
+      "lat": 32.69745,
+      "lon": -103.18367,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w464020385",
+        "w1178747128"
+      ]
+    },
+    {
+      "lat": 32.70522,
+      "lon": -100.86563,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w729223748"
+      ]
+    },
+    {
+      "lat": 32.73856,
+      "lon": -111.54968,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n4719302865",
+        "n4719302867",
+        "n4719302866"
+      ]
+    },
+    {
+      "lat": 32.73997,
+      "lon": -103.16291,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n3285253211"
+      ]
+    },
+    {
+      "lat": 32.93033,
+      "lon": -112.67334,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12099611220"
+      ]
+    },
+    {
+      "lat": 32.95791,
+      "lon": -97.30723,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w292983166",
+        "r14196393"
+      ]
+    },
+    {
+      "lat": 32.9779,
+      "lon": -115.50383,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12696303914",
+        "w1080972243"
+      ]
+    },
+    {
+      "lat": 33.04361,
+      "lon": -96.17785,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w268165556",
+        "w268165555"
+      ]
+    },
+    {
+      "lat": 33.10216,
+      "lon": -97.47055,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w832951695",
+        "w832951694"
+      ]
+    },
+    {
+      "lat": 33.11654,
+      "lon": -95.63422,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w268086138",
+        "w268086140"
+      ]
+    },
+    {
+      "lat": 33.17291,
+      "lon": -87.47848,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w124674624"
+      ]
+    },
+    {
+      "lat": 33.21088,
+      "lon": -84.05676,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w219842526"
+      ]
+    },
+    {
+      "lat": 33.26926,
+      "lon": -80.56715,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "n6394718385"
+      ]
+    },
+    {
+      "lat": 33.32088,
+      "lon": -84.77759,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "r14036453"
+      ]
+    },
+    {
+      "lat": 33.41707,
+      "lon": -80.6664,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w520939889",
+        "w520939887"
+      ]
+    },
+    {
+      "lat": 33.45301,
+      "lon": -94.13262,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w943963040"
+      ]
+    },
+    {
+      "lat": 33.49427,
+      "lon": -112.93761,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w951751975",
+        "w951751974"
+      ]
+    },
+    {
+      "lat": 33.52382,
+      "lon": -82.0336,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236473286",
+        "w236473288"
+      ]
+    },
+    {
+      "lat": 33.56077,
+      "lon": -83.47838,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w226931347"
+      ]
+    },
+    {
+      "lat": 33.60434,
+      "lon": -81.84093,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10109748474"
+      ]
+    },
+    {
+      "lat": 33.63376,
+      "lon": -113.7683,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2381608285",
+        "n2381608313",
+        "n2381608334"
+      ]
+    },
+    {
+      "lat": 33.66166,
+      "lon": -114.23661,
+      "brand": "pilot",
+      "name": "Pilot Travel Centers",
+      "osm": [
+        "w264996161",
+        "w264996165"
+      ]
+    },
+    {
+      "lat": 33.68258,
+      "lon": -85.26325,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236501658",
+        "w236501656"
+      ]
+    },
+    {
+      "lat": 33.68529,
+      "lon": -84.31115,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2427461553"
+      ]
+    },
+    {
+      "lat": 33.71895,
+      "lon": -85.02917,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n6533962509"
+      ]
+    },
+    {
+      "lat": 33.76571,
+      "lon": -112.51401,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1189183180"
+      ]
+    },
+    {
+      "lat": 33.80119,
+      "lon": -98.19573,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1167601974"
+      ]
+    },
+    {
+      "lat": 33.90304,
+      "lon": -116.54584,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n1577570957"
+      ]
+    },
+    {
+      "lat": 33.99213,
+      "lon": -87.77823,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12842967406"
+      ]
+    },
+    {
+      "lat": 34.05543,
+      "lon": -117.39593,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11291592068"
+      ]
+    },
+    {
+      "lat": 34.11689,
+      "lon": -86.86387,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1314211600",
+        "w1314211601"
+      ]
+    },
+    {
+      "lat": 34.11949,
+      "lon": -83.76233,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n895041543"
+      ]
+    },
+    {
+      "lat": 34.18713,
+      "lon": -93.07023,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10776035880"
+      ]
+    },
+    {
+      "lat": 34.19236,
+      "lon": -80.28303,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n7883068916"
+      ]
+    },
+    {
+      "lat": 34.19282,
+      "lon": -80.687,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n9385775212",
+        "n9385811924"
+      ]
+    },
+    {
+      "lat": 34.24047,
+      "lon": -81.45955,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1111675855",
+        "w1111675875"
+      ]
+    },
+    {
+      "lat": 34.27279,
+      "lon": -84.80775,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w688510930"
+      ]
+    },
+    {
+      "lat": 34.32709,
+      "lon": -112.1181,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1525040505"
+      ]
+    },
+    {
+      "lat": 34.34533,
+      "lon": -79.53444,
+      "brand": "pilot",
+      "name": "Pilot (Truck diesel station)",
+      "osm": [
+        "n4782121832"
+      ]
+    },
+    {
+      "lat": 34.36476,
+      "lon": -96.14101,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12165977781"
+      ]
+    },
+    {
+      "lat": 34.43571,
+      "lon": -100.23033,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1083335206"
+      ]
+    },
+    {
+      "lat": 34.46795,
+      "lon": -89.00638,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236750656",
+        "w236750655"
+      ]
+    },
+    {
+      "lat": 34.49439,
+      "lon": -118.62027,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w262315782"
+      ]
+    },
+    {
+      "lat": 34.52889,
+      "lon": -101.79772,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12141612156"
+      ]
+    },
+    {
+      "lat": 34.53785,
+      "lon": -86.91084,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236742061",
+        "w236742059"
+      ]
+    },
+    {
+      "lat": 34.54319,
+      "lon": -118.03598,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12100285725"
+      ]
+    },
+    {
+      "lat": 34.55892,
+      "lon": -84.93557,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w429774374",
+        "w429774376"
+      ]
+    },
+    {
+      "lat": 34.60837,
+      "lon": -92.53372,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w264987548"
+      ]
+    },
+    {
+      "lat": 34.62,
+      "lon": -89.95298,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10871362855"
+      ]
+    },
+    {
+      "lat": 34.65549,
+      "lon": -84.98058,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236484274",
+        "w236484271"
+      ]
+    },
+    {
+      "lat": 34.69905,
+      "lon": -113.61011,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1021354946"
+      ]
+    },
+    {
+      "lat": 34.72832,
+      "lon": -114.316,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w223539704"
+      ]
+    },
+    {
+      "lat": 34.78129,
+      "lon": -92.12776,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w218548059",
+        "w218548058"
+      ]
+    },
+    {
+      "lat": 34.85465,
+      "lon": -117.08773,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w223416541"
+      ]
+    },
+    {
+      "lat": 34.94683,
+      "lon": -104.65139,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w784612776",
+        "w784612775"
+      ]
+    },
+    {
+      "lat": 34.96069,
+      "lon": -106.66013,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1124744229"
+      ]
+    },
+    {
+      "lat": 34.99175,
+      "lon": -117.54249,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w263298253",
+        "w80799385"
+      ]
+    },
+    {
+      "lat": 35.01119,
+      "lon": -106.04387,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "w904936667"
+      ]
+    },
+    {
+      "lat": 35.07801,
+      "lon": -81.70311,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w236635039"
+      ]
+    },
+    {
+      "lat": 35.12712,
+      "lon": -118.41539,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "n12100208432",
+        "n12100208433"
+      ]
+    },
+    {
+      "lat": 35.14988,
+      "lon": -103.72445,
+      "brand": "pilot",
+      "name": "One9 Gas Station",
+      "osm": [
+        "n12766688259"
+      ]
+    },
+    {
+      "lat": 35.15315,
+      "lon": -84.953,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w268168665"
+      ]
+    },
+    {
+      "lat": 35.16601,
+      "lon": -81.45097,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "n651186894"
+      ]
+    },
+    {
+      "lat": 35.19592,
+      "lon": -101.74124,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220362347",
+        "w220362345"
+      ]
+    },
+    {
+      "lat": 35.23295,
+      "lon": -85.82619,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11211834817"
+      ]
+    },
+    {
+      "lat": 35.23572,
+      "lon": -102.42852,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1059829888",
+        "w1059829887"
+      ]
+    },
+    {
+      "lat": 35.23824,
+      "lon": -111.82196,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11076238346"
+      ]
+    },
+    {
+      "lat": 35.27041,
+      "lon": -80.83784,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5612026462"
+      ]
+    },
+    {
+      "lat": 35.28068,
+      "lon": -93.09327,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w264988864"
+      ]
+    },
+    {
+      "lat": 35.29804,
+      "lon": -79.72627,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1001154270"
+      ]
+    },
+    {
+      "lat": 35.31841,
+      "lon": -78.57577,
+      "brand": "pilot",
+      "name": "Pilot Dealer--Sadler Travel Plaza",
+      "osm": [
+        "w236144789"
+      ]
+    },
+    {
+      "lat": 35.39004,
+      "lon": -89.41105,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w291653928"
+      ]
+    },
+    {
+      "lat": 35.40427,
+      "lon": -94.52166,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w265529439",
+        "w265529438"
+      ]
+    },
+    {
+      "lat": 35.58354,
+      "lon": -78.14787,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220150715"
+      ]
+    },
+    {
+      "lat": 35.59577,
+      "lon": -97.43646,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w226295913",
+        "w226295912"
+      ]
+    },
+    {
+      "lat": 35.61581,
+      "lon": -119.65884,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n1834487562"
+      ]
+    },
+    {
+      "lat": 35.70013,
+      "lon": -114.47719,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n8265004339"
+      ]
+    },
+    {
+      "lat": 35.78472,
+      "lon": -95.4018,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2555053467",
+        "n2555053468"
+      ]
+    },
+    {
+      "lat": 35.80515,
+      "lon": -90.6255,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11155412689"
+      ]
+    },
+    {
+      "lat": 35.80779,
+      "lon": -86.39683,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w291651304"
+      ]
+    },
+    {
+      "lat": 35.84122,
+      "lon": -83.57126,
+      "brand": "pilot",
+      "name": "Pilot Convenience Store",
+      "osm": [
+        "w416311629"
+      ]
+    },
+    {
+      "lat": 35.87426,
+      "lon": -84.45909,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w890083793"
+      ]
+    },
+    {
+      "lat": 35.88219,
+      "lon": -87.80101,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2881918876"
+      ]
+    },
+    {
+      "lat": 35.90402,
+      "lon": -84.14194,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2683531552",
+        "n2683531584",
+        "n5813702473"
+      ]
+    },
+    {
+      "lat": 35.92495,
+      "lon": -84.06579,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w831405097"
+      ]
+    },
+    {
+      "lat": 35.92815,
+      "lon": -83.58318,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n4332726190"
+      ]
+    },
+    {
+      "lat": 35.96044,
+      "lon": -83.82348,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1021211488",
+        "w1021207508"
+      ]
+    },
+    {
+      "lat": 35.98012,
+      "lon": -84.01705,
+      "brand": "pilot",
+      "name": "Pilot Convenience Store",
+      "osm": [
+        "n5548112512"
+      ]
+    },
+    {
+      "lat": 35.99569,
+      "lon": -83.92191,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10270375168"
+      ]
+    },
+    {
+      "lat": 35.99777,
+      "lon": -86.59509,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1253396935",
+        "w1253396934"
+      ]
+    },
+    {
+      "lat": 35.99971,
+      "lon": -83.77747,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w223632511"
+      ]
+    },
+    {
+      "lat": 36.00771,
+      "lon": -83.97619,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n4438809745"
+      ]
+    },
+    {
+      "lat": 36.01717,
+      "lon": -83.81743,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w926255824"
+      ]
+    },
+    {
+      "lat": 36.0229,
+      "lon": -87.34085,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n9861448027"
+      ]
+    },
+    {
+      "lat": 36.06578,
+      "lon": -79.30983,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5077700121"
+      ]
+    },
+    {
+      "lat": 36.10865,
+      "lon": -83.33418,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w930319365"
+      ]
+    },
+    {
+      "lat": 36.10916,
+      "lon": -83.33847,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w911947409"
+      ]
+    },
+    {
+      "lat": 36.1337,
+      "lon": -85.50395,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "n5580291030"
+      ]
+    },
+    {
+      "lat": 36.17617,
+      "lon": -94.19314,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12099603250",
+        "n7682055228"
+      ]
+    },
+    {
+      "lat": 36.17725,
+      "lon": -85.94864,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1155116129",
+        "n10742335870"
+      ]
+    },
+    {
+      "lat": 36.17896,
+      "lon": -86.29969,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w291650441",
+        "w291650442"
+      ]
+    },
+    {
+      "lat": 36.241,
+      "lon": -115.0978,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w264216829",
+        "w264216830"
+      ]
+    },
+    {
+      "lat": 36.58242,
+      "lon": -79.3539,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220906405"
+      ]
+    },
+    {
+      "lat": 36.66527,
+      "lon": -121.62986,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "w262315409",
+        "w262315410"
+      ]
+    },
+    {
+      "lat": 36.67511,
+      "lon": -78.92677,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5497869217"
+      ]
+    },
+    {
+      "lat": 36.69259,
+      "lon": -87.4518,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n3897624258"
+      ]
+    },
+    {
+      "lat": 36.69621,
+      "lon": -97.34931,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11328498721",
+        "n11328479147"
+      ]
+    },
+    {
+      "lat": 36.71435,
+      "lon": -76.66942,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "r12929994"
+      ]
+    },
+    {
+      "lat": 36.72236,
+      "lon": -84.1683,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w267333875"
+      ]
+    },
+    {
+      "lat": 36.7601,
+      "lon": -89.54121,
+      "brand": "pilot",
+      "name": "Pilot Truck stop",
+      "osm": [
+        "n4445871090",
+        "n11418273084"
+      ]
+    },
+    {
+      "lat": 36.89732,
+      "lon": -113.91042,
+      "brand": "pilot",
+      "name": "Pilot Truck Lanes",
+      "osm": [
+        "w1173865805",
+        "w1173865804",
+        "w1173865803"
+      ]
+    },
+    {
+      "lat": 36.93862,
+      "lon": -80.99302,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n6224489913"
+      ]
+    },
+    {
+      "lat": 36.97546,
+      "lon": -84.10768,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w225807076"
+      ]
+    },
+    {
+      "lat": 36.99508,
+      "lon": -111.56412,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w387787672"
+      ]
+    },
+    {
+      "lat": 37.01875,
+      "lon": -120.13263,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n401976140"
+      ]
+    },
+    {
+      "lat": 37.06016,
+      "lon": -113.58205,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w241718232",
+        "w241718233"
+      ]
+    },
+    {
+      "lat": 37.07176,
+      "lon": -88.12356,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w267330914"
+      ]
+    },
+    {
+      "lat": 37.09754,
+      "lon": -88.69121,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w265728412",
+        "w265728410"
+      ]
+    },
+    {
+      "lat": 37.18464,
+      "lon": -77.31818,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12165022613",
+        "n12165022612"
+      ]
+    },
+    {
+      "lat": 37.25529,
+      "lon": -87.44905,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w223215971",
+        "w223215972"
+      ]
+    },
+    {
+      "lat": 37.31068,
+      "lon": -77.39184,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220909444"
+      ]
+    },
+    {
+      "lat": 37.50013,
+      "lon": -77.08976,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5224067414"
+      ]
+    },
+    {
+      "lat": 37.74049,
+      "lon": -88.96465,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w978337898",
+        "w978337897",
+        "w978337901"
+      ]
+    },
+    {
+      "lat": 37.8275,
+      "lon": -85.72403,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2727971891",
+        "n2727971893"
+      ]
+    },
+    {
+      "lat": 37.93193,
+      "lon": -79.23166,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "n4933720061"
+      ]
+    },
+    {
+      "lat": 37.93928,
+      "lon": -77.46575,
+      "brand": "pilot",
+      "name": "Mr. Fuel Travel Center",
+      "osm": [
+        "w781066444"
+      ]
+    },
+    {
+      "lat": 38.01991,
+      "lon": -79.14191,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220906168",
+        "n4609317831"
+      ]
+    },
+    {
+      "lat": 38.0607,
+      "lon": -85.70309,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10579902385"
+      ]
+    },
+    {
+      "lat": 38.23912,
+      "lon": -86.36206,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w267162691",
+        "w267162689"
+      ]
+    },
+    {
+      "lat": 38.27615,
+      "lon": -84.55432,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n1891130460"
+      ]
+    },
+    {
+      "lat": 38.31312,
+      "lon": -88.96136,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w229452544"
+      ]
+    },
+    {
+      "lat": 38.44366,
+      "lon": -81.83112,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1023123841"
+      ]
+    },
+    {
+      "lat": 38.48016,
+      "lon": -78.81843,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "w1147235921"
+      ]
+    },
+    {
+      "lat": 38.49174,
+      "lon": -85.77315,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n7674506725"
+      ]
+    },
+    {
+      "lat": 38.61703,
+      "lon": -121.53836,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w60065329"
+      ]
+    },
+    {
+      "lat": 38.6521,
+      "lon": -90.13192,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12244403851"
+      ]
+    },
+    {
+      "lat": 38.70508,
+      "lon": -80.6639,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w689772833",
+        "w689772830"
+      ]
+    },
+    {
+      "lat": 38.86227,
+      "lon": -121.95065,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2679753643",
+        "w262310086",
+        "n2679753644"
+      ]
+    },
+    {
+      "lat": 38.87435,
+      "lon": -97.6106,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w385780213"
+      ]
+    },
+    {
+      "lat": 38.93943,
+      "lon": -92.77399,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w554602289",
+        "w554602290"
+      ]
+    },
+    {
+      "lat": 38.96648,
+      "lon": -78.43851,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11403825520"
+      ]
+    },
+    {
+      "lat": 38.97085,
+      "lon": -89.1363,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n4743143943",
+        "w1318432316"
+      ]
+    },
+    {
+      "lat": 38.99555,
+      "lon": -110.14845,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w241717704"
+      ]
+    },
+    {
+      "lat": 39.00321,
+      "lon": -93.73472,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w555000321"
+      ]
+    },
+    {
+      "lat": 39.05604,
+      "lon": -104.85356,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w768675941"
+      ]
+    },
+    {
+      "lat": 39.11258,
+      "lon": -108.64807,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "r10717656"
+      ]
+    },
+    {
+      "lat": 39.14922,
+      "lon": -88.53102,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1318432787",
+        "w1289022151"
+      ]
+    },
+    {
+      "lat": 39.3646,
+      "lon": -101.0329,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n1022121200"
+      ]
+    },
+    {
+      "lat": 39.36888,
+      "lon": -94.37415,
+      "brand": "pilot",
+      "name": "Pilot Gas",
+      "osm": [
+        "w265139487",
+        "w265139488"
+      ]
+    },
+    {
+      "lat": 39.41893,
+      "lon": -87.69463,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1311869096",
+        "w1311869094"
+      ]
+    },
+    {
+      "lat": 39.54219,
+      "lon": -84.29119,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w205877916"
+      ]
+    },
+    {
+      "lat": 39.55794,
+      "lon": -82.95777,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12125481416"
+      ]
+    },
+    {
+      "lat": 39.58391,
+      "lon": -85.81832,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w267162879"
+      ]
+    },
+    {
+      "lat": 39.60086,
+      "lon": -94.79098,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1086839013",
+        "w1086839014"
+      ]
+    },
+    {
+      "lat": 39.61808,
+      "lon": -119.26707,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w225364452"
+      ]
+    },
+    {
+      "lat": 39.62953,
+      "lon": -77.78332,
+      "brand": "pilot",
+      "name": "pilot",
+      "osm": [
+        "w220739418",
+        "w220739417"
+      ]
+    },
+    {
+      "lat": 39.63386,
+      "lon": -77.80719,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w225803789",
+        "w225803787"
+      ]
+    },
+    {
+      "lat": 39.69228,
+      "lon": -79.10056,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220735023",
+        "w220735020"
+      ]
+    },
+    {
+      "lat": 39.69754,
+      "lon": -86.18554,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w221381427",
+        "w221381429"
+      ]
+    },
+    {
+      "lat": 39.73764,
+      "lon": -81.52771,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220778074",
+        "w220778072"
+      ]
+    },
+    {
+      "lat": 39.75121,
+      "lon": -122.20847,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n4787182022"
+      ]
+    },
+    {
+      "lat": 39.82154,
+      "lon": -85.91614,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n9596357483"
+      ]
+    },
+    {
+      "lat": 39.83163,
+      "lon": -84.62996,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w229319025"
+      ]
+    },
+    {
+      "lat": 39.8506,
+      "lon": -85.41763,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5854690496",
+        "n12098427653"
+      ]
+    },
+    {
+      "lat": 39.94545,
+      "lon": -82.53606,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w221392146",
+        "w221392147"
+      ]
+    },
+    {
+      "lat": 39.9591,
+      "lon": -83.37017,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w221628744",
+        "w221628742"
+      ]
+    },
+    {
+      "lat": 39.97342,
+      "lon": -83.09982,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w229324197",
+        "w229324194"
+      ]
+    },
+    {
+      "lat": 39.997,
+      "lon": -81.57721,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1178084819",
+        "w1178084818"
+      ]
+    },
+    {
+      "lat": 40.03209,
+      "lon": -86.47321,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11182190951",
+        "n11182190950"
+      ]
+    },
+    {
+      "lat": 40.04631,
+      "lon": -86.82096,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w267159749"
+      ]
+    },
+    {
+      "lat": 40.05793,
+      "lon": -81.05128,
+      "brand": "pilot",
+      "name": "Pilot Gas Station",
+      "osm": [
+        "n10276959380"
+      ]
+    },
+    {
+      "lat": 40.1237,
+      "lon": -87.77906,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w416108175",
+        "w416108173"
+      ]
+    },
+    {
+      "lat": 40.15744,
+      "lon": -89.41266,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n3240580136"
+      ]
+    },
+    {
+      "lat": 40.26569,
+      "lon": -82.92405,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w608260434",
+        "w229322738"
+      ]
+    },
+    {
+      "lat": 40.29421,
+      "lon": -109.98946,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12248045406",
+        "n11463484429"
+      ]
+    },
+    {
+      "lat": 40.36528,
+      "lon": -111.75283,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1433596005"
+      ]
+    },
+    {
+      "lat": 40.37084,
+      "lon": -82.83034,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w229321788"
+      ]
+    },
+    {
+      "lat": 40.43388,
+      "lon": -109.49914,
+      "brand": "pilot",
+      "name": "Pilot Naples 24 Hour Pay At Pump",
+      "osm": [
+        "w1102235116"
+      ]
+    },
+    {
+      "lat": 40.48262,
+      "lon": -89.01737,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "r14467904"
+      ]
+    },
+    {
+      "lat": 40.53326,
+      "lon": -76.43038,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "w619013529"
+      ]
+    },
+    {
+      "lat": 40.63656,
+      "lon": -74.96732,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n4397109431"
+      ]
+    },
+    {
+      "lat": 40.65947,
+      "lon": -75.0728,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5792682395",
+        "n12247171676"
+      ]
+    },
+    {
+      "lat": 40.71961,
+      "lon": -74.12571,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1112517705"
+      ]
+    },
+    {
+      "lat": 40.73945,
+      "lon": -114.06646,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "w264209941"
+      ]
+    },
+    {
+      "lat": 40.74987,
+      "lon": -81.40338,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1127365367",
+        "w1127365366"
+      ]
+    },
+    {
+      "lat": 40.75095,
+      "lon": -88.0017,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w887647683",
+        "w217587173"
+      ]
+    },
+    {
+      "lat": 40.76633,
+      "lon": -87.12348,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n9923278117"
+      ]
+    },
+    {
+      "lat": 40.8337,
+      "lon": -83.96485,
+      "brand": "pilot",
+      "name": "Pilot Travel Center #457",
+      "osm": [
+        "w229320512",
+        "w229320513"
+      ]
+    },
+    {
+      "lat": 40.83402,
+      "lon": -83.24496,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w229321289"
+      ]
+    },
+    {
+      "lat": 40.89213,
+      "lon": -74.68576,
+      "brand": "pilot",
+      "name": "Pilot Dealer #891",
+      "osm": [
+        "w267162756"
+      ]
+    },
+    {
+      "lat": 40.95942,
+      "lon": -80.66017,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220785756",
+        "w220785758"
+      ]
+    },
+    {
+      "lat": 40.96443,
+      "lon": -80.13998,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220625680"
+      ]
+    },
+    {
+      "lat": 41.02742,
+      "lon": -76.07993,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n145130814"
+      ]
+    },
+    {
+      "lat": 41.04848,
+      "lon": -86.21812,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w711423486"
+      ]
+    },
+    {
+      "lat": 41.09222,
+      "lon": -74.15582,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "r9107525"
+      ]
+    },
+    {
+      "lat": 41.11892,
+      "lon": -85.18469,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w229619322"
+      ]
+    },
+    {
+      "lat": 41.12869,
+      "lon": -80.76952,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220782795",
+        "w220782794"
+      ]
+    },
+    {
+      "lat": 41.13634,
+      "lon": -104.70684,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2441943128",
+        "n1002844680"
+      ]
+    },
+    {
+      "lat": 41.17549,
+      "lon": -79.73952,
+      "brand": "pilot",
+      "name": "Pilot Gas Station",
+      "osm": [
+        "w1216052886"
+      ]
+    },
+    {
+      "lat": 41.1807,
+      "lon": -90.33768,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w264238456",
+        "w264238454"
+      ]
+    },
+    {
+      "lat": 41.23562,
+      "lon": -95.87878,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2022526595"
+      ]
+    },
+    {
+      "lat": 41.23689,
+      "lon": -73.02226,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11146674117",
+        "w209686668"
+      ]
+    },
+    {
+      "lat": 41.27618,
+      "lon": -81.6264,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w225804450",
+        "w225804448"
+      ]
+    },
+    {
+      "lat": 41.28964,
+      "lon": -87.29481,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w230775840",
+        "w230776416",
+        "w230776418"
+      ]
+    },
+    {
+      "lat": 41.31418,
+      "lon": -75.75496,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220654394",
+        "w220654390"
+      ]
+    },
+    {
+      "lat": 41.39538,
+      "lon": -88.42186,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1040391975"
+      ]
+    },
+    {
+      "lat": 41.39882,
+      "lon": -122.37697,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w546998196",
+        "w261985269",
+        "w261985270"
+      ]
+    },
+    {
+      "lat": 41.41655,
+      "lon": -84.10422,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220265675"
+      ]
+    },
+    {
+      "lat": 41.42759,
+      "lon": -87.75676,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11071533349",
+        "n11071533350"
+      ]
+    },
+    {
+      "lat": 41.4576,
+      "lon": -88.1925,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "w144058519"
+      ]
+    },
+    {
+      "lat": 41.46077,
+      "lon": -88.27253,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w264009003",
+        "w264009002"
+      ]
+    },
+    {
+      "lat": 41.4802,
+      "lon": -88.07906,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w851353103",
+        "w851353105"
+      ]
+    },
+    {
+      "lat": 41.52153,
+      "lon": -74.11271,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220505480"
+      ]
+    },
+    {
+      "lat": 41.5224,
+      "lon": -83.46224,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n9421654611"
+      ]
+    },
+    {
+      "lat": 41.56731,
+      "lon": -87.47299,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1309484266"
+      ]
+    },
+    {
+      "lat": 41.57311,
+      "lon": -87.40257,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w229466168",
+        "w229466171"
+      ]
+    },
+    {
+      "lat": 41.60446,
+      "lon": -87.11494,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w229477118",
+        "w229477116"
+      ]
+    },
+    {
+      "lat": 41.61452,
+      "lon": -90.78239,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "r11097557"
+      ]
+    },
+    {
+      "lat": 41.61959,
+      "lon": -90.78416,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w221387540",
+        "w221387541"
+      ]
+    },
+    {
+      "lat": 41.66271,
+      "lon": -87.70063,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1320737091"
+      ]
+    },
+    {
+      "lat": 41.69816,
+      "lon": -92.35876,
+      "brand": "pilot",
+      "name": "pilot",
+      "osm": [
+        "n947850877",
+        "n2689261965"
+      ]
+    },
+    {
+      "lat": 41.73603,
+      "lon": -86.33649,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "r16179242"
+      ]
+    },
+    {
+      "lat": 41.74408,
+      "lon": -84.99961,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1320734463",
+        "w1320734462"
+      ]
+    },
+    {
+      "lat": 41.75471,
+      "lon": -87.79958,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1244801295"
+      ]
+    },
+    {
+      "lat": 41.78551,
+      "lon": -80.85377,
+      "brand": "pilot",
+      "name": "Pilot - Cars",
+      "osm": [
+        "w220781342",
+        "w220781341"
+      ]
+    },
+    {
+      "lat": 41.79839,
+      "lon": -83.69414,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w796722330"
+      ]
+    },
+    {
+      "lat": 41.89136,
+      "lon": -91.6672,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1034588818",
+        "w1034588819"
+      ]
+    },
+    {
+      "lat": 41.90363,
+      "lon": -88.12289,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w973189011",
+        "w756604969"
+      ]
+    },
+    {
+      "lat": 41.9248,
+      "lon": -83.36617,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n8423790401"
+      ]
+    },
+    {
+      "lat": 41.96357,
+      "lon": -112.71002,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w231141237"
+      ]
+    },
+    {
+      "lat": 41.96389,
+      "lon": -83.35381,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n8423787402"
+      ]
+    },
+    {
+      "lat": 41.98798,
+      "lon": -87.95994,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w982036883"
+      ]
+    },
+    {
+      "lat": 42.06679,
+      "lon": -72.10755,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1039346655"
+      ]
+    },
+    {
+      "lat": 42.0695,
+      "lon": -80.03853,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w816556753",
+        "w816556752"
+      ]
+    },
+    {
+      "lat": 42.09032,
+      "lon": -86.4123,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n8382541028"
+      ]
+    },
+    {
+      "lat": 42.25613,
+      "lon": -121.79873,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w261971683"
+      ]
+    },
+    {
+      "lat": 42.29617,
+      "lon": -83.87866,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5471247118"
+      ]
+    },
+    {
+      "lat": 42.30172,
+      "lon": -83.87762,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2379543839"
+      ]
+    },
+    {
+      "lat": 42.30258,
+      "lon": -85.08211,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2379587828"
+      ]
+    },
+    {
+      "lat": 42.37833,
+      "lon": -122.89912,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n1876207297"
+      ]
+    },
+    {
+      "lat": 42.43523,
+      "lon": -96.3733,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5555013358"
+      ]
+    },
+    {
+      "lat": 42.49779,
+      "lon": -73.67442,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n10170632752",
+        "n709064600"
+      ]
+    },
+    {
+      "lat": 42.52694,
+      "lon": -88.97978,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w267159050",
+        "w267159049"
+      ]
+    },
+    {
+      "lat": 42.74091,
+      "lon": -86.06952,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n4350335864"
+      ]
+    },
+    {
+      "lat": 42.77902,
+      "lon": -87.95191,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n635241801",
+        "n2726222856"
+      ]
+    },
+    {
+      "lat": 42.78136,
+      "lon": -74.02829,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n1557832816"
+      ]
+    },
+    {
+      "lat": 42.87148,
+      "lon": -87.94442,
+      "brand": "pilot",
+      "name": "Pilot Travel Center",
+      "osm": [
+        "n635243078"
+      ]
+    },
+    {
+      "lat": 42.94729,
+      "lon": -74.3558,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12128697874"
+      ]
+    },
+    {
+      "lat": 42.97665,
+      "lon": -82.54256,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n7047814400"
+      ]
+    },
+    {
+      "lat": 43.1217,
+      "lon": -71.48074,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w220502426"
+      ]
+    },
+    {
+      "lat": 43.1423,
+      "lon": -115.66294,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "r13741633"
+      ]
+    },
+    {
+      "lat": 43.14518,
+      "lon": -93.35892,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2392294122"
+      ]
+    },
+    {
+      "lat": 43.88596,
+      "lon": -100.70512,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w265138290",
+        "w265138292"
+      ]
+    },
+    {
+      "lat": 44.0254,
+      "lon": -116.95247,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w261971331"
+      ]
+    },
+    {
+      "lat": 44.78084,
+      "lon": -93.03362,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w231137533",
+        "w231137532"
+      ]
+    },
+    {
+      "lat": 45.04909,
+      "lon": -122.97499,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w261984078"
+      ]
+    },
+    {
+      "lat": 45.49592,
+      "lon": -94.14881,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w265727249",
+        "w265727248"
+      ]
+    },
+    {
+      "lat": 45.66932,
+      "lon": -120.835,
+      "brand": "pilot",
+      "name": "Pilot Truck Stop",
+      "osm": [
+        "w226329065",
+        "w387276215"
+      ]
+    },
+    {
+      "lat": 45.76597,
+      "lon": -119.20527,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n5047060121"
+      ]
+    },
+    {
+      "lat": 45.81249,
+      "lon": -108.41579,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n8317060529"
+      ]
+    },
+    {
+      "lat": 45.81565,
+      "lon": -108.41738,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n8317080809"
+      ]
+    },
+    {
+      "lat": 45.91731,
+      "lon": -111.59916,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n9512341273"
+      ]
+    },
+    {
+      "lat": 46.00518,
+      "lon": -112.61253,
+      "brand": "pilot",
+      "name": "Pilot Flying J",
+      "osm": [
+        "w451824958"
+      ]
+    },
+    {
+      "lat": 46.39682,
+      "lon": -105.82094,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1306440658"
+      ]
+    },
+    {
+      "lat": 46.75705,
+      "lon": -114.08094,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11369524623"
+      ]
+    },
+    {
+      "lat": 46.95364,
+      "lon": -122.93516,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n2338730114",
+        "n2100738508"
+      ]
+    },
+    {
+      "lat": 47.00573,
+      "lon": -120.58756,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w1250249428",
+        "w1213093011"
+      ]
+    },
+    {
+      "lat": 47.24202,
+      "lon": -122.41202,
+      "brand": "pilot",
+      "name": "Pilot Express",
+      "osm": [
+        "w1033370988"
+      ]
+    },
+    {
+      "lat": 47.88796,
+      "lon": -97.09338,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n11189416005"
+      ]
+    },
+    {
+      "lat": 48.18762,
+      "lon": -122.19661,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "n12142719866"
+      ]
+    },
+    {
+      "lat": 48.3701,
+      "lon": -114.2384,
+      "brand": "pilot",
+      "name": "Pilot",
+      "osm": [
+        "w989750911"
+      ]
+    },
+    {
+      "lat": 26.09363,
+      "lon": -98.20179,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1328088694",
+        "w1328088695"
+      ]
+    },
+    {
+      "lat": 28.047,
+      "lon": -99.34866,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w525507185",
+        "w525507183"
+      ]
+    },
+    {
+      "lat": 29.02921,
+      "lon": -99.05051,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1185428710",
+        "w1185428711"
+      ]
+    },
+    {
+      "lat": 29.57122,
+      "lon": -98.01218,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1333272882"
+      ]
+    },
+    {
+      "lat": 30.58061,
+      "lon": -100.64606,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w998218718",
+        "w998218719"
+      ]
+    },
+    {
+      "lat": 31.65067,
+      "lon": -97.09894,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1212935781"
+      ]
+    },
+    {
+      "lat": 31.78819,
+      "lon": -102.47862,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "n11203970627"
+      ]
+    },
+    {
+      "lat": 33.47727,
+      "lon": -94.41049,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1328096863",
+        "w1328096864"
+      ]
+    },
+    {
+      "lat": 33.66968,
+      "lon": -97.15277,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1328084323",
+        "w865119447"
+      ]
+    },
+    {
+      "lat": 34.9132,
+      "lon": -91.19487,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "n12649843751"
+      ]
+    },
+    {
+      "lat": 35.1935,
+      "lon": -101.70782,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "n12287629780"
+      ]
+    },
+    {
+      "lat": 37.6201,
+      "lon": -88.98573,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1005760533"
+      ]
+    },
+    {
+      "lat": 39.42454,
+      "lon": -87.69195,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1181350088",
+        "w1181350086"
+      ]
+    },
+    {
+      "lat": 39.44648,
+      "lon": -87.12568,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1031528228",
+        "w1031528227"
+      ]
+    },
+    {
+      "lat": 39.73209,
+      "lon": -89.92451,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w264217597"
+      ]
+    },
+    {
+      "lat": 39.79206,
+      "lon": -88.26826,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w196181384",
+        "w196181386"
+      ]
+    },
+    {
+      "lat": 40.17744,
+      "lon": -88.24031,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w263994196",
+        "w263994197"
+      ]
+    },
+    {
+      "lat": 40.31076,
+      "lon": -89.16904,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w1207048661",
+        "w1207048662"
+      ]
+    },
+    {
+      "lat": 40.91282,
+      "lon": -89.05328,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w264007967",
+        "w264007968"
+      ]
+    },
+    {
+      "lat": 41.2056,
+      "lon": -87.87037,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "n12287573106",
+        "n12287573104"
+      ]
+    },
+    {
+      "lat": 41.37899,
+      "lon": -88.7764,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "n9849198661"
+      ]
+    },
+    {
+      "lat": 41.82274,
+      "lon": -89.47514,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w771586679",
+        "w771586678"
+      ]
+    },
+    {
+      "lat": 41.83127,
+      "lon": -87.69448,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w165234369",
+        "w165232763"
+      ]
+    },
+    {
+      "lat": 41.93358,
+      "lon": -89.03483,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w223480684"
+      ]
+    },
+    {
+      "lat": 41.93431,
+      "lon": -89.06791,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w821222855"
+      ]
+    },
+    {
+      "lat": 42.23843,
+      "lon": -89.03356,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w827484724"
+      ]
+    },
+    {
+      "lat": 42.28046,
+      "lon": -89.24218,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w766383726"
+      ]
+    },
+    {
+      "lat": 42.31102,
+      "lon": -89.07691,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w256728581"
+      ]
+    },
+    {
+      "lat": 42.36732,
+      "lon": -89.03581,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w248678801"
+      ]
+    },
+    {
+      "lat": 42.46115,
+      "lon": -92.24707,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "n3950968352",
+        "n3285219503"
+      ]
+    },
+    {
+      "lat": 42.49115,
+      "lon": -88.99893,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w230775261",
+        "w230775263"
+      ]
+    },
+    {
+      "lat": 42.79056,
+      "lon": -88.38943,
+      "brand": "roadranger",
+      "name": "Road Ranger",
+      "osm": [
+        "w267159234",
+        "w267159235"
+      ]
+    },
+    {
+      "lat": 28.01002,
+      "lon": -82.30025,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w226886062"
+      ]
+    },
+    {
+      "lat": 29.7772,
+      "lon": -94.91288,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w1018187398"
+      ]
+    },
+    {
+      "lat": 29.99551,
+      "lon": -82.59674,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w1292774381"
+      ]
+    },
+    {
+      "lat": 30.06581,
+      "lon": -81.49605,
+      "brand": "ta",
+      "name": "TA Travel Center",
+      "osm": [
+        "n12323229952"
+      ]
+    },
+    {
+      "lat": 30.6306,
+      "lon": -87.6157,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n13908194632"
+      ]
+    },
+    {
+      "lat": 30.64413,
+      "lon": -83.18737,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w1010806655",
+        "w1010806654",
+        "w226930452"
+      ]
+    },
+    {
+      "lat": 30.71819,
+      "lon": -85.18389,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w226885455"
+      ]
+    },
+    {
+      "lat": 31.72535,
+      "lon": -96.17696,
+      "brand": "ta",
+      "name": "TA Express",
+      "osm": [
+        "n11179682221"
+      ]
+    },
+    {
+      "lat": 31.92461,
+      "lon": -81.33268,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w226931520"
+      ]
+    },
+    {
+      "lat": 32.3277,
+      "lon": -86.33182,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n13908279067"
+      ]
+    },
+    {
+      "lat": 32.38824,
+      "lon": -91.20043,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w225870337",
+        "w225870338"
+      ]
+    },
+    {
+      "lat": 32.44608,
+      "lon": -93.94876,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w896341241"
+      ]
+    },
+    {
+      "lat": 32.89495,
+      "lon": -93.86642,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w1372919676"
+      ]
+    },
+    {
+      "lat": 33.17694,
+      "lon": -87.44627,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n12305191074"
+      ]
+    },
+    {
+      "lat": 33.45816,
+      "lon": -112.78236,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w226825764"
+      ]
+    },
+    {
+      "lat": 33.52943,
+      "lon": -86.85191,
+      "brand": "ta",
+      "name": "TA Express",
+      "osm": [
+        "n13908234772"
+      ]
+    },
+    {
+      "lat": 33.58635,
+      "lon": -86.1243,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n12307861848"
+      ]
+    },
+    {
+      "lat": 33.71331,
+      "lon": -116.17585,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n10266317591"
+      ]
+    },
+    {
+      "lat": 34.07447,
+      "lon": -80.9969,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n10121730014"
+      ]
+    },
+    {
+      "lat": 34.23609,
+      "lon": -79.80577,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n11410928766"
+      ]
+    },
+    {
+      "lat": 34.27448,
+      "lon": -84.80707,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w226929752"
+      ]
+    },
+    {
+      "lat": 34.8535,
+      "lon": -117.08975,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n10088156758"
+      ]
+    },
+    {
+      "lat": 34.91429,
+      "lon": -82.11036,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w225353624"
+      ]
+    },
+    {
+      "lat": 35.00932,
+      "lon": -106.06585,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w226934269",
+        "w226934271"
+      ]
+    },
+    {
+      "lat": 35.13631,
+      "lon": -90.48847,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n12166255032"
+      ]
+    },
+    {
+      "lat": 35.17523,
+      "lon": -103.10394,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n13401860214"
+      ]
+    },
+    {
+      "lat": 35.19105,
+      "lon": -101.75826,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w221640035"
+      ]
+    },
+    {
+      "lat": 35.22161,
+      "lon": -92.82621,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w795395060",
+        "w1330230242"
+      ]
+    },
+    {
+      "lat": 35.40121,
+      "lon": -119.39671,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n2604505366"
+      ]
+    },
+    {
+      "lat": 35.54365,
+      "lon": -82.75448,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w226934960"
+      ]
+    },
+    {
+      "lat": 35.85993,
+      "lon": -86.82972,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n2503437251"
+      ]
+    },
+    {
+      "lat": 36.75859,
+      "lon": -89.5347,
+      "brand": "ta",
+      "name": "TA Truck stop",
+      "osm": [
+        "n4445873489"
+      ]
+    },
+    {
+      "lat": 37.09478,
+      "lon": -93.80731,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n794711505"
+      ]
+    },
+    {
+      "lat": 37.27505,
+      "lon": -93.11509,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n12287821996"
+      ]
+    },
+    {
+      "lat": 37.83228,
+      "lon": -79.37771,
+      "brand": "ta",
+      "name": "ta",
+      "osm": [
+        "n11381430094"
+      ]
+    },
+    {
+      "lat": 37.86091,
+      "lon": -112.82958,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w229593418",
+        "w229593419"
+      ]
+    },
+    {
+      "lat": 38.34403,
+      "lon": -104.62266,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n13065091478"
+      ]
+    },
+    {
+      "lat": 38.45452,
+      "lon": -81.93515,
+      "brand": "ta",
+      "name": "TA Travel Authority",
+      "osm": [
+        "w220734028"
+      ]
+    },
+    {
+      "lat": 38.73345,
+      "lon": -89.90966,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n2380499668",
+        "n2295351549"
+      ]
+    },
+    {
+      "lat": 38.93001,
+      "lon": -111.85375,
+      "brand": "ta",
+      "name": "TA Express Trucks",
+      "osm": [
+        "w1176514632",
+        "w1176514631"
+      ]
+    },
+    {
+      "lat": 39.10919,
+      "lon": -108.64108,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n13009185681"
+      ]
+    },
+    {
+      "lat": 39.1188,
+      "lon": -100.81147,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w189582919"
+      ]
+    },
+    {
+      "lat": 39.13609,
+      "lon": -88.56607,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w223479979",
+        "w223479981"
+      ]
+    },
+    {
+      "lat": 39.27069,
+      "lon": -103.7069,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n1441571881"
+      ]
+    },
+    {
+      "lat": 39.27868,
+      "lon": -76.54885,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n2086293852"
+      ]
+    },
+    {
+      "lat": 39.64418,
+      "lon": -75.79704,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w217813138"
+      ]
+    },
+    {
+      "lat": 39.93859,
+      "lon": -82.53548,
+      "brand": "ta",
+      "name": "Travel Centers of America",
+      "osm": [
+        "w221391766"
+      ]
+    },
+    {
+      "lat": 40.00114,
+      "lon": -78.23281,
+      "brand": "ta",
+      "name": "Travel Centers of America",
+      "osm": [
+        "w220648297"
+      ]
+    },
+    {
+      "lat": 40.48814,
+      "lon": -89.02691,
+      "brand": "ta",
+      "name": "Travel Centers of America",
+      "osm": [
+        "w223479812"
+      ]
+    },
+    {
+      "lat": 40.65948,
+      "lon": -75.07408,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n12323260378"
+      ]
+    },
+    {
+      "lat": 40.68946,
+      "lon": -112.26326,
+      "brand": "ta",
+      "name": "Salt Lake City Travel Center",
+      "osm": [
+        "w229594879"
+      ]
+    },
+    {
+      "lat": 40.95952,
+      "lon": -77.76226,
+      "brand": "ta",
+      "name": "Travel Centers of America",
+      "osm": [
+        "n1657014410"
+      ]
+    },
+    {
+      "lat": 41.0271,
+      "lon": -77.52131,
+      "brand": "ta",
+      "name": "Travel Centers of America",
+      "osm": [
+        "n1657015262"
+      ]
+    },
+    {
+      "lat": 41.12246,
+      "lon": -80.76619,
+      "brand": "ta",
+      "name": "Travel Centers of America",
+      "osm": [
+        "w220781615"
+      ]
+    },
+    {
+      "lat": 41.14525,
+      "lon": -87.26018,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n11860872690"
+      ]
+    },
+    {
+      "lat": 41.17277,
+      "lon": -79.09941,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w220638284"
+      ]
+    },
+    {
+      "lat": 41.39166,
+      "lon": -88.42065,
+      "brand": "ta",
+      "name": "Travel Centers of America",
+      "osm": [
+        "n4354872319"
+      ]
+    },
+    {
+      "lat": 41.5041,
+      "lon": -74.22,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w220520577"
+      ]
+    },
+    {
+      "lat": 41.56457,
+      "lon": -72.90936,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w220525336"
+      ]
+    },
+    {
+      "lat": 41.59056,
+      "lon": -87.23989,
+      "brand": "ta",
+      "name": "TA #219 - Lake Station",
+      "osm": [
+        "w229469514"
+      ]
+    },
+    {
+      "lat": 41.60853,
+      "lon": -71.66337,
+      "brand": "ta",
+      "name": "TA Diesel",
+      "osm": [
+        "n9611841078"
+      ]
+    },
+    {
+      "lat": 41.6128,
+      "lon": -87.09586,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w229471245",
+        "w229471246"
+      ]
+    },
+    {
+      "lat": 41.69836,
+      "lon": -92.44585,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w1085893823",
+        "w1085893816"
+      ]
+    },
+    {
+      "lat": 41.87697,
+      "lon": -80.66731,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n8715460627"
+      ]
+    },
+    {
+      "lat": 42.14159,
+      "lon": -79.92447,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "n7887487648"
+      ]
+    },
+    {
+      "lat": 42.14556,
+      "lon": -88.50973,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w229451282",
+        "w229451283"
+      ]
+    },
+    {
+      "lat": 42.48368,
+      "lon": -87.95044,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w229450892"
+      ]
+    },
+    {
+      "lat": 42.48664,
+      "lon": -87.95104,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w229450895"
+      ]
+    },
+    {
+      "lat": 44.29308,
+      "lon": -117.2244,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w1063418636",
+        "w1063418637"
+      ]
+    },
+    {
+      "lat": 45.1967,
+      "lon": -93.54994,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w226826723",
+        "w226826724"
+      ]
+    },
+    {
+      "lat": 45.23649,
+      "lon": -122.80764,
+      "brand": "ta",
+      "name": "TA Diesel",
+      "osm": [
+        "n334156887"
+      ]
+    },
+    {
+      "lat": 46.94875,
+      "lon": -114.13003,
+      "brand": "ta",
+      "name": "TA",
+      "osm": [
+        "w449496089"
+      ]
+    }
+  ]
+}
