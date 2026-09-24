@@ -1,0 +1,8214 @@
+{
+  "schema": "dailyfuel/map-fleet-points/1",
+  "source": "Weigh station and truck service points compiled by DailyFuel",
+  "licence": "CC BY 4.0",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+  "attribution": "Weigh station and truck service points: DailyFuel",
+  "imported": "2026-09-23",
+  "dedupe_m": 25,
+  "counts": {
+    "weigh": 500,
+    "inspection": 12,
+    "port_of_entry": 24,
+    "ta": 163,
+    "petro": 12,
+    "loves_shop": 195,
+    "speedco": 107,
+    "lubezone": 8,
+    "profleet": 3
+  },
+  "points": [
+    {
+      "lat": 24.95481,
+      "lon": -80.58106,
+      "category": "weigh",
+      "direction": null,
+      "state": "FL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 26.75394,
+      "lon": -81.03769,
+      "category": "weigh",
+      "direction": null,
+      "state": "FL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 27.93756,
+      "lon": -82.11381,
+      "category": "weigh",
+      "direction": null,
+      "state": "FL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 28.28182,
+      "lon": -97.29544,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 28.32188,
+      "lon": -97.70379,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 28.46366,
+      "lon": -97.68233,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 28.54662,
+      "lon": -98.19174,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 28.55782,
+      "lon": -98.19554,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 28.69127,
+      "lon": -97.25703,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 28.69203,
+      "lon": -97.25723,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 28.92758,
+      "lon": -96.74807,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 29.09194,
+      "lon": -98.95344,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 29.09269,
+      "lon": -98.95335,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 29.40814,
+      "lon": -96.06307,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 29.62529,
+      "lon": -97.76771,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 29.6262,
+      "lon": -97.76856,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 29.77356,
+      "lon": -96.07344,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 29.77642,
+      "lon": -96.01184,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 29.92369,
+      "lon": -97.89269,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.10019,
+      "lon": -90.48231,
+      "category": "weigh",
+      "direction": null,
+      "state": "LA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.10046,
+      "lon": -90.4808,
+      "category": "weigh",
+      "direction": null,
+      "state": "LA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.34281,
+      "lon": -89.47469,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.38206,
+      "lon": -82.87056,
+      "category": "weigh",
+      "direction": null,
+      "state": "FL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.38281,
+      "lon": -82.86969,
+      "category": "weigh",
+      "direction": null,
+      "state": "FL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.47894,
+      "lon": -90.52119,
+      "category": "weigh",
+      "direction": null,
+      "state": "LA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.47983,
+      "lon": -90.52156,
+      "category": "weigh",
+      "direction": null,
+      "state": "LA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.52444,
+      "lon": -95.49156,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.69944,
+      "lon": -81.66219,
+      "category": "weigh",
+      "direction": null,
+      "state": "FL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.74344,
+      "lon": -81.95431,
+      "category": "weigh",
+      "direction": null,
+      "state": "FL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 30.89331,
+      "lon": -90.52869,
+      "category": "weigh",
+      "direction": null,
+      "state": "LA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 31.01219,
+      "lon": -89.79644,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 31.07639,
+      "lon": -91.07217,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 31.19122,
+      "lon": -105.42997,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.25781,
+      "lon": -109.17944,
+      "category": "weigh",
+      "direction": null,
+      "state": "AZ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.32031,
+      "lon": -90.94781,
+      "category": "weigh",
+      "direction": null,
+      "state": "LA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.35444,
+      "lon": -90.75394,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.43694,
+      "lon": -88.43531,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.43856,
+      "lon": -88.43656,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.48656,
+      "lon": -89.54381,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.49276,
+      "lon": -95.5582,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.49283,
+      "lon": -95.56012,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.65862,
+      "lon": -96.10858,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.65874,
+      "lon": -96.10583,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 32.71344,
+      "lon": -114.61206,
+      "category": "weigh",
+      "direction": null,
+      "state": "AZ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.06906,
+      "lon": -83.97356,
+      "category": "weigh",
+      "direction": null,
+      "state": "GA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.07027,
+      "lon": -83.97322,
+      "category": "weigh",
+      "direction": null,
+      "state": "GA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.15832,
+      "lon": -95.05008,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.35144,
+      "lon": -117.52481,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.35219,
+      "lon": -117.52406,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.44706,
+      "lon": -117.13494,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.60969,
+      "lon": -114.74131,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.61269,
+      "lon": -114.47056,
+      "category": "weigh",
+      "direction": null,
+      "state": "AZ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.61419,
+      "lon": -114.47069,
+      "category": "weigh",
+      "direction": null,
+      "state": "AZ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.64481,
+      "lon": -85.43919,
+      "category": "weigh",
+      "direction": null,
+      "state": "AL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.69636,
+      "lon": -85.08569,
+      "category": "weigh",
+      "direction": null,
+      "state": "GA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.77271,
+      "lon": -84.63029,
+      "category": "weigh",
+      "direction": null,
+      "state": "GA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.77931,
+      "lon": -81.48944,
+      "category": "weigh",
+      "direction": null,
+      "state": "SC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.80506,
+      "lon": -96.53619,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.86844,
+      "lon": -117.75669,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.86944,
+      "lon": -117.75794,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.90531,
+      "lon": -97.13331,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.91601,
+      "lon": -95.50992,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.91661,
+      "lon": -95.51221,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 33.93919,
+      "lon": -81.26881,
+      "category": "weigh",
+      "direction": null,
+      "state": "SC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.24481,
+      "lon": -88.38231,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.24544,
+      "lon": -81.47644,
+      "category": "weigh",
+      "direction": null,
+      "state": "SC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.24581,
+      "lon": -88.38281,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.28586,
+      "lon": -106.89655,
+      "category": "weigh",
+      "direction": null,
+      "state": "NM",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.28606,
+      "lon": -106.8972,
+      "category": "weigh",
+      "direction": null,
+      "state": "NM",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.30519,
+      "lon": -117.46731,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.30594,
+      "lon": -117.46669,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.43581,
+      "lon": -118.59281,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.43912,
+      "lon": -100.24191,
+      "category": "weigh",
+      "direction": null,
+      "state": "TX",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.59271,
+      "lon": -105.18964,
+      "category": "weigh",
+      "direction": null,
+      "state": "NM",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.70644,
+      "lon": -78.99869,
+      "category": "weigh",
+      "direction": null,
+      "state": "NC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.72344,
+      "lon": -114.42044,
+      "category": "weigh",
+      "direction": null,
+      "state": "AZ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.75256,
+      "lon": -114.56531,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.77716,
+      "lon": -88.15386,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.77801,
+      "lon": -88.15386,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.8794,
+      "lon": -85.04832,
+      "category": "weigh",
+      "direction": null,
+      "state": "GA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.88094,
+      "lon": -85.05286,
+      "category": "weigh",
+      "direction": null,
+      "state": "GA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.89406,
+      "lon": -89.99056,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.89579,
+      "lon": -89.99253,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.96069,
+      "lon": -118.93794,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.96676,
+      "lon": -88.53245,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 34.96724,
+      "lon": -88.53355,
+      "category": "weigh",
+      "direction": null,
+      "state": "MS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.01569,
+      "lon": -80.96981,
+      "category": "weigh",
+      "direction": null,
+      "state": "SC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.06544,
+      "lon": -86.87994,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.11344,
+      "lon": -118.23594,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.14094,
+      "lon": -90.10469,
+      "category": "weigh",
+      "direction": null,
+      "state": "AR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.15344,
+      "lon": -90.08944,
+      "category": "weigh",
+      "direction": null,
+      "state": "AR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.19206,
+      "lon": -90.20019,
+      "category": "weigh",
+      "direction": null,
+      "state": "AR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.21769,
+      "lon": -114.12019,
+      "category": "weigh",
+      "direction": null,
+      "state": "AZ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.22356,
+      "lon": -109.32194,
+      "category": "weigh",
+      "direction": null,
+      "state": "AZ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.22979,
+      "lon": -99.96912,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.23557,
+      "lon": -99.76847,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.23732,
+      "lon": -99.76701,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.43194,
+      "lon": -86.03245,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.43312,
+      "lon": -86.03108,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.43804,
+      "lon": -94.47611,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.45589,
+      "lon": -89.30895,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.46108,
+      "lon": -89.30251,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.48456,
+      "lon": -108.90469,
+      "category": "weigh",
+      "direction": null,
+      "state": "NM",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.50072,
+      "lon": -97.87713,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.50142,
+      "lon": -97.87302,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.55431,
+      "lon": -82.69681,
+      "category": "weigh",
+      "direction": null,
+      "state": "NC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.55444,
+      "lon": -82.70131,
+      "category": "weigh",
+      "direction": null,
+      "state": "NC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.60407,
+      "lon": -103.10613,
+      "category": "weigh",
+      "direction": null,
+      "state": "NM",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.76391,
+      "lon": -81.02123,
+      "category": "weigh",
+      "direction": null,
+      "state": "NC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.8931,
+      "lon": -84.19568,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.89324,
+      "lon": -84.19904,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 35.92726,
+      "lon": -115.19474,
+      "category": "weigh",
+      "direction": null,
+      "state": "NV",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.07932,
+      "lon": -89.52457,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.08534,
+      "lon": -79.1248,
+      "category": "weigh",
+      "direction": null,
+      "state": "NC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.14311,
+      "lon": -89.64327,
+      "category": "weigh",
+      "direction": null,
+      "state": "MO",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.18344,
+      "lon": -94.17844,
+      "category": "weigh",
+      "direction": null,
+      "state": "AR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.21406,
+      "lon": -83.07096,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.33599,
+      "lon": -114.91865,
+      "category": "weigh",
+      "direction": null,
+      "state": "NV",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.43596,
+      "lon": -103.17439,
+      "category": "weigh",
+      "direction": null,
+      "state": "NM",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.52594,
+      "lon": -80.74827,
+      "category": "weigh",
+      "direction": null,
+      "state": "NC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.52956,
+      "lon": -80.74856,
+      "category": "weigh",
+      "direction": null,
+      "state": "NC",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.60908,
+      "lon": -86.58188,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.61003,
+      "lon": -86.57976,
+      "category": "weigh",
+      "direction": null,
+      "state": "TN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.71801,
+      "lon": -97.34535,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.71993,
+      "lon": -97.34632,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.72819,
+      "lon": -102.49599,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 36.98371,
+      "lon": -97.3467,
+      "category": "weigh",
+      "direction": null,
+      "state": "OK",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.01206,
+      "lon": -113.61631,
+      "category": "weigh",
+      "direction": null,
+      "state": "UT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.01299,
+      "lon": -113.61306,
+      "category": "weigh",
+      "direction": null,
+      "state": "UT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.02269,
+      "lon": -97.33756,
+      "category": "weigh",
+      "direction": null,
+      "state": "KS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.04006,
+      "lon": -121.57694,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.04281,
+      "lon": -84.09731,
+      "category": "weigh",
+      "direction": null,
+      "state": "KY",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.06431,
+      "lon": -77.37131,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.06469,
+      "lon": -77.37269,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.07431,
+      "lon": -121.59044,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.08591,
+      "lon": -81.12702,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.08595,
+      "lon": -81.12599,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.08881,
+      "lon": -100.82481,
+      "category": "weigh",
+      "direction": null,
+      "state": "KS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.12844,
+      "lon": -121.03069,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.13669,
+      "lon": -104.52006,
+      "category": "weigh",
+      "direction": null,
+      "state": "CO",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.15956,
+      "lon": -120.29769,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.35956,
+      "lon": -79.92506,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.37025,
+      "lon": -79.9175,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.37137,
+      "lon": -79.91778,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.44119,
+      "lon": -79.07594,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.49044,
+      "lon": -79.07306,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.50006,
+      "lon": -121.95706,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.51419,
+      "lon": -77.23256,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.51506,
+      "lon": -77.23294,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 37.91931,
+      "lon": -87.54944,
+      "category": "weigh",
+      "direction": null,
+      "state": "KY",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.02844,
+      "lon": -122.53806,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.29331,
+      "lon": -84.55819,
+      "category": "weigh",
+      "direction": null,
+      "state": "KY",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.35707,
+      "lon": -77.03162,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.35758,
+      "lon": -77.03175,
+      "category": "weigh",
+      "direction": null,
+      "state": "VA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.42619,
+      "lon": -75.56494,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.42619,
+      "lon": -75.56431,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.45716,
+      "lon": -81.95453,
+      "category": "weigh",
+      "direction": null,
+      "state": "WV",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.45849,
+      "lon": -81.95757,
+      "category": "weigh",
+      "direction": null,
+      "state": "WV",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.46919,
+      "lon": -75.79694,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.57481,
+      "lon": -89.89994,
+      "category": "weigh",
+      "direction": null,
+      "state": "IL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.83156,
+      "lon": -94.85106,
+      "category": "weigh",
+      "direction": null,
+      "state": "KS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.95429,
+      "lon": -109.75367,
+      "category": "weigh",
+      "direction": null,
+      "state": "UT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.95579,
+      "lon": -109.75398,
+      "category": "weigh",
+      "direction": null,
+      "state": "UT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 38.98831,
+      "lon": -88.93594,
+      "category": "weigh",
+      "direction": null,
+      "state": "IL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.01631,
+      "lon": -76.95281,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.06495,
+      "lon": -96.25157,
+      "category": "weigh",
+      "direction": null,
+      "state": "KS",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.18094,
+      "lon": -108.82506,
+      "category": "weigh",
+      "direction": null,
+      "state": "CO",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.22744,
+      "lon": -89.64356,
+      "category": "weigh",
+      "direction": null,
+      "state": "IL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.26169,
+      "lon": -77.31067,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.26356,
+      "lon": -77.30969,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.31794,
+      "lon": -76.97919,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.38431,
+      "lon": -75.80131,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.41969,
+      "lon": -75.76381,
+      "category": "weigh",
+      "direction": null,
+      "state": "DE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.43619,
+      "lon": -87.52831,
+      "category": "weigh",
+      "direction": null,
+      "state": "IN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.50756,
+      "lon": -83.87706,
+      "category": "weigh",
+      "direction": null,
+      "state": "OH",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.51203,
+      "lon": -80.06555,
+      "category": "weigh",
+      "direction": null,
+      "state": "WV",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.51247,
+      "lon": -80.06614,
+      "category": "weigh",
+      "direction": null,
+      "state": "WV",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.51356,
+      "lon": -119.97869,
+      "category": "weigh",
+      "direction": null,
+      "state": "NV",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.58681,
+      "lon": -76.07306,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.58806,
+      "lon": -76.07806,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.64919,
+      "lon": -76.20169,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.66381,
+      "lon": -78.96144,
+      "category": "weigh",
+      "direction": null,
+      "state": "MD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.70094,
+      "lon": -75.45856,
+      "category": "weigh",
+      "direction": null,
+      "state": "NJ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.71813,
+      "lon": -110.86804,
+      "category": "weigh",
+      "direction": null,
+      "state": "UT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.86531,
+      "lon": -84.94556,
+      "category": "weigh",
+      "direction": null,
+      "state": "IN",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 39.92969,
+      "lon": -89.57244,
+      "category": "weigh",
+      "direction": null,
+      "state": "IL",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.05619,
+      "lon": -80.67994,
+      "category": "weigh",
+      "direction": null,
+      "state": "WV",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.09644,
+      "lon": -97.61431,
+      "category": "weigh",
+      "direction": null,
+      "state": "NE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.13981,
+      "lon": -76.80644,
+      "category": "weigh",
+      "direction": null,
+      "state": "PA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.14694,
+      "lon": -97.58323,
+      "category": "weigh",
+      "direction": null,
+      "state": "NE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.15456,
+      "lon": -76.82219,
+      "category": "weigh",
+      "direction": null,
+      "state": "PA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.24469,
+      "lon": -103.89781,
+      "category": "weigh",
+      "direction": null,
+      "state": "CO",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.35194,
+      "lon": -122.28119,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.35631,
+      "lon": -122.28356,
+      "category": "weigh",
+      "direction": null,
+      "state": "CA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.54794,
+      "lon": -74.49569,
+      "category": "weigh",
+      "direction": null,
+      "state": "NJ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.54969,
+      "lon": -95.62806,
+      "category": "weigh",
+      "direction": null,
+      "state": "MO",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.55631,
+      "lon": -105.00131,
+      "category": "weigh",
+      "direction": null,
+      "state": "CO",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.55669,
+      "lon": -105.00031,
+      "category": "weigh",
+      "direction": null,
+      "state": "CO",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.66244,
+      "lon": -75.08406,
+      "category": "weigh",
+      "direction": null,
+      "state": "NJ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.66456,
+      "lon": -75.08869,
+      "category": "weigh",
+      "direction": null,
+      "state": "NJ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.6748,
+      "lon": -95.94487,
+      "category": "weigh",
+      "direction": null,
+      "state": "NE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.74436,
+      "lon": -113.98981,
+      "category": "weigh",
+      "direction": null,
+      "state": "UT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.74545,
+      "lon": -113.98978,
+      "category": "weigh",
+      "direction": null,
+      "state": "UT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.76831,
+      "lon": -91.56281,
+      "category": "weigh",
+      "direction": null,
+      "state": "IA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.92231,
+      "lon": -96.46031,
+      "category": "weigh",
+      "direction": null,
+      "state": "NE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.92364,
+      "lon": -96.46043,
+      "category": "weigh",
+      "direction": null,
+      "state": "NE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.92644,
+      "lon": -96.50831,
+      "category": "weigh",
+      "direction": null,
+      "state": "NE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.92869,
+      "lon": -84.69081,
+      "category": "weigh",
+      "direction": null,
+      "state": "OH",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 40.95331,
+      "lon": -75.11556,
+      "category": "weigh",
+      "direction": null,
+      "state": "NJ",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.01519,
+      "lon": -73.63719,
+      "category": "weigh",
+      "direction": null,
+      "state": "CT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.03219,
+      "lon": -81.80181,
+      "category": "weigh",
+      "direction": null,
+      "state": "OH",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.08109,
+      "lon": -111.24621,
+      "category": "weigh",
+      "direction": null,
+      "state": "UT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.13364,
+      "lon": -100.70452,
+      "category": "weigh",
+      "direction": null,
+      "state": "NE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.19706,
+      "lon": -79.49781,
+      "category": "weigh",
+      "direction": null,
+      "state": "PA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.25369,
+      "lon": -75.51531,
+      "category": "weigh",
+      "direction": null,
+      "state": "PA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.27456,
+      "lon": -75.52156,
+      "category": "weigh",
+      "direction": null,
+      "state": "PA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.36756,
+      "lon": -72.15406,
+      "category": "weigh",
+      "direction": null,
+      "state": "CT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.43966,
+      "lon": -112.05608,
+      "category": "weigh",
+      "direction": null,
+      "state": "UT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.49806,
+      "lon": -95.26094,
+      "category": "weigh",
+      "direction": null,
+      "state": "IA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.51081,
+      "lon": -71.36569,
+      "category": "weigh",
+      "direction": null,
+      "state": "RI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.55431,
+      "lon": -72.74294,
+      "category": "weigh",
+      "direction": null,
+      "state": "CT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.68244,
+      "lon": -93.33431,
+      "category": "weigh",
+      "direction": null,
+      "state": "IA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.78794,
+      "lon": -71.30181,
+      "category": "weigh",
+      "direction": null,
+      "state": "MA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.82169,
+      "lon": -103.1443,
+      "category": "weigh",
+      "direction": null,
+      "state": "NE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.87744,
+      "lon": -84.99006,
+      "category": "weigh",
+      "direction": null,
+      "state": "MI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.91657,
+      "lon": -71.33484,
+      "category": "weigh",
+      "direction": null,
+      "state": "MA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.9178,
+      "lon": -71.33141,
+      "category": "weigh",
+      "direction": null,
+      "state": "MA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.93234,
+      "lon": -71.0077,
+      "category": "weigh",
+      "direction": null,
+      "state": "MA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.93284,
+      "lon": -71.0071,
+      "category": "weigh",
+      "direction": null,
+      "state": "MA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 41.98769,
+      "lon": -72.17556,
+      "category": "weigh",
+      "direction": null,
+      "state": "CT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.05181,
+      "lon": -72.12081,
+      "category": "weigh",
+      "direction": null,
+      "state": "MA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.06156,
+      "lon": -72.10802,
+      "category": "weigh",
+      "direction": null,
+      "state": "MA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.22219,
+      "lon": -122.72594,
+      "category": "weigh",
+      "direction": null,
+      "state": "OR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.22219,
+      "lon": -122.72281,
+      "category": "weigh",
+      "direction": null,
+      "state": "OR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.34181,
+      "lon": -92.03381,
+      "category": "weigh",
+      "direction": null,
+      "state": "IA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.46679,
+      "lon": -97.09298,
+      "category": "weigh",
+      "direction": null,
+      "state": "NE",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.50003,
+      "lon": -87.95024,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.52097,
+      "lon": -71.70601,
+      "category": "weigh",
+      "direction": null,
+      "state": "MA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.59879,
+      "lon": -88.98086,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.82331,
+      "lon": -71.29056,
+      "category": "weigh",
+      "direction": null,
+      "state": "NH",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.82381,
+      "lon": -71.28881,
+      "category": "weigh",
+      "direction": null,
+      "state": "NH",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 42.85698,
+      "lon": -76.1182,
+      "category": "weigh",
+      "direction": null,
+      "state": "NY",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.00856,
+      "lon": -89.22356,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.04831,
+      "lon": -123.33106,
+      "category": "weigh",
+      "direction": null,
+      "state": "OR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.05494,
+      "lon": -123.33394,
+      "category": "weigh",
+      "direction": null,
+      "state": "OR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.08217,
+      "lon": -97.40018,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.13581,
+      "lon": -70.71156,
+      "category": "weigh",
+      "direction": null,
+      "state": "ME",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.14744,
+      "lon": -70.68356,
+      "category": "weigh",
+      "direction": null,
+      "state": "ME",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.38589,
+      "lon": -100.02045,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.40356,
+      "lon": -93.35019,
+      "category": "weigh",
+      "direction": null,
+      "state": "IA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.60281,
+      "lon": -113.34419,
+      "category": "weigh",
+      "direction": null,
+      "state": "ID",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.60963,
+      "lon": -96.46179,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.64894,
+      "lon": -72.26131,
+      "category": "weigh",
+      "direction": null,
+      "state": "NH",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.65092,
+      "lon": -72.25972,
+      "category": "weigh",
+      "direction": null,
+      "state": "NH",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.69644,
+      "lon": -98.04519,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.83244,
+      "lon": -112.20094,
+      "category": "weigh",
+      "direction": null,
+      "state": "ID",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 43.97147,
+      "lon": -87.73685,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.03614,
+      "lon": -103.19317,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.07727,
+      "lon": -89.53534,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.31778,
+      "lon": -103.43736,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.34094,
+      "lon": -88.20031,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.40319,
+      "lon": -69.75206,
+      "category": "weigh",
+      "direction": null,
+      "state": "ME",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.45694,
+      "lon": -121.19994,
+      "category": "weigh",
+      "direction": null,
+      "state": "OR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.46156,
+      "lon": -98.5001,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.50203,
+      "lon": -100.06841,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.64756,
+      "lon": -112.60269,
+      "category": "weigh",
+      "direction": null,
+      "state": "MT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.74227,
+      "lon": -88.0517,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.74644,
+      "lon": -69.42356,
+      "category": "weigh",
+      "direction": null,
+      "state": "ME",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.88719,
+      "lon": -107.00931,
+      "category": "weigh",
+      "direction": null,
+      "state": "WY",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.9046,
+      "lon": -91.79937,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.96012,
+      "lon": -92.61059,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 44.97608,
+      "lon": -68.70566,
+      "category": "weigh",
+      "direction": null,
+      "state": "ME",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.05297,
+      "lon": -101.57103,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.17544,
+      "lon": -122.85456,
+      "category": "weigh",
+      "direction": null,
+      "state": "OR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.18119,
+      "lon": -122.85081,
+      "category": "weigh",
+      "direction": null,
+      "state": "OR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.26995,
+      "lon": -96.51079,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.55856,
+      "lon": -103.54519,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.59119,
+      "lon": -118.54556,
+      "category": "weigh",
+      "direction": null,
+      "state": "OR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.70182,
+      "lon": -96.96534,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.83295,
+      "lon": -120.80167,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.91444,
+      "lon": -119.13831,
+      "category": "weigh",
+      "direction": null,
+      "state": "OR",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.93433,
+      "lon": -102.17598,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 45.93456,
+      "lon": -98.52869,
+      "category": "weigh",
+      "direction": null,
+      "state": "SD",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.05669,
+      "lon": -118.90981,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.10014,
+      "lon": -118.25238,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.17792,
+      "lon": -103.4084,
+      "category": "weigh",
+      "direction": null,
+      "state": "ND",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.2481,
+      "lon": -119.85821,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.28756,
+      "lon": -96.83219,
+      "category": "weigh",
+      "direction": null,
+      "state": "ND",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.30639,
+      "lon": -108.93761,
+      "category": "weigh",
+      "direction": null,
+      "state": "MT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.30719,
+      "lon": -120.33343,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.39244,
+      "lon": -119.06229,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.39295,
+      "lon": -119.06309,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.61861,
+      "lon": -91.94243,
+      "category": "weigh",
+      "direction": null,
+      "state": "WI",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.98512,
+      "lon": -123.54784,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 46.98642,
+      "lon": -123.54522,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.00301,
+      "lon": -113.36933,
+      "category": "weigh",
+      "direction": null,
+      "state": "MT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.08538,
+      "lon": -122.65382,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.18221,
+      "lon": -121.03103,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.18314,
+      "lon": -121.02802,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.21057,
+      "lon": -118.2242,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.2118,
+      "lon": -118.2292,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.27056,
+      "lon": -122.31581,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.27336,
+      "lon": -122.31507,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.39369,
+      "lon": -115.42356,
+      "category": "weigh",
+      "direction": null,
+      "state": "MT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.66498,
+      "lon": -117.92011,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.68794,
+      "lon": -117.07094,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.86218,
+      "lon": -117.35694,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 47.90147,
+      "lon": -122.21475,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 48.02332,
+      "lon": -122.10984,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 48.05194,
+      "lon": -103.65906,
+      "category": "weigh",
+      "direction": null,
+      "state": "ND",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 48.10327,
+      "lon": -119.68554,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 48.17831,
+      "lon": -114.41694,
+      "category": "weigh",
+      "direction": null,
+      "state": "MT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 48.36486,
+      "lon": -107.88852,
+      "category": "weigh",
+      "direction": null,
+      "state": "MT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 48.53873,
+      "lon": -122.35438,
+      "category": "weigh",
+      "direction": null,
+      "state": "WA",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 48.55456,
+      "lon": -109.74794,
+      "category": "weigh",
+      "direction": null,
+      "state": "MT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 48.55479,
+      "lon": -111.8607,
+      "category": "weigh",
+      "direction": null,
+      "state": "MT",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 48.80479,
+      "lon": -97.23492,
+      "category": "weigh",
+      "direction": null,
+      "state": "ND",
+      "label": "Weigh station"
+    },
+    {
+      "lat": 28.01544,
+      "lon": -82.26531,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "FL",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 30.28531,
+      "lon": -91.93869,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "LA",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 30.46019,
+      "lon": -88.43631,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MS",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 30.55306,
+      "lon": -87.36269,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "FL",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 30.63981,
+      "lon": -84.98281,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "FL",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 30.88931,
+      "lon": -88.44731,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MS",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 31.75494,
+      "lon": -102.55417,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "TX",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 32.16761,
+      "lon": -81.44325,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "GA",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 32.31956,
+      "lon": -90.94781,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "LA",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 32.34056,
+      "lon": -108.69731,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "NM",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 32.45194,
+      "lon": -94.02319,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "LA",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 33.4871,
+      "lon": -82.23759,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "GA",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 33.64944,
+      "lon": -93.67131,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "AR",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 34.95154,
+      "lon": -89.84105,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MS",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 35.11191,
+      "lon": -103.30112,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "NM",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 35.22281,
+      "lon": -109.32106,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "AZ",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 35.37819,
+      "lon": -82.48044,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "NC",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 36.07731,
+      "lon": -79.21006,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "NC",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 36.07781,
+      "lon": -79.20731,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "NC",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 37.00619,
+      "lon": -94.56556,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MO",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 37.06031,
+      "lon": -88.18381,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "KY",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 38.11444,
+      "lon": -102.62744,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "CO",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 38.17094,
+      "lon": -85.15506,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "KY",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 38.33919,
+      "lon": -91.00644,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MO",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 38.70006,
+      "lon": -121.31694,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "CA",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 39.00381,
+      "lon": -93.85519,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MO",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 39.17806,
+      "lon": -108.81969,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "CO",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 39.27281,
+      "lon": -103.68556,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "CO",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 39.32944,
+      "lon": -102.04381,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "KS",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 39.37656,
+      "lon": -77.23806,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MD",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 40.55744,
+      "lon": -89.10731,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "IL",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 40.94254,
+      "lon": -115.64508,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "NV",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 41.35631,
+      "lon": -75.22131,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "PA",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 41.45381,
+      "lon": -90.46956,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "IL",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 41.55181,
+      "lon": -87.90119,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "IL",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 41.55615,
+      "lon": -90.34248,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "IL",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 41.64056,
+      "lon": -86.99719,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "IN",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 41.78469,
+      "lon": -86.71831,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MI",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 42.29294,
+      "lon": -84.17806,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MI",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 42.65031,
+      "lon": -84.12919,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MI",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 42.87956,
+      "lon": -85.03719,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MI",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 43.43081,
+      "lon": -116.05744,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "ID",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 45.69244,
+      "lon": -108.68394,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MT",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 46.93106,
+      "lon": -104.02756,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "ND",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 47.00131,
+      "lon": -104.22056,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "MT",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 47.70819,
+      "lon": -116.86719,
+      "category": "weigh",
+      "direction": "EB",
+      "state": "ID",
+      "label": "Weigh station, eastbound"
+    },
+    {
+      "lat": 26.87981,
+      "lon": -81.98498,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "FL",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 27.00481,
+      "lon": -80.20544,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "FL",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 28.99356,
+      "lon": -82.14281,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "FL",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 29.51169,
+      "lon": -81.19681,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "FL",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 30.41794,
+      "lon": -82.89831,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "FL",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 30.66956,
+      "lon": -81.66694,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "FL",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 30.91797,
+      "lon": -83.36462,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "GA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 31.02794,
+      "lon": -90.49944,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "MS",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 31.47741,
+      "lon": -81.44663,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "GA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 32.6218,
+      "lon": -96.69379,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "TX",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 33.08396,
+      "lon": -84.91645,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "GA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 33.84594,
+      "lon": -118.26944,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "CA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 34.20056,
+      "lon": -118.95669,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "CA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 34.42689,
+      "lon": -83.15633,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "GA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 34.47512,
+      "lon": -97.15549,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "OK",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 34.70669,
+      "lon": -78.99706,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "NC",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 35.25756,
+      "lon": -81.00706,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "NC",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 35.37889,
+      "lon": -82.48014,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "NC",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 36.10969,
+      "lon": -89.77106,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "MO",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 36.14731,
+      "lon": -77.78481,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "NC",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 36.50644,
+      "lon": -88.89881,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "KY",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 36.68694,
+      "lon": -86.53744,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "KY",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 36.80246,
+      "lon": -77.98451,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "VA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 37.04881,
+      "lon": -92.01269,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "MO",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 37.34806,
+      "lon": -79.88247,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "VA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 37.63819,
+      "lon": -88.97856,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "IL",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 38.59606,
+      "lon": -77.31456,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "VA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 38.62819,
+      "lon": -94.34969,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "MO",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 38.97794,
+      "lon": -85.84269,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "IN",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 39.04756,
+      "lon": -78.24594,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "VA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 39.17202,
+      "lon": -81.53702,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "WV",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 39.43069,
+      "lon": -94.78931,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "MO",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 40.33144,
+      "lon": -80.13731,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "PA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 41.36144,
+      "lon": -87.80344,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "IL",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 41.67269,
+      "lon": -88.09031,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "IL",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 41.82669,
+      "lon": -83.43169,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "MI",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 42.64694,
+      "lon": -96.62956,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "SD",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 42.69619,
+      "lon": -70.96869,
+      "category": "weigh",
+      "direction": "NB",
+      "state": "MA",
+      "label": "Weigh station, northbound"
+    },
+    {
+      "lat": 26.87906,
+      "lon": -81.98581,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "FL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 27.18868,
+      "lon": -80.40075,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "FL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 28.90754,
+      "lon": -96.78548,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "TX",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 28.99356,
+      "lon": -82.14444,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "FL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 29.50994,
+      "lon": -81.19744,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "FL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 30.37294,
+      "lon": -83.27219,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "FL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 30.42144,
+      "lon": -82.90281,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "FL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 30.47644,
+      "lon": -89.68031,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MS",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 30.47719,
+      "lon": -89.68119,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MS",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 30.66844,
+      "lon": -81.66794,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "FL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 30.91809,
+      "lon": -83.36589,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "GA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 31.03351,
+      "lon": -90.50028,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MS",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 31.47814,
+      "lon": -81.4482,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "GA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 32.21936,
+      "lon": -81.17222,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "GA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 32.62194,
+      "lon": -96.69456,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "TX",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 33.08773,
+      "lon": -84.91486,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "GA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 33.84756,
+      "lon": -118.27306,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "CA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 34.19931,
+      "lon": -118.95731,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "CA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 34.41518,
+      "lon": -83.17908,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "GA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 34.47763,
+      "lon": -97.15759,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "OK",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 35.25856,
+      "lon": -81.00769,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "NC",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 36.14856,
+      "lon": -77.78619,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "NC",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 36.80344,
+      "lon": -77.98594,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "VA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 36.98194,
+      "lon": -89.24906,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MO",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 37.04844,
+      "lon": -92.01356,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MO",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 37.12544,
+      "lon": -121.02994,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "CA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 37.34796,
+      "lon": -79.8831,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "VA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 37.64181,
+      "lon": -88.97869,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "IL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 37.65381,
+      "lon": -85.85681,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "KY",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 38.03031,
+      "lon": -90.24956,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MO",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 38.59631,
+      "lon": -77.31581,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "VA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 38.62769,
+      "lon": -94.35069,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MO",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 38.81894,
+      "lon": -84.60119,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "KY",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 39.17315,
+      "lon": -81.53785,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "WV",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 40.32931,
+      "lon": -80.14119,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "PA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 40.52156,
+      "lon": -93.96206,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MO",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 40.74694,
+      "lon": -85.40856,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "IN",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 41.27081,
+      "lon": -122.28081,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "CA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 41.30469,
+      "lon": -87.30169,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "IN",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 41.36573,
+      "lon": -87.79993,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "IL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 41.67244,
+      "lon": -88.09294,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "IL",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 41.82756,
+      "lon": -83.43206,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MI",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 42.34094,
+      "lon": -114.57444,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "ID",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 42.64694,
+      "lon": -96.63069,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "SD",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 42.69656,
+      "lon": -70.96981,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "MA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 46.20432,
+      "lon": -122.89286,
+      "category": "weigh",
+      "direction": "SB",
+      "state": "WA",
+      "label": "Weigh station, southbound"
+    },
+    {
+      "lat": 28.01544,
+      "lon": -82.27194,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "FL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 30.28644,
+      "lon": -91.93831,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "LA",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 30.37469,
+      "lon": -83.27231,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "FL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 30.47334,
+      "lon": -88.40408,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MS",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 30.55394,
+      "lon": -87.36194,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "FL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 30.63881,
+      "lon": -84.98244,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "FL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 30.88969,
+      "lon": -88.44519,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MS",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 31.757,
+      "lon": -102.55223,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "TX",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 32.16983,
+      "lon": -81.44424,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "GA",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 32.45281,
+      "lon": -94.02119,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "LA",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 33.48767,
+      "lon": -82.23283,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "GA",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 33.65081,
+      "lon": -93.67181,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "AR",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 34.95244,
+      "lon": -89.84056,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MS",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 35.11322,
+      "lon": -103.30141,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "NM",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 35.45931,
+      "lon": -94.29506,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "AR",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 35.46019,
+      "lon": -94.29531,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "AR",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 35.76794,
+      "lon": -81.01206,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "NC",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 37.00689,
+      "lon": -94.56623,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MO",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 37.06169,
+      "lon": -88.18344,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "KY",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 38.11506,
+      "lon": -102.62806,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "CO",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 38.22969,
+      "lon": -122.11694,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "CA",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 38.27794,
+      "lon": -83.34594,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "KY",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 38.33981,
+      "lon": -91.00669,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MO",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 38.69806,
+      "lon": -121.32069,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "CA",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 38.70406,
+      "lon": -89.97969,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "IL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 38.81244,
+      "lon": -90.93619,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MO",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 39.00506,
+      "lon": -93.85119,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MO",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 39.06594,
+      "lon": -96.25181,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "KS",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 39.27369,
+      "lon": -103.68581,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "CO",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 39.27969,
+      "lon": -84.83119,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "IN",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 39.42556,
+      "lon": -87.61856,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "IL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 39.99531,
+      "lon": -81.66931,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "OH",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 40.55581,
+      "lon": -89.10306,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "IL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 40.94299,
+      "lon": -115.64627,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "NV",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.09969,
+      "lon": -100.69619,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "NE",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.09981,
+      "lon": -100.69019,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "NE",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.19706,
+      "lon": -79.50144,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "PA",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.35919,
+      "lon": -75.22044,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "PA",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.45431,
+      "lon": -90.43306,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "IL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.55106,
+      "lon": -87.82056,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "IL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.55931,
+      "lon": -90.34256,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "IL",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.64169,
+      "lon": -86.99919,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "IN",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.64183,
+      "lon": -86.99841,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "IN",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 41.78669,
+      "lon": -86.71819,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MI",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 42.29394,
+      "lon": -84.17844,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MI",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 42.33475,
+      "lon": -98.45522,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "NE",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 42.65156,
+      "lon": -84.12919,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MI",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 42.87844,
+      "lon": -85.03706,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MI",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 43.43206,
+      "lon": -116.05694,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "ID",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 45.69144,
+      "lon": -108.68744,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MT",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 46.00631,
+      "lon": -112.59031,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MT",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 46.87819,
+      "lon": -96.98956,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "ND",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 47.00144,
+      "lon": -104.21831,
+      "category": "weigh",
+      "direction": "WB",
+      "state": "MT",
+      "label": "Weigh station, westbound"
+    },
+    {
+      "lat": 25.90031,
+      "lon": -80.38358,
+      "category": "inspection",
+      "direction": null,
+      "state": "FL",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 27.28964,
+      "lon": -97.80985,
+      "category": "inspection",
+      "direction": null,
+      "state": "TX",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 27.90519,
+      "lon": -99.39379,
+      "category": "inspection",
+      "direction": null,
+      "state": "TX",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 29.83298,
+      "lon": -94.51437,
+      "category": "inspection",
+      "direction": null,
+      "state": "TX",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 31.2799,
+      "lon": -95.99123,
+      "category": "inspection",
+      "direction": null,
+      "state": "TX",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 39.60231,
+      "lon": -119.33531,
+      "category": "inspection",
+      "direction": null,
+      "state": "NV",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 39.66006,
+      "lon": -79.77831,
+      "category": "inspection",
+      "direction": null,
+      "state": "WV",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 40.06231,
+      "lon": -74.80219,
+      "category": "inspection",
+      "direction": null,
+      "state": "NJ",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 40.12169,
+      "lon": -74.1292,
+      "category": "inspection",
+      "direction": null,
+      "state": "NJ",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 41.42564,
+      "lon": -74.39505,
+      "category": "inspection",
+      "direction": null,
+      "state": "NY",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 42.50469,
+      "lon": -73.68631,
+      "category": "inspection",
+      "direction": null,
+      "state": "NY",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 42.85806,
+      "lon": -76.11875,
+      "category": "inspection",
+      "direction": null,
+      "state": "NY",
+      "label": "Inspection station"
+    },
+    {
+      "lat": 27.0251,
+      "lon": -98.13848,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "TX",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 36.99019,
+      "lon": -104.48344,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "NM",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 37.08528,
+      "lon": -112.53976,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "UT",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 37.87316,
+      "lon": -109.30731,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "UT",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 39.62444,
+      "lon": -110.85944,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "UT",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 39.62544,
+      "lon": -110.85894,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "UT",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 39.79894,
+      "lon": -97.65269,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "KS",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 40.46231,
+      "lon": -111.38114,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "UT",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 41.08192,
+      "lon": -104.85375,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WY",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 41.15904,
+      "lon": -104.63294,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WY",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 41.24574,
+      "lon": -111.03924,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WY",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 41.28332,
+      "lon": -105.59103,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WY",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 41.44017,
+      "lon": -112.05755,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "UT",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 41.79144,
+      "lon": -110.57644,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WY",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 42.79981,
+      "lon": -112.29006,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "ID",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 42.80064,
+      "lon": -112.29024,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "ID",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 43.17944,
+      "lon": -111.02469,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WY",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 44.28931,
+      "lon": -105.47094,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WY",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 44.41269,
+      "lon": -104.34156,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WY",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 44.88508,
+      "lon": -107.00788,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WY",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 45.83374,
+      "lon": -122.69369,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WA",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 45.91881,
+      "lon": -119.32631,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "OR",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 45.95932,
+      "lon": -119.34122,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "WA",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 46.43369,
+      "lon": -116.94931,
+      "category": "port_of_entry",
+      "direction": null,
+      "state": "ID",
+      "label": "Port of entry"
+    },
+    {
+      "lat": 28.00981,
+      "lon": -82.30094,
+      "category": "ta",
+      "direction": null,
+      "state": "FL",
+      "label": "TA"
+    },
+    {
+      "lat": 28.89969,
+      "lon": -99.11731,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 29.04956,
+      "lon": -96.50344,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 29.44319,
+      "lon": -98.36169,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 29.74269,
+      "lon": -96.33006,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 29.79669,
+      "lon": -95.03106,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 30.03706,
+      "lon": -94.15606,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 30.06606,
+      "lon": -81.49619,
+      "category": "ta",
+      "direction": null,
+      "state": "FL",
+      "label": "TA"
+    },
+    {
+      "lat": 30.25219,
+      "lon": -92.03856,
+      "category": "ta",
+      "direction": null,
+      "state": "LA",
+      "label": "TA"
+    },
+    {
+      "lat": 30.28656,
+      "lon": -89.75056,
+      "category": "ta",
+      "direction": null,
+      "state": "LA",
+      "label": "TA"
+    },
+    {
+      "lat": 30.47694,
+      "lon": -90.45831,
+      "category": "ta",
+      "direction": null,
+      "state": "LA",
+      "label": "TA"
+    },
+    {
+      "lat": 30.64406,
+      "lon": -83.18744,
+      "category": "ta",
+      "direction": null,
+      "state": "GA",
+      "label": "TA"
+    },
+    {
+      "lat": 30.71869,
+      "lon": -85.18381,
+      "category": "ta",
+      "direction": null,
+      "state": "FL",
+      "label": "TA"
+    },
+    {
+      "lat": 31.13806,
+      "lon": -81.57981,
+      "category": "ta",
+      "direction": null,
+      "state": "GA",
+      "label": "TA"
+    },
+    {
+      "lat": 31.92519,
+      "lon": -81.33269,
+      "category": "ta",
+      "direction": null,
+      "state": "GA",
+      "label": "TA"
+    },
+    {
+      "lat": 31.95819,
+      "lon": -106.57931,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 32.04544,
+      "lon": -97.09078,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 32.26484,
+      "lon": -101.49005,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 32.30344,
+      "lon": -81.86956,
+      "category": "ta",
+      "direction": null,
+      "state": "GA",
+      "label": "TA"
+    },
+    {
+      "lat": 32.39644,
+      "lon": -88.58281,
+      "category": "ta",
+      "direction": null,
+      "state": "MS",
+      "label": "TA"
+    },
+    {
+      "lat": 32.44581,
+      "lon": -93.90344,
+      "category": "ta",
+      "direction": null,
+      "state": "LA",
+      "label": "TA"
+    },
+    {
+      "lat": 32.44606,
+      "lon": -93.94931,
+      "category": "ta",
+      "direction": null,
+      "state": "LA",
+      "label": "TA"
+    },
+    {
+      "lat": 32.65344,
+      "lon": -96.75169,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 32.73856,
+      "lon": -97.76381,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 32.77381,
+      "lon": -111.61756,
+      "category": "ta",
+      "direction": null,
+      "state": "AZ",
+      "label": "TA"
+    },
+    {
+      "lat": 33.20606,
+      "lon": -84.05844,
+      "category": "ta",
+      "direction": null,
+      "state": "GA",
+      "label": "TA"
+    },
+    {
+      "lat": 33.27956,
+      "lon": -87.09194,
+      "category": "ta",
+      "direction": null,
+      "state": "AL",
+      "label": "TA"
+    },
+    {
+      "lat": 33.45869,
+      "lon": -112.78256,
+      "category": "ta",
+      "direction": null,
+      "state": "AZ",
+      "label": "TA"
+    },
+    {
+      "lat": 33.55244,
+      "lon": -83.47481,
+      "category": "ta",
+      "direction": null,
+      "state": "GA",
+      "label": "TA"
+    },
+    {
+      "lat": 33.70456,
+      "lon": -80.24194,
+      "category": "ta",
+      "direction": null,
+      "state": "SC",
+      "label": "TA"
+    },
+    {
+      "lat": 33.70494,
+      "lon": -80.24156,
+      "category": "ta",
+      "direction": null,
+      "state": "SC",
+      "label": "TA"
+    },
+    {
+      "lat": 33.71369,
+      "lon": -116.17556,
+      "category": "ta",
+      "direction": null,
+      "state": "CA",
+      "label": "TA"
+    },
+    {
+      "lat": 33.95331,
+      "lon": -80.98756,
+      "category": "ta",
+      "direction": null,
+      "state": "SC",
+      "label": "TA"
+    },
+    {
+      "lat": 34.06494,
+      "lon": -117.56006,
+      "category": "ta",
+      "direction": null,
+      "state": "CA",
+      "label": "TA"
+    },
+    {
+      "lat": 34.07481,
+      "lon": -80.99706,
+      "category": "ta",
+      "direction": null,
+      "state": "SC",
+      "label": "TA"
+    },
+    {
+      "lat": 34.26681,
+      "lon": -79.73156,
+      "category": "ta",
+      "direction": null,
+      "state": "SC",
+      "label": "TA"
+    },
+    {
+      "lat": 34.90544,
+      "lon": -110.21069,
+      "category": "ta",
+      "direction": null,
+      "state": "AZ",
+      "label": "TA"
+    },
+    {
+      "lat": 34.91444,
+      "lon": -82.10981,
+      "category": "ta",
+      "direction": null,
+      "state": "SC",
+      "label": "TA"
+    },
+    {
+      "lat": 35.00969,
+      "lon": -106.06544,
+      "category": "ta",
+      "direction": null,
+      "state": "NM",
+      "label": "TA"
+    },
+    {
+      "lat": 35.11119,
+      "lon": -106.62469,
+      "category": "ta",
+      "direction": null,
+      "state": "NM",
+      "label": "TA"
+    },
+    {
+      "lat": 35.15383,
+      "lon": -90.13696,
+      "category": "ta",
+      "direction": null,
+      "state": "AR",
+      "label": "TA"
+    },
+    {
+      "lat": 35.17931,
+      "lon": -107.90381,
+      "category": "ta",
+      "direction": null,
+      "state": "NM",
+      "label": "TA"
+    },
+    {
+      "lat": 35.18106,
+      "lon": -107.90394,
+      "category": "ta",
+      "direction": null,
+      "state": "NM",
+      "label": "TA"
+    },
+    {
+      "lat": 35.19006,
+      "lon": -114.07019,
+      "category": "ta",
+      "direction": null,
+      "state": "AZ",
+      "label": "TA"
+    },
+    {
+      "lat": 35.19006,
+      "lon": -101.74344,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 35.19144,
+      "lon": -101.75881,
+      "category": "ta",
+      "direction": null,
+      "state": "TX",
+      "label": "TA"
+    },
+    {
+      "lat": 35.33506,
+      "lon": -99.59444,
+      "category": "ta",
+      "direction": null,
+      "state": "OK",
+      "label": "TA"
+    },
+    {
+      "lat": 35.33556,
+      "lon": -99.59456,
+      "category": "ta",
+      "direction": null,
+      "state": "OK",
+      "label": "TA"
+    },
+    {
+      "lat": 35.45794,
+      "lon": -97.65581,
+      "category": "ta",
+      "direction": null,
+      "state": "OK",
+      "label": "TA"
+    },
+    {
+      "lat": 35.50581,
+      "lon": -108.83619,
+      "category": "ta",
+      "direction": null,
+      "state": "NM",
+      "label": "TA"
+    },
+    {
+      "lat": 35.58281,
+      "lon": -78.14219,
+      "category": "ta",
+      "direction": null,
+      "state": "NC",
+      "label": "TA"
+    },
+    {
+      "lat": 35.59431,
+      "lon": -89.05431,
+      "category": "ta",
+      "direction": null,
+      "state": "TN",
+      "label": "TA"
+    },
+    {
+      "lat": 35.85174,
+      "lon": -93.86465,
+      "category": "ta",
+      "direction": null,
+      "state": "AR",
+      "label": "TA"
+    },
+    {
+      "lat": 35.87406,
+      "lon": -84.23906,
+      "category": "ta",
+      "direction": null,
+      "state": "TN",
+      "label": "TA"
+    },
+    {
+      "lat": 35.87706,
+      "lon": -84.23456,
+      "category": "ta",
+      "direction": null,
+      "state": "TN",
+      "label": "TA"
+    },
+    {
+      "lat": 35.90956,
+      "lon": -84.14781,
+      "category": "ta",
+      "direction": null,
+      "state": "TN",
+      "label": "TA"
+    },
+    {
+      "lat": 36.01494,
+      "lon": -86.61844,
+      "category": "ta",
+      "direction": null,
+      "state": "TN",
+      "label": "TA"
+    },
+    {
+      "lat": 36.04356,
+      "lon": -115.18681,
+      "category": "ta",
+      "direction": null,
+      "state": "NV",
+      "label": "TA"
+    },
+    {
+      "lat": 36.27969,
+      "lon": -115.02619,
+      "category": "ta",
+      "direction": null,
+      "state": "NV",
+      "label": "TA"
+    },
+    {
+      "lat": 36.32556,
+      "lon": -82.83506,
+      "category": "ta",
+      "direction": null,
+      "state": "TN",
+      "label": "TA"
+    },
+    {
+      "lat": 36.37544,
+      "lon": -84.24506,
+      "category": "ta",
+      "direction": null,
+      "state": "TN",
+      "label": "TA"
+    },
+    {
+      "lat": 36.71644,
+      "lon": -86.52431,
+      "category": "ta",
+      "direction": null,
+      "state": "KY",
+      "label": "TA"
+    },
+    {
+      "lat": 36.75819,
+      "lon": -89.53481,
+      "category": "ta",
+      "direction": null,
+      "state": "MO",
+      "label": "TA"
+    },
+    {
+      "lat": 36.96506,
+      "lon": -81.06769,
+      "category": "ta",
+      "direction": null,
+      "state": "VA",
+      "label": "TA"
+    },
+    {
+      "lat": 37.09481,
+      "lon": -93.80744,
+      "category": "ta",
+      "direction": null,
+      "state": "MO",
+      "label": "TA"
+    },
+    {
+      "lat": 37.27444,
+      "lon": -93.11519,
+      "category": "ta",
+      "direction": null,
+      "state": "MO",
+      "label": "TA"
+    },
+    {
+      "lat": 37.59919,
+      "lon": -85.87106,
+      "category": "ta",
+      "direction": null,
+      "state": "KY",
+      "label": "TA"
+    },
+    {
+      "lat": 37.72381,
+      "lon": -77.44781,
+      "category": "ta",
+      "direction": null,
+      "state": "VA",
+      "label": "TA"
+    },
+    {
+      "lat": 37.75969,
+      "lon": -77.46269,
+      "category": "ta",
+      "direction": null,
+      "state": "VA",
+      "label": "TA"
+    },
+    {
+      "lat": 37.83194,
+      "lon": -79.37781,
+      "category": "ta",
+      "direction": null,
+      "state": "VA",
+      "label": "TA"
+    },
+    {
+      "lat": 37.86069,
+      "lon": -112.82919,
+      "category": "ta",
+      "direction": null,
+      "state": "UT",
+      "label": "TA"
+    },
+    {
+      "lat": 37.92706,
+      "lon": -79.23044,
+      "category": "ta",
+      "direction": null,
+      "state": "VA",
+      "label": "TA"
+    },
+    {
+      "lat": 38.00544,
+      "lon": -100.88456,
+      "category": "ta",
+      "direction": null,
+      "state": "KS",
+      "label": "TA"
+    },
+    {
+      "lat": 38.07594,
+      "lon": -91.40956,
+      "category": "ta",
+      "direction": null,
+      "state": "MO",
+      "label": "TA"
+    },
+    {
+      "lat": 38.31344,
+      "lon": -88.95931,
+      "category": "ta",
+      "direction": null,
+      "state": "IL",
+      "label": "TA"
+    },
+    {
+      "lat": 38.42719,
+      "lon": -95.72669,
+      "category": "ta",
+      "direction": null,
+      "state": "KS",
+      "label": "TA"
+    },
+    {
+      "lat": 38.45431,
+      "lon": -81.93506,
+      "category": "ta",
+      "direction": null,
+      "state": "WV",
+      "label": "TA"
+    },
+    {
+      "lat": 38.73381,
+      "lon": -89.90981,
+      "category": "ta",
+      "direction": null,
+      "state": "IL",
+      "label": "TA"
+    },
+    {
+      "lat": 38.87894,
+      "lon": -97.61369,
+      "category": "ta",
+      "direction": null,
+      "state": "KS",
+      "label": "TA"
+    },
+    {
+      "lat": 38.94031,
+      "lon": -91.93731,
+      "category": "ta",
+      "direction": null,
+      "state": "MO",
+      "label": "TA"
+    },
+    {
+      "lat": 38.99406,
+      "lon": -93.56781,
+      "category": "ta",
+      "direction": null,
+      "state": "MO",
+      "label": "TA"
+    },
+    {
+      "lat": 39.01508,
+      "lon": -94.13124,
+      "category": "ta",
+      "direction": null,
+      "state": "MO",
+      "label": "TA"
+    },
+    {
+      "lat": 39.01754,
+      "lon": -94.12985,
+      "category": "ta",
+      "direction": null,
+      "state": "MO",
+      "label": "TA"
+    },
+    {
+      "lat": 39.11881,
+      "lon": -100.81144,
+      "category": "ta",
+      "direction": null,
+      "state": "KS",
+      "label": "TA"
+    },
+    {
+      "lat": 39.16669,
+      "lon": -76.78269,
+      "category": "ta",
+      "direction": null,
+      "state": "MD",
+      "label": "TA"
+    },
+    {
+      "lat": 39.27056,
+      "lon": -103.70619,
+      "category": "ta",
+      "direction": null,
+      "state": "CO",
+      "label": "TA"
+    },
+    {
+      "lat": 39.27731,
+      "lon": -76.54869,
+      "category": "ta",
+      "direction": null,
+      "state": "MD",
+      "label": "TA"
+    },
+    {
+      "lat": 39.36081,
+      "lon": -101.05244,
+      "category": "ta",
+      "direction": null,
+      "state": "KS",
+      "label": "TA"
+    },
+    {
+      "lat": 39.44519,
+      "lon": -87.12769,
+      "category": "ta",
+      "direction": null,
+      "state": "IN",
+      "label": "TA"
+    },
+    {
+      "lat": 39.52344,
+      "lon": -119.70794,
+      "category": "ta",
+      "direction": null,
+      "state": "NV",
+      "label": "TA"
+    },
+    {
+      "lat": 39.53519,
+      "lon": -119.73606,
+      "category": "ta",
+      "direction": null,
+      "state": "NV",
+      "label": "TA"
+    },
+    {
+      "lat": 39.61131,
+      "lon": -86.48069,
+      "category": "ta",
+      "direction": null,
+      "state": "IN",
+      "label": "TA"
+    },
+    {
+      "lat": 39.64369,
+      "lon": -75.79756,
+      "category": "ta",
+      "direction": null,
+      "state": "MD",
+      "label": "TA"
+    },
+    {
+      "lat": 39.77931,
+      "lon": -105.13481,
+      "category": "ta",
+      "direction": null,
+      "state": "CO",
+      "label": "TA"
+    },
+    {
+      "lat": 39.78456,
+      "lon": -77.71269,
+      "category": "ta",
+      "direction": null,
+      "state": "PA",
+      "label": "TA"
+    },
+    {
+      "lat": 39.7902,
+      "lon": -104.90442,
+      "category": "ta",
+      "direction": null,
+      "state": "CO",
+      "label": "TA"
+    },
+    {
+      "lat": 39.81881,
+      "lon": -75.23794,
+      "category": "ta",
+      "direction": null,
+      "state": "NJ",
+      "label": "TA"
+    },
+    {
+      "lat": 39.83619,
+      "lon": -84.80919,
+      "category": "ta",
+      "direction": null,
+      "state": "OH",
+      "label": "TA"
+    },
+    {
+      "lat": 39.84006,
+      "lon": -84.62819,
+      "category": "ta",
+      "direction": null,
+      "state": "OH",
+      "label": "TA"
+    },
+    {
+      "lat": 39.90419,
+      "lon": -122.19844,
+      "category": "ta",
+      "direction": null,
+      "state": "CA",
+      "label": "TA"
+    },
+    {
+      "lat": 40.00112,
+      "lon": -78.23297,
+      "category": "ta",
+      "direction": null,
+      "state": "PA",
+      "label": "TA"
+    },
+    {
+      "lat": 40.06944,
+      "lon": -80.56781,
+      "category": "ta",
+      "direction": null,
+      "state": "WV",
+      "label": "TA"
+    },
+    {
+      "lat": 40.12331,
+      "lon": -74.71081,
+      "category": "ta",
+      "direction": null,
+      "state": "NJ",
+      "label": "TA"
+    },
+    {
+      "lat": 40.27756,
+      "lon": -85.55044,
+      "category": "ta",
+      "direction": null,
+      "state": "IN",
+      "label": "TA"
+    },
+    {
+      "lat": 40.35481,
+      "lon": -76.72406,
+      "category": "ta",
+      "direction": null,
+      "state": "PA",
+      "label": "TA"
+    },
+    {
+      "lat": 40.48794,
+      "lon": -89.02631,
+      "category": "ta",
+      "direction": null,
+      "state": "IL",
+      "label": "TA"
+    },
+    {
+      "lat": 40.50456,
+      "lon": -122.33494,
+      "category": "ta",
+      "direction": null,
+      "state": "CA",
+      "label": "TA"
+    },
+    {
+      "lat": 40.55844,
+      "lon": -84.16531,
+      "category": "ta",
+      "direction": null,
+      "state": "OH",
+      "label": "TA"
+    },
+    {
+      "lat": 40.68994,
+      "lon": -112.26294,
+      "category": "ta",
+      "direction": null,
+      "state": "UT",
+      "label": "TA"
+    },
+    {
+      "lat": 40.69319,
+      "lon": -118.05606,
+      "category": "ta",
+      "direction": null,
+      "state": "NV",
+      "label": "TA"
+    },
+    {
+      "lat": 40.79969,
+      "lon": -98.49656,
+      "category": "ta",
+      "direction": null,
+      "state": "NE",
+      "label": "TA"
+    },
+    {
+      "lat": 40.81831,
+      "lon": -97.59881,
+      "category": "ta",
+      "direction": null,
+      "state": "NE",
+      "label": "TA"
+    },
+    {
+      "lat": 40.87881,
+      "lon": -81.42956,
+      "category": "ta",
+      "direction": null,
+      "state": "OH",
+      "label": "TA"
+    },
+    {
+      "lat": 40.93169,
+      "lon": -75.09681,
+      "category": "ta",
+      "direction": null,
+      "state": "NJ",
+      "label": "TA"
+    },
+    {
+      "lat": 40.95906,
+      "lon": -77.76244,
+      "category": "ta",
+      "direction": null,
+      "state": "PA",
+      "label": "TA"
+    },
+    {
+      "lat": 41.01331,
+      "lon": -76.49306,
+      "category": "ta",
+      "direction": null,
+      "state": "PA",
+      "label": "TA"
+    },
+    {
+      "lat": 41.03219,
+      "lon": -81.90769,
+      "category": "ta",
+      "direction": null,
+      "state": "OH",
+      "label": "TA"
+    },
+    {
+      "lat": 41.10081,
+      "lon": -114.95556,
+      "category": "ta",
+      "direction": null,
+      "state": "NV",
+      "label": "TA"
+    },
+    {
+      "lat": 41.11356,
+      "lon": -101.71181,
+      "category": "ta",
+      "direction": null,
+      "state": "NE",
+      "label": "TA"
+    },
+    {
+      "lat": 41.12294,
+      "lon": -80.76531,
+      "category": "ta",
+      "direction": null,
+      "state": "OH",
+      "label": "TA"
+    },
+    {
+      "lat": 41.16019,
+      "lon": -104.52194,
+      "category": "ta",
+      "direction": null,
+      "state": "WY",
+      "label": "TA"
+    },
+    {
+      "lat": 41.17281,
+      "lon": -79.09919,
+      "category": "ta",
+      "direction": null,
+      "state": "PA",
+      "label": "TA"
+    },
+    {
+      "lat": 41.17394,
+      "lon": -83.64669,
+      "category": "ta",
+      "direction": null,
+      "state": "OH",
+      "label": "TA"
+    },
+    {
+      "lat": 41.22869,
+      "lon": -95.85369,
+      "category": "ta",
+      "direction": null,
+      "state": "IA",
+      "label": "TA"
+    },
+    {
+      "lat": 41.31444,
+      "lon": -110.50831,
+      "category": "ta",
+      "direction": null,
+      "state": "WY",
+      "label": "TA"
+    },
+    {
+      "lat": 41.33019,
+      "lon": -75.74156,
+      "category": "ta",
+      "direction": null,
+      "state": "PA",
+      "label": "TA"
+    },
+    {
+      "lat": 41.34381,
+      "lon": -88.19781,
+      "category": "ta",
+      "direction": null,
+      "state": "IL",
+      "label": "TA"
+    },
+    {
+      "lat": 41.41919,
+      "lon": -84.10481,
+      "category": "ta",
+      "direction": null,
+      "state": "OH",
+      "label": "TA"
+    },
+    {
+      "lat": 41.50394,
+      "lon": -74.22044,
+      "category": "ta",
+      "direction": null,
+      "state": "NY",
+      "label": "TA"
+    },
+    {
+      "lat": 41.56381,
+      "lon": -87.35519,
+      "category": "ta",
+      "direction": null,
+      "state": "IN",
+      "label": "TA"
+    },
+    {
+      "lat": 41.56469,
+      "lon": -72.91006,
+      "category": "ta",
+      "direction": null,
+      "state": "CT",
+      "label": "TA"
+    },
+    {
+      "lat": 41.57269,
+      "lon": -87.40481,
+      "category": "ta",
+      "direction": null,
+      "state": "IN",
+      "label": "TA"
+    },
+    {
+      "lat": 41.59069,
+      "lon": -87.23944,
+      "category": "ta",
+      "direction": null,
+      "state": "IN",
+      "label": "TA"
+    },
+    {
+      "lat": 41.60906,
+      "lon": -71.66506,
+      "category": "ta",
+      "direction": null,
+      "state": "RI",
+      "label": "TA"
+    },
+    {
+      "lat": 41.61294,
+      "lon": -87.09856,
+      "category": "ta",
+      "direction": null,
+      "state": "IN",
+      "label": "TA"
+    },
+    {
+      "lat": 41.69969,
+      "lon": -92.44681,
+      "category": "ta",
+      "direction": null,
+      "state": "IA",
+      "label": "TA"
+    },
+    {
+      "lat": 41.77556,
+      "lon": -107.22369,
+      "category": "ta",
+      "direction": null,
+      "state": "WY",
+      "label": "TA"
+    },
+    {
+      "lat": 41.87644,
+      "lon": -80.66706,
+      "category": "ta",
+      "direction": null,
+      "state": "OH",
+      "label": "TA"
+    },
+    {
+      "lat": 41.91769,
+      "lon": -72.26131,
+      "category": "ta",
+      "direction": null,
+      "state": "CT",
+      "label": "TA"
+    },
+    {
+      "lat": 41.93581,
+      "lon": -89.03094,
+      "category": "ta",
+      "direction": null,
+      "state": "IL",
+      "label": "TA"
+    },
+    {
+      "lat": 42.10131,
+      "lon": -75.84144,
+      "category": "ta",
+      "direction": null,
+      "state": "NY",
+      "label": "TA"
+    },
+    {
+      "lat": 42.10656,
+      "lon": -84.98969,
+      "category": "ta",
+      "direction": null,
+      "state": "MI",
+      "label": "TA"
+    },
+    {
+      "lat": 42.14094,
+      "lon": -79.92456,
+      "category": "ta",
+      "direction": null,
+      "state": "PA",
+      "label": "TA"
+    },
+    {
+      "lat": 42.14519,
+      "lon": -88.50969,
+      "category": "ta",
+      "direction": null,
+      "state": "IL",
+      "label": "TA"
+    },
+    {
+      "lat": 42.29644,
+      "lon": -83.87644,
+      "category": "ta",
+      "direction": null,
+      "state": "MI",
+      "label": "TA"
+    },
+    {
+      "lat": 42.30281,
+      "lon": -85.08106,
+      "category": "ta",
+      "direction": null,
+      "state": "MI",
+      "label": "TA"
+    },
+    {
+      "lat": 42.48569,
+      "lon": -87.95119,
+      "category": "ta",
+      "direction": null,
+      "state": "IL",
+      "label": "TA"
+    },
+    {
+      "lat": 42.71419,
+      "lon": -88.97869,
+      "category": "ta",
+      "direction": null,
+      "state": "WI",
+      "label": "TA"
+    },
+    {
+      "lat": 42.72281,
+      "lon": -87.95594,
+      "category": "ta",
+      "direction": null,
+      "state": "WI",
+      "label": "TA"
+    },
+    {
+      "lat": 42.84519,
+      "lon": -106.21119,
+      "category": "ta",
+      "direction": null,
+      "state": "WY",
+      "label": "TA"
+    },
+    {
+      "lat": 42.94869,
+      "lon": -74.36269,
+      "category": "ta",
+      "direction": null,
+      "state": "NY",
+      "label": "TA"
+    },
+    {
+      "lat": 43.00481,
+      "lon": -78.40781,
+      "category": "ta",
+      "direction": null,
+      "state": "NY",
+      "label": "TA"
+    },
+    {
+      "lat": 43.17444,
+      "lon": -89.32531,
+      "category": "ta",
+      "direction": null,
+      "state": "WI",
+      "label": "TA"
+    },
+    {
+      "lat": 43.56556,
+      "lon": -116.19944,
+      "category": "ta",
+      "direction": null,
+      "state": "ID",
+      "label": "TA"
+    },
+    {
+      "lat": 43.65756,
+      "lon": -93.31556,
+      "category": "ta",
+      "direction": null,
+      "state": "MN",
+      "label": "TA"
+    },
+    {
+      "lat": 44.13619,
+      "lon": -123.05731,
+      "category": "ta",
+      "direction": null,
+      "state": "OR",
+      "label": "TA"
+    },
+    {
+      "lat": 44.96556,
+      "lon": -92.67881,
+      "category": "ta",
+      "direction": null,
+      "state": "WI",
+      "label": "TA"
+    },
+    {
+      "lat": 45.19694,
+      "lon": -93.54931,
+      "category": "ta",
+      "direction": null,
+      "state": "MN",
+      "label": "TA"
+    },
+    {
+      "lat": 45.23606,
+      "lon": -122.80731,
+      "category": "ta",
+      "direction": null,
+      "state": "OR",
+      "label": "TA"
+    },
+    {
+      "lat": 46.84956,
+      "lon": -96.86669,
+      "category": "ta",
+      "direction": null,
+      "state": "ND",
+      "label": "TA"
+    },
+    {
+      "lat": 46.94744,
+      "lon": -114.12906,
+      "category": "ta",
+      "direction": null,
+      "state": "MT",
+      "label": "TA"
+    },
+    {
+      "lat": 47.46819,
+      "lon": -121.71831,
+      "category": "ta",
+      "direction": null,
+      "state": "WA",
+      "label": "TA"
+    },
+    {
+      "lat": 47.59181,
+      "lon": -117.56119,
+      "category": "ta",
+      "direction": null,
+      "state": "WA",
+      "label": "TA"
+    },
+    {
+      "lat": 31.66094,
+      "lon": -106.24244,
+      "category": "petro",
+      "direction": null,
+      "state": "TX",
+      "label": "Petro"
+    },
+    {
+      "lat": 32.23881,
+      "lon": -107.99269,
+      "category": "petro",
+      "direction": null,
+      "state": "NM",
+      "label": "Petro"
+    },
+    {
+      "lat": 32.27981,
+      "lon": -90.19756,
+      "category": "petro",
+      "direction": null,
+      "state": "MS",
+      "label": "Petro"
+    },
+    {
+      "lat": 34.26656,
+      "lon": -79.73231,
+      "category": "petro",
+      "direction": null,
+      "state": "SC",
+      "label": "Petro"
+    },
+    {
+      "lat": 35.46619,
+      "lon": -97.47556,
+      "category": "petro",
+      "direction": null,
+      "state": "OK",
+      "label": "Petro"
+    },
+    {
+      "lat": 36.08231,
+      "lon": -87.09556,
+      "category": "petro",
+      "direction": null,
+      "state": "TN",
+      "label": "Petro"
+    },
+    {
+      "lat": 39.90569,
+      "lon": -122.19494,
+      "category": "petro",
+      "direction": null,
+      "state": "CA",
+      "label": "Petro"
+    },
+    {
+      "lat": 40.76694,
+      "lon": -87.12619,
+      "category": "petro",
+      "direction": null,
+      "state": "IN",
+      "label": "Petro"
+    },
+    {
+      "lat": 41.14081,
+      "lon": -80.71731,
+      "category": "petro",
+      "direction": null,
+      "state": "OH",
+      "label": "Petro"
+    },
+    {
+      "lat": 41.32869,
+      "lon": -105.61944,
+      "category": "petro",
+      "direction": null,
+      "state": "WY",
+      "label": "Petro"
+    },
+    {
+      "lat": 41.53544,
+      "lon": -83.46681,
+      "category": "petro",
+      "direction": null,
+      "state": "OH",
+      "label": "Petro"
+    },
+    {
+      "lat": 42.27944,
+      "lon": -122.81156,
+      "category": "petro",
+      "direction": null,
+      "state": "OR",
+      "label": "Petro"
+    },
+    {
+      "lat": 26.71394,
+      "lon": -81.81506,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "FL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 26.83494,
+      "lon": -81.13194,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "FL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 28.04469,
+      "lon": -99.34881,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 28.15569,
+      "lon": -81.79969,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "FL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 28.24394,
+      "lon": -81.65731,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "FL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 28.66794,
+      "lon": -82.14756,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "FL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 28.66806,
+      "lon": -80.87344,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "FL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 29.31094,
+      "lon": -98.61769,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 29.56194,
+      "lon": -98.03456,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 29.68977,
+      "lon": -96.77814,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 29.79744,
+      "lon": -95.36969,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 29.79909,
+      "lon": -95.2697,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 29.98156,
+      "lon": -98.90206,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.00244,
+      "lon": -82.60006,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "FL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.17294,
+      "lon": -93.58806,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "LA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.25106,
+      "lon": -92.19556,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "LA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.25306,
+      "lon": -93.01306,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "LA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.35469,
+      "lon": -95.09119,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.37669,
+      "lon": -83.29781,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "FL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.45156,
+      "lon": -82.93494,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "FL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.45219,
+      "lon": -88.93269,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.53169,
+      "lon": -88.23794,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.65356,
+      "lon": -87.75981,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.74206,
+      "lon": -88.11081,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 30.84581,
+      "lon": -89.49769,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.18994,
+      "lon": -90.48706,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.36156,
+      "lon": -92.58956,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "LA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.39906,
+      "lon": -103.48069,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.41156,
+      "lon": -94.71881,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.41581,
+      "lon": -83.50306,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "GA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.42069,
+      "lon": -87.00781,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.42769,
+      "lon": -85.61944,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.87469,
+      "lon": -89.75581,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.94731,
+      "lon": -102.14081,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.95919,
+      "lon": -81.33194,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "GA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.96256,
+      "lon": -110.34494,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AZ",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.97544,
+      "lon": -83.75781,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "GA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 31.99856,
+      "lon": -106.58131,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.00956,
+      "lon": -97.09344,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.19631,
+      "lon": -86.41394,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.40444,
+      "lon": -85.95694,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.41206,
+      "lon": -88.50569,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.44431,
+      "lon": -93.98294,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "LA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.49344,
+      "lon": -91.99281,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "LA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.58194,
+      "lon": -93.25044,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "LA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.62394,
+      "lon": -96.69369,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.68631,
+      "lon": -114.58281,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AZ",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.84606,
+      "lon": -86.59244,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 32.86669,
+      "lon": -87.92206,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.16394,
+      "lon": -95.21819,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.27844,
+      "lon": -87.09894,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.27869,
+      "lon": -111.96219,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AZ",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.33031,
+      "lon": -91.29256,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AR",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.43106,
+      "lon": -112.59169,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AZ",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.45744,
+      "lon": -90.63081,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.45906,
+      "lon": -80.73481,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "SC",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.56256,
+      "lon": -83.49506,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "GA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.57631,
+      "lon": -86.47956,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.58431,
+      "lon": -88.65806,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.59219,
+      "lon": -80.35517,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "SC",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.64156,
+      "lon": -101.83819,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.64731,
+      "lon": -85.50594,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.71731,
+      "lon": -116.17144,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.79142,
+      "lon": -87.24168,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.88094,
+      "lon": -96.49931,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OK",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.88669,
+      "lon": -98.46894,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.88756,
+      "lon": -98.46881,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.92381,
+      "lon": -81.29081,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "SC",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 33.93356,
+      "lon": -86.19119,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.09281,
+      "lon": -88.00494,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.11819,
+      "lon": -84.74244,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "GA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.18821,
+      "lon": -97.17209,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OK",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.29731,
+      "lon": -81.54369,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "SC",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.31594,
+      "lon": -88.79244,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.35269,
+      "lon": -89.91556,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.36731,
+      "lon": -86.89369,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.38756,
+      "lon": -92.84656,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AR",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.41786,
+      "lon": -79.41539,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "SC",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.50419,
+      "lon": -82.96056,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "SC",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.65344,
+      "lon": -106.79344,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NM",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.69644,
+      "lon": -87.63656,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.72306,
+      "lon": -100.53381,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.74494,
+      "lon": -89.45419,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 34.95519,
+      "lon": -110.31369,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AZ",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.03606,
+      "lon": -85.58219,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.06481,
+      "lon": -106.78469,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NM",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.12506,
+      "lon": -118.40806,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.15694,
+      "lon": -81.47794,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "SC",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.15894,
+      "lon": -103.70006,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NM",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.19194,
+      "lon": -101.76094,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TX",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.20019,
+      "lon": -113.90344,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AZ",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.22381,
+      "lon": -99.86969,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OK",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.25469,
+      "lon": -80.97956,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NC",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.26456,
+      "lon": -112.19419,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "AZ",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.30594,
+      "lon": -95.58831,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OK",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.48556,
+      "lon": -95.14919,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OK",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.50569,
+      "lon": -108.83381,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NM",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.52669,
+      "lon": -98.35131,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OK",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.72431,
+      "lon": -86.31931,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.87219,
+      "lon": -84.32131,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.97044,
+      "lon": -83.24781,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 35.99194,
+      "lon": -87.48819,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 36.06794,
+      "lon": -86.42806,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 36.17494,
+      "lon": -94.57306,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OK",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 36.37931,
+      "lon": -114.89694,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NV",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 36.46731,
+      "lon": -86.68606,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "TN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 36.60581,
+      "lon": -77.55981,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "VA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 36.65106,
+      "lon": -97.34219,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OK",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 36.66153,
+      "lon": -76.93795,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "VA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 36.75819,
+      "lon": -89.54019,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 37.00506,
+      "lon": -88.31831,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "KY",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 37.65631,
+      "lon": -85.88644,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "KY",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 37.72531,
+      "lon": -113.05231,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "UT",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 37.79419,
+      "lon": -79.88419,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "VA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 37.84231,
+      "lon": -84.32431,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "KY",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.00631,
+      "lon": -90.22681,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.11781,
+      "lon": -121.39206,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.15519,
+      "lon": -88.91094,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.24456,
+      "lon": -86.35669,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.34219,
+      "lon": -104.62306,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.37006,
+      "lon": -97.61644,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "KS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.49106,
+      "lon": -85.76919,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.57281,
+      "lon": -95.26544,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "KS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.68519,
+      "lon": -90.21769,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.75794,
+      "lon": -81.69031,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "WV",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.87419,
+      "lon": -89.38756,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.87544,
+      "lon": -82.29706,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 38.93481,
+      "lon": -97.25769,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "KS",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.16669,
+      "lon": -122.14444,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.29119,
+      "lon": -102.27631,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.55531,
+      "lon": -82.95769,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.61594,
+      "lon": -86.47869,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.67156,
+      "lon": -78.71719,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MD",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.69994,
+      "lon": -77.73344,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MD",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.72244,
+      "lon": -94.78694,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.74019,
+      "lon": -104.43444,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.76256,
+      "lon": -92.56281,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.79506,
+      "lon": -104.93356,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.89419,
+      "lon": -89.00231,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.90744,
+      "lon": -122.19644,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.94469,
+      "lon": -82.67919,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.96119,
+      "lon": -89.56344,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.96756,
+      "lon": -81.90406,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 39.97944,
+      "lon": -86.39594,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.16444,
+      "lon": -111.65144,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "UT",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.22581,
+      "lon": -76.72006,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "PA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.30531,
+      "lon": -104.98419,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "CO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.33969,
+      "lon": -88.76119,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.45106,
+      "lon": -86.84994,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.46592,
+      "lon": -93.97927,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MO",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.51761,
+      "lon": -76.11198,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "PA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.55419,
+      "lon": -85.54894,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.65281,
+      "lon": -82.54569,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.81994,
+      "lon": -97.99906,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NE",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.85694,
+      "lon": -83.29994,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 40.89894,
+      "lon": -81.43731,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.02671,
+      "lon": -76.31873,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "PA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.04619,
+      "lon": -95.82706,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.09894,
+      "lon": -114.96006,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NV",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.10269,
+      "lon": -100.72394,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NE",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.10944,
+      "lon": -102.95031,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NE",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.14069,
+      "lon": -84.85044,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.17319,
+      "lon": -80.56981,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.23756,
+      "lon": -95.87844,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.32894,
+      "lon": -105.61081,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "WY",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.36244,
+      "lon": -86.35156,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.49581,
+      "lon": -95.45381,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.50881,
+      "lon": -112.05394,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "UT",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.53806,
+      "lon": -83.46531,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.57131,
+      "lon": -87.40169,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.59881,
+      "lon": -87.57981,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.60481,
+      "lon": -90.62206,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.63381,
+      "lon": -85.04994,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IN",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.67569,
+      "lon": -107.98294,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "WY",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.68106,
+      "lon": -92.99656,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 41.91494,
+      "lon": -80.57056,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OH",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 42.10181,
+      "lon": -75.83619,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NY",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 42.14919,
+      "lon": -88.51431,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 42.31269,
+      "lon": -93.57144,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 42.36281,
+      "lon": -73.42981,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "NY",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 42.45519,
+      "lon": -88.99769,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 42.45594,
+      "lon": -88.99806,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "IL",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 42.78269,
+      "lon": -86.02319,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MI",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 42.92544,
+      "lon": -114.93906,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "ID",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 43.15081,
+      "lon": -123.36694,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OR",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 43.38919,
+      "lon": -89.46844,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "WI",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 43.43669,
+      "lon": -112.12006,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "ID",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 44.69906,
+      "lon": -123.05506,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OR",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 44.90656,
+      "lon": -91.85731,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "WI",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 45.82506,
+      "lon": -119.79669,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "OR",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 46.83081,
+      "lon": -96.84356,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "ND",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 46.94631,
+      "lon": -114.13344,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "MT",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 47.11394,
+      "lon": -118.36819,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "WA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 47.24531,
+      "lon": -122.38469,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "WA",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 47.71044,
+      "lon": -117.00506,
+      "category": "loves_shop",
+      "direction": null,
+      "state": "ID",
+      "label": "Love's shop"
+    },
+    {
+      "lat": 27.44481,
+      "lon": -80.39706,
+      "category": "speedco",
+      "direction": null,
+      "state": "FL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 27.64369,
+      "lon": -99.55544,
+      "category": "speedco",
+      "direction": null,
+      "state": "TX",
+      "label": "Speedco"
+    },
+    {
+      "lat": 29.44831,
+      "lon": -98.36169,
+      "category": "speedco",
+      "direction": null,
+      "state": "TX",
+      "label": "Speedco"
+    },
+    {
+      "lat": 29.79844,
+      "lon": -95.02744,
+      "category": "speedco",
+      "direction": null,
+      "state": "TX",
+      "label": "Speedco"
+    },
+    {
+      "lat": 29.98944,
+      "lon": -94.21044,
+      "category": "speedco",
+      "direction": null,
+      "state": "TX",
+      "label": "Speedco"
+    },
+    {
+      "lat": 30.29106,
+      "lon": -81.98681,
+      "category": "speedco",
+      "direction": null,
+      "state": "FL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 30.41881,
+      "lon": -89.18844,
+      "category": "speedco",
+      "direction": null,
+      "state": "MS",
+      "label": "Speedco"
+    },
+    {
+      "lat": 30.47644,
+      "lon": -90.45644,
+      "category": "speedco",
+      "direction": null,
+      "state": "LA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 30.64569,
+      "lon": -83.18544,
+      "category": "speedco",
+      "direction": null,
+      "state": "GA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 30.74981,
+      "lon": -85.38194,
+      "category": "speedco",
+      "direction": null,
+      "state": "FL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 31.13806,
+      "lon": -81.57294,
+      "category": "speedco",
+      "direction": null,
+      "state": "GA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 31.65844,
+      "lon": -106.23681,
+      "category": "speedco",
+      "direction": null,
+      "state": "TX",
+      "label": "Speedco"
+    },
+    {
+      "lat": 31.66244,
+      "lon": -106.23719,
+      "category": "speedco",
+      "direction": null,
+      "state": "TX",
+      "label": "Speedco"
+    },
+    {
+      "lat": 31.78294,
+      "lon": -89.05781,
+      "category": "speedco",
+      "direction": null,
+      "state": "MS",
+      "label": "Speedco"
+    },
+    {
+      "lat": 32.18381,
+      "lon": -81.45706,
+      "category": "speedco",
+      "direction": null,
+      "state": "GA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 32.27881,
+      "lon": -90.15294,
+      "category": "speedco",
+      "direction": null,
+      "state": "MS",
+      "label": "Speedco"
+    },
+    {
+      "lat": 32.35356,
+      "lon": -108.73531,
+      "category": "speedco",
+      "direction": null,
+      "state": "NM",
+      "label": "Speedco"
+    },
+    {
+      "lat": 32.36181,
+      "lon": -90.66644,
+      "category": "speedco",
+      "direction": null,
+      "state": "MS",
+      "label": "Speedco"
+    },
+    {
+      "lat": 32.40356,
+      "lon": -99.38319,
+      "category": "speedco",
+      "direction": null,
+      "state": "TX",
+      "label": "Speedco"
+    },
+    {
+      "lat": 32.44719,
+      "lon": -93.98494,
+      "category": "speedco",
+      "direction": null,
+      "state": "LA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 32.70444,
+      "lon": -80.87469,
+      "category": "speedco",
+      "direction": null,
+      "state": "SC",
+      "label": "Speedco"
+    },
+    {
+      "lat": 32.80519,
+      "lon": -111.67181,
+      "category": "speedco",
+      "direction": null,
+      "state": "AZ",
+      "label": "Speedco"
+    },
+    {
+      "lat": 32.86569,
+      "lon": -87.92344,
+      "category": "speedco",
+      "direction": null,
+      "state": "AL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 33.20606,
+      "lon": -84.06394,
+      "category": "speedco",
+      "direction": null,
+      "state": "GA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 33.45831,
+      "lon": -112.24094,
+      "category": "speedco",
+      "direction": null,
+      "state": "AZ",
+      "label": "Speedco"
+    },
+    {
+      "lat": 33.65656,
+      "lon": -114.24131,
+      "category": "speedco",
+      "direction": null,
+      "state": "AZ",
+      "label": "Speedco"
+    },
+    {
+      "lat": 33.66031,
+      "lon": -84.34056,
+      "category": "speedco",
+      "direction": null,
+      "state": "GA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 33.95456,
+      "lon": -80.99431,
+      "category": "speedco",
+      "direction": null,
+      "state": "SC",
+      "label": "Speedco"
+    },
+    {
+      "lat": 34.14006,
+      "lon": -80.74944,
+      "category": "speedco",
+      "direction": null,
+      "state": "SC",
+      "label": "Speedco"
+    },
+    {
+      "lat": 34.33556,
+      "lon": -112.11719,
+      "category": "speedco",
+      "direction": null,
+      "state": "AZ",
+      "label": "Speedco"
+    },
+    {
+      "lat": 34.67481,
+      "lon": -82.53981,
+      "category": "speedco",
+      "direction": null,
+      "state": "SC",
+      "label": "Speedco"
+    },
+    {
+      "lat": 34.67519,
+      "lon": -82.53881,
+      "category": "speedco",
+      "direction": null,
+      "state": "SC",
+      "label": "Speedco"
+    },
+    {
+      "lat": 34.81519,
+      "lon": -91.56906,
+      "category": "speedco",
+      "direction": null,
+      "state": "AR",
+      "label": "Speedco"
+    },
+    {
+      "lat": 34.91506,
+      "lon": -82.11219,
+      "category": "speedco",
+      "direction": null,
+      "state": "SC",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.15405,
+      "lon": -90.12939,
+      "category": "speedco",
+      "direction": null,
+      "state": "AR",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.17881,
+      "lon": -107.90494,
+      "category": "speedco",
+      "direction": null,
+      "state": "NM",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.17931,
+      "lon": -113.79331,
+      "category": "speedco",
+      "direction": null,
+      "state": "AZ",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.19069,
+      "lon": -101.72144,
+      "category": "speedco",
+      "direction": null,
+      "state": "TX",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.39594,
+      "lon": -97.26819,
+      "category": "speedco",
+      "direction": null,
+      "state": "OK",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.41806,
+      "lon": -86.01444,
+      "category": "speedco",
+      "direction": null,
+      "state": "TN",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.58219,
+      "lon": -78.14894,
+      "category": "speedco",
+      "direction": null,
+      "state": "NC",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.67894,
+      "lon": -88.74044,
+      "category": "speedco",
+      "direction": null,
+      "state": "TN",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.88056,
+      "lon": -97.39094,
+      "category": "speedco",
+      "direction": null,
+      "state": "OK",
+      "label": "Speedco"
+    },
+    {
+      "lat": 35.88231,
+      "lon": -84.23819,
+      "category": "speedco",
+      "direction": null,
+      "state": "TN",
+      "label": "Speedco"
+    },
+    {
+      "lat": 36.21294,
+      "lon": -115.12981,
+      "category": "speedco",
+      "direction": null,
+      "state": "NV",
+      "label": "Speedco"
+    },
+    {
+      "lat": 36.27731,
+      "lon": -82.92619,
+      "category": "speedco",
+      "direction": null,
+      "state": "TN",
+      "label": "Speedco"
+    },
+    {
+      "lat": 36.56944,
+      "lon": -95.21606,
+      "category": "speedco",
+      "direction": null,
+      "state": "OK",
+      "label": "Speedco"
+    },
+    {
+      "lat": 36.70881,
+      "lon": -87.45569,
+      "category": "speedco",
+      "direction": null,
+      "state": "KY",
+      "label": "Speedco"
+    },
+    {
+      "lat": 36.71669,
+      "lon": -86.52706,
+      "category": "speedco",
+      "direction": null,
+      "state": "KY",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.05769,
+      "lon": -94.43131,
+      "category": "speedco",
+      "direction": null,
+      "state": "MO",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.20281,
+      "lon": -85.93469,
+      "category": "speedco",
+      "direction": null,
+      "state": "KY",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.27581,
+      "lon": -93.11131,
+      "category": "speedco",
+      "direction": null,
+      "state": "MO",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.46119,
+      "lon": -121.17381,
+      "category": "speedco",
+      "direction": null,
+      "state": "CA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.50169,
+      "lon": -77.09194,
+      "category": "speedco",
+      "direction": null,
+      "state": "VA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.72381,
+      "lon": -77.44794,
+      "category": "speedco",
+      "direction": null,
+      "state": "VA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.74644,
+      "lon": -88.95031,
+      "category": "speedco",
+      "direction": null,
+      "state": "IL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.75544,
+      "lon": -121.13969,
+      "category": "speedco",
+      "direction": null,
+      "state": "CA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.97994,
+      "lon": -85.69556,
+      "category": "speedco",
+      "direction": null,
+      "state": "KY",
+      "label": "Speedco"
+    },
+    {
+      "lat": 37.98256,
+      "lon": -91.71994,
+      "category": "speedco",
+      "direction": null,
+      "state": "MO",
+      "label": "Speedco"
+    },
+    {
+      "lat": 38.15106,
+      "lon": -85.06906,
+      "category": "speedco",
+      "direction": null,
+      "state": "KY",
+      "label": "Speedco"
+    },
+    {
+      "lat": 38.15619,
+      "lon": -88.91206,
+      "category": "speedco",
+      "direction": null,
+      "state": "IL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 38.73881,
+      "lon": -89.90969,
+      "category": "speedco",
+      "direction": null,
+      "state": "IL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 38.89669,
+      "lon": -91.45356,
+      "category": "speedco",
+      "direction": null,
+      "state": "MO",
+      "label": "Speedco"
+    },
+    {
+      "lat": 38.94681,
+      "lon": -112.35294,
+      "category": "speedco",
+      "direction": null,
+      "state": "UT",
+      "label": "Speedco"
+    },
+    {
+      "lat": 38.96494,
+      "lon": -78.43969,
+      "category": "speedco",
+      "direction": null,
+      "state": "VA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 39.0124,
+      "lon": -94.12619,
+      "category": "speedco",
+      "direction": null,
+      "state": "MO",
+      "label": "Speedco"
+    },
+    {
+      "lat": 39.11431,
+      "lon": -108.64594,
+      "category": "speedco",
+      "direction": null,
+      "state": "CO",
+      "label": "Speedco"
+    },
+    {
+      "lat": 39.15356,
+      "lon": -94.47469,
+      "category": "speedco",
+      "direction": null,
+      "state": "MO",
+      "label": "Speedco"
+    },
+    {
+      "lat": 39.54744,
+      "lon": -86.03619,
+      "category": "speedco",
+      "direction": null,
+      "state": "IN",
+      "label": "Speedco"
+    },
+    {
+      "lat": 39.61506,
+      "lon": -119.26894,
+      "category": "speedco",
+      "direction": null,
+      "state": "NV",
+      "label": "Speedco"
+    },
+    {
+      "lat": 39.69019,
+      "lon": -86.18581,
+      "category": "speedco",
+      "direction": null,
+      "state": "IN",
+      "label": "Speedco"
+    },
+    {
+      "lat": 39.73369,
+      "lon": -94.21856,
+      "category": "speedco",
+      "direction": null,
+      "state": "MO",
+      "label": "Speedco"
+    },
+    {
+      "lat": 39.73419,
+      "lon": -84.20969,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 39.84506,
+      "lon": -82.93931,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 40.26456,
+      "lon": -84.18456,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 40.27731,
+      "lon": -86.12944,
+      "category": "speedco",
+      "direction": null,
+      "state": "IN",
+      "label": "Speedco"
+    },
+    {
+      "lat": 40.30556,
+      "lon": -104.98444,
+      "category": "speedco",
+      "direction": null,
+      "state": "CO",
+      "label": "Speedco"
+    },
+    {
+      "lat": 40.35344,
+      "lon": -76.72944,
+      "category": "speedco",
+      "direction": null,
+      "state": "PA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 40.54144,
+      "lon": -88.99944,
+      "category": "speedco",
+      "direction": null,
+      "state": "IL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 40.68369,
+      "lon": -112.27256,
+      "category": "speedco",
+      "direction": null,
+      "state": "UT",
+      "label": "Speedco"
+    },
+    {
+      "lat": 40.83606,
+      "lon": -83.96431,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 40.89956,
+      "lon": -81.43744,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 40.94956,
+      "lon": -117.75819,
+      "category": "speedco",
+      "direction": null,
+      "state": "NV",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.03619,
+      "lon": -81.90681,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.10756,
+      "lon": -81.04831,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.13781,
+      "lon": -80.72006,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.15781,
+      "lon": -96.13619,
+      "category": "speedco",
+      "direction": null,
+      "state": "NE",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.17131,
+      "lon": -79.04731,
+      "category": "speedco",
+      "direction": null,
+      "state": "PA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.41519,
+      "lon": -88.36756,
+      "category": "speedco",
+      "direction": null,
+      "state": "IL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.41606,
+      "lon": -84.10856,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.43344,
+      "lon": -88.19181,
+      "category": "speedco",
+      "direction": null,
+      "state": "IL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.55994,
+      "lon": -109.53969,
+      "category": "speedco",
+      "direction": null,
+      "state": "WY",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.57134,
+      "lon": -87.40169,
+      "category": "speedco",
+      "direction": null,
+      "state": "IN",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.78719,
+      "lon": -80.85169,
+      "category": "speedco",
+      "direction": null,
+      "state": "OH",
+      "label": "Speedco"
+    },
+    {
+      "lat": 41.89869,
+      "lon": -89.06469,
+      "category": "speedco",
+      "direction": null,
+      "state": "IL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 42.25878,
+      "lon": -79.74329,
+      "category": "speedco",
+      "direction": null,
+      "state": "NY",
+      "label": "Speedco"
+    },
+    {
+      "lat": 42.49006,
+      "lon": -87.95281,
+      "category": "speedco",
+      "direction": null,
+      "state": "IL",
+      "label": "Speedco"
+    },
+    {
+      "lat": 42.65294,
+      "lon": -88.54456,
+      "category": "speedco",
+      "direction": null,
+      "state": "WI",
+      "label": "Speedco"
+    },
+    {
+      "lat": 42.78694,
+      "lon": -84.66969,
+      "category": "speedco",
+      "direction": null,
+      "state": "MI",
+      "label": "Speedco"
+    },
+    {
+      "lat": 42.87069,
+      "lon": -87.94031,
+      "category": "speedco",
+      "direction": null,
+      "state": "WI",
+      "label": "Speedco"
+    },
+    {
+      "lat": 42.96394,
+      "lon": -76.84981,
+      "category": "speedco",
+      "direction": null,
+      "state": "NY",
+      "label": "Speedco"
+    },
+    {
+      "lat": 43.34856,
+      "lon": -83.86106,
+      "category": "speedco",
+      "direction": null,
+      "state": "MI",
+      "label": "Speedco"
+    },
+    {
+      "lat": 44.11969,
+      "lon": -103.05394,
+      "category": "speedco",
+      "direction": null,
+      "state": "SD",
+      "label": "Speedco"
+    },
+    {
+      "lat": 45.23269,
+      "lon": -122.81156,
+      "category": "speedco",
+      "direction": null,
+      "state": "OR",
+      "label": "Speedco"
+    },
+    {
+      "lat": 45.51244,
+      "lon": -94.28569,
+      "category": "speedco",
+      "direction": null,
+      "state": "MN",
+      "label": "Speedco"
+    },
+    {
+      "lat": 46.90869,
+      "lon": -98.00769,
+      "category": "speedco",
+      "direction": null,
+      "state": "ND",
+      "label": "Speedco"
+    },
+    {
+      "lat": 47.58769,
+      "lon": -117.56769,
+      "category": "speedco",
+      "direction": null,
+      "state": "WA",
+      "label": "Speedco"
+    },
+    {
+      "lat": 27.68944,
+      "lon": -99.46731,
+      "category": "lubezone",
+      "direction": null,
+      "state": "TX",
+      "label": "LubeZone"
+    },
+    {
+      "lat": 29.79406,
+      "lon": -95.03119,
+      "category": "lubezone",
+      "direction": null,
+      "state": "TX",
+      "label": "LubeZone"
+    },
+    {
+      "lat": 31.83806,
+      "lon": -102.38319,
+      "category": "lubezone",
+      "direction": null,
+      "state": "TX",
+      "label": "LubeZone"
+    },
+    {
+      "lat": 32.44831,
+      "lon": -100.44094,
+      "category": "lubezone",
+      "direction": null,
+      "state": "TX",
+      "label": "LubeZone"
+    },
+    {
+      "lat": 34.34931,
+      "lon": -83.32281,
+      "category": "lubezone",
+      "direction": null,
+      "state": "GA",
+      "label": "LubeZone"
+    },
+    {
+      "lat": 35.19081,
+      "lon": -101.76094,
+      "category": "lubezone",
+      "direction": null,
+      "state": "TX",
+      "label": "LubeZone"
+    },
+    {
+      "lat": 35.26744,
+      "lon": -99.64281,
+      "category": "lubezone",
+      "direction": null,
+      "state": "OK",
+      "label": "LubeZone"
+    },
+    {
+      "lat": 35.91519,
+      "lon": -80.85881,
+      "category": "lubezone",
+      "direction": null,
+      "state": "NC",
+      "label": "LubeZone"
+    },
+    {
+      "lat": 36.10394,
+      "lon": -115.19031,
+      "category": "profleet",
+      "direction": null,
+      "state": "NV",
+      "label": "ProFleet lube"
+    },
+    {
+      "lat": 38.12019,
+      "lon": -121.39706,
+      "category": "profleet",
+      "direction": null,
+      "state": "CA",
+      "label": "ProFleet lube"
+    },
+    {
+      "lat": 38.20806,
+      "lon": -121.26469,
+      "category": "profleet",
+      "direction": null,
+      "state": "CA",
+      "label": "ProFleet lube"
+    }
+  ]
+}

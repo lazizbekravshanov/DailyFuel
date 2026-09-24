@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dailyfuel/map-fleet-points/1",
+  "title": "Weigh station and truck service points compiled by DailyFuel",
+  "description": "Pins with lat, lon, category, direction, state and a label built from the category and direction only. The label pattern refuses anything else; no other field is ever published.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "source", "licence", "licence_url", "attribution", "imported", "dedupe_m", "counts", "points"],
+  "properties": {
+    "schema": { "const": "dailyfuel/map-fleet-points/1" },
+    "source": { "const": "Weigh station and truck service points compiled by DailyFuel" },
+    "licence": { "const": "CC BY 4.0" },
+    "licence_url": { "type": "string", "format": "uri" },
+    "attribution": { "const": "Weigh station and truck service points: DailyFuel" },
+    "imported": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "dedupe_m": {
+      "description": "Pins of one category and direction closer than this many metres are one pin.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "counts": {
+      "description": "Published points per category.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weigh", "inspection", "port_of_entry", "ta", "petro", "loves_shop", "speedco", "lubezone", "profleet"],
+      "properties": {
+        "weigh": { "type": "integer", "minimum": 0 },
+        "inspection": { "type": "integer", "minimum": 0 },
+        "port_of_entry": { "type": "integer", "minimum": 0 },
+        "ta": { "type": "integer", "minimum": 0 },
+        "petro": { "type": "integer", "minimum": 0 },
+        "loves_shop": { "type": "integer", "minimum": 0 },
+        "speedco": { "type": "integer", "minimum": 0 },
+        "lubezone": { "type": "integer", "minimum": 0 },
+        "profleet": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lat", "lon", "category", "direction", "state", "label"],
+        "properties": {
+          "lat": { "type": "number", "minimum": 18, "maximum": 72 },
+          "lon": { "type": "number", "minimum": -180, "maximum": -65 },
+          "category": {
+            "enum": ["weigh", "inspection", "port_of_entry", "ta", "petro", "loves_shop", "speedco", "lubezone", "profleet"]
+          },
+          "direction": { "enum": ["EB", "WB", "NB", "SB", null] },
+          "state": { "type": ["string", "null"], "pattern": "^[A-Z]{2}$" },
+          "label": {
+            "type": "string",
+            "pattern": "^((Weigh station|Inspection station|Port of entry)(, (east|west|north|south)bound)?|TA|Petro|Love's shop|Speedco|LubeZone|ProFleet lube)$"
+          }
+        }
+      }
+    }
+  }
+}

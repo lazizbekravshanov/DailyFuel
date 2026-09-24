@@ -62,6 +62,7 @@ SCHEMA_FILES = {
     "map-weigh-ntad": "map-weigh-ntad.schema.json",
     "map-weigh-ia": "map-weigh-ia.schema.json",
     "map-coverage": "map-coverage.schema.json",
+    "map-fleet-points": "map-fleet-points.schema.json",  # written by fleetpoints, not by build()
 }
 
 # Raw responses inside the cache directory, plus a sidecar that records the
@@ -446,6 +447,11 @@ class Boundaries:
     def __init__(self, polygons: list[tuple[str, list[list[tuple[float, float]]]]]):
         # (code, polygon, bbox of its outer ring)
         self._polys = [(code, poly, _bbox(poly[0])) for code, poly in polygons if poly and poly[0]]
+
+    @property
+    def codes(self) -> frozenset[str]:
+        """The state codes these polygons cover."""
+        return frozenset(code for code, _, _ in self._polys)
 
     @classmethod
     def from_topology(cls, topo: dict, states: StateTable, obj: str = "states") -> "Boundaries":

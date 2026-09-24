@@ -621,14 +621,17 @@ def _imports(path: Path) -> set[str]:
 
 def test_the_scheduled_job_never_imports_the_map_data_code():
     scripts = REPO_ROOT / "scripts"
+    map_code = ("mapdata", "update_map_data", "fleetpoints", "import_fleet_points")
     job = [scripts / "update_data.py", scripts / "health.py"] + [
-        p for p in (scripts / "dailyfuel").glob("*.py") if p.name != "mapdata.py"
+        p for p in (scripts / "dailyfuel").glob("*.py") if p.name not in ("mapdata.py", "fleetpoints.py")
     ]
     for path in job:
         names = _imports(path)
-        assert not any("mapdata" in n or "update_map_data" in n for n in names), f"{path.name} imports the map data code"
+        assert not any(m in n for n in names for m in map_code), f"{path.name} imports the map data code"
     workflow = (REPO_ROOT / ".github" / "workflows" / "update-data.yml").read_text(encoding="utf-8")
-    assert "update_map_data" not in workflow and "mapdata" not in workflow
-    # And the map tool never touches the pipeline's data files.
-    names = _imports(scripts / "update_map_data.py") | _imports(scripts / "dailyfuel" / "mapdata.py")
+    assert not any(m in workflow for m in map_code)
+    # And the map tools never touch the pipeline's data files.
+    names = set()
+    for rel in ("update_map_data.py", "import_fleet_points.py", "dailyfuel/mapdata.py", "dailyfuel/fleetpoints.py"):
+        names |= _imports(scripts / rel)
     assert not any(n.split(".")[-1] in ("pipeline", "eia", "aaa", "derive") for n in names)
