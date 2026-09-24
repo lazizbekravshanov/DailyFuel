@@ -1,0 +1,4437 @@
+{
+  "schema": "dailyfuel/map-weigh-osm/1",
+  "source": "OpenStreetMap, fetched through the Overpass API",
+  "source_url": "https://www.openstreetmap.org",
+  "licence": "Open Database License (ODbL) 1.0",
+  "licence_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "attribution": "© OpenStreetMap contributors",
+  "attribution_url": "https://www.openstreetmap.org/copyright",
+  "queries": {
+    "weighbridge": "[out:json][timeout:240];area[\"ISO3166-1\"=\"US\"][\"admin_level\"=\"2\"]->.us;nwr(area.us)[amenity=weighbridge];out tags center;",
+    "tags": "[out:json][timeout:240];area[\"ISO3166-1\"=\"US\"][\"admin_level\"=\"2\"]->.us;(nwr(area.us)[service=weigh_station];nwr(area.us)[amenity=weigh_station];nwr(area.us)[amenity=weight_station];nwr(area.us)[man_made=weigh_station];);out tags center;",
+    "names": "[out:json][timeout:240];area[\"ISO3166-1\"=\"US\"][\"admin_level\"=\"2\"]->.us;(nwr(area.us)[name~\"[Ww]eigh [Ss]tation|[Pp]ort of [Ee]ntry|[Ss]cale [Hh]ouse|[Ii]nspection [Ss]tation|[Ww]eigh [Ss]cale|[Tt]ruck [Ss]cale|[Ww]eight [Ss]tation\"];nwr(area.us)[amenity~\"^(weigh_station|weight_station)$\"];nwr(area.us)[man_made=weigh_station];nwr(area.us)[highway~\"weigh\"];);out tags center;"
+  },
+  "osm_base": "2026-09-20T01:22:43Z",
+  "fetched": "2026-09-19",
+  "dedupe_m": 600,
+  "note": "Candidates, not a complete list. Weigh and inspection stations in OpenStreetMap, minus CAT Scale and other truck stop scales, border crossings, agricultural and vehicle inspection sites. Coverage is measured in coverage.json.",
+  "counts": {
+    "candidates": 453,
+    "dropped_agricultural": 38,
+    "dropped_border": 156,
+    "dropped_border_outline": 28,
+    "dropped_cat_scale": 2128,
+    "dropped_closed": 11,
+    "dropped_not_a_station": 19,
+    "dropped_outside_us": 0,
+    "dropped_private": 208,
+    "dropped_private_scale": 1413,
+    "dropped_road": 89,
+    "dropped_vehicle_inspection": 20,
+    "dropped_weak": 48,
+    "elements": 4735,
+    "kept": 605,
+    "sites": 425,
+    "states": 47,
+    "via_name": 113,
+    "via_tag": 312
+  },
+  "sites": [
+    {
+      "lat": 24.95463,
+      "lon": -80.58133,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144374"
+      ]
+    },
+    {
+      "lat": 25.9541,
+      "lon": -97.41855,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1163638974"
+      ]
+    },
+    {
+      "lat": 26.0925,
+      "lon": -98.20006,
+      "name": "Pharr Texas Port of Entry",
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1113538802",
+        "r19466797"
+      ]
+    },
+    {
+      "lat": 26.8798,
+      "lon": -81.985,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144552",
+        "w194144554"
+      ]
+    },
+    {
+      "lat": 27.16668,
+      "lon": -98.1496,
+      "name": "CMV Inspection Station",
+      "state": "TX",
+      "via": "name",
+      "osm": [
+        "n9535535832",
+        "n9535535833"
+      ]
+    },
+    {
+      "lat": 27.18868,
+      "lon": -80.40078,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144533"
+      ]
+    },
+    {
+      "lat": 27.61398,
+      "lon": -99.52432,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1159100232"
+      ]
+    },
+    {
+      "lat": 27.70695,
+      "lon": -99.73416,
+      "name": "TxDOT Inspection Station",
+      "state": "TX",
+      "via": "name",
+      "osm": [
+        "w1184123871"
+      ]
+    },
+    {
+      "lat": 27.93764,
+      "lon": -82.11382,
+      "name": "Hopewell Weigh Station",
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w776377301"
+      ]
+    },
+    {
+      "lat": 28.01547,
+      "lon": -82.26526,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "n9893694797"
+      ]
+    },
+    {
+      "lat": 28.01845,
+      "lon": -82.27274,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "n9893694794"
+      ]
+    },
+    {
+      "lat": 28.04557,
+      "lon": -99.34826,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1152299366"
+      ]
+    },
+    {
+      "lat": 28.1552,
+      "lon": -81.80007,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w1256814396"
+      ]
+    },
+    {
+      "lat": 28.37082,
+      "lon": -82.57089,
+      "name": "Weigh Station",
+      "state": "FL",
+      "via": "name",
+      "osm": [
+        "w532290051"
+      ]
+    },
+    {
+      "lat": 28.99289,
+      "lon": -82.14389,
+      "name": "Wildwood I-75 Weigh Station Northbound",
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144619",
+        "w697822478",
+        "w697822485"
+      ]
+    },
+    {
+      "lat": 29.19586,
+      "lon": -95.4565,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1259732182"
+      ]
+    },
+    {
+      "lat": 29.4602,
+      "lon": -98.31561,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1368186768"
+      ]
+    },
+    {
+      "lat": 29.51172,
+      "lon": -81.19679,
+      "name": "Flagler I-95 Weigh Station",
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144623",
+        "w194144628",
+        "w1380981517"
+      ]
+    },
+    {
+      "lat": 29.55982,
+      "lon": -81.26875,
+      "name": "Palm Coast Southbound US-1 Weigh Station",
+      "state": "FL",
+      "via": "name",
+      "osm": [
+        "n13429605901",
+        "n13429605923"
+      ]
+    },
+    {
+      "lat": 29.5955,
+      "lon": -82.96938,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144386"
+      ]
+    },
+    {
+      "lat": 29.74524,
+      "lon": -81.34927,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w1365984785"
+      ]
+    },
+    {
+      "lat": 29.77341,
+      "lon": -96.07436,
+      "name": "CMV Inspection Station",
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1083360859"
+      ]
+    },
+    {
+      "lat": 29.8547,
+      "lon": -95.12963,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1125577694"
+      ]
+    },
+    {
+      "lat": 30.03647,
+      "lon": -94.15486,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w362156420"
+      ]
+    },
+    {
+      "lat": 30.08517,
+      "lon": -90.44435,
+      "name": null,
+      "state": "LA",
+      "via": "tag",
+      "osm": [
+        "w1105736623"
+      ]
+    },
+    {
+      "lat": 30.09988,
+      "lon": -90.48242,
+      "name": "Eastbound LaPlace Weigh Station",
+      "state": "LA",
+      "via": "name",
+      "osm": [
+        "w1001916853",
+        "w1001916854"
+      ]
+    },
+    {
+      "lat": 30.10384,
+      "lon": -97.30618,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1190041377"
+      ]
+    },
+    {
+      "lat": 30.20782,
+      "lon": -82.63722,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144363"
+      ]
+    },
+    {
+      "lat": 30.28524,
+      "lon": -91.93847,
+      "name": null,
+      "state": "LA",
+      "via": "tag",
+      "osm": [
+        "w1178148298",
+        "w1178148299"
+      ]
+    },
+    {
+      "lat": 30.31332,
+      "lon": -93.68308,
+      "name": null,
+      "state": "LA",
+      "via": "tag",
+      "osm": [
+        "w1556464114"
+      ]
+    },
+    {
+      "lat": 30.32415,
+      "lon": -82.12512,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144359"
+      ]
+    },
+    {
+      "lat": 30.37342,
+      "lon": -83.27257,
+      "name": "Weigh Station",
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144591",
+        "w194144592"
+      ]
+    },
+    {
+      "lat": 30.41554,
+      "lon": -82.89674,
+      "name": "White Springs I-75 Weigh Station - Northbound",
+      "state": "FL",
+      "via": "name",
+      "osm": [
+        "w614937450"
+      ]
+    },
+    {
+      "lat": 30.42227,
+      "lon": -82.90323,
+      "name": "White Springs I-75 Weigh Station - Southbound",
+      "state": "FL",
+      "via": "name",
+      "osm": [
+        "w614941508"
+      ]
+    },
+    {
+      "lat": 30.52926,
+      "lon": -87.42955,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144465"
+      ]
+    },
+    {
+      "lat": 30.55306,
+      "lon": -87.36274,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144602",
+        "w194144615"
+      ]
+    },
+    {
+      "lat": 30.58223,
+      "lon": -87.06094,
+      "name": "Weigh Scale",
+      "state": "FL",
+      "via": "name",
+      "osm": [
+        "w806147600"
+      ]
+    },
+    {
+      "lat": 30.63878,
+      "lon": -84.98252,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144595",
+        "w194144599"
+      ]
+    },
+    {
+      "lat": 30.66959,
+      "lon": -81.66695,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194144576",
+        "w194144579"
+      ]
+    },
+    {
+      "lat": 30.69946,
+      "lon": -81.66213,
+      "name": null,
+      "state": "FL",
+      "via": "tag",
+      "osm": [
+        "w194108245"
+      ]
+    },
+    {
+      "lat": 30.7111,
+      "lon": -97.64625,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1225786572",
+        "w1225786573"
+      ]
+    },
+    {
+      "lat": 30.89375,
+      "lon": -90.52874,
+      "name": "Weight station",
+      "state": "LA",
+      "via": "name",
+      "osm": [
+        "n9309370161"
+      ]
+    },
+    {
+      "lat": 30.91792,
+      "lon": -83.36631,
+      "name": "I-75 Southbound Weigh Station",
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w1037037126",
+        "w1037037127"
+      ]
+    },
+    {
+      "lat": 30.97579,
+      "lon": -83.20937,
+      "name": "Weigh Station",
+      "state": "GA",
+      "via": "name",
+      "osm": [
+        "w312095841"
+      ]
+    },
+    {
+      "lat": 31.38362,
+      "lon": -109.51691,
+      "name": "Weigh Station",
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "w161775652"
+      ]
+    },
+    {
+      "lat": 31.42772,
+      "lon": -85.61863,
+      "name": null,
+      "state": "AL",
+      "via": "tag",
+      "osm": [
+        "w1257613184"
+      ]
+    },
+    {
+      "lat": 32.08425,
+      "lon": -110.80295,
+      "name": null,
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "w1052377755"
+      ]
+    },
+    {
+      "lat": 32.16729,
+      "lon": -81.44326,
+      "name": "I-16 Eastbound Weigh Station",
+      "state": "GA",
+      "via": "name",
+      "osm": [
+        "w1094893185",
+        "w1094893186"
+      ]
+    },
+    {
+      "lat": 32.1879,
+      "lon": -81.19562,
+      "name": null,
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w1306988099"
+      ]
+    },
+    {
+      "lat": 32.19655,
+      "lon": -86.41424,
+      "name": null,
+      "state": "AL",
+      "via": "tag",
+      "osm": [
+        "w1259755649"
+      ]
+    },
+    {
+      "lat": 32.25777,
+      "lon": -109.17964,
+      "name": "San Simon Weigh Station",
+      "state": "AZ",
+      "via": "name",
+      "osm": [
+        "w1013388372"
+      ]
+    },
+    {
+      "lat": 32.27108,
+      "lon": -109.24329,
+      "name": null,
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "w474712276"
+      ]
+    },
+    {
+      "lat": 32.2796,
+      "lon": -90.19753,
+      "name": null,
+      "state": "MS",
+      "via": "tag",
+      "osm": [
+        "w1330213343"
+      ]
+    },
+    {
+      "lat": 32.29854,
+      "lon": -104.27576,
+      "name": "Weigh Station",
+      "state": "NM",
+      "via": "tag",
+      "osm": [
+        "n2367294108"
+      ]
+    },
+    {
+      "lat": 32.3203,
+      "lon": -90.94787,
+      "name": "Weigh Station",
+      "state": "LA",
+      "via": "name",
+      "osm": [
+        "w838049122",
+        "w838049126"
+      ]
+    },
+    {
+      "lat": 32.34055,
+      "lon": -108.69728,
+      "name": "Lordsburg Port of Entry",
+      "state": "NM",
+      "via": "name",
+      "osm": [
+        "w566463100",
+        "r8079840"
+      ]
+    },
+    {
+      "lat": 32.35485,
+      "lon": -90.7538,
+      "name": null,
+      "state": "MS",
+      "via": "tag",
+      "osm": [
+        "w1167564444"
+      ]
+    },
+    {
+      "lat": 32.36206,
+      "lon": -90.66671,
+      "name": null,
+      "state": "MS",
+      "via": "tag",
+      "osm": [
+        "w1257606901"
+      ]
+    },
+    {
+      "lat": 32.42432,
+      "lon": -88.44138,
+      "name": null,
+      "state": "MS",
+      "via": "tag",
+      "osm": [
+        "w462167418"
+      ]
+    },
+    {
+      "lat": 32.43765,
+      "lon": -88.43552,
+      "name": null,
+      "state": "MS",
+      "via": "tag",
+      "osm": [
+        "w455660150",
+        "w542367257"
+      ]
+    },
+    {
+      "lat": 32.46352,
+      "lon": -97.26285,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1175029948"
+      ]
+    },
+    {
+      "lat": 32.60388,
+      "lon": -90.07294,
+      "name": null,
+      "state": "MS",
+      "via": "tag",
+      "osm": [
+        "w1257996106"
+      ]
+    },
+    {
+      "lat": 32.62179,
+      "lon": -96.6938,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "n10974093168",
+        "n10974093169"
+      ]
+    },
+    {
+      "lat": 32.68991,
+      "lon": -96.24477,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w766380307"
+      ]
+    },
+    {
+      "lat": 32.70965,
+      "lon": -114.61062,
+      "name": "Arizona Port of Entry",
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "w1262068225",
+        "w1263146251"
+      ]
+    },
+    {
+      "lat": 32.7175,
+      "lon": -83.73226,
+      "name": null,
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w1257616972"
+      ]
+    },
+    {
+      "lat": 32.73777,
+      "lon": -111.54942,
+      "name": null,
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "w478714776"
+      ]
+    },
+    {
+      "lat": 32.78264,
+      "lon": -97.27467,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1392448343"
+      ]
+    },
+    {
+      "lat": 32.79064,
+      "lon": -96.65713,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1392457457"
+      ]
+    },
+    {
+      "lat": 32.8008,
+      "lon": -97.32202,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1266263582"
+      ]
+    },
+    {
+      "lat": 32.80215,
+      "lon": -97.03063,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1175890561"
+      ]
+    },
+    {
+      "lat": 32.95765,
+      "lon": -97.30648,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1266263976"
+      ]
+    },
+    {
+      "lat": 33.03862,
+      "lon": -80.14231,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1133055769"
+      ]
+    },
+    {
+      "lat": 33.05621,
+      "lon": -97.48407,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1266264221"
+      ]
+    },
+    {
+      "lat": 33.06898,
+      "lon": -83.97325,
+      "name": "Monroe County Weigh Station - I-75 Southbound",
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w462463316",
+        "w462463323"
+      ]
+    },
+    {
+      "lat": 33.10164,
+      "lon": -97.47031,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1266264273"
+      ]
+    },
+    {
+      "lat": 33.16069,
+      "lon": -95.21627,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1368332382"
+      ]
+    },
+    {
+      "lat": 33.26059,
+      "lon": -80.47564,
+      "name": "South Carolina Transport Police District 6 Office (Weigh Station)",
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w41597453",
+        "w41597458",
+        "w41597537",
+        "w174854353",
+        "n367806888"
+      ]
+    },
+    {
+      "lat": 33.26885,
+      "lon": -80.56734,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1251405355"
+      ]
+    },
+    {
+      "lat": 33.26924,
+      "lon": -80.48773,
+      "name": "South Carolina Transport Police District 6 Office (Weigh Station)",
+      "state": "SC",
+      "via": "name",
+      "osm": [
+        "n510783073"
+      ]
+    },
+    {
+      "lat": 33.35119,
+      "lon": -117.5242,
+      "name": "CHP San Onofre Inspection Facility",
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w58474990",
+        "w58503025"
+      ]
+    },
+    {
+      "lat": 33.42995,
+      "lon": -117.14844,
+      "name": "Rainbow Weigh Station",
+      "state": "CA",
+      "via": "name",
+      "osm": [
+        "w91841364"
+      ]
+    },
+    {
+      "lat": 33.44736,
+      "lon": -117.13513,
+      "name": "Rainbow Weigh Station",
+      "state": "CA",
+      "via": "name",
+      "osm": [
+        "w74269338"
+      ]
+    },
+    {
+      "lat": 33.45718,
+      "lon": -90.62998,
+      "name": null,
+      "state": "MS",
+      "via": "tag",
+      "osm": [
+        "w1343622421"
+      ]
+    },
+    {
+      "lat": 33.45861,
+      "lon": -80.73556,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1257112886"
+      ]
+    },
+    {
+      "lat": 33.46164,
+      "lon": -112.16744,
+      "name": null,
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "w593454793"
+      ]
+    },
+    {
+      "lat": 33.48664,
+      "lon": -82.23711,
+      "name": null,
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w1095115652",
+        "w1095115653"
+      ]
+    },
+    {
+      "lat": 33.60243,
+      "lon": -81.84374,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1173387649",
+        "w1392447261"
+      ]
+    },
+    {
+      "lat": 33.61242,
+      "lon": -114.47047,
+      "name": "Ehrenberg Weigh Station",
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "n9050027096",
+        "w1347247740"
+      ]
+    },
+    {
+      "lat": 33.63315,
+      "lon": -80.87898,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1365983357"
+      ]
+    },
+    {
+      "lat": 33.64536,
+      "lon": -85.43905,
+      "name": null,
+      "state": "AL",
+      "via": "tag",
+      "osm": [
+        "w1005705415"
+      ]
+    },
+    {
+      "lat": 33.64964,
+      "lon": -93.67078,
+      "name": "Weight station",
+      "state": "AR",
+      "via": "name",
+      "osm": [
+        "n9212492476"
+      ]
+    },
+    {
+      "lat": 33.6967,
+      "lon": -85.0858,
+      "name": null,
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w459464637"
+      ]
+    },
+    {
+      "lat": 33.77935,
+      "lon": -81.4895,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1106156244"
+      ]
+    },
+    {
+      "lat": 33.79166,
+      "lon": -87.24303,
+      "name": null,
+      "state": "AL",
+      "via": "tag",
+      "osm": [
+        "w1258811608"
+      ]
+    },
+    {
+      "lat": 33.8013,
+      "lon": -98.1953,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1387763489"
+      ]
+    },
+    {
+      "lat": 33.82883,
+      "lon": -93.39551,
+      "name": null,
+      "state": "AR",
+      "via": "tag",
+      "osm": [
+        "w1258802850"
+      ]
+    },
+    {
+      "lat": 33.86614,
+      "lon": -96.51008,
+      "name": "Weigh Station US-69 US-75 (NB)",
+      "state": "OK",
+      "via": "tag",
+      "osm": [
+        "n3472045143",
+        "w1379297534"
+      ]
+    },
+    {
+      "lat": 33.92987,
+      "lon": -81.07849,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1315266991"
+      ]
+    },
+    {
+      "lat": 33.93059,
+      "lon": -116.8379,
+      "name": "Westbound Banning Weigh Station",
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w103406919",
+        "w103406927"
+      ]
+    },
+    {
+      "lat": 33.93935,
+      "lon": -81.26821,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1106156251"
+      ]
+    },
+    {
+      "lat": 33.95435,
+      "lon": -80.99411,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1199897484"
+      ]
+    },
+    {
+      "lat": 34.03711,
+      "lon": -117.36748,
+      "name": null,
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w1108561787"
+      ]
+    },
+    {
+      "lat": 34.06427,
+      "lon": -117.49353,
+      "name": null,
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w1158458231"
+      ]
+    },
+    {
+      "lat": 34.11987,
+      "lon": -83.76128,
+      "name": null,
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w1111527706"
+      ]
+    },
+    {
+      "lat": 34.13986,
+      "lon": -80.74922,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1257118016"
+      ]
+    },
+    {
+      "lat": 34.14443,
+      "lon": -107.84301,
+      "name": null,
+      "state": "NM",
+      "via": "tag",
+      "osm": [
+        "w301422681"
+      ]
+    },
+    {
+      "lat": 34.15598,
+      "lon": -114.29455,
+      "name": "ADOT Inspection Station",
+      "state": "AZ",
+      "via": "name",
+      "osm": [
+        "w909795106"
+      ]
+    },
+    {
+      "lat": 34.17249,
+      "lon": -98.49851,
+      "name": null,
+      "state": "OK",
+      "via": "tag",
+      "osm": [
+        "w1255423802"
+      ]
+    },
+    {
+      "lat": 34.20053,
+      "lon": -118.95617,
+      "name": null,
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w39265655",
+        "w39265657",
+        "w394985400",
+        "w767348372"
+      ]
+    },
+    {
+      "lat": 34.22703,
+      "lon": -83.50023,
+      "name": null,
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w1256811837"
+      ]
+    },
+    {
+      "lat": 34.37973,
+      "lon": -84.90795,
+      "name": null,
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w875553341"
+      ]
+    },
+    {
+      "lat": 34.40911,
+      "lon": -117.39871,
+      "name": null,
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w1193547497"
+      ]
+    },
+    {
+      "lat": 34.43999,
+      "lon": -77.87695,
+      "name": null,
+      "state": "NC",
+      "via": "tag",
+      "osm": [
+        "w1034337073"
+      ]
+    },
+    {
+      "lat": 34.44413,
+      "lon": -84.91541,
+      "name": null,
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w1103311754"
+      ]
+    },
+    {
+      "lat": 34.49455,
+      "lon": -118.61922,
+      "name": null,
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w1306724233"
+      ]
+    },
+    {
+      "lat": 34.70917,
+      "lon": -97.24217,
+      "name": null,
+      "state": "OK",
+      "via": "tag",
+      "osm": [
+        "w1266265278"
+      ]
+    },
+    {
+      "lat": 34.79878,
+      "lon": -80.40524,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w1193558216"
+      ]
+    },
+    {
+      "lat": 34.88063,
+      "lon": -85.05251,
+      "name": "Region 1 Weigh Station - I 75 southbound",
+      "state": "GA",
+      "via": "tag",
+      "osm": [
+        "w970495423",
+        "w970495433"
+      ]
+    },
+    {
+      "lat": 34.91585,
+      "lon": -82.10739,
+      "name": null,
+      "state": "SC",
+      "via": "tag",
+      "osm": [
+        "w541978334"
+      ]
+    },
+    {
+      "lat": 34.92809,
+      "lon": -83.74631,
+      "name": "weigh station",
+      "state": "GA",
+      "via": "name",
+      "osm": [
+        "w553857453"
+      ]
+    },
+    {
+      "lat": 34.92865,
+      "lon": -89.79283,
+      "name": null,
+      "state": "MS",
+      "via": "tag",
+      "osm": [
+        "w1148147880"
+      ]
+    },
+    {
+      "lat": 34.96056,
+      "lon": -118.93798,
+      "name": "Weigh Station",
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w177273507"
+      ]
+    },
+    {
+      "lat": 34.96721,
+      "lon": -88.53359,
+      "name": "Weigh Station",
+      "state": "MS",
+      "via": "name",
+      "osm": [
+        "w215634850",
+        "w215634857"
+      ]
+    },
+    {
+      "lat": 35.02137,
+      "lon": -89.87927,
+      "name": null,
+      "state": "TN",
+      "via": "tag",
+      "osm": [
+        "w1368189070"
+      ]
+    },
+    {
+      "lat": 35.11315,
+      "lon": -92.50496,
+      "name": "Weigh Station",
+      "state": "AR",
+      "via": "tag",
+      "osm": [
+        "w1511068835"
+      ]
+    },
+    {
+      "lat": 35.11325,
+      "lon": -103.30135,
+      "name": "San Jon Port of Entry",
+      "state": "NM",
+      "via": "name",
+      "osm": [
+        "w264247041",
+        "n2622962248"
+      ]
+    },
+    {
+      "lat": 35.11348,
+      "lon": -118.23593,
+      "name": "Cache Creek Weigh Inspection Station",
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "n9941431331",
+        "w1084959215"
+      ]
+    },
+    {
+      "lat": 35.15209,
+      "lon": -90.25099,
+      "name": "Weigh Station (Truck) I-40",
+      "state": "AR",
+      "via": "name",
+      "osm": [
+        "w340956254",
+        "n9212841923"
+      ]
+    },
+    {
+      "lat": 35.19121,
+      "lon": -101.74353,
+      "name": null,
+      "state": "TX",
+      "via": "tag",
+      "osm": [
+        "w1208406454"
+      ]
+    },
+    {
+      "lat": 35.21766,
+      "lon": -114.1202,
+      "name": "Arizona Port of Entry",
+      "state": "AZ",
+      "via": "name",
+      "osm": [
+        "w1020184731"
+      ]
+    },
+    {
+      "lat": 35.22146,
+      "lon": -112.47895,
+      "name": null,
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "w1539958996"
+      ]
+    },
+    {
+      "lat": 35.22354,
+      "lon": -109.32203,
+      "name": "Truck weigh station",
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "w180361078",
+        "w137717198"
+      ]
+    },
+    {
+      "lat": 35.23589,
+      "lon": -118.57645,
+      "name": "Keene Weigh Station",
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "n9941427741"
+      ]
+    },
+    {
+      "lat": 35.26813,
+      "lon": -119.22946,
+      "name": null,
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w1180438371"
+      ]
+    },
+    {
+      "lat": 35.34371,
+      "lon": -114.18034,
+      "name": null,
+      "state": "AZ",
+      "via": "tag",
+      "osm": [
+        "n11532571371",
+        "n11532571377"
+      ]
+    },
+    {
+      "lat": 35.38916,
+      "lon": -85.98861,
+      "name": null,
+      "state": "TN",
+      "via": "tag",
+      "osm": [
+        "w1074404703",
+        "w1074404704"
+      ]
+    },
+    {
+      "lat": 35.39403,
+      "lon": -82.50577,
+      "name": null,
+      "state": "NC",
+      "via": "tag",
+      "osm": [
+        "w1178715088"
+      ]
+    },
+    {
+      "lat": 35.45573,
+      "lon": -86.04514,
+      "name": null,
+      "state": "TN",
+      "via": "tag",
+      "osm": [
+        "w1387764633"
+      ]
+    },
+    {
+      "lat": 35.45581,
+      "lon": -89.30882,
+      "name": "Weight station",
+      "state": "TN",
+      "via": "name",
+      "osm": [
+        "n9212915372"
+      ]
+    },
+    {
+      "lat": 35.46267,
+      "lon": -97.68729,
+      "name": null,
+      "state": "OK",
+      "via": "tag",
+      "osm": [
+        "w1266266006"
+      ]
+    },
+    {
+      "lat": 35.48544,
+      "lon": -108.90141,
+      "name": "Gallup Port of Entry",
+      "state": "NM",
+      "via": "name",
+      "osm": [
+        "w899666219"
+      ]
+    },
+    {
+      "lat": 35.50258,
+      "lon": -115.43735,
+      "name": "California Highway Patrol - Mountain Pass Joint Port of Entry Commercial Vehicle Enforcement Facility",
+      "state": "CA",
+      "via": "name",
+      "osm": [
+        "w508262732"
+      ]
+    },
+    {
+      "lat": 35.55437,
+      "lon": -82.70129,
+      "name": "North Carolina Asheville Weigh Station",
+      "state": "NC",
+      "via": "name",
+      "osm": [
+        "w653785105",
+        "w653785106"
+      ]
+    },
+    {
+      "lat": 35.71582,
+      "lon": -77.36515,
+      "name": null,
+      "state": "NC",
+      "via": "tag",
+      "osm": [
+        "w1368763631"
+      ]
+    },
+    {
+      "lat": 35.89327,
+      "lon": -84.19915,
+      "name": "Weigh Station Westbound",
+      "state": "TN",
+      "via": "tag",
+      "osm": [
+        "n6073683312",
+        "n6073683313"
+      ]
+    },
+    {
+      "lat": 35.97089,
+      "lon": -114.90998,
+      "name": null,
+      "state": "NV",
+      "via": "tag",
+      "osm": [
+        "w1240356121"
+      ]
+    },
+    {
+      "lat": 35.99562,
+      "lon": -89.87517,
+      "name": "Yarbro Weigh Station",
+      "state": "AR",
+      "via": "name",
+      "osm": [
+        "w1549978688"
+      ]
+    },
+    {
+      "lat": 35.99741,
+      "lon": -94.19884,
+      "name": null,
+      "state": "AR",
+      "via": "tag",
+      "osm": [
+        "w1315004698"
+      ]
+    },
+    {
+      "lat": 36.02619,
+      "lon": -87.17131,
+      "name": null,
+      "state": "TN",
+      "via": "tag",
+      "osm": [
+        "w1259799046"
+      ]
+    },
+    {
+      "lat": 36.07775,
+      "lon": -79.20678,
+      "name": null,
+      "state": "NC",
+      "via": "tag",
+      "osm": [
+        "w106454892",
+        "w106454904"
+      ]
+    },
+    {
+      "lat": 36.11006,
+      "lon": -89.77095,
+      "name": "Weigh Station (Northbound)",
+      "state": "MO",
+      "via": "name",
+      "osm": [
+        "w761361714"
+      ]
+    },
+    {
+      "lat": 36.11124,
+      "lon": -84.02053,
+      "name": null,
+      "state": "TN",
+      "via": "tag",
+      "osm": [
+        "w1305271312"
+      ]
+    },
+    {
+      "lat": 36.13276,
+      "lon": -86.40264,
+      "name": null,
+      "state": "TN",
+      "via": "tag",
+      "osm": [
+        "w1202812959"
+      ]
+    },
+    {
+      "lat": 36.17555,
+      "lon": -94.57317,
+      "name": null,
+      "state": "OK",
+      "via": "tag",
+      "osm": [
+        "w1259751614"
+      ]
+    },
+    {
+      "lat": 36.27036,
+      "lon": -115.05415,
+      "name": null,
+      "state": "NV",
+      "via": "tag",
+      "osm": [
+        "w1387763307"
+      ]
+    },
+    {
+      "lat": 36.27599,
+      "lon": -97.29662,
+      "name": "Northern Oklahoma Metals Weigh Scales",
+      "state": "OK",
+      "via": "name",
+      "osm": [
+        "w641976826"
+      ]
+    },
+    {
+      "lat": 36.34999,
+      "lon": -119.42515,
+      "name": null,
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w1369965912"
+      ]
+    },
+    {
+      "lat": 36.37618,
+      "lon": -80.48906,
+      "name": null,
+      "state": "NC",
+      "via": "tag",
+      "osm": [
+        "w1368758889"
+      ]
+    },
+    {
+      "lat": 36.48784,
+      "lon": -80.7473,
+      "name": null,
+      "state": "NC",
+      "via": "tag",
+      "osm": [
+        "w1291323704"
+      ]
+    },
+    {
+      "lat": 36.52983,
+      "lon": -80.74849,
+      "name": null,
+      "state": "NC",
+      "via": "tag",
+      "osm": [
+        "w552200551",
+        "w552200553"
+      ]
+    },
+    {
+      "lat": 36.60163,
+      "lon": -79.86379,
+      "name": null,
+      "state": "VA",
+      "via": "tag",
+      "osm": [
+        "w1392453676"
+      ]
+    },
+    {
+      "lat": 36.76447,
+      "lon": -76.48505,
+      "name": "Motor Carrier Service Center - Suffolk Weigh Station",
+      "state": "VA",
+      "via": "name",
+      "osm": [
+        "w384035080"
+      ]
+    },
+    {
+      "lat": 36.80252,
+      "lon": -77.9846,
+      "name": "Motor Carrier Service Center - Aberta Station",
+      "state": "VA",
+      "via": "tag",
+      "osm": [
+        "n2129586171",
+        "n2129586172"
+      ]
+    },
+    {
+      "lat": 36.85363,
+      "lon": -89.58459,
+      "name": null,
+      "state": "MO",
+      "via": "tag",
+      "osm": [
+        "w1259731691"
+      ]
+    },
+    {
+      "lat": 36.97457,
+      "lon": -91.93994,
+      "name": null,
+      "state": "MO",
+      "via": "tag",
+      "osm": [
+        "w1257614598"
+      ]
+    },
+    {
+      "lat": 36.98311,
+      "lon": -97.34705,
+      "name": null,
+      "state": "OK",
+      "via": "tag",
+      "osm": [
+        "w757066029"
+      ]
+    },
+    {
+      "lat": 36.99012,
+      "lon": -104.48349,
+      "name": "Raton Port of Entry",
+      "state": "NM",
+      "via": "name",
+      "osm": [
+        "w256663915"
+      ]
+    },
+    {
+      "lat": 37.00448,
+      "lon": -88.31841,
+      "name": null,
+      "state": "KY",
+      "via": "tag",
+      "osm": [
+        "w1257113364"
+      ]
+    },
+    {
+      "lat": 37.00618,
+      "lon": -94.56631,
+      "name": "Weigh Station (Eastbound)",
+      "state": "MO",
+      "via": "name",
+      "osm": [
+        "w759527516"
+      ]
+    },
+    {
+      "lat": 37.01398,
+      "lon": -113.61555,
+      "name": "Arizona Inspection Station",
+      "state": "UT",
+      "via": "name",
+      "osm": [
+        "w172658950",
+        "w172658951"
+      ]
+    },
+    {
+      "lat": 37.04001,
+      "lon": -121.577,
+      "name": "Gilroy Commercial Vehicle Enforcement Facility",
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w100573011"
+      ]
+    },
+    {
+      "lat": 37.04214,
+      "lon": -84.09652,
+      "name": "Truck scales and rest area - I75 NB",
+      "state": "KY",
+      "via": "name",
+      "osm": [
+        "n5063308665"
+      ]
+    },
+    {
+      "lat": 37.04545,
+      "lon": -86.21047,
+      "name": null,
+      "state": "KY",
+      "via": "tag",
+      "osm": [
+        "w1319698713"
+      ]
+    },
+    {
+      "lat": 37.04723,
+      "lon": -84.09917,
+      "name": "Truck scales and rest area - I75 SB",
+      "state": "KY",
+      "via": "tag",
+      "osm": [
+        "w16266351",
+        "w16266352",
+        "w1417548984",
+        "w1417548985",
+        "w1417548987",
+        "n5063308664"
+      ]
+    },
+    {
+      "lat": 37.06489,
+      "lon": -77.37253,
+      "name": "Truck Weight Station",
+      "state": "VA",
+      "via": "name",
+      "osm": [
+        "n4787425734",
+        "n4787426924"
+      ]
+    },
+    {
+      "lat": 37.07417,
+      "lon": -121.59004,
+      "name": "Gilroy Commercial Vehicle Enforcement Facility",
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w124333133"
+      ]
+    },
+    {
+      "lat": 37.08525,
+      "lon": -112.53973,
+      "name": "Port of Entry",
+      "state": "UT",
+      "via": "name",
+      "osm": [
+        "w1012125340"
+      ]
+    },
+    {
+      "lat": 37.11127,
+      "lon": -121.01427,
+      "name": null,
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w1228118330"
+      ]
+    },
+    {
+      "lat": 37.1367,
+      "lon": -104.52004,
+      "name": "CDOT Trinidad Weigh Station",
+      "state": "CO",
+      "via": "name",
+      "osm": [
+        "w1006627140"
+      ]
+    },
+    {
+      "lat": 37.15689,
+      "lon": -77.27353,
+      "name": null,
+      "state": "VA",
+      "via": "tag",
+      "osm": [
+        "w1213520432"
+      ]
+    },
+    {
+      "lat": 37.15957,
+      "lon": -120.29767,
+      "name": "Highway Patrol Weigh Station",
+      "state": "CA",
+      "via": "name",
+      "osm": [
+        "n3171712559"
+      ]
+    },
+    {
+      "lat": 37.23084,
+      "lon": -79.18616,
+      "name": null,
+      "state": "VA",
+      "via": "tag",
+      "osm": [
+        "w19898146"
+      ]
+    },
+    {
+      "lat": 37.31155,
+      "lon": -77.39088,
+      "name": null,
+      "state": "VA",
+      "via": "tag",
+      "osm": [
+        "w1313023400"
+      ]
+    },
+    {
+      "lat": 37.31429,
+      "lon": -108.60822,
+      "name": "Port of Entry Cortez",
+      "state": "CO",
+      "via": "tag",
+      "osm": [
+        "n9710785936",
+        "n7183052499"
+      ]
+    },
+    {
+      "lat": 37.50838,
+      "lon": -77.25436,
+      "name": "Weigh Station",
+      "state": "VA",
+      "via": "tag",
+      "osm": [
+        "n6501316472"
+      ]
+    },
+    {
+      "lat": 37.51505,
+      "lon": -77.23278,
+      "name": "Sandston Weigh Station",
+      "state": "VA",
+      "via": "tag",
+      "osm": [
+        "n9445217402"
+      ]
+    },
+    {
+      "lat": 37.6472,
+      "lon": -95.47578,
+      "name": null,
+      "state": "KS",
+      "via": "tag",
+      "osm": [
+        "w1257116432"
+      ]
+    },
+    {
+      "lat": 37.65373,
+      "lon": -85.85684,
+      "name": "Weight station",
+      "state": "KY",
+      "via": "name",
+      "osm": [
+        "n9207823896"
+      ]
+    },
+    {
+      "lat": 37.81677,
+      "lon": -87.03981,
+      "name": null,
+      "state": "KY",
+      "via": "tag",
+      "osm": [
+        "w1473935936",
+        "w1473935937",
+        "w1473935938"
+      ]
+    },
+    {
+      "lat": 37.85689,
+      "lon": -121.27609,
+      "name": null,
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "w1306692718"
+      ]
+    },
+    {
+      "lat": 37.8732,
+      "lon": -109.3074,
+      "name": "Monticello UDOT Port of Entry",
+      "state": "UT",
+      "via": "name",
+      "osm": [
+        "w1365572051"
+      ]
+    },
+    {
+      "lat": 37.92939,
+      "lon": -122.06081,
+      "name": "Weigh Station",
+      "state": "CA",
+      "via": "name",
+      "osm": [
+        "w1123797734",
+        "w1134989713"
+      ]
+    },
+    {
+      "lat": 37.93221,
+      "lon": -79.23389,
+      "name": null,
+      "state": "VA",
+      "via": "tag",
+      "osm": [
+        "w1227166653"
+      ]
+    },
+    {
+      "lat": 38.08613,
+      "lon": -83.89788,
+      "name": null,
+      "state": "KY",
+      "via": "tag",
+      "osm": [
+        "w1118804262"
+      ]
+    },
+    {
+      "lat": 38.11438,
+      "lon": -102.62752,
+      "name": "Colorado Port of Entry",
+      "state": "CO",
+      "via": "name",
+      "osm": [
+        "w307494675",
+        "w307494679"
+      ]
+    },
+    {
+      "lat": 38.17277,
+      "lon": -87.55152,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w1257603465"
+      ]
+    },
+    {
+      "lat": 38.23395,
+      "lon": -122.10767,
+      "name": "Interstate 80 Westbound Truck Scales",
+      "state": "CA",
+      "via": "name",
+      "osm": [
+        "w1463388297"
+      ]
+    },
+    {
+      "lat": 38.2409,
+      "lon": -87.99902,
+      "name": null,
+      "state": "IL",
+      "via": "tag",
+      "osm": [
+        "w1533722454"
+      ]
+    },
+    {
+      "lat": 38.25698,
+      "lon": -90.40403,
+      "name": null,
+      "state": "MO",
+      "via": "tag",
+      "osm": [
+        "w1442057118"
+      ]
+    },
+    {
+      "lat": 38.33973,
+      "lon": -91.00834,
+      "name": "Weigh Station (Westbound)",
+      "state": "MO",
+      "via": "name",
+      "osm": [
+        "w759527559",
+        "w759527560"
+      ]
+    },
+    {
+      "lat": 38.37004,
+      "lon": -97.61602,
+      "name": null,
+      "state": "KS",
+      "via": "tag",
+      "osm": [
+        "w1257599749"
+      ]
+    },
+    {
+      "lat": 38.62791,
+      "lon": -94.35057,
+      "name": "Weigh Station (Southbound)",
+      "state": "MO",
+      "via": "name",
+      "osm": [
+        "w791960691",
+        "w791960692",
+        "n9142496202"
+      ]
+    },
+    {
+      "lat": 38.74437,
+      "lon": -120.64671,
+      "name": "Camino Platform Scale Westbound US 50",
+      "state": "CA",
+      "via": "tag",
+      "osm": [
+        "n2724017530"
+      ]
+    },
+    {
+      "lat": 38.79346,
+      "lon": -90.44797,
+      "name": null,
+      "state": "MO",
+      "via": "tag",
+      "osm": [
+        "w598192760"
+      ]
+    },
+    {
+      "lat": 38.81173,
+      "lon": -90.93428,
+      "name": "Weigh Station (Westbound)",
+      "state": "MO",
+      "via": "name",
+      "osm": [
+        "w562400518",
+        "n9143052335"
+      ]
+    },
+    {
+      "lat": 38.8131,
+      "lon": -90.94108,
+      "name": "Weigh Station (Eastbound)",
+      "state": "MO",
+      "via": "name",
+      "osm": [
+        "w562400577"
+      ]
+    },
+    {
+      "lat": 38.81882,
+      "lon": -84.60183,
+      "name": "I-75 Southbound Weigh Station",
+      "state": "KY",
+      "via": "tag",
+      "osm": [
+        "w298882800",
+        "n1346240757",
+        "w119960958"
+      ]
+    },
+    {
+      "lat": 38.83093,
+      "lon": -94.85035,
+      "name": "Weigh Station",
+      "state": "KS",
+      "via": "name",
+      "osm": [
+        "w159352047",
+        "w159352053"
+      ]
+    },
+    {
+      "lat": 38.86548,
+      "lon": -84.64634,
+      "name": "I-71 Southbound Weigh Station",
+      "state": "KY",
+      "via": "tag",
+      "osm": [
+        "w298882798",
+        "n7105924306",
+        "n9207652361"
+      ]
+    },
+    {
+      "lat": 38.89133,
+      "lon": -75.84488,
+      "name": null,
+      "state": "MD",
+      "via": "tag",
+      "osm": [
+        "w728269474"
+      ]
+    },
+    {
+      "lat": 38.98826,
+      "lon": -88.93586,
+      "name": "Weigh Station (Eastbound)",
+      "state": "IL",
+      "via": "name",
+      "osm": [
+        "w1410867210"
+      ]
+    },
+    {
+      "lat": 39.00485,
+      "lon": -93.85001,
+      "name": "Weigh Station (Westbound)",
+      "state": "MO",
+      "via": "name",
+      "osm": [
+        "w759450930",
+        "w759450931",
+        "n9138952466"
+      ]
+    },
+    {
+      "lat": 39.04741,
+      "lon": -78.24624,
+      "name": "Weight station",
+      "state": "VA",
+      "via": "name",
+      "osm": [
+        "n9214949688"
+      ]
+    },
+    {
+      "lat": 39.05251,
+      "lon": -78.25293,
+      "name": null,
+      "state": "VA",
+      "via": "tag",
+      "osm": [
+        "w307459531"
+      ]
+    },
+    {
+      "lat": 39.10053,
+      "lon": -104.86359,
+      "name": "Weigh Station",
+      "state": "CO",
+      "via": "name",
+      "osm": [
+        "w769463786"
+      ]
+    },
+    {
+      "lat": 39.18093,
+      "lon": -108.82505,
+      "name": "CSP Weigh Station: Loma",
+      "state": "CO",
+      "via": "name",
+      "osm": [
+        "w373343886",
+        "w373344104",
+        "w373344237"
+      ]
+    },
+    {
+      "lat": 39.22746,
+      "lon": -89.64363,
+      "name": "State Weigh Scale #32",
+      "state": "IL",
+      "via": "name",
+      "osm": [
+        "w755237142"
+      ]
+    },
+    {
+      "lat": 39.248,
+      "lon": -84.78392,
+      "name": "I-74 Eastbound Weigh Station",
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "w760643792",
+        "n1669851356",
+        "w668225165"
+      ]
+    },
+    {
+      "lat": 39.27368,
+      "lon": -103.68578,
+      "name": "Weigh Station",
+      "state": "CO",
+      "via": "tag",
+      "osm": [
+        "n177450111",
+        "n7127198370",
+        "n13896179981",
+        "w810605801",
+        "w810605802",
+        "w551416060",
+        "w762744838",
+        "w1524601297",
+        "w1524601301"
+      ]
+    },
+    {
+      "lat": 39.27866,
+      "lon": -76.54866,
+      "name": null,
+      "state": "MD",
+      "via": "tag",
+      "osm": [
+        "w198501571"
+      ]
+    },
+    {
+      "lat": 39.28004,
+      "lon": -84.83092,
+      "name": "West Harrison Weigh Station",
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w760639316",
+        "w17293712",
+        "n12010054275"
+      ]
+    },
+    {
+      "lat": 39.32937,
+      "lon": -102.04379,
+      "name": "Kansas weight station",
+      "state": "KS",
+      "via": "name",
+      "osm": [
+        "w1092066241"
+      ]
+    },
+    {
+      "lat": 39.38444,
+      "lon": -75.80126,
+      "name": null,
+      "state": "MD",
+      "via": "tag",
+      "osm": [
+        "w69020684",
+        "w261870059"
+      ]
+    },
+    {
+      "lat": 39.41969,
+      "lon": -75.76376,
+      "name": null,
+      "state": "DE",
+      "via": "tag",
+      "osm": [
+        "w635131910"
+      ]
+    },
+    {
+      "lat": 39.43341,
+      "lon": -87.33156,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w816707650"
+      ]
+    },
+    {
+      "lat": 39.43614,
+      "lon": -87.52875,
+      "name": "Terre Haute Weigh Station",
+      "state": "IN",
+      "via": "name",
+      "osm": [
+        "w1410867246"
+      ]
+    },
+    {
+      "lat": 39.43822,
+      "lon": -77.97372,
+      "name": null,
+      "state": "WV",
+      "via": "tag",
+      "osm": [
+        "w546743116"
+      ]
+    },
+    {
+      "lat": 39.51238,
+      "lon": -80.06615,
+      "name": null,
+      "state": "WV",
+      "via": "tag",
+      "osm": [
+        "w15590565",
+        "w15590567"
+      ]
+    },
+    {
+      "lat": 39.52331,
+      "lon": -119.70828,
+      "name": null,
+      "state": "NV",
+      "via": "tag",
+      "osm": [
+        "w1070079500"
+      ]
+    },
+    {
+      "lat": 39.55223,
+      "lon": -86.04442,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w1193679642"
+      ]
+    },
+    {
+      "lat": 39.57427,
+      "lon": -91.40475,
+      "name": null,
+      "state": "MO",
+      "via": "tag",
+      "osm": [
+        "w1257599260"
+      ]
+    },
+    {
+      "lat": 39.58936,
+      "lon": -76.06486,
+      "name": null,
+      "state": "MD",
+      "via": "tag",
+      "osm": [
+        "w1097987757"
+      ]
+    },
+    {
+      "lat": 39.61371,
+      "lon": -86.07092,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w127661079"
+      ]
+    },
+    {
+      "lat": 39.62546,
+      "lon": -110.85912,
+      "name": null,
+      "state": "UT",
+      "via": "tag",
+      "osm": [
+        "w1192785679",
+        "w1192785681"
+      ]
+    },
+    {
+      "lat": 39.64272,
+      "lon": -75.79806,
+      "name": null,
+      "state": "MD",
+      "via": "tag",
+      "osm": [
+        "w1330185346"
+      ]
+    },
+    {
+      "lat": 39.6999,
+      "lon": -77.73356,
+      "name": null,
+      "state": "MD",
+      "via": "tag",
+      "osm": [
+        "w1210184017"
+      ]
+    },
+    {
+      "lat": 39.73336,
+      "lon": -94.21862,
+      "name": null,
+      "state": "MO",
+      "via": "tag",
+      "osm": [
+        "w1257604857"
+      ]
+    },
+    {
+      "lat": 39.7405,
+      "lon": -104.43441,
+      "name": null,
+      "state": "CO",
+      "via": "tag",
+      "osm": [
+        "w1361818817"
+      ]
+    },
+    {
+      "lat": 39.7648,
+      "lon": -105.61252,
+      "name": "Weigh Station",
+      "state": "CO",
+      "via": "name",
+      "osm": [
+        "w298465074",
+        "w617736003"
+      ]
+    },
+    {
+      "lat": 39.828,
+      "lon": -84.03204,
+      "name": null,
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "w1180109736"
+      ]
+    },
+    {
+      "lat": 39.82817,
+      "lon": -84.80234,
+      "name": "DOT Weigh Station. West Bound",
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "w1074531038",
+        "n3101420197",
+        "w19213827"
+      ]
+    },
+    {
+      "lat": 39.83518,
+      "lon": -97.63704,
+      "name": null,
+      "state": "KS",
+      "via": "tag",
+      "osm": [
+        "w1257995047"
+      ]
+    },
+    {
+      "lat": 39.84492,
+      "lon": -75.36334,
+      "name": "Chester Weigh Station",
+      "state": "PA",
+      "via": "tag",
+      "osm": [
+        "n5690804959"
+      ]
+    },
+    {
+      "lat": 39.85125,
+      "lon": -85.41202,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w944063450"
+      ]
+    },
+    {
+      "lat": 39.86841,
+      "lon": -94.43552,
+      "name": "Antique Weigh Scale",
+      "state": "MO",
+      "via": "name",
+      "osm": [
+        "n5063200750"
+      ]
+    },
+    {
+      "lat": 39.87972,
+      "lon": -88.8676,
+      "name": null,
+      "state": "IL",
+      "via": "tag",
+      "osm": [
+        "w687415809"
+      ]
+    },
+    {
+      "lat": 40.04744,
+      "lon": -75.63322,
+      "name": null,
+      "state": "PA",
+      "via": "tag",
+      "osm": [
+        "w1310650852"
+      ]
+    },
+    {
+      "lat": 40.07804,
+      "lon": -104.64811,
+      "name": null,
+      "state": "CO",
+      "via": "tag",
+      "osm": [
+        "w417748170"
+      ]
+    },
+    {
+      "lat": 40.12359,
+      "lon": -74.7113,
+      "name": null,
+      "state": "NJ",
+      "via": "tag",
+      "osm": [
+        "w1105725074",
+        "w1257116933"
+      ]
+    },
+    {
+      "lat": 40.14439,
+      "lon": -74.14894,
+      "name": null,
+      "state": "NJ",
+      "via": "tag",
+      "osm": [
+        "w438222589",
+        "w438222594"
+      ]
+    },
+    {
+      "lat": 40.23544,
+      "lon": -77.12151,
+      "name": null,
+      "state": "PA",
+      "via": "tag",
+      "osm": [
+        "w1263601138"
+      ]
+    },
+    {
+      "lat": 40.35272,
+      "lon": -76.72822,
+      "name": null,
+      "state": "PA",
+      "via": "tag",
+      "osm": [
+        "w1263601421"
+      ]
+    },
+    {
+      "lat": 40.38637,
+      "lon": -104.68847,
+      "name": null,
+      "state": "CO",
+      "via": "tag",
+      "osm": [
+        "w627870887",
+        "w1263367208"
+      ]
+    },
+    {
+      "lat": 40.40614,
+      "lon": -77.00893,
+      "name": null,
+      "state": "PA",
+      "via": "tag",
+      "osm": [
+        "w1263601318"
+      ]
+    },
+    {
+      "lat": 40.41594,
+      "lon": -77.01225,
+      "name": null,
+      "state": "PA",
+      "via": "tag",
+      "osm": [
+        "w1263601337"
+      ]
+    },
+    {
+      "lat": 40.54932,
+      "lon": -104.9982,
+      "name": "CSP Weigh Station: Fort Collins",
+      "state": "CO",
+      "via": "name",
+      "osm": [
+        "w1422143954",
+        "w1422143955"
+      ]
+    },
+    {
+      "lat": 40.55584,
+      "lon": -89.10298,
+      "name": "Weight Station",
+      "state": "IL",
+      "via": "name",
+      "osm": [
+        "n9114707987",
+        "n12347965348"
+      ]
+    },
+    {
+      "lat": 40.55635,
+      "lon": -105.00126,
+      "name": "CSP Weigh Station: Fort Collins",
+      "state": "CO",
+      "via": "name",
+      "osm": [
+        "w373434345"
+      ]
+    },
+    {
+      "lat": 40.62773,
+      "lon": -89.46538,
+      "name": null,
+      "state": "IL",
+      "via": "tag",
+      "osm": [
+        "w236405892"
+      ]
+    },
+    {
+      "lat": 40.65971,
+      "lon": -75.07367,
+      "name": null,
+      "state": "NJ",
+      "via": "tag",
+      "osm": [
+        "w1105495983",
+        "w1227664161"
+      ]
+    },
+    {
+      "lat": 40.67481,
+      "lon": -95.94484,
+      "name": "Truck Weigh Station",
+      "state": "NE",
+      "via": "name",
+      "osm": [
+        "w207998812"
+      ]
+    },
+    {
+      "lat": 40.70715,
+      "lon": -95.79527,
+      "name": "Weigh Station",
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w177188764",
+        "w689029182"
+      ]
+    },
+    {
+      "lat": 40.71087,
+      "lon": -80.10115,
+      "name": null,
+      "state": "PA",
+      "via": "tag",
+      "osm": [
+        "w58062502"
+      ]
+    },
+    {
+      "lat": 40.71828,
+      "lon": -80.10254,
+      "name": null,
+      "state": "PA",
+      "via": "tag",
+      "osm": [
+        "w19318678"
+      ]
+    },
+    {
+      "lat": 40.74501,
+      "lon": -113.98965,
+      "name": "Port of Entry",
+      "state": "UT",
+      "via": "name",
+      "osm": [
+        "r21121733"
+      ]
+    },
+    {
+      "lat": 40.81427,
+      "lon": -84.93913,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w1387763848"
+      ]
+    },
+    {
+      "lat": 40.92353,
+      "lon": -96.46029,
+      "name": "Waverly I-80 West Weigh Station",
+      "state": "NE",
+      "via": "tag",
+      "osm": [
+        "n7238052391",
+        "n10940491931"
+      ]
+    },
+    {
+      "lat": 40.92645,
+      "lon": -96.50832,
+      "name": "Truck Weigh Station",
+      "state": "NE",
+      "via": "name",
+      "osm": [
+        "w198994338"
+      ]
+    },
+    {
+      "lat": 40.93108,
+      "lon": -75.09624,
+      "name": null,
+      "state": "NJ",
+      "via": "tag",
+      "osm": [
+        "w1392453890"
+      ]
+    },
+    {
+      "lat": 40.9526,
+      "lon": -75.11494,
+      "name": "Knowlton Scale - Eastbound",
+      "state": "NJ",
+      "via": "tag",
+      "osm": [
+        "n11830990282"
+      ]
+    },
+    {
+      "lat": 40.96095,
+      "lon": -117.74762,
+      "name": null,
+      "state": "NV",
+      "via": "tag",
+      "osm": [
+        "w1102165187"
+      ]
+    },
+    {
+      "lat": 40.98916,
+      "lon": -93.79666,
+      "name": "Weigh Station",
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w1092244384"
+      ]
+    },
+    {
+      "lat": 41.03226,
+      "lon": -81.80188,
+      "name": null,
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "n7552744998",
+        "w541308860",
+        "w541308863"
+      ]
+    },
+    {
+      "lat": 41.08191,
+      "lon": -104.85373,
+      "name": "Port of Entry",
+      "state": "WY",
+      "via": "name",
+      "osm": [
+        "w1393155433"
+      ]
+    },
+    {
+      "lat": 41.09738,
+      "lon": -104.84887,
+      "name": null,
+      "state": "WY",
+      "via": "tag",
+      "osm": [
+        "w1259795664",
+        "w1259795883"
+      ]
+    },
+    {
+      "lat": 41.09916,
+      "lon": -114.96103,
+      "name": null,
+      "state": "NV",
+      "via": "tag",
+      "osm": [
+        "w1259753103"
+      ]
+    },
+    {
+      "lat": 41.119,
+      "lon": -85.17094,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "n10034883169",
+        "n10034883170"
+      ]
+    },
+    {
+      "lat": 41.12298,
+      "lon": -80.76609,
+      "name": null,
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "w594082005"
+      ]
+    },
+    {
+      "lat": 41.13588,
+      "lon": -104.70766,
+      "name": null,
+      "state": "WY",
+      "via": "tag",
+      "osm": [
+        "w1259795282"
+      ]
+    },
+    {
+      "lat": 41.16008,
+      "lon": -104.52,
+      "name": null,
+      "state": "WY",
+      "via": "tag",
+      "osm": [
+        "w1259796926"
+      ]
+    },
+    {
+      "lat": 41.16319,
+      "lon": -80.61203,
+      "name": "I-80 WB Weigh Station",
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "n12477202340",
+        "w541308857"
+      ]
+    },
+    {
+      "lat": 41.17491,
+      "lon": -83.64628,
+      "name": null,
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "w1184894372",
+        "w1257995584"
+      ]
+    },
+    {
+      "lat": 41.17783,
+      "lon": -80.56574,
+      "name": "Scales",
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "w1368815053"
+      ]
+    },
+    {
+      "lat": 41.19683,
+      "lon": -79.4977,
+      "name": "Weight station",
+      "state": "PA",
+      "via": "name",
+      "osm": [
+        "n9105609699"
+      ]
+    },
+    {
+      "lat": 41.24578,
+      "lon": -111.03921,
+      "name": "Wyoming Port of Entry",
+      "state": "WY",
+      "via": "name",
+      "osm": [
+        "w1150750448"
+      ]
+    },
+    {
+      "lat": 41.26988,
+      "lon": -122.27992,
+      "name": "Weight Station",
+      "state": "CA",
+      "via": "name",
+      "osm": [
+        "w178280550"
+      ]
+    },
+    {
+      "lat": 41.28333,
+      "lon": -105.59107,
+      "name": "Port of Entry",
+      "state": "WY",
+      "via": "name",
+      "osm": [
+        "w717915639"
+      ]
+    },
+    {
+      "lat": 41.29025,
+      "lon": -83.63466,
+      "name": null,
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "w1069838879"
+      ]
+    },
+    {
+      "lat": 41.30466,
+      "lon": -87.30284,
+      "name": "Weight Station",
+      "state": "IN",
+      "via": "name",
+      "osm": [
+        "n9187208430"
+      ]
+    },
+    {
+      "lat": 41.34203,
+      "lon": -86.26458,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w1264975590"
+      ]
+    },
+    {
+      "lat": 41.36765,
+      "lon": -72.15405,
+      "name": null,
+      "state": "CT",
+      "via": "tag",
+      "osm": [
+        "n1755550419"
+      ]
+    },
+    {
+      "lat": 41.44013,
+      "lon": -112.05762,
+      "name": "Perry Port of Entry",
+      "state": "UT",
+      "via": "name",
+      "osm": [
+        "w1193653940"
+      ]
+    },
+    {
+      "lat": 41.45348,
+      "lon": -90.46972,
+      "name": "Weight station",
+      "state": "IL",
+      "via": "name",
+      "osm": [
+        "n9121256400"
+      ]
+    },
+    {
+      "lat": 41.49664,
+      "lon": -95.45311,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w1263553708"
+      ]
+    },
+    {
+      "lat": 41.49821,
+      "lon": -95.26066,
+      "name": "Weight station",
+      "state": "IA",
+      "via": "name",
+      "osm": [
+        "n9115471760"
+      ]
+    },
+    {
+      "lat": 41.50705,
+      "lon": -87.55463,
+      "name": "Chicago Heights Weigh Station",
+      "state": "IL",
+      "via": "tag",
+      "osm": [
+        "n9446709128"
+      ]
+    },
+    {
+      "lat": 41.55176,
+      "lon": -87.90136,
+      "name": "Weight Station C",
+      "state": "IL",
+      "via": "name",
+      "osm": [
+        "n9121331511"
+      ]
+    },
+    {
+      "lat": 41.55466,
+      "lon": -93.91532,
+      "name": "Iowa DOT Weigh Station",
+      "state": "IA",
+      "via": "name",
+      "osm": [
+        "w558991998"
+      ]
+    },
+    {
+      "lat": 41.55594,
+      "lon": -90.34263,
+      "name": "Weight station",
+      "state": "IL",
+      "via": "name",
+      "osm": [
+        "w896208356",
+        "n9114955833"
+      ]
+    },
+    {
+      "lat": 41.56477,
+      "lon": -87.40244,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w1370127893"
+      ]
+    },
+    {
+      "lat": 41.56728,
+      "lon": -87.47244,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w1263870003"
+      ]
+    },
+    {
+      "lat": 41.58889,
+      "lon": -87.23953,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w1369516891"
+      ]
+    },
+    {
+      "lat": 41.61321,
+      "lon": -93.77964,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w824032506"
+      ]
+    },
+    {
+      "lat": 41.62402,
+      "lon": -87.67625,
+      "name": null,
+      "state": "IL",
+      "via": "tag",
+      "osm": [
+        "w1263871395"
+      ]
+    },
+    {
+      "lat": 41.63023,
+      "lon": -93.78062,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w306473983"
+      ]
+    },
+    {
+      "lat": 41.63908,
+      "lon": -88.22207,
+      "name": "Weigh Station",
+      "state": "IL",
+      "via": "name",
+      "osm": [
+        "w1471823526"
+      ]
+    },
+    {
+      "lat": 41.6442,
+      "lon": -91.15058,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w204778975"
+      ]
+    },
+    {
+      "lat": 41.6784,
+      "lon": -93.57328,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w1167636793"
+      ]
+    },
+    {
+      "lat": 41.68249,
+      "lon": -93.33433,
+      "name": "Weigh station",
+      "state": "IA",
+      "via": "name",
+      "osm": [
+        "w349258560"
+      ]
+    },
+    {
+      "lat": 41.69869,
+      "lon": -92.35892,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w1085888732"
+      ]
+    },
+    {
+      "lat": 41.69876,
+      "lon": -92.4463,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w1085893817"
+      ]
+    },
+    {
+      "lat": 41.73646,
+      "lon": -86.33631,
+      "name": null,
+      "state": "IN",
+      "via": "tag",
+      "osm": [
+        "w1263865353"
+      ]
+    },
+    {
+      "lat": 41.79041,
+      "lon": -80.85601,
+      "name": null,
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "w1323269849"
+      ]
+    },
+    {
+      "lat": 41.91466,
+      "lon": -80.57048,
+      "name": null,
+      "state": "OH",
+      "via": "tag",
+      "osm": [
+        "w1247339303"
+      ]
+    },
+    {
+      "lat": 41.92447,
+      "lon": -80.54733,
+      "name": "Weigh Station",
+      "state": "OH",
+      "via": "name",
+      "osm": [
+        "w1246970188",
+        "w1246974512"
+      ]
+    },
+    {
+      "lat": 41.96538,
+      "lon": -91.64797,
+      "name": "Weigh Station",
+      "state": "IA",
+      "via": "name",
+      "osm": [
+        "w996971557"
+      ]
+    },
+    {
+      "lat": 42.05851,
+      "lon": -84.22089,
+      "name": "Michigan State Police Weigh Station",
+      "state": "MI",
+      "via": "name",
+      "osm": [
+        "w288996669"
+      ]
+    },
+    {
+      "lat": 42.06245,
+      "lon": -71.65422,
+      "name": "Weigh Station SR 146 (North Bound)",
+      "state": "MA",
+      "via": "name",
+      "osm": [
+        "w344931757"
+      ]
+    },
+    {
+      "lat": 42.06989,
+      "lon": -80.03807,
+      "name": null,
+      "state": "PA",
+      "via": "tag",
+      "osm": [
+        "w849862015"
+      ]
+    },
+    {
+      "lat": 42.09336,
+      "lon": -124.3344,
+      "name": null,
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "w1388083392"
+      ]
+    },
+    {
+      "lat": 42.10161,
+      "lon": -75.83511,
+      "name": null,
+      "state": "NY",
+      "via": "tag",
+      "osm": [
+        "w1258811114"
+      ]
+    },
+    {
+      "lat": 42.11139,
+      "lon": -79.18395,
+      "name": "weigh station",
+      "state": "NY",
+      "via": "tag",
+      "osm": [
+        "w1062471087"
+      ]
+    },
+    {
+      "lat": 42.20237,
+      "lon": -79.31318,
+      "name": null,
+      "state": "NY",
+      "via": "tag",
+      "osm": [
+        "w1082780306"
+      ]
+    },
+    {
+      "lat": 42.21555,
+      "lon": -89.10664,
+      "name": null,
+      "state": "IL",
+      "via": "tag",
+      "osm": [
+        "w1145077238"
+      ]
+    },
+    {
+      "lat": 42.22209,
+      "lon": -122.72597,
+      "name": "Weigh Station",
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "n2003927501",
+        "n5751433087"
+      ]
+    },
+    {
+      "lat": 42.31218,
+      "lon": -93.57171,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w1138726861"
+      ]
+    },
+    {
+      "lat": 42.34162,
+      "lon": -92.03379,
+      "name": "Weight station",
+      "state": "IA",
+      "via": "name",
+      "osm": [
+        "n9121069223"
+      ]
+    },
+    {
+      "lat": 42.37738,
+      "lon": -122.89902,
+      "name": null,
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "w1057107718"
+      ]
+    },
+    {
+      "lat": 42.40031,
+      "lon": -90.17268,
+      "name": null,
+      "state": "IL",
+      "via": "tag",
+      "osm": [
+        "w1214709160"
+      ]
+    },
+    {
+      "lat": 42.43524,
+      "lon": -96.37993,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w1263560138",
+        "w1263560867"
+      ]
+    },
+    {
+      "lat": 42.47812,
+      "lon": -95.15076,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "n10555584736"
+      ]
+    },
+    {
+      "lat": 42.49152,
+      "lon": -88.3089,
+      "name": "Weigh Station",
+      "state": "IL",
+      "via": "name",
+      "osm": [
+        "w447970953"
+      ]
+    },
+    {
+      "lat": 42.50056,
+      "lon": -122.81169,
+      "name": null,
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "n1897447970",
+        "n2160484841"
+      ]
+    },
+    {
+      "lat": 42.59846,
+      "lon": -88.98075,
+      "name": "Weigh station",
+      "state": "WI",
+      "via": "tag",
+      "osm": [
+        "w585987124",
+        "n9104441843"
+      ]
+    },
+    {
+      "lat": 42.65021,
+      "lon": -84.12926,
+      "name": "Weigh Station",
+      "state": "MI",
+      "via": "name",
+      "osm": [
+        "w387942443",
+        "w387942444"
+      ]
+    },
+    {
+      "lat": 42.75549,
+      "lon": -104.45374,
+      "name": "Wyoming Port of Entry",
+      "state": "WY",
+      "via": "name",
+      "osm": [
+        "w1272573749"
+      ]
+    },
+    {
+      "lat": 42.76704,
+      "lon": -96.21169,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w1263561550"
+      ]
+    },
+    {
+      "lat": 42.78534,
+      "lon": -96.79743,
+      "name": null,
+      "state": "SD",
+      "via": "tag",
+      "osm": [
+        "w1263559483"
+      ]
+    },
+    {
+      "lat": 42.82366,
+      "lon": -71.28883,
+      "name": "Scale Lane",
+      "state": "NH",
+      "via": "tag",
+      "osm": [
+        "w1286379777",
+        "w1286379769"
+      ]
+    },
+    {
+      "lat": 42.825,
+      "lon": -85.67562,
+      "name": null,
+      "state": "MI",
+      "via": "tag",
+      "osm": [
+        "w1158047695"
+      ]
+    },
+    {
+      "lat": 42.87005,
+      "lon": -87.94123,
+      "name": null,
+      "state": "WI",
+      "via": "tag",
+      "osm": [
+        "w1257609972"
+      ]
+    },
+    {
+      "lat": 42.87971,
+      "lon": -85.03738,
+      "name": "Weight station",
+      "state": "MI",
+      "via": "name",
+      "osm": [
+        "n9258348207"
+      ]
+    },
+    {
+      "lat": 42.88336,
+      "lon": -78.80003,
+      "name": null,
+      "state": "NY",
+      "via": "tag",
+      "osm": [
+        "w1503791428"
+      ]
+    },
+    {
+      "lat": 42.97675,
+      "lon": -82.54128,
+      "name": null,
+      "state": "MI",
+      "via": "tag",
+      "osm": [
+        "w1306689691"
+      ]
+    },
+    {
+      "lat": 42.98954,
+      "lon": -82.93045,
+      "name": null,
+      "state": "MI",
+      "via": "tag",
+      "osm": [
+        "w1259757664"
+      ]
+    },
+    {
+      "lat": 42.99829,
+      "lon": -72.47091,
+      "name": null,
+      "state": "VT",
+      "via": "tag",
+      "osm": [
+        "w364839808"
+      ]
+    },
+    {
+      "lat": 43.02304,
+      "lon": -71.05774,
+      "name": "Epping Weigh Station",
+      "state": "NH",
+      "via": "tag",
+      "osm": [
+        "w1164775141"
+      ]
+    },
+    {
+      "lat": 43.05491,
+      "lon": -123.33387,
+      "name": "Weigh Station",
+      "state": "OR",
+      "via": "name",
+      "osm": [
+        "n2037619250"
+      ]
+    },
+    {
+      "lat": 43.08848,
+      "lon": -88.76252,
+      "name": null,
+      "state": "WI",
+      "via": "tag",
+      "osm": [
+        "w1387764999"
+      ]
+    },
+    {
+      "lat": 43.10901,
+      "lon": -123.45114,
+      "name": "Weigh Station Scales",
+      "state": "OR",
+      "via": "name",
+      "osm": [
+        "w279664287"
+      ]
+    },
+    {
+      "lat": 43.12253,
+      "lon": -92.73425,
+      "name": null,
+      "state": "IA",
+      "via": "tag",
+      "osm": [
+        "w1256837491"
+      ]
+    },
+    {
+      "lat": 43.1359,
+      "lon": -70.7114,
+      "name": "Weigh Station",
+      "state": "ME",
+      "via": "tag",
+      "osm": [
+        "w756916610",
+        "w217888518"
+      ]
+    },
+    {
+      "lat": 43.14652,
+      "lon": -70.68351,
+      "name": "Weigh Station",
+      "state": "ME",
+      "via": "tag",
+      "osm": [
+        "w756916614",
+        "w756916617"
+      ]
+    },
+    {
+      "lat": 43.17939,
+      "lon": -111.02462,
+      "name": "Alpine Port of Entry",
+      "state": "WY",
+      "via": "name",
+      "osm": [
+        "w1441994810"
+      ]
+    },
+    {
+      "lat": 43.23504,
+      "lon": -72.44826,
+      "name": null,
+      "state": "VT",
+      "via": "tag",
+      "osm": [
+        "w164190686",
+        "w164190687"
+      ]
+    },
+    {
+      "lat": 43.43118,
+      "lon": -116.05806,
+      "name": "Idaho Port of Entry",
+      "state": "ID",
+      "via": "name",
+      "osm": [
+        "w534370381",
+        "w536800746"
+      ]
+    },
+    {
+      "lat": 43.51273,
+      "lon": -124.21734,
+      "name": null,
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "w719460330"
+      ]
+    },
+    {
+      "lat": 43.60374,
+      "lon": -96.76751,
+      "name": null,
+      "state": "SD",
+      "via": "tag",
+      "osm": [
+        "w1263562491"
+      ]
+    },
+    {
+      "lat": 43.63723,
+      "lon": -95.54608,
+      "name": "Worthington Weigh Station",
+      "state": "MN",
+      "via": "tag",
+      "osm": [
+        "w1523466487",
+        "w995331569"
+      ]
+    },
+    {
+      "lat": 43.6773,
+      "lon": -87.75849,
+      "name": null,
+      "state": "WI",
+      "via": "tag",
+      "osm": [
+        "w1256825581"
+      ]
+    },
+    {
+      "lat": 43.72673,
+      "lon": -72.42855,
+      "name": "Weigh Station I-89 (South Bound)",
+      "state": "VT",
+      "via": "name",
+      "osm": [
+        "w345414305"
+      ]
+    },
+    {
+      "lat": 43.73651,
+      "lon": -98.95624,
+      "name": null,
+      "state": "SD",
+      "via": "tag",
+      "osm": [
+        "w1255422758"
+      ]
+    },
+    {
+      "lat": 43.74896,
+      "lon": -88.46559,
+      "name": null,
+      "state": "WI",
+      "via": "tag",
+      "osm": [
+        "w1259759209"
+      ]
+    },
+    {
+      "lat": 43.80246,
+      "lon": -123.04475,
+      "name": null,
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "w1010065666"
+      ]
+    },
+    {
+      "lat": 43.83243,
+      "lon": -112.20095,
+      "name": "Weigh station NB and SB",
+      "state": "ID",
+      "via": "name",
+      "osm": [
+        "w148433097"
+      ]
+    },
+    {
+      "lat": 43.88633,
+      "lon": -100.70499,
+      "name": null,
+      "state": "SD",
+      "via": "tag",
+      "osm": [
+        "w1307340340"
+      ]
+    },
+    {
+      "lat": 43.91142,
+      "lon": -91.55428,
+      "name": "Ridgeway Weigh Station - Westbound",
+      "state": "MN",
+      "via": "name",
+      "osm": [
+        "w726006166",
+        "w726006167"
+      ]
+    },
+    {
+      "lat": 43.95366,
+      "lon": -92.47167,
+      "name": null,
+      "state": "MN",
+      "via": "tag",
+      "osm": [
+        "w142087209"
+      ]
+    },
+    {
+      "lat": 44.02634,
+      "lon": -116.9524,
+      "name": null,
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "w514481673"
+      ]
+    },
+    {
+      "lat": 44.10264,
+      "lon": -123.20029,
+      "name": null,
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "n9000073805",
+        "w620731183",
+        "w620731184"
+      ]
+    },
+    {
+      "lat": 44.10428,
+      "lon": -103.15076,
+      "name": null,
+      "state": "SD",
+      "via": "tag",
+      "osm": [
+        "w1307339436"
+      ]
+    },
+    {
+      "lat": 44.11276,
+      "lon": -103.2737,
+      "name": null,
+      "state": "SD",
+      "via": "tag",
+      "osm": [
+        "w1307339672"
+      ]
+    },
+    {
+      "lat": 44.12008,
+      "lon": -103.05314,
+      "name": null,
+      "state": "SD",
+      "via": "tag",
+      "osm": [
+        "w1307340016"
+      ]
+    },
+    {
+      "lat": 44.20134,
+      "lon": -88.48484,
+      "name": null,
+      "state": "WI",
+      "via": "tag",
+      "osm": [
+        "w1112279189",
+        "w1504071668"
+      ]
+    },
+    {
+      "lat": 44.28935,
+      "lon": -105.47095,
+      "name": "Gillette Port of Entry",
+      "state": "WY",
+      "via": "name",
+      "osm": [
+        "w261042062"
+      ]
+    },
+    {
+      "lat": 44.29085,
+      "lon": -117.22201,
+      "name": "Farewell Bend Port of Entry",
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "w92361744",
+        "w92361745",
+        "w221069937",
+        "w221069938",
+        "n9981288126"
+      ]
+    },
+    {
+      "lat": 44.30485,
+      "lon": -120.79836,
+      "name": null,
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "w642507373"
+      ]
+    },
+    {
+      "lat": 44.31811,
+      "lon": -103.43773,
+      "name": "Weight station",
+      "state": "SD",
+      "via": "name",
+      "osm": [
+        "n9118609024"
+      ]
+    },
+    {
+      "lat": 44.40994,
+      "lon": -124.08407,
+      "name": "Waldport Weigh Station 21-03",
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "n3080781098"
+      ]
+    },
+    {
+      "lat": 44.45237,
+      "lon": -88.09245,
+      "name": null,
+      "state": "WI",
+      "via": "tag",
+      "osm": [
+        "w1523485784"
+      ]
+    },
+    {
+      "lat": 44.77543,
+      "lon": -91.96161,
+      "name": null,
+      "state": "WI",
+      "via": "tag",
+      "osm": [
+        "w1343586424"
+      ]
+    },
+    {
+      "lat": 44.90713,
+      "lon": -91.8571,
+      "name": null,
+      "state": "WI",
+      "via": "tag",
+      "osm": [
+        "w1472880926",
+        "w1472880927",
+        "w1472880928",
+        "w1472880932",
+        "w1472880933",
+        "w1472880934"
+      ]
+    },
+    {
+      "lat": 44.95818,
+      "lon": -92.78766,
+      "name": "Saint Croix Weigh Station",
+      "state": "MN",
+      "via": "name",
+      "osm": [
+        "w1006631978"
+      ]
+    },
+    {
+      "lat": 44.96773,
+      "lon": -108.62209,
+      "name": "Wyoming Port of Entry",
+      "state": "WY",
+      "via": "name",
+      "osm": [
+        "w1322368752"
+      ]
+    },
+    {
+      "lat": 44.97608,
+      "lon": -68.70569,
+      "name": "DPS Weigh Station",
+      "state": "ME",
+      "via": "name",
+      "osm": [
+        "w877463714"
+      ]
+    },
+    {
+      "lat": 44.99972,
+      "lon": -73.45559,
+      "name": "Champlain Commercial Weigh Station",
+      "state": "NY",
+      "via": "name",
+      "osm": [
+        "w1351405532"
+      ]
+    },
+    {
+      "lat": 45.05072,
+      "lon": -123.52753,
+      "name": null,
+      "state": "OR",
+      "via": "tag",
+      "osm": [
+        "w163136587",
+        "w720090162",
+        "w720090163"
+      ]
+    },
+    {
+      "lat": 45.24684,
+      "lon": -93.50326,
+      "name": "Dayton Port Weigh Station",
+      "state": "MN",
+      "via": "tag",
+      "osm": [
+        "w45899578"
+      ]
+    },
+    {
+      "lat": 45.24815,
+      "lon": -93.02344,
+      "name": null,
+      "state": "MN",
+      "via": "tag",
+      "osm": [
+        "w1147688996"
+      ]
+    },
+    {
+      "lat": 45.61113,
+      "lon": -123.05284,
+      "name": "Weigh Station",
+      "state": "OR",
+      "via": "name",
+      "osm": [
+        "w535488164"
+      ]
+    },
+    {
+      "lat": 45.67105,
+      "lon": -121.87824,
+      "name": "Cascade Locks POE Weigh Station",
+      "state": "OR",
+      "via": "name",
+      "osm": [
+        "w522491180"
+      ]
+    },
+    {
+      "lat": 45.8335,
+      "lon": -122.69301,
+      "name": "Ridgefield Port of Entry",
+      "state": "WA",
+      "via": "tag",
+      "osm": [
+        "w712551571"
+      ]
+    },
+    {
+      "lat": 45.86158,
+      "lon": -95.42198,
+      "name": null,
+      "state": "MN",
+      "via": "tag",
+      "osm": [
+        "w1263563706"
+      ]
+    },
+    {
+      "lat": 45.91279,
+      "lon": -123.89028,
+      "name": "Weigh Scales",
+      "state": "OR",
+      "via": "name",
+      "osm": [
+        "w255379457"
+      ]
+    },
+    {
+      "lat": 45.91884,
+      "lon": -119.3263,
+      "name": "Umatilla Port of Entry",
+      "state": "OR",
+      "via": "name",
+      "osm": [
+        "w362678298"
+      ]
+    },
+    {
+      "lat": 46.00557,
+      "lon": -112.61392,
+      "name": null,
+      "state": "MT",
+      "via": "tag",
+      "osm": [
+        "w1215710857"
+      ]
+    },
+    {
+      "lat": 46.00619,
+      "lon": -112.59025,
+      "name": null,
+      "state": "MT",
+      "via": "tag",
+      "osm": [
+        "w362645913"
+      ]
+    },
+    {
+      "lat": 46.26233,
+      "lon": -119.08274,
+      "name": null,
+      "state": "WA",
+      "via": "tag",
+      "osm": [
+        "w1261989270"
+      ]
+    },
+    {
+      "lat": 46.60739,
+      "lon": -122.90567,
+      "name": null,
+      "state": "WA",
+      "via": "tag",
+      "osm": [
+        "w1232161765"
+      ]
+    },
+    {
+      "lat": 46.61918,
+      "lon": -91.94283,
+      "name": "Weigh Station",
+      "state": "WI",
+      "via": "name",
+      "osm": [
+        "w859040297"
+      ]
+    },
+    {
+      "lat": 46.67208,
+      "lon": -92.4659,
+      "name": "Saginaw Weigh Station North",
+      "state": "MN",
+      "via": "tag",
+      "osm": [
+        "w1023396554",
+        "w1023397978"
+      ]
+    },
+    {
+      "lat": 46.84655,
+      "lon": -96.67664,
+      "name": "Moorhead Weigh Station",
+      "state": "MN",
+      "via": "tag",
+      "osm": [
+        "n333127996",
+        "w42329665"
+      ]
+    },
+    {
+      "lat": 46.94674,
+      "lon": -114.13382,
+      "name": null,
+      "state": "MT",
+      "via": "tag",
+      "osm": [
+        "w1259317633"
+      ]
+    },
+    {
+      "lat": 47.00814,
+      "lon": -120.58616,
+      "name": null,
+      "state": "WA",
+      "via": "tag",
+      "osm": [
+        "w1261988539",
+        "w1261988759"
+      ]
+    },
+    {
+      "lat": 47.11324,
+      "lon": -118.3678,
+      "name": null,
+      "state": "WA",
+      "via": "tag",
+      "osm": [
+        "w1261990092"
+      ]
+    },
+    {
+      "lat": 47.18315,
+      "lon": -121.02807,
+      "name": "Weigh Station",
+      "state": "WA",
+      "via": "name",
+      "osm": [
+        "w60823885"
+      ]
+    },
+    {
+      "lat": 47.21056,
+      "lon": -118.2243,
+      "name": "Tokio Weigh Station",
+      "state": "WA",
+      "via": "tag",
+      "osm": [
+        "n7293593707"
+      ]
+    },
+    {
+      "lat": 47.31953,
+      "lon": -120.07281,
+      "name": "Weigh Station",
+      "state": "WA",
+      "via": "name",
+      "osm": [
+        "n4195968105"
+      ]
+    },
+    {
+      "lat": 47.65638,
+      "lon": -95.96926,
+      "name": "Erskine Weigh Station",
+      "state": "MN",
+      "via": "tag",
+      "osm": [
+        "w18204067"
+      ]
+    },
+    {
+      "lat": 47.67217,
+      "lon": -121.94164,
+      "name": "Weight station",
+      "state": "WA",
+      "via": "name",
+      "osm": [
+        "w910272389"
+      ]
+    },
+    {
+      "lat": 47.90192,
+      "lon": -122.21462,
+      "name": "Silver Lake Weigh Station",
+      "state": "WA",
+      "via": "tag",
+      "osm": [
+        "w1367641861"
+      ]
+    },
+    {
+      "lat": 48.18676,
+      "lon": -122.19647,
+      "name": null,
+      "state": "WA",
+      "via": "tag",
+      "osm": [
+        "w1168480939"
+      ]
+    },
+    {
+      "lat": 48.44675,
+      "lon": -122.46015,
+      "name": "Weight Station 35",
+      "state": "WA",
+      "via": "name",
+      "osm": [
+        "w367290004"
+      ]
+    },
+    {
+      "lat": 48.53854,
+      "lon": -122.35413,
+      "name": "Bow Hill Port of Entry",
+      "state": "WA",
+      "via": "name",
+      "osm": [
+        "w1061242202"
+      ]
+    },
+    {
+      "lat": 48.73239,
+      "lon": -116.29667,
+      "name": "DOT Scale",
+      "state": "ID",
+      "via": "tag",
+      "osm": [
+        "n4548685990"
+      ]
+    },
+    {
+      "lat": 48.84899,
+      "lon": -122.57248,
+      "name": null,
+      "state": "WA",
+      "via": "tag",
+      "osm": [
+        "w1261987479"
+      ]
+    },
+    {
+      "lat": 59.66062,
+      "lon": -151.64176,
+      "name": null,
+      "state": "AK",
+      "via": "tag",
+      "osm": [
+        "w352185189"
+      ]
+    },
+    {
+      "lat": 60.53728,
+      "lon": -150.77447,
+      "name": null,
+      "state": "AK",
+      "via": "tag",
+      "osm": [
+        "w353541908"
+      ]
+    },
+    {
+      "lat": 61.04561,
+      "lon": -149.78957,
+      "name": null,
+      "state": "AK",
+      "via": "tag",
+      "osm": [
+        "n322973536"
+      ]
+    },
+    {
+      "lat": 61.28541,
+      "lon": -149.60507,
+      "name": "Weigh Station",
+      "state": "AK",
+      "via": "tag",
+      "osm": [
+        "w1036130978",
+        "w1036130981",
+        "w971256771"
+      ]
+    },
+    {
+      "lat": 63.32272,
+      "lon": -142.80733,
+      "name": null,
+      "state": "AK",
+      "via": "tag",
+      "osm": [
+        "w455267954"
+      ]
+    },
+    {
+      "lat": 64.81421,
+      "lon": -147.60878,
+      "name": "Department of Transportation and Public Facilities Inspection Building Richardson Weigh Station",
+      "state": "AK",
+      "via": "tag",
+      "osm": [
+        "n5917956452",
+        "n5917956454",
+        "w626875744",
+        "w961656541",
+        "w1232598359",
+        "w626875742",
+        "w626875743",
+        "w1232598358"
+      ]
+    },
+    {
+      "lat": 64.84505,
+      "lon": -148.00509,
+      "name": "Ester Weigh Station",
+      "state": "AK",
+      "via": "name",
+      "osm": [
+        "w1232583479"
+      ]
+    },
+    {
+      "lat": 64.96019,
+      "lon": -147.61659,
+      "name": "AKDOT Weigh Station",
+      "state": "AK",
+      "via": "tag",
+      "osm": [
+        "w504518280"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1129 @@
+{
+  "schema": "dailyfuel/map-weigh-ntad/1",
+  "source": "Bureau of Transportation Statistics, National Transportation Atlas Database, Truck Stop Parking",
+  "source_url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0",
+  "licence": "Public domain, a work of the United States government",
+  "licence_note": "This NTAD dataset is a work of the United States government as defined in 17 U.S.C. § 101 and as such are not protected by any U.S. copyrights. This work is available for unrestricted public use.",
+  "attribution": "Weigh station rows from the Truck Stop Parking dataset, FHWA and BTS (NTAD), compiled 2019",
+  "compiled": "2019-04-09",
+  "filter": "rows whose nhs_rest_stop name contains weigh or scale",
+  "query_url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query?where=UPPER%28nhs_rest_stop%29+LIKE+%27%25WEIGH%25%27+OR+UPPER%28nhs_rest_stop%29+LIKE+%27%25SCALE%25%27&outFields=%2A&orderByFields=OBJECTID&resultRecordCount=2000&f=json",
+  "fetched": "2026-09-23",
+  "counts": {
+    "rows": 111,
+    "sites": 111,
+    "dropped_outside_us": 0
+  },
+  "sites": [
+    {
+      "lat": 24.9546,
+      "lon": -80.5813,
+      "name": "Plantation Key - Weight Station / Comfort Station",
+      "state": "FL",
+      "route": "SR5/US1",
+      "milepost": "86",
+      "spots": 4,
+      "id": 204
+    },
+    {
+      "lat": 26.87916,
+      "lon": -81.98599,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-75N",
+      "milepost": "158",
+      "spots": 33,
+      "id": 212
+    },
+    {
+      "lat": 26.8799,
+      "lon": -81.985,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-75S",
+      "milepost": "158",
+      "spots": 33,
+      "id": 213
+    },
+    {
+      "lat": 27.0049,
+      "lon": -80.2054,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-95N",
+      "milepost": "92",
+      "spots": 18,
+      "id": 215
+    },
+    {
+      "lat": 27.1891,
+      "lon": -80.4008,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-95S",
+      "milepost": "112",
+      "spots": 34,
+      "id": 218
+    },
+    {
+      "lat": 28.0155,
+      "lon": -82.2652,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-4E",
+      "milepost": "12",
+      "spots": 15,
+      "id": 229
+    },
+    {
+      "lat": 28.0185,
+      "lon": -82.2727,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-4W",
+      "milepost": "12",
+      "spots": 15,
+      "id": 230
+    },
+    {
+      "lat": 28.9929,
+      "lon": -82.1439,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-75N",
+      "milepost": "338",
+      "spots": 29,
+      "id": 244
+    },
+    {
+      "lat": 28.9935,
+      "lon": -82.1429,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-75S",
+      "milepost": "338",
+      "spots": 28,
+      "id": 245
+    },
+    {
+      "lat": 29.5108,
+      "lon": -81.1971,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-95N",
+      "milepost": "286",
+      "spots": 41,
+      "id": 248
+    },
+    {
+      "lat": 29.5108,
+      "lon": -81.1971,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-95S",
+      "milepost": "286",
+      "spots": 41,
+      "id": 249
+    },
+    {
+      "lat": 30.3734,
+      "lon": -83.2726,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-10E",
+      "milepost": "264",
+      "spots": 27,
+      "id": 265
+    },
+    {
+      "lat": 30.3747,
+      "lon": -83.2723,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-10W",
+      "milepost": "264",
+      "spots": 27,
+      "id": 266
+    },
+    {
+      "lat": 30.4181,
+      "lon": -82.8985,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-75S",
+      "milepost": "449",
+      "spots": 39,
+      "id": 267
+    },
+    {
+      "lat": 30.4215,
+      "lon": -82.9029,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-75N",
+      "milepost": "449",
+      "spots": 31,
+      "id": 268
+    },
+    {
+      "lat": 30.5531,
+      "lon": -87.3627,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-10E",
+      "milepost": "4",
+      "spots": 39,
+      "id": 274
+    },
+    {
+      "lat": 30.5539,
+      "lon": -87.362,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-10W",
+      "milepost": "4",
+      "spots": 39,
+      "id": 275
+    },
+    {
+      "lat": 30.6388,
+      "lon": -84.9825,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-10E",
+      "milepost": "155",
+      "spots": 39,
+      "id": 280
+    },
+    {
+      "lat": 30.6398,
+      "lon": -84.9829,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-10W",
+      "milepost": "155",
+      "spots": 39,
+      "id": 281
+    },
+    {
+      "lat": 30.66924,
+      "lon": -81.66873,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-95S",
+      "milepost": "376",
+      "spots": 30,
+      "id": 282
+    },
+    {
+      "lat": 30.6696,
+      "lon": -81.667,
+      "name": "Weigh Station",
+      "state": "FL",
+      "route": "I-95N",
+      "milepost": "376",
+      "spots": 30,
+      "id": 283
+    },
+    {
+      "lat": 30.917,
+      "lon": -83.365,
+      "name": "Georgia Weigh Station Region 8 South(Lowndes)",
+      "state": "GA",
+      "route": "I-75S",
+      "milepost": "23",
+      "spots": 30,
+      "id": 293
+    },
+    {
+      "lat": 30.918,
+      "lon": -83.364,
+      "name": "Georgia Weigh Station Region 8 North (Lowndes)",
+      "state": "GA",
+      "route": "I-75N",
+      "milepost": "23",
+      "spots": 30,
+      "id": 294
+    },
+    {
+      "lat": 31.477,
+      "lon": -81.448,
+      "name": "Georgia Weigh Station Region 9 South (McIntosh)",
+      "state": "GA",
+      "route": "I-95S",
+      "milepost": "54",
+      "spots": 58,
+      "id": 299
+    },
+    {
+      "lat": 31.477,
+      "lon": -81.446,
+      "name": "Georgia Weigh Station Region 9 North (McIntosh)",
+      "state": "GA",
+      "route": "I-95N",
+      "milepost": "54",
+      "spots": 56,
+      "id": 298
+    },
+    {
+      "lat": 32.167,
+      "lon": -81.443,
+      "name": "Georgia Weigh Station Region 7 East (Bryan)",
+      "state": "GA",
+      "route": "I-16E",
+      "milepost": "144",
+      "spots": 35,
+      "id": 303
+    },
+    {
+      "lat": 32.17025,
+      "lon": -81.44461,
+      "name": "Georgia Weigh Station Region 7 West (Bryan)",
+      "state": "GA",
+      "route": "I-16W",
+      "milepost": "144",
+      "spots": 35,
+      "id": 304
+    },
+    {
+      "lat": 32.216,
+      "lon": -81.174,
+      "name": "Georgia Weigh Station Region 7 (Chatham )",
+      "state": "GA",
+      "route": "I-95S",
+      "milepost": "110",
+      "spots": 18,
+      "id": 306
+    },
+    {
+      "lat": 33.069,
+      "lon": -83.973,
+      "name": "Georgia Weigh Station Region 6 South (Monroe)",
+      "state": "GA",
+      "route": "I-75S",
+      "milepost": "190",
+      "spots": 14,
+      "id": 314
+    },
+    {
+      "lat": 33.07,
+      "lon": -83.973,
+      "name": "Georgia Weigh Station Region 6 North(Monroe)",
+      "state": "GA",
+      "route": "I-75N",
+      "milepost": "190",
+      "spots": 14,
+      "id": 315
+    },
+    {
+      "lat": 33.083,
+      "lon": -84.916,
+      "name": "Georgia Weigh Station Region 5 North (Troup)",
+      "state": "GA",
+      "route": "I-85N",
+      "milepost": "22.5",
+      "spots": 20,
+      "id": 316
+    },
+    {
+      "lat": 33.087,
+      "lon": -84.915,
+      "name": "Georgia Weigh Station Region 5 South (Troup)",
+      "state": "GA",
+      "route": "I-85S",
+      "milepost": "22.5",
+      "spots": 20,
+      "id": 317
+    },
+    {
+      "lat": 33.487,
+      "lon": -82.237,
+      "name": "Georgia Weigh Station Region 4 West (Columbia)",
+      "state": "GA",
+      "route": "I-20W",
+      "milepost": "187",
+      "spots": 31,
+      "id": 319
+    },
+    {
+      "lat": 33.487,
+      "lon": -82.233,
+      "name": "Georgia Weigh Station Region 4 East (Columbia)",
+      "state": "GA",
+      "route": "I-20E",
+      "milepost": "187",
+      "spots": 55,
+      "id": 318
+    },
+    {
+      "lat": 33.696,
+      "lon": -85.085,
+      "name": "Georgia Weigh Station Region 3 West (Carroll)",
+      "state": "GA",
+      "route": "I-20W",
+      "milepost": "15",
+      "spots": 53,
+      "id": 326
+    },
+    {
+      "lat": 33.772,
+      "lon": -84.63,
+      "name": "Georgia Weigh Station Region 3 East(Douglas)",
+      "state": "GA",
+      "route": "I-20E",
+      "milepost": "42",
+      "spots": 13,
+      "id": 327
+    },
+    {
+      "lat": 34.415,
+      "lon": -83.178,
+      "name": "Georgia Weigh Station Region 2 South(Franklin)",
+      "state": "GA",
+      "route": "I-85S",
+      "milepost": "170",
+      "spots": 76,
+      "id": 329
+    },
+    {
+      "lat": 34.427,
+      "lon": -83.156,
+      "name": "Georgia Weigh Station Region 2 North (Franklin)",
+      "state": "GA",
+      "route": "I-85N",
+      "milepost": "171",
+      "spots": 76,
+      "id": 330
+    },
+    {
+      "lat": 34.879,
+      "lon": -85.048,
+      "name": "Georgia Weigh Station Region 1 North (Catoosa )",
+      "state": "GA",
+      "route": "I-75N",
+      "milepost": "342",
+      "spots": 35,
+      "id": 333
+    },
+    {
+      "lat": 34.88,
+      "lon": -85.052,
+      "name": "Georgia Weigh Station Region 1 South (Catoosa)",
+      "state": "GA",
+      "route": "I-75S",
+      "milepost": "342",
+      "spots": 35,
+      "id": 334
+    },
+    {
+      "lat": 42.46856,
+      "lon": -87.9473,
+      "name": "Weigh Station US  41",
+      "state": "IL",
+      "route": "US 41",
+      "milepost": null,
+      "spots": 3,
+      "id": 446
+    },
+    {
+      "lat": 36.507,
+      "lon": -88.897,
+      "name": "US-51/Julian Carroll Pkwy Weigh Station",
+      "state": "KY",
+      "route": "KY-9003 Carroll Pkwy",
+      "milepost": "1",
+      "spots": 3,
+      "id": 523
+    },
+    {
+      "lat": 36.687,
+      "lon": -86.538,
+      "name": "I-65 North Simpson County Weigh Station",
+      "state": "KY",
+      "route": "I-65N",
+      "milepost": "4",
+      "spots": 50,
+      "id": 527
+    },
+    {
+      "lat": 37.043,
+      "lon": -84.097,
+      "name": "I-75 North Laurel County Weigh Station/Rest Haven",
+      "state": "KY",
+      "route": "I-75N",
+      "milepost": "33",
+      "spots": 50,
+      "id": 528
+    },
+    {
+      "lat": 37.047,
+      "lon": -84.099,
+      "name": "I-75 South Laurel County Weigh Station/Rest Haven",
+      "state": "KY",
+      "route": "I-75S",
+      "milepost": "33",
+      "spots": 50,
+      "id": 529
+    },
+    {
+      "lat": 37.061,
+      "lon": -88.184,
+      "name": "I-24 East Lyon County Weigh Station",
+      "state": "KY",
+      "route": "I-24E",
+      "milepost": "36",
+      "spots": 46,
+      "id": 531
+    },
+    {
+      "lat": 37.061,
+      "lon": -88.184,
+      "name": "I-24 West Lyon County Weigh Station",
+      "state": "KY",
+      "route": "I-24W",
+      "milepost": "36",
+      "spots": 46,
+      "id": 532
+    },
+    {
+      "lat": 37.654,
+      "lon": -85.857,
+      "name": "I-65 South Hardin County Weigh Station",
+      "state": "KY",
+      "route": "I-65S",
+      "milepost": "90",
+      "spots": 8,
+      "id": 536
+    },
+    {
+      "lat": 37.919,
+      "lon": -87.549,
+      "name": "US41 Southbound Weigh Station",
+      "state": "KY",
+      "route": "US-41",
+      "milepost": "21",
+      "spots": 35,
+      "id": 538
+    },
+    {
+      "lat": 38.171,
+      "lon": -85.155,
+      "name": "I-64 East Shelby County Weigh Station",
+      "state": "KY",
+      "route": "I-64E",
+      "milepost": "38",
+      "spots": 6,
+      "id": 543
+    },
+    {
+      "lat": 38.277,
+      "lon": -83.343,
+      "name": "I-64 West Rowan County Weigh Station",
+      "state": "KY",
+      "route": "I-64W",
+      "milepost": "148",
+      "spots": 6,
+      "id": 549
+    },
+    {
+      "lat": 38.294,
+      "lon": -84.558,
+      "name": "I-75 North Scott County Weigh Station",
+      "state": "KY",
+      "route": "I-75N",
+      "milepost": "130",
+      "spots": 4,
+      "id": 550
+    },
+    {
+      "lat": 38.8192,
+      "lon": -84.60081,
+      "name": "I-75 Kenton County Weigh Station/Rest Haven",
+      "state": "KY",
+      "route": "I-75S",
+      "milepost": "168",
+      "spots": 50,
+      "id": 555
+    },
+    {
+      "lat": 38.86465,
+      "lon": -84.64747,
+      "name": "I-71 South Boone County Weigh Station/Rest Haven",
+      "state": "KY",
+      "route": "I-71S",
+      "milepost": "75",
+      "spots": 45,
+      "id": 556
+    },
+    {
+      "lat": 30.10013,
+      "lon": -90.48243,
+      "name": "LaPlace Weigh Scale",
+      "state": "LA",
+      "route": "I-10E",
+      "milepost": "270",
+      "spots": 10,
+      "id": 559
+    },
+    {
+      "lat": 30.10046,
+      "lon": -90.48076,
+      "name": "LaPlace Weigh Scale",
+      "state": "LA",
+      "route": "I-10W",
+      "milepost": "207",
+      "spots": 10,
+      "id": 560
+    },
+    {
+      "lat": 30.14362,
+      "lon": -93.66454,
+      "name": "Starks Weigh Scale",
+      "state": "LA",
+      "route": "I-10W",
+      "milepost": "3",
+      "spots": 10,
+      "id": 562
+    },
+    {
+      "lat": 30.28533,
+      "lon": -91.93861,
+      "name": "Breaux Bridge Weigh Scale",
+      "state": "LA",
+      "route": "I-10E",
+      "milepost": "108",
+      "spots": 10,
+      "id": 563
+    },
+    {
+      "lat": 30.28634,
+      "lon": -91.93829,
+      "name": "Breaux Bridge Weigh Scale",
+      "state": "LA",
+      "route": "I-10W",
+      "milepost": "107",
+      "spots": 10,
+      "id": 564
+    },
+    {
+      "lat": 30.47903,
+      "lon": -90.52122,
+      "name": "Baptist Weigh Scale",
+      "state": "LA",
+      "route": "I-12E",
+      "milepost": "36",
+      "spots": 10,
+      "id": 568
+    },
+    {
+      "lat": 30.47978,
+      "lon": -90.52151,
+      "name": "Baptist Weigh Scale",
+      "state": "LA",
+      "route": "I-12W",
+      "milepost": "35",
+      "spots": 10,
+      "id": 569
+    },
+    {
+      "lat": 32.31957,
+      "lon": -90.94776,
+      "name": "Delta Weigh Scale",
+      "state": "LA",
+      "route": "I-20E",
+      "milepost": "186",
+      "spots": 10,
+      "id": 572
+    },
+    {
+      "lat": 32.3203,
+      "lon": -90.94787,
+      "name": "Delta Weigh Scale",
+      "state": "LA",
+      "route": "I-20W",
+      "milepost": "186",
+      "spots": 10,
+      "id": 573
+    },
+    {
+      "lat": 32.4521,
+      "lon": -94.02318,
+      "name": "Greenwood Weigh Scale",
+      "state": "LA",
+      "route": "I-20E",
+      "milepost": "1",
+      "spots": 10,
+      "id": 576
+    },
+    {
+      "lat": 32.45253,
+      "lon": -94.02112,
+      "name": "Greenwood Weigh Scale",
+      "state": "LA",
+      "route": "I-20W",
+      "milepost": "1",
+      "spots": 10,
+      "id": 577
+    },
+    {
+      "lat": 39.8681,
+      "lon": -77.68254,
+      "name": "NHS PSP Weight Enforcement Station S26",
+      "state": "PA",
+      "route": "I-81 S",
+      "milepost": null,
+      "spots": 6,
+      "id": 1292
+    },
+    {
+      "lat": 40.13883,
+      "lon": -76.80547,
+      "name": "NHS PSP Weight Enforcement Station S5",
+      "state": "PA",
+      "route": "I-83 N",
+      "milepost": null,
+      "spots": 12,
+      "id": 1304
+    },
+    {
+      "lat": 40.15598,
+      "lon": -76.82288,
+      "name": "NHS PSP Weight Enforcement Station S4",
+      "state": "PA",
+      "route": "I-83 S",
+      "milepost": null,
+      "spots": 14,
+      "id": 1306
+    },
+    {
+      "lat": 40.70941,
+      "lon": -80.10122,
+      "name": "NHS PSP Weight Enforcement Station S9",
+      "state": "PA",
+      "route": "I-79 N",
+      "milepost": null,
+      "spots": 13,
+      "id": 1321
+    },
+    {
+      "lat": 40.71976,
+      "lon": -80.10239,
+      "name": "NHS PSP Weight Enforcement Station S10",
+      "state": "PA",
+      "route": "I-79 S",
+      "milepost": null,
+      "spots": 14,
+      "id": 1322
+    },
+    {
+      "lat": 41.19757,
+      "lon": -79.50007,
+      "name": "NHS PSP Weight Enforcement Station S6",
+      "state": "PA",
+      "route": "I-80 W",
+      "milepost": null,
+      "spots": 8,
+      "id": 1342
+    },
+    {
+      "lat": 41.5585,
+      "lon": -71.6671,
+      "name": "Weigh Station Not In Operation  Parking Avalible",
+      "state": "RI",
+      "route": "I-95 N",
+      "milepost": "MP 10.7",
+      "spots": 8,
+      "id": 1359
+    },
+    {
+      "lat": 35.06558,
+      "lon": -86.88069,
+      "name": "Weigh Scale Complex, No Facilities",
+      "state": "TN",
+      "route": "I65 NB",
+      "milepost": "5",
+      "spots": 38,
+      "id": 1423
+    },
+    {
+      "lat": 35.45581,
+      "lon": -89.30891,
+      "name": "Weigh Scale Complex, No Facilities",
+      "state": "TN",
+      "route": "I40 EB",
+      "milepost": "50",
+      "spots": 17,
+      "id": 1437
+    },
+    {
+      "lat": 35.46125,
+      "lon": -89.30268,
+      "name": "Weigh Scale Complex, No Facilities",
+      "state": "TN",
+      "route": "I40 WB",
+      "milepost": "50",
+      "spots": 19,
+      "id": 1438
+    },
+    {
+      "lat": 35.89309,
+      "lon": -84.19653,
+      "name": "Weigh Scale Complex, No Facilities",
+      "state": "TN",
+      "route": "I40 EB",
+      "milepost": "372",
+      "spots": 16,
+      "id": 1448
+    },
+    {
+      "lat": 35.89309,
+      "lon": -84.19653,
+      "name": "Weigh Scale Complex, No Facilities",
+      "state": "TN",
+      "route": "I40 EB",
+      "milepost": "372",
+      "spots": 16,
+      "id": 1449
+    },
+    {
+      "lat": 35.95549,
+      "lon": -82.55934,
+      "name": "Weigh Scale Complex, No Facilities",
+      "state": "TN",
+      "route": "I26 WB",
+      "milepost": "54.3",
+      "spots": 10,
+      "id": 1453
+    },
+    {
+      "lat": 36.21462,
+      "lon": -83.07192,
+      "name": "Weigh Scale Complex, No Facilities",
+      "state": "TN",
+      "route": "I81 SB",
+      "milepost": "21",
+      "spots": 32,
+      "id": 1466
+    },
+    {
+      "lat": 36.60943,
+      "lon": -86.5805,
+      "name": "Weigh Scale Complex, No Facilities",
+      "state": "TN",
+      "route": "I65 NB",
+      "milepost": "119",
+      "spots": 11,
+      "id": 1472
+    },
+    {
+      "lat": 36.6095,
+      "lon": -86.58222,
+      "name": "Weigh Scale Complex, No Facilities",
+      "state": "TN",
+      "route": "I65 SB",
+      "milepost": "119",
+      "spots": 11,
+      "id": 1473
+    },
+    {
+      "lat": 42.97852,
+      "lon": -72.48217,
+      "name": "Putney North Weight Station",
+      "state": "VT",
+      "route": "I-91N",
+      "milepost": "20",
+      "spots": 7,
+      "id": 1622
+    },
+    {
+      "lat": 42.99835,
+      "lon": -72.4709,
+      "name": "Putney South Weight Station",
+      "state": "VT",
+      "route": "I-91S",
+      "milepost": "21",
+      "spots": 7,
+      "id": 1623
+    },
+    {
+      "lat": 44.55709,
+      "lon": -73.18232,
+      "name": "Colchester North Weight Station",
+      "state": "VT",
+      "route": "I-89N",
+      "milepost": "95",
+      "spots": 12,
+      "id": 1645
+    },
+    {
+      "lat": 45.83339,
+      "lon": -122.69321,
+      "name": "Ridgefield (POE) Weigh Station",
+      "state": "WA",
+      "route": "I-5",
+      "milepost": "15",
+      "spots": 32,
+      "id": 1657
+    },
+    {
+      "lat": 45.95931,
+      "lon": -119.34119,
+      "name": "Plymouth (POE) Weigh Station",
+      "state": "WA",
+      "route": "I-82",
+      "milepost": "131",
+      "spots": 10,
+      "id": 1658
+    },
+    {
+      "lat": 46.24725,
+      "lon": -119.85795,
+      "name": "Grandview Weigh Station",
+      "state": "WA",
+      "route": "I-82",
+      "milepost": "76",
+      "spots": 12,
+      "id": 1660
+    },
+    {
+      "lat": 47.08543,
+      "lon": -122.65383,
+      "name": "Ft. Lewis Weigh Station",
+      "state": "WA",
+      "route": "I-5",
+      "milepost": "117",
+      "spots": 12,
+      "id": 1678
+    },
+    {
+      "lat": 47.18315,
+      "lon": -121.02803,
+      "name": "Cle Elum (POE) Weigh Station",
+      "state": "WA",
+      "route": "I-90",
+      "milepost": "80",
+      "spots": 7,
+      "id": 1685
+    },
+    {
+      "lat": 47.27061,
+      "lon": -122.31583,
+      "name": "Sea Tac Weigh Station",
+      "state": "WA",
+      "route": "I-5",
+      "milepost": "141",
+      "spots": 22,
+      "id": 1687
+    },
+    {
+      "lat": 47.31954,
+      "lon": -120.07281,
+      "name": "Rock Island Weigh Station",
+      "state": "WA",
+      "route": "SR 28",
+      "milepost": "13",
+      "spots": 11,
+      "id": 1690
+    },
+    {
+      "lat": 47.68791,
+      "lon": -117.07106,
+      "name": "Spokane (POE) Weigh Station",
+      "state": "WA",
+      "route": "I-90",
+      "milepost": "299",
+      "spots": 21,
+      "id": 1691
+    },
+    {
+      "lat": 47.90151,
+      "lon": -122.21475,
+      "name": "Everett Weigh Station",
+      "state": "WA",
+      "route": "I-5",
+      "milepost": "188",
+      "spots": 14,
+      "id": 1694
+    },
+    {
+      "lat": 48.02332,
+      "lon": -122.10984,
+      "name": "Lake Stevens Weigh Station",
+      "state": "WA",
+      "route": "SR 9",
+      "milepost": "17",
+      "spots": 2,
+      "id": 1695
+    },
+    {
+      "lat": 48.10328,
+      "lon": -119.68557,
+      "name": "Brewster Weigh Station",
+      "state": "WA",
+      "route": "US 97",
+      "milepost": "265",
+      "spots": 4,
+      "id": 1696
+    },
+    {
+      "lat": 48.25701,
+      "lon": -122.25651,
+      "name": "Stanwood/Bryant Weigh Station",
+      "state": "WA",
+      "route": "I-5",
+      "milepost": "214",
+      "spots": 13,
+      "id": 1699
+    },
+    {
+      "lat": 48.53881,
+      "lon": -122.35442,
+      "name": "Bow Hill (POE) Weigh Station",
+      "state": "WA",
+      "route": "I-5",
+      "milepost": "235",
+      "spots": 20,
+      "id": 1700
+    },
+    {
+      "lat": 42.50037,
+      "lon": -87.95073,
+      "name": "Safety & Weight Enforcment Facility #21",
+      "state": "WI",
+      "route": "I-94W",
+      "milepost": "1",
+      "spots": 26,
+      "id": 1705
+    },
+    {
+      "lat": 42.52025,
+      "lon": -90.60743,
+      "name": "Safety & Weight Enforcement Facility #11",
+      "state": "WI",
+      "route": "US61/151 NB",
+      "milepost": "1",
+      "spots": 10,
+      "id": 1708
+    },
+    {
+      "lat": 42.59873,
+      "lon": -88.98119,
+      "name": "Safety & Weight Enforcment Facility #19",
+      "state": "WI",
+      "route": "I-39N/I-90W",
+      "milepost": "180",
+      "spots": 16,
+      "id": 1710
+    },
+    {
+      "lat": 42.79495,
+      "lon": -87.95393,
+      "name": "Safety & Weight Enforcement Facility #22",
+      "state": "WI",
+      "route": "I41/94EB",
+      "milepost": "327.3",
+      "spots": 8,
+      "id": 1714
+    },
+    {
+      "lat": 43.00864,
+      "lon": -89.22373,
+      "name": "Safety & Weight Enforcment Facility #16",
+      "state": "WI",
+      "route": "I-39S/I-90E",
+      "milepost": "145",
+      "spots": 17,
+      "id": 1715
+    },
+    {
+      "lat": 43.88614,
+      "lon": -91.10653,
+      "name": "Safety & Weight Enforcement Facility #54",
+      "state": "WI",
+      "route": "I90/EB",
+      "milepost": "16",
+      "spots": 20,
+      "id": 1725
+    },
+    {
+      "lat": 43.97065,
+      "lon": -87.73635,
+      "name": "Safety & Weight Enforcement Facility #35",
+      "state": "WI",
+      "route": "I43/SB",
+      "milepost": "141",
+      "spots": 10,
+      "id": 1729
+    },
+    {
+      "lat": 44.07731,
+      "lon": -89.53549,
+      "name": "Safety & Weight Enforcement Facility #44",
+      "state": "WI",
+      "route": "I39/NB/SB",
+      "milepost": "127",
+      "spots": 12,
+      "id": 1731
+    },
+    {
+      "lat": 44.34088,
+      "lon": -88.20037,
+      "name": "Safety & Weight Enforcement Facility #34",
+      "state": "WI",
+      "route": "I41/NB",
+      "milepost": "153",
+      "spots": 8,
+      "id": 1736
+    },
+    {
+      "lat": 44.74223,
+      "lon": -88.05183,
+      "name": "Safety & Weight Enforcement Facility #41",
+      "state": "WI",
+      "route": "US41NB/SB",
+      "milepost": "183",
+      "spots": 20,
+      "id": 1737
+    },
+    {
+      "lat": 44.90455,
+      "lon": -91.79945,
+      "name": "Safety & Weight Enforcement Facility #63",
+      "state": "WI",
+      "route": "I94/WB",
+      "milepost": "48",
+      "spots": 10,
+      "id": 1738
+    },
+    {
+      "lat": 44.95994,
+      "lon": -92.61088,
+      "name": "Safety & Weight Enforcement Facility #61",
+      "state": "WI",
+      "route": "I-94EB",
+      "milepost": "8",
+      "spots": 18,
+      "id": 1741
+    },
+    {
+      "lat": 46.61414,
+      "lon": -91.93362,
+      "name": "Safety & Weight Enforcement Facility #72",
+      "state": "WI",
+      "route": "US2/53-",
+      "milepost": "225",
+      "spots": 14,
+      "id": 1745
+    },
+    {
+      "lat": 39.65725,
+      "lon": -79.77643,
+      "name": "Cheat Lake Weigh Station WB",
+      "state": "WV",
+      "route": "I-68W",
+      "milepost": "15",
+      "spots": 9,
+      "id": 1767
+    }
+  ]
+}

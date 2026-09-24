@@ -1,0 +1,118 @@
+{
+  "schema": "dailyfuel/map-weigh-ia/1",
+  "source": "Iowa Department of Transportation, Weigh Scale",
+  "source_url": "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/Weigh_Scale_View/FeatureServer/0",
+  "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+  "terms_url": "https://iowadot.gov/policies_and_statements/terms-of-use#gis",
+  "attribution": "Weigh scales: Iowa Department of Transportation, CC BY 4.0",
+  "query_url": "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/Weigh_Scale_View/FeatureServer/0/query?where=1%3D1&outFields=%2A&outSR=4326&f=geojson",
+  "records_edited": "2021-06-23",
+  "fetched": "2026-09-19",
+  "counts": {
+    "rows": 11,
+    "sites": 11,
+    "dropped_outside_iowa": 0
+  },
+  "sites": [
+    {
+      "lat": 40.70722,
+      "lon": -95.79515,
+      "name": "Fremont",
+      "route": "I 29",
+      "direction": "NB",
+      "city": "Percival",
+      "id": 40910
+    },
+    {
+      "lat": 40.76848,
+      "lon": -91.56293,
+      "name": "West Point",
+      "route": "I 218",
+      "direction": "NB",
+      "city": "West Point",
+      "id": 40916
+    },
+    {
+      "lat": 40.98912,
+      "lon": -93.79699,
+      "name": "Osceola - Northbound",
+      "route": "I 35",
+      "direction": "NB",
+      "city": "Osceola",
+      "id": 40908
+    },
+    {
+      "lat": 41.498,
+      "lon": -95.26095,
+      "name": "Avoca - Westbound",
+      "route": "I 80",
+      "direction": "WB",
+      "city": "Avoca",
+      "id": 40911
+    },
+    {
+      "lat": 41.55465,
+      "lon": -93.91534,
+      "name": "Dallas - Eastbound",
+      "route": "I 80",
+      "direction": "EB",
+      "city": "Dallas",
+      "id": 40909
+    },
+    {
+      "lat": 41.6825,
+      "lon": -93.3343,
+      "name": "Jasper - Westbound",
+      "route": "I 80",
+      "direction": "WB",
+      "city": "Mictchellville",
+      "id": 40913
+    },
+    {
+      "lat": 42.29028,
+      "lon": -96.28757,
+      "name": "Salix - Southbound",
+      "route": "I 29",
+      "direction": "SB",
+      "city": "Salix",
+      "id": 40906
+    },
+    {
+      "lat": 42.32941,
+      "lon": -91.99836,
+      "name": "Brandon - Northbound",
+      "route": "I 380",
+      "direction": "NB",
+      "city": "Brandon",
+      "id": 40915
+    },
+    {
+      "lat": 42.34164,
+      "lon": -92.03365,
+      "name": "Brandon - Southbound",
+      "route": "I 380",
+      "direction": "SB",
+      "city": "Brandon",
+      "id": 40914
+    },
+    {
+      "lat": 42.47816,
+      "lon": -95.15087,
+      "name": "Early - Southbound",
+      "route": "IA 71",
+      "direction": "SB",
+      "city": "Early",
+      "id": 40912
+    },
+    {
+      "lat": 43.40331,
+      "lon": -93.35046,
+      "name": "Work - Southbound",
+      "route": "I 35",
+      "direction": "SB",
+      "city": "Joice",
+      "id": 40907
+    }
+  ]
+}
