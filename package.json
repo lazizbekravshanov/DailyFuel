@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "24.13.5",
+    "leaflet": "1.9.4",
     "typescript": "7.0.2",
     "vitest": "5.0.1"
   }
