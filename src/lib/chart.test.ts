@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildChart, chartLabel, sharedDollarDomain, sparseMonths, spokenMove, windowStart } from "./chart.ts";
+import { buildChart, chartLabel, readoutX, sharedDollarDomain, sparseMonths, spokenMove, windowStart, yLabels } from "./chart.ts";
 import { addDays } from "./dates.ts";
 import type { Point } from "./stats.ts";
 
@@ -165,6 +165,42 @@ describe("buildChart with a step benchmark", () => {
     expect(m.hover.dates).toHaveLength(10);
     expect(m.hover.series[1].values[0]).toBe(5.9);
     expect(m.hover.series[1].values[9]).toBe(6.0);
+  });
+});
+
+describe("the state chart on the paper terminal", () => {
+  // 52 weeks ending Sep 21, 2026, rising into a record
+  const pts = weekly("2025-09-29", Array.from({ length: 52 }, (_, i) => 3.7 + i * 0.05));
+  const to = pts[pts.length - 1].date;
+  const m = buildChart([{ id: "eia", label: "EIA weekly, Midwest", kind: "primary", points: pts }], {
+    from: pts[0].date,
+    to,
+    heightPx: 220,
+    xTicks: "quarters",
+    maxYTicks: 6,
+  });
+
+  it("names the quarter months, January by its name and not the year", () => {
+    expect(m.xTicks.map((t) => t.label)).toEqual(["Oct", "Jan", "Apr", "Jul"]);
+    expect(m.xTicks.some((t) => t.minor || t.thin)).toBe(false);
+    for (const t of m.xTicks) expect(t.pos).toBeLessThanOrEqual(97);
+    // Oct 1 is two days into this window, so its name reads from the left edge
+    expect(m.xTicks[0].pos).toBeLessThan(3);
+    expect(m.xTicks[0].anchor).toBe("start");
+    expect(m.xTicks.slice(1).every((t) => t.anchor === "middle" && t.pos >= 3)).toBe(true);
+  });
+
+  it("lets the readout script land the crosshair where Plot drew the point", () => {
+    m.hover.dates.forEach((d, i) => expect(readoutX(m.from, m.to, d)).toBeCloseTo(m.hover.x[i], 1));
+    expect(readoutX("2026-01-05", "2026-01-05", "2026-01-05")).toBe(0);
+  });
+
+  it("drops the axis label the newest price's tag would cover", () => {
+    const end = m.ends[0];
+    const kept = yLabels(m);
+    expect(kept.length).toBeLessThan(m.yTicks.length);
+    for (const t of kept) expect(Math.abs(t.pos - end.y)).toBeGreaterThan(12.5);
+    expect(yLabels(m, 0)).toEqual(m.yTicks);
   });
 });
 

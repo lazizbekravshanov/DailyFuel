@@ -3,7 +3,8 @@
 import { directionFor, type Direction } from "./bins.ts";
 import { formatDate, formatShortDate, formatWeekdayDate } from "./dates.ts";
 import {
-  changeTenths, changeVerb, formatCents, formatChange, formatPrice, pctFrom, spokenChange, spokenPrice, toUnits,
+  changeTenths, changeVerb, formatCents, formatChange, formatPrice, formatSignedCents, pctFrom, spokenChange, spokenPrice,
+  toUnits,
 } from "./format.ts";
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
@@ -122,6 +123,40 @@ function regionWords(s: StateView): { adjective: string; suffix: string } {
 export function samePriceLead(s: StateView, mates: { code: string }[]): string {
   const { adjective, suffix } = regionWords(s);
   return `Same price in ${countPlaces(mates, s.code !== "DC", adjective)}${suffix}:`;
+}
+
+/**
+ * The meta on the "Same price, other states" head: "15 states read $6.250
+ * this week", counting the state itself and DC apart. Null with no price or
+ * no region mates.
+ */
+export function samePriceMeta(s: StateView, site: SiteData): string | null {
+  const mates = regionMates(s, site);
+  if (!s.primary || !mates.length) return null;
+  return `${countPlaces([s, ...mates], false)} read ${formatPrice(s.primary.price)} this week`;
+}
+
+/**
+ * The caption under that table: "One EIA price covers the whole Midwest
+ * region. The state tax on top of it is different in each one."
+ */
+export function samePriceCaption(s: StateView): string {
+  const region = s.eia_series === "R5XCA" ? "West Coast outside California" : s.regionName ?? "";
+  return `One EIA price covers the whole ${region} region. The state tax on top of it is different in each one.`;
+}
+
+/**
+ * Why Alaska and Hawaii have no number, with the nearest number EIA does
+ * print: "EIA doesn't survey diesel in Alaska, so there is no weekly number
+ * for it. The nearest region EIA does survey is the West Coast, which read
+ * $7.250 this week, +26.3¢ on the week." `west` is EIA's whole West Coast
+ * figure (series R50), or null when the weekly file lacks it.
+ */
+export function noSurveyNote(s: StateView, west: Move | null): string {
+  const lead = `EIA doesn't survey diesel in ${s.name}, so there is no weekly number for it.`;
+  if (!west) return `${lead} The nearest region EIA does survey is the West Coast.`;
+  const moved = west.change === null ? "" : `, ${formatSignedCents(west.change)} on the week`;
+  return `${lead} The nearest region EIA does survey is the West Coast, which read ${formatPrice(west.price)} this week${moved}.`;
 }
 
 /** Where the number on a state sign comes from, in one sentence. */

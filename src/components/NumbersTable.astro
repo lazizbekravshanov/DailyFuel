@@ -1,135 +1,73 @@
 ---
-// The table twin under a chart: every value the chart draws, as text.
-// Plain three decimal prices here, since this table is for reading and copying numbers.
-// With one or two price columns it also gets a Change column for the first one
-// (vs the next older row), and its headers sort (src/scripts/twin-sort.js).
-// The markup stays lean on purpose: a state table has over 200 rows, so each
-// row's arrow points at the page's ArrowSprite instead of carrying its shape.
-// The cents carry a sign, so a copied row still says which way it moved.
-import sortScript from "../scripts/twin-sort.js?raw";
-import Glyph from "./Glyph.astro";
-import { directionFor, type Cadence } from "../lib/bins.ts";
+// The table twin under a chart: every value the chart draws, as text, newest
+// first, under a "Show the numbers" summary. Prices print as 6.285 under a
+// head that says LAST $. It is also where the chart's readout script reads
+// its dates and prices (src/scripts/chart.js), so the page carries each
+// value once: the price cells wear the `v` class for it. No sort buttons and
+// no change column: the paper terminal prints the sheet as it is, and the
+// readout says each week's move.
 import { formatDate } from "../lib/dates.ts";
-import { changeTenths, formatPrice, formatSignedCents, spokenChange, toUnits } from "../lib/format.ts";
+import { formatQuote } from "../lib/format.ts";
 interface Props {
+  /** What the table holds, for screen readers: "Midwest weekly diesel price since June 2022, newest first". */
   caption: string;
+  /** "Week of" or "Date". */
   firstColumn: string;
+  /** One head per price column: "Last $", or "AAA daily $" and "EIA Midwest $". */
   columns: string[];
   /** Newest first. */
   rows: { date: string; values: (number | null)[] }[];
+  /** Names the scrolling box for keyboard users. */
   label: string;
-  tall?: boolean;
-  /** Add a Change column after the first price column. Defaults to on for one or two price columns. */
-  change?: boolean;
-  /** Which bins the change arrow follows. Defaults to weekly when the first column is "Week of". */
-  cadence?: Cadence;
 }
-const { caption, firstColumn, columns, rows, label, tall = false } = Astro.props;
-const withChange = Astro.props.change ?? (columns.length > 0 && columns.length <= 2);
-const cadence: Cadence = Astro.props.cadence ?? (firstColumn === "Week of" ? "weekly" : "daily");
-const noneYet = cadence === "weekly" ? "First week" : "First day";
-
-// Each row's move from the next older row that has a price. Rows are newest first.
-const changes = rows.map((row, i) => {
-  const v = row.values[0];
-  if (!withChange || v === null) return null;
-  const older = rows.slice(i + 1).find((o) => o.values[0] !== null);
-  if (!older) return null;
-  const change = (toUnits(v) - toUnits(older.values[0]!)) / 10000;
-  const dir = directionFor(change, cadence);
-  // the same words the Change component speaks
-  const spoken = `${dir === "flat" && changeTenths(change) !== 0 ? "about the same, " : ""}${spokenChange(change)}`;
-  return { change, dir, spoken, text: formatSignedCents(change) };
-});
+const { caption, firstColumn, columns, rows, label } = Astro.props;
 ---
 <details class="numbers">
   <summary>Show the numbers</summary>
-  <div class:list={["table-scroll", tall && "table-tall"]} tabindex="0" role="region" aria-label={label}>
-    <table class="data" data-twin-sort={withChange ? "" : undefined}>
-      <caption>{caption}</caption>
+  <div class="scroll" tabindex="0" role="region" aria-label={label}>
+    <table>
+      <caption class="sr-only">{caption}</caption>
       <thead>
         <tr>
-          <th scope="col" data-sort-type={withChange ? "date" : undefined} aria-sort={withChange ? "descending" : undefined}>{firstColumn}</th>
-          {columns.map((c, i) => (
-            <>
-              <th scope="col" class="r" data-sort-type={withChange ? "number" : undefined}>{c}</th>
-              {withChange && i === 0 && <th scope="col" class="chg" data-sort-type="number">Change</th>}
-            </>
-          ))}
+          <th scope="col">{firstColumn}</th>
+          {columns.map((c) => <th scope="col" class="num v">{c}</th>)}
         </tr>
       </thead>
       <tbody>
-        {rows.map((row, r) => (
+        {rows.map((row) => (
           <tr>
-            <th scope="row">{formatDate(row.date)}</th>
-            {row.values.map((v, i) => (
-              <>
-                <td class="r">{v === null ? "No price" : formatPrice(v)}</td>
-                {withChange && i === 0 && (changes[r] ? (
-                  <td class="chg" data-sort={changes[r]!.change}><Glyph direction={changes[r]!.dir} sprite /><span class="sr-only">{changes[r]!.spoken}</span><span aria-hidden="true">{changes[r]!.text}</span></td>
-                ) : (
-                  <td class="chg muted" data-sort="">{v === null ? "No price" : noneYet}</td>
-                ))}
-              </>
-            ))}
+            <td>{formatDate(row.date)}</td>
+            {row.values.map((v) => <td class:list={["num", "v", v === null && "muted"]}>{v === null ? "n/a" : formatQuote(v)}</td>)}
           </tr>
         ))}
       </tbody>
     </table>
   </div>
-  {withChange && <p class="sr-only twin-status" aria-live="polite"></p>}
-  {withChange && <script is:inline set:html={sortScript}></script>}
 </details>
 
 <style is:global>
-  /* .table-tall in global.css keeps it shorter than most of the screen */
-  .numbers .chg {
-    padding-left: var(--space-4);
+  .numbers {
+    margin-top: 12px;
   }
-  /* On a 320px phone the three columns fit only without the air after the last one */
-  @media (max-width: 359px) {
-    .numbers .data th:last-child,
-    .numbers .data td:last-child {
-      padding-right: 0;
-    }
-  }
-  .numbers th[data-sort-type] {
-    padding-top: 0;
-    padding-bottom: 0;
-    vertical-align: bottom;
-  }
-  .numbers .sort-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-height: 44px;
-    padding: 0 4px 0 0;
-    border: 0;
-    background: none;
-    color: var(--ink);
-    font: inherit;
-    font-weight: 700;
+  /* keeps the browser's own disclosure triangle, so it reads as something to open */
+  .numbers summary {
+    min-height: 24px;
+    line-height: 24px;
     cursor: pointer;
+    font-size: var(--fs-s);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
-  .numbers th.r .sort-btn {
-    flex-direction: row-reverse;
+  /* two hundred weeks stay shorter than the screen, and scroll inside their box */
+  .numbers .scroll {
+    max-height: 60vh;
+    max-width: 420px;
+    margin-top: 8px;
+    overflow-y: auto;
   }
-  .numbers .sort-icon {
-    width: 8px;
-    height: 12px;
-    fill: var(--hairline-strong);
-  }
-  .numbers th[aria-sort="ascending"] .sort-up,
-  .numbers th[aria-sort="descending"] .sort-down {
-    fill: var(--ink);
-  }
-  @media (forced-colors: active) {
-    .numbers .sort-icon {
-      fill: GrayText;
-    }
-    .numbers th[aria-sort="ascending"] .sort-up,
-    .numbers th[aria-sort="descending"] .sort-down {
-      fill: CanvasText;
-    }
+  .numbers thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
   }
 </style>

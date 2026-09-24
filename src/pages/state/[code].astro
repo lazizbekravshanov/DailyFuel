@@ -1,27 +1,33 @@
 ---
+// One state's page on the paper terminal: the quote head (the boxed code, the
+// name, the price with its change, the plate, the week line, the peak
+// sentence), the price chart with its range switch and table twin, the key
+// stats, the tax boxes, and the other states that read the same number.
+// Alaska and Hawaii, which EIA doesn't survey, get the no survey page: why,
+// the nearest number EIA does print, and their tax boxes.
+//
+// Every printed value comes from the data. The words come from the shared
+// helpers (src/lib/copy.ts, doe.ts, release.ts, tax.ts) so the share text,
+// the meta description and the page agree.
 import Base from "../../layouts/Base.astro";
-import Sign from "../../components/Sign.astro";
-import Price from "../../components/Price.astro";
-import Change from "../../components/Change.astro";
 import LineChart from "../../components/LineChart.astro";
 import NumbersTable from "../../components/NumbersTable.astro";
 import TaxPanel from "../../components/TaxPanel.astro";
-import Icon from "../../components/Icon.astro";
-import ArrowSprite from "../../components/ArrowSprite.astro";
-import ShareButton from "../../components/ShareButton.astro";
 import chartScript from "../../scripts/chart.js?raw";
-import { getSite, REGION_NAMES, type StateView } from "../../lib/site.ts";
+import { getSite, weeklyMove, weeklySeries, type StateView } from "../../lib/site.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
 import { addDays, formatDate, formatMonthYear, formatShortDate, todayInNewYork, when } from "../../lib/dates.ts";
+import { changeClass, formatMove, formatPct, formatPrice, formatQuote, formatSignedCents, signedCents, spokenChange } from "../../lib/format.ts";
 import { changeOver, highLow, lastDays, newest, peakKind } from "../../lib/stats.ts";
 import { DOE_LINE, DYED_DIESEL_HERE, peakSentence } from "../../lib/doe.ts";
-import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText, WEEKLY_LEAD } from "../../lib/release.ts";
-import { regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence } from "../../lib/copy.ts";
-import { regionPlate } from "../../lib/yourstate.ts";
+import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText } from "../../lib/release.ts";
+import { quoteCpg } from "../../lib/tax.ts";
+import { noSurveyNote, pctOf, regionMates, samePriceCaption, samePriceMeta, stateDescription } from "../../lib/copy.ts";
+import { regionLabel } from "../../lib/og.ts";
 import { stateShareText } from "../../lib/share.ts";
 import { inlineCall } from "../../lib/inline.ts";
 import { saveOnView } from "../../scripts/your-state.ts";
-import type { Move } from "../../lib/data.ts";
+import { markMyState } from "../../scripts/my-state.ts";
 
 export function getStaticPaths() {
   return getSite().states.map((s) => ({ params: { code: s.slug } }));
@@ -31,46 +37,51 @@ const site = getSite();
 const s = site.byCode.get(Astro.params.code!.toUpperCase()) as StateView;
 const aaaMode = site.mode === "aaa+eia";
 const { latest } = site;
-const CHART_H = 300;
-
-// Sign lines
 const noSurvey = !aaaMode && s.eia_series === null;
-let dateLine = "";
-let compareLine: string | null = null;
-if (aaaMode && latest.aaa) {
-  dateLine = `Price as of ${formatShortDate(latest.aaa.as_of)}`;
-  if (s.primary?.change !== null && latest.aaa.prev_as_of) {
-    compareLine = latest.aaa.gap_days && latest.aaa.gap_days > 1 ? `vs ${formatShortDate(latest.aaa.prev_as_of)}` : "vs yesterday";
-  }
-} else if (latest.eia) {
-  // EIA surveys stations on Monday morning, so say the day, not "week of".
-  dateLine = noSurvey ? "Not in EIA's weekly survey" : `Surveyed ${formatShortWeekdayDate(latest.eia.period)}`;
-  if (latest.eia.prev_period) compareLine = `vs ${formatShortWeekdayDate(latest.eia.prev_period)}`;
+const move = s.primary;
+const pct = move ? pctOf(move) : null;
+const eia = latest.eia ?? null;
+const aaa = aaaMode ? latest.aaa : null;
+
+// The head: "Ohio diesel $6.250 a gallon, up 30.4 cents | DailyFuel".
+const title = move
+  ? `${s.name} diesel ${formatPrice(move.price)} a gallon${move.change === null ? "" : `, ${spokenChange(move.change)}`} | DailyFuel`
+  : `${s.name} diesel | DailyFuel`;
+const description = stateDescription(s, site);
+const shareText = stateShareText(s, site);
+
+// The plate under the price says whose number it is: "EIA Midwest average,
+// 15 states", "EIA California average", or AAA's daily figure.
+const plate = !move ? null : aaaMode ? "AAA daily average" : regionLabel(s, site);
+
+// The week line: which week, against which, and when the next one lands. The
+// late text is what the stale script swaps in once the release day passes.
+const release = !aaaMode && eia
+  ? nextEiaRelease(eia.period, eia.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork())
+  : null;
+let weekLine = "";
+if (aaa && move) {
+  const against = move.change === null || !aaa.prev_as_of ? "" : `, change since ${aaa.gap_days && aaa.gap_days > 1 ? formatShortDate(aaa.prev_as_of) : "yesterday"}`;
+  weekLine = `Price as of ${formatDate(aaa.as_of)}${against}. Updates every morning.`;
+} else if (eia && move) {
+  weekLine = `Week of ${formatDate(eia.period)}${eia.prev_period && move.change !== null ? ` against ${when(eia.prev_period, eia.period)}` : ""}.`;
 }
 
-// How often the number changes, under the sign. The late text is what the
-// stale script swaps in once the release day passes with nothing new.
-const release = !aaaMode && !noSurvey && s.primary
-  ? nextEiaRelease(latest.eia?.period ?? null, latest.eia?.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork())
-  : null;
-const dailyLine = aaaMode && s.primary ? "Daily number. It updates every morning." : null;
-
-// Where the number comes from, and how it sits against the U.S. and its own past.
-const source = sourceSentence(s, site);
-const vsUs = noSurvey ? null : vsUsSentence(s, site);
+// "Highest Midwest price in our records, which start June 2022."
 const peak = s.eia_series ? peakKind(s.eiaHistory) : null;
 const peakLine = peak && s.regionName ? peakSentence(peak, aaaMode ? `EIA weekly ${s.regionName}` : s.regionName) : null;
-// Name the series the way drivers do, but only where the sign shows that number.
-const doeLine = !aaaMode && s.primary ? DOE_LINE : null;
+
+// Why Alaska and Hawaii have no number, with EIA's whole West Coast figure.
+const westCoast = noSurvey ? weeklyMove(weeklySeries(site.weekly, "R50")) : null;
 
 const notes: string[] = [];
-if (s.flags.includes("gap") && latest.aaa?.prev_as_of) {
-  notes.push(`There was no AAA price for the day before, so the change is since ${formatDate(latest.aaa.prev_as_of)}.`);
+if (s.flags.includes("gap") && aaa?.prev_as_of) {
+  notes.push(`There was no AAA price for the day before, so the change is since ${formatDate(aaa.prev_as_of)}.`);
 }
 if (s.flags.includes("prev_missing")) notes.push("This is the first daily price we have, so there's no change yet.");
 if (s.flags.includes("large_move")) {
   // After a missed day the change covers more than one day, so don't call it one.
-  const days = s.flags.includes("gap") ? latest.aaa?.gap_days ?? null : 1;
+  const days = s.flags.includes("gap") ? aaa?.gap_days ?? null : 1;
   const span = days === 1 ? " for one day" : days && days > 1 ? ` for ${days} days` : "";
   notes.push(`That's a big move${span}. It's worth checking again tomorrow.`);
 }
@@ -81,42 +92,36 @@ if (aaaMode && s.eia_series === null) {
   notes.push(`EIA doesn't survey diesel prices in ${s.name}, so there's no weekly benchmark here.`);
 }
 
-// Chart
+// Charts. While EIA is the source: the region's 52 weeks and everything since
+// the records start, one switch between them. With AAA: the last 90 days
+// with EIA's weekly line under them.
 interface ChartView {
   id: string;
   /** What and over what stretch. LineChart builds the spoken name from it with chartLabel. */
   title: string;
-  tableNote: string;
   model: ReturnType<typeof buildChart>;
-  table: { date: string; values: (number | null)[] }[];
-  columns: string[];
-  caption: string;
   weekly: boolean;
 }
 const charts: ChartView[] = [];
-const chartTitle = aaaMode ? "Last 90 days" : "Weekly price";
+let table: { caption: string; firstColumn: string; columns: string[]; rows: { date: string; values: (number | null)[] }[] } | null = null;
+const tableNote = aaaMode ? "Every day is in the table below." : "Every week is in the table below.";
 if (aaaMode) {
   const last = newest(s.history);
   if (last) {
     const from = addDays(last.date, -89);
-    // The full history goes in, so the tooltip on the first day can say its change.
+    // The full history goes in, so the readout on the first day still has its change.
     const series: ChartSeries[] = [{ id: "aaa", label: "AAA daily", kind: "primary", points: s.history }];
     if (s.eia_series && s.eiaHistory.length) {
       series.push({ id: "eia", label: `EIA weekly, ${s.regionName}`, kind: "bench", points: s.eiaHistory, step: true });
     }
-    const model = buildChart(series, { from, to: last.date, heightPx: CHART_H, xTicks: "months", maxYTicks: 6 });
-    charts.push({
-      id: "daily",
-      title: `${s.name} daily diesel price, last 90 days`,
-      tableNote: series.length > 1
-        ? `Every day is in the table below, with EIA's weekly ${s.regionName} price.`
-        : "Every day is in the table below.",
-      model,
-      table: model.hover.dates.map((d, i) => ({ date: d, values: model.hover.series.map((ser) => ser.values[i]) })).reverse(),
-      columns: series.map((x) => x.label),
+    const model = buildChart(series, { from, to: last.date, heightPx: 220, xTicks: "months", maxYTicks: 6 });
+    charts.push({ id: "daily", title: `${s.name} daily diesel price, last 90 days`, model, weekly: false });
+    table = {
       caption: `${s.name} diesel, ${formatDate(from)} to ${formatDate(last.date)}, newest first`,
-      weekly: false,
-    });
+      firstColumn: "Date",
+      columns: series.length > 1 ? ["AAA daily $", `EIA ${s.regionName} $`] : ["AAA daily $"],
+      rows: model.hover.dates.map((d, i) => ({ date: d, values: model.hover.series.map((ser) => ser.values[i]) })).reverse(),
+    };
   }
 } else if (!noSurvey) {
   const last = newest(s.history);
@@ -124,41 +129,25 @@ if (aaaMode) {
     const year = lastDays(s.history, 364);
     const all = s.history;
     const label = `EIA weekly, ${s.regionName}`;
-    // Every chart gets the full history and its own start date, so the tooltip
-    // on the first week in the window can still say the change from the week before.
-    const mk = (from: string, xTicks: "months" | "years") =>
-      buildChart([{ id: "eia", label, kind: "primary", points: all }], { from, to: last.date, heightPx: CHART_H, xTicks, maxYTicks: 6 });
-    charts.push({
-      id: "year",
-      title: `${s.regionName} weekly diesel price, last 52 weeks`,
-      tableNote: "Every week is in the table below.",
-      model: mk(year[0].date, "months"),
-      table: [],
-      columns: [],
-      caption: "",
-      weekly: true,
-    });
-    const allModel = mk(all[0].date, "years");
-    charts.push({
-      id: "all",
-      title: `${s.regionName} weekly diesel price since ${formatMonthYear(all[0].date)}`,
-      tableNote: "Every week is in the table below.",
-      model: allModel,
-      table: all.map((p) => ({ date: p.date, values: [p.value] })).reverse(),
-      columns: ["Price"],
+    const mk = (from: string, xTicks: "quarters" | "years") =>
+      buildChart([{ id: "eia", label, kind: "primary", points: all }], { from, to: last.date, heightPx: 220, xTicks, maxYTicks: 6 });
+    charts.push({ id: "year", title: `${s.regionName} weekly diesel price, last 52 weeks`, model: mk(year[0].date, "quarters"), weekly: true });
+    charts.push({ id: "all", title: `${s.regionName} weekly diesel price since ${formatMonthYear(all[0].date)}`, model: mk(all[0].date, "years"), weekly: true });
+    table = {
       caption: `${s.regionName} weekly diesel price since ${formatMonthYear(all[0].date)}, newest first`,
-      weekly: true,
-    });
+      firstColumn: "Week of",
+      columns: ["Last $"],
+      rows: all.map((p) => ({ date: p.date, values: [p.value] })).reverse(),
+    };
   }
 }
-const tableChart = charts.find((c) => c.table.length > 0);
+const sinceLabel = charts.length > 1 ? `Since ${formatMonthYear(charts[1].model.from)}` : "";
 
-// Stats: 4 week change, 52 week change, 52 week high and low.
+// Key stats: 4 week change, 52 week change, 52 week high and low.
 const primaryHist = s.history;
 let fourWeek = primaryHist.length ? changeOver(primaryHist, 28, aaaMode ? 3 : 0) : null;
 // For the first four weeks after the AAA switch flips, daily history is too
-// short for a 4 week change. Fall back the same way the 52 week block does,
-// rather than showing "not enough history" above a real 52 week figure.
+// short for a 4 week change. Fall back the same way the 52 week block does.
 const fourWeekFromEia = aaaMode && !fourWeek && s.eiaHistory.length > 0;
 if (fourWeekFromEia) fourWeek = changeOver(s.eiaHistory, 28, 0);
 let yearBasis = primaryHist;
@@ -177,255 +166,202 @@ const shortWindow = Boolean(yearHL && !yearHL.complete && yearBasis.length);
 const shortFrom = shortWindow ? formatShortDate(yearBasis[0].date) : "";
 const highLabel = shortWindow ? `High since ${shortFrom}` : "52 week high";
 const lowLabel = shortWindow ? `Low since ${shortFrom}` : "52 week low";
+// With AAA's daily prices a figure that falls back to EIA's weeks says so.
+const fourWeekOf = fourWeekFromEia ? "week of " : "";
+const yearOf = aaaMode && yearBasis === s.eiaHistory ? "week of " : "";
+const statsMeta = aaaMode ? "AAA daily prices, dollars a gallon" : "Weekly EIA prices, dollars a gallon";
 
-const peers = s.peers.map((c) => site.byCode.get(c)!);
-const peerTitle = noSurvey ? "Closest region EIA surveys" : s.peerLabel;
+// The other states. While EIA is the source, every state in a region reads
+// the same number, so the region mates list with their own tax. With AAA's
+// per state prices the peers list with their prices.
+const mates = aaaMode || noSurvey ? [] : regionMates(s, site);
+const peers = aaaMode ? s.peers.map((c) => site.byCode.get(c)!) : [];
+const taxCell = (p: StateView) => (p.tax && p.tax.state !== null && !p.tax.outOfDate ? quoteCpg(p.tax.state) : null);
 
-// Other states. While EIA is the source, every state in a region has the same
-// price, so the same number repeated 14 times becomes one line of links. The
-// other regions nearby get one row each. With AAA's per state prices the full
-// list comes back, since the prices differ.
-interface PeerGroup {
-  key: string;
-  label: string;
-  move: Move | null;
-  members: StateView[];
-}
-const mates = aaaMode ? [] : regionMates(s, site);
-const sameLead = mates.length ? samePriceLead(s, mates) : null;
-const groups: PeerGroup[] = [];
-if (!aaaMode) {
-  for (const p of peers) {
-    if (p.eia_series === s.eia_series && p.eia_series !== null) continue;
-    // AK and HI list only what EIA does survey
-    if (p.eia_series === null && noSurvey) continue;
-    const key = p.eia_series ?? "none";
-    let g = groups.find((x) => x.key === key);
-    if (!g) {
-      g = {
-        key,
-        label: p.eia_series ? REGION_NAMES[p.eia_series] : "Not in EIA's survey",
-        move: p.eia_series ? p.primary : null,
-        members: [],
-      };
-      groups.push(g);
-    }
-    g.members.push(p);
-  }
-  // the states with no survey go last
-  groups.sort((a, b) => Number(a.key === "none") - Number(b.key === "none"));
-}
-const peerNote = noSurvey ? "EIA splits the West Coast in two: California, and the rest of the region." : null;
-
-// While EIA is the source, most states show their region's average, so the
-// title names it instead of promising a price for the state itself.
-const sharedPrice = !aaaMode && s.eia_series !== null && s.eia_series !== "SCA";
-const title = noSurvey
-  ? `${s.name} diesel prices | DailyFuel`
-  : sharedPrice
-    ? `${s.name} diesel, DOE ${s.regionName} weekly average | DailyFuel`
-    : `${s.name} diesel price${aaaMode ? " today" : " this week"} | DailyFuel`;
-// "EIA Midwest average, 15 states" under the price, only while the price is shared.
-const plate = regionPlate(s, site);
-// With a plate, the big heading is just the state, so it never claims an Ohio
-// average right above a plate that says it's the Midwest's.
-const legend = noSurvey ? `Diesel in ${s.name}` : plate ? s.name : `${s.name} diesel average`;
-const description = stateDescription(s, site);
 const aaaLink = `https://gasprices.aaa.com/?state=${s.code}`;
-// Remember this state for the home page's "your state" row.
-const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return window.localStorage}");
-// What the Share button sends with the link: the number on this sign.
-const shareText = stateShareText(s, site);
+// Remember this state for the home page's your state strip, then show the marker.
+const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return window.localStorage}") +
+  inlineCall(markMyState, "document", JSON.stringify(s.code), "function(){return window.localStorage}");
 ---
-<Base title={title} description={description}>
-  {/* the arrows the chart tooltip and the numbers table point at */}
-  {charts.length > 0 && <ArrowSprite />}
-  <div class="wrap back-row">
-    <a href="/#find-your-state">All states</a>
+<Base title={title} description={description} share={shareText}>
+  <p class="back"><a href="/#states">‹ All states</a></p>
+  <div class="head-row">
+    <h1 class="h1row"><span class="sym">{s.code}</span><span class="nmbig">{s.name}</span></h1>
+    <span class="acts"><span class="mark" data-my-state>My state ✓</span></span>
   </div>
 
-  <section class="wrap state-hero" aria-label={`${s.name} price`}>
-    <div class="sign-col">
-      <Sign
-        legend={legend}
-        price={s.primary?.price ?? null}
-        noPrice="No weekly price"
-        change={s.primary?.change ?? null}
-        pct={s.primary?.change_pct ?? null}
-        prev={s.primary?.prev ?? null}
-        cadence={s.cadence}
-        dateLine={dateLine}
-        compareLine={compareLine}
-        shield={s.code}
-        plate={plate}
-        note={Boolean(aaaMode && s.eia && latest.eia)}
-      >
-        {aaaMode && s.eia && latest.eia && (
-          <p slot="note"><Icon name="region" size={17} class="note-mark" />EIA weekly {s.regionName} price: <Price price={s.eia.price} /> for the week of {formatShortDate(latest.eia.period)}</p>
-        )}
-      </Sign>
-      {release && (
-        <p class="cadence">
-          <Icon name="next-update" size={15} class="cadence-mark" />{WEEKLY_LEAD} <span data-next-release={release.date} data-late={LATE_TEXT}>{release.late ? LATE_TEXT : nextUpdateText(release.date)}</span>
-        </p>
-      )}
-      {dailyLine && <p class="cadence"><Icon name="next-update" size={15} class="cadence-mark" />{dailyLine}</p>}
-      <ShareButton text={shareText} class="share-slot" />
-    </div>
-    <div class="explain">
-      <p class="lead">{source}</p>
-      {noSurvey && (
-        <p>
-          So there's no DOE weekly number for {s.name}. The <a href="#peers-title">closest region EIA surveys</a> is
-          the West Coast.
-        </p>
-      )}
-      {vsUs && <p>{vsUs}</p>}
-      {peakLine && <p class="peak">{peakLine}</p>}
-      {notes.map((n) => <p>{n}</p>)}
-      {s.primary && <p class="small muted fine">{doeLine && `${doeLine} `}{DYED_DIESEL_HERE}</p>}
-      <p><a href={aaaLink}>AAA's daily average for {s.name}</a></p>
-    </div>
-  </section>
+  <p class="big">
+    {move ? (
+      <>
+        <span>{formatPrice(move.price)}</span>
+        {move.change !== null && <span class:list={["d", changeClass(move.change)]}>{formatMove(move.change, pct)}</span>}
+      </>
+    ) : (
+      <span>{aaaMode ? "No price today" : "No EIA price"}</span>
+    )}
+  </p>
 
-  {charts.length > 0 && (
-    <section class="section wrap" aria-labelledby="chart-title">
-      <div class="section-head">
-        <h2 id="chart-title"><Icon name="price-history" size={24} class="head-mark" />{chartTitle}</h2>
-        <p>
-          {aaaMode
-            ? s.eia_series
-              ? `AAA's daily average for ${s.name}, with EIA's weekly ${s.regionName} price as a step line.`
-              : `AAA's daily average for ${s.name}.`
-            : s.eia_series === "SCA"
-              // California is its own EIA region, so the shared-price sentence
-              // would say California shares a price with itself.
-              ? `EIA's weekly price for ${s.name}.`
-              : `EIA's weekly ${s.regionName} price, which ${s.name} shares.`}
-        </p>
+  {move && (
+    <p class="head-row line">
+      {plate && <span class="plate">{plate}</span>}
+      <span class="fine">
+        {weekLine}
+        {release && <> <span data-next-release={release.date} data-late={LATE_TEXT}>{release.late ? LATE_TEXT : nextUpdateText(release.date)}</span></>}
+      </span>
+    </p>
+  )}
+  {noSurvey && (
+    <>
+      <p class="note">{noSurveyNote(s, westCoast)}</p>
+      {release && <p class="note fine"><span data-next-release={release.date} data-late={LATE_TEXT}>{release.late ? LATE_TEXT : `Next EIA release ${formatShortWeekdayDate(release.date)}.`}</span></p>}
+    </>
+  )}
+  {peakLine && <p class="note">{peakLine}</p>}
+  {notes.map((n) => <p class="note">{n}</p>)}
+  {aaaMode && s.eia && eia && (
+    <p class="note fine">EIA weekly {s.regionName} average {formatPrice(s.eia.price)}, week of {formatShortDate(eia.period)}.</p>
+  )}
+  {move && <p class="note fine">{!aaaMode && `${DOE_LINE} `}{DYED_DIESEL_HERE}</p>}
+  <p class="note fine"><a href={aaaLink}>AAA's daily average for {s.name}</a></p>
+
+  {charts.length > 1 ? (
+    <section class="ch" aria-labelledby="price-title">
+      <input class="sr-only" type="radio" name="rng" id="r1" checked />
+      <input class="sr-only" type="radio" name="rng" id="r2" />
+      <div class="sh">
+        <h2 id="price-title">Price</h2>
+        <div class="rng" role="group" aria-label="Chart range"><label for="r1">52 weeks</label><label for="r2">{sinceLabel}</label></div>
       </div>
-      {aaaMode ? (
-        <>
-          {charts[0].model.paths.length > 1 && (
-            <ul class="key" aria-label="Chart key">
-              <li><span class="key-line key-primary" aria-hidden="true"></span>AAA daily</li>
-              <li><span class="key-line key-bench" aria-hidden="true"></span>EIA weekly, {s.regionName}</li>
-            </ul>
-          )}
-          <LineChart model={charts[0].model} height={CHART_H} title={charts[0].title} tableNote={charts[0].tableNote} weekly={false} />
-        </>
-      ) : (
-        <div class="range-switch">
-          <fieldset class="range">
-            <legend class="sr-only">Chart range</legend>
-            <input type="radio" id="range-year" name="range" value="year" checked />
-            <label for="range-year">Last 52 weeks</label>
-            <input type="radio" id="range-all" name="range" value="all" />
-            <label for="range-all">Since {formatMonthYear(charts[1].model.from)}</label>
-          </fieldset>
-          <LineChart class="chart-year" model={charts[0].model} height={CHART_H} title={charts[0].title} tableNote={charts[0].tableNote} weekly />
-          <LineChart class="chart-all" model={charts[1].model} height={CHART_H} title={charts[1].title} tableNote={charts[1].tableNote} weekly />
-        </div>
-      )}
-      {tableChart && (
-        <NumbersTable
-          caption={tableChart.caption}
-          firstColumn={tableChart.weekly ? "Week of" : "Date"}
-          columns={tableChart.columns}
-          rows={tableChart.table}
-          label="Price table, scrolls"
-          tall
-        />
-      )}
+      <div class="charts">
+        <div class="c c1"><LineChart model={charts[0].model} title={charts[0].title} tableNote={tableNote} weekly /></div>
+        <div class="c c2"><LineChart model={charts[1].model} title={charts[1].title} tableNote={tableNote} weekly /></div>
+      </div>
     </section>
+  ) : charts.length === 1 ? (
+    <section class="ch" aria-labelledby="price-title">
+      <div class="sh">
+        <h2 id="price-title">Price</h2>
+        <p class="meta">AAA daily, last 90 days{charts[0].model.paths.length > 1 && `, with EIA weekly ${s.regionName}`}</p>
+      </div>
+      <LineChart model={charts[0].model} title={charts[0].title} tableNote={tableNote} weekly={false} />
+    </section>
+  ) : null}
+  {table && (
+    <NumbersTable caption={table.caption} firstColumn={table.firstColumn} columns={table.columns} rows={table.rows} label="Price table, scrolls" />
   )}
 
   {(fourWeek || yearChange || yearHL) && (
-    <section class="section wrap" aria-labelledby="stats-title">
-      <div class="section-head">
-        <h2 id="stats-title">The longer view</h2>
-        {yearNote && <p>{yearNote}</p>}
-      </div>
+    <section aria-labelledby="stats-title">
+      <div class="sh"><h2 id="stats-title">Key stats</h2><p class="meta">{statsMeta}</p></div>
       <dl class="stats">
         <div>
           <dt>4 week change</dt>
-          <dd>{fourWeek ? <Change change={fourWeek.change} pct={fourWeek.pct} /> : <span class="muted">Not enough history yet</span>}</dd>
-          {fourWeek && <dd class="small muted">Since {when(fourWeek.from.date, fourWeek.to.date)}</dd>}
+          {fourWeek ? (
+            <>
+              <dd class={changeClass(fourWeek.change)}>{formatSignedCents(fourWeek.change)}</dd>
+              <dd class="s">{formatPct(fourWeek.pct)} since {fourWeekOf}{when(fourWeek.from.date, fourWeek.to.date)}</dd>
+            </>
+          ) : (
+            <>
+              <dd class="w">Not enough history</dd>
+              <dd class="s">Needs 4 weeks</dd>
+            </>
+          )}
         </div>
         <div>
           <dt>52 week change</dt>
-          <dd>{yearChange ? <Change change={yearChange.change} pct={yearChange.pct} /> : <span class="muted">Not enough history yet</span>}</dd>
-          {yearChange && <dd class="small muted">Since {formatDate(yearChange.from.date)}</dd>}
+          {yearChange ? (
+            <>
+              <dd class={changeClass(yearChange.change)}>{formatSignedCents(yearChange.change)}</dd>
+              <dd class="s">{formatPct(yearChange.pct)} since {yearOf}{formatDate(yearChange.from.date)}</dd>
+            </>
+          ) : (
+            <>
+              <dd class="w">Not enough history</dd>
+              <dd class="s">Needs 52 weeks</dd>
+            </>
+          )}
         </div>
         <div>
           <dt>{highLabel}</dt>
-          <dd>{yearHL ? <Price price={yearHL.high.value} /> : <span class="muted">None yet</span>}</dd>
-          {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory ? "Week of " : ""}{formatDate(yearHL.high.date)}</dd>}
+          {yearHL ? (
+            <>
+              <dd>{formatPrice(yearHL.high.value)}</dd>
+              <dd class="s">{yearOf && "Week of "}{formatDate(yearHL.high.date)}</dd>
+            </>
+          ) : (
+            <>
+              <dd class="w">None yet</dd>
+              <dd class="s">No prices</dd>
+            </>
+          )}
         </div>
         <div>
           <dt>{lowLabel}</dt>
-          <dd>{yearHL ? <Price price={yearHL.low.value} /> : <span class="muted">None yet</span>}</dd>
-          {yearHL && <dd class="small muted">{yearBasis === s.eiaHistory ? "Week of " : ""}{formatDate(yearHL.low.date)}</dd>}
+          {yearHL ? (
+            <>
+              <dd>{formatPrice(yearHL.low.value)}</dd>
+              <dd class="s">{yearOf && "Week of "}{formatDate(yearHL.low.date)}</dd>
+            </>
+          ) : (
+            <>
+              <dd class="w">None yet</dd>
+              <dd class="s">No prices</dd>
+            </>
+          )}
         </div>
       </dl>
+      {yearNote && <p class="fine note">{yearNote}</p>}
     </section>
   )}
 
-  {site.tax && s.tax && <TaxPanel site={site} state={s} />}
+  {site.tax && s.tax && <TaxPanel site={site} state={s} priced={Boolean(move)} />}
+
+  {mates.length > 0 && (
+    <section class="board peers" aria-labelledby="peers-title">
+      <div class="sh"><h2 id="peers-title">Same price, other states</h2><p class="meta">{samePriceMeta(s, site)}</p></div>
+      <div class="scroll">
+        <table aria-describedby="peer-cap">
+          <thead><tr><th scope="col">Sym</th><th scope="col">Name</th><th scope="col" class="num">Tax ¢</th></tr></thead>
+          <tbody>
+            {mates.map((p) => (
+              <tr>
+                <th scope="row"><a href={p.href}>{p.code}</a></th>
+                <td>{p.name}</td>
+                {taxCell(p) === null ? <td class="num muted">n/a</td> : <td class="num">{taxCell(p)}</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="cap" id="peer-cap">{samePriceCaption(s)}</p>
+    </section>
+  )}
 
   {peers.length > 0 && (
-    <section class="section wrap" aria-labelledby="peers-title">
-      <div class="section-head">
-        <h2 id="peers-title">{peerTitle}</h2>
-        {peerNote && <p>{peerNote}</p>}
+    <section class="board peers" aria-labelledby="peers-title">
+      <div class="sh"><h2 id="peers-title">{s.peerLabel}</h2><p class="meta">AAA daily, dollars a gallon</p></div>
+      <div class="scroll">
+        <table aria-describedby="peer-cap">
+          <thead>
+            <tr><th scope="col">Sym</th><th scope="col">Name</th><th scope="col" class="num">Last $</th><th scope="col" class="num">Chg ¢</th><th scope="col" class="num">Tax ¢</th></tr>
+          </thead>
+          <tbody>
+            {peers.map((p) => (
+              <tr>
+                <th scope="row"><a href={p.href}>{p.code}</a></th>
+                <td>{p.name}</td>
+                {p.primary ? <td class="num">{formatQuote(p.primary.price)}</td> : <td class="num muted">n/a</td>}
+                {p.primary && p.primary.change !== null
+                  ? <td class:list={["num", changeClass(p.primary.change)]}>{signedCents(p.primary.change)}</td>
+                  : <td class="num muted">n/a</td>}
+                {taxCell(p) === null ? <td class="num muted">n/a</td> : <td class="num">{taxCell(p)}</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      {aaaMode ? (
-        <ul class="peers">
-          {peers.map((p) => (
-            <li>
-              <a href={p.href}>{p.name}</a>
-              <span class="peer-price">{p.primary ? <Price price={p.primary.price} /> : <span class="muted">No price</span>}</span>
-              <span class="peer-change">{p.primary ? <Change change={p.primary.change} pct={p.primary.change_pct} prev={p.primary.prev} cadence={p.cadence} showPct={false} signed /> : <span class="muted">No price</span>}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <>
-          {sameLead && (
-            <div class="same">
-              <p class="same-lead" id="same-lead">{sameLead}</p>
-              <ul class="peer-links" aria-labelledby="same-lead">
-                {mates.map((p) => <li><a href={p.href}>{p.name}</a></li>)}
-              </ul>
-            </div>
-          )}
-          {groups.length > 0 && (
-            <ul class="groups">
-              {groups.map((g) => {
-                const single = g.members.length === 1 && g.members[0].name === g.label;
-                return (
-                  <li class="group">
-                    <div class="group-row">
-                      <span class="group-name">{single ? <a href={g.members[0].href}>{g.label}</a> : g.label}</span>
-                      {g.move && <span class="peer-price"><Price price={g.move.price} /></span>}
-                      {g.move && (
-                        <span class="peer-change">
-                          <Change change={g.move.change} pct={g.move.change_pct} prev={g.move.prev} cadence={s.cadence} showPct={false} signed />
-                        </span>
-                      )}
-                    </div>
-                    {!single && (
-                      <ul class="peer-links" aria-label={g.move ? `States with the ${g.label} price` : g.label}>
-                        {g.members.map((p) => <li><a href={p.href}>{p.name}</a></li>)}
-                      </ul>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </>
-      )}
+      <p class="cap" id="peer-cap">AAA's daily average for each state. The state tax on top of it is different in each one.</p>
     </section>
   )}
 
@@ -435,234 +371,55 @@ const shareText = stateShareText(s, site);
   </Fragment>
 </Base>
 
-<style>
-  .back-row {
-    padding-top: var(--space-4);
-    font-size: 15px;
+<style is:global>
+  /* global, not scoped: the scope attributes cost half a kilobyte on a page with a budget */
+  main > .big {
+    margin-top: 14px;
   }
-  .back-row a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
+  .head-row.line {
+    margin-top: 10px;
   }
-  .state-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 8fr) minmax(0, 5fr);
-    gap: var(--space-6) var(--space-7);
-    align-items: center;
-    padding-block: var(--space-3) var(--space-7);
-  }
-  @media (max-width: 899px) {
-    .state-hero {
-      grid-template-columns: minmax(0, 1fr);
-      padding-bottom: var(--space-6);
-    }
-  }
-  .sign-col {
-    min-width: 0;
-  }
-  .cadence {
-    margin: var(--space-3) 0 0;
-    font-size: 15px;
-    color: var(--ink-2);
-  }
-  .cadence :global(.cadence-mark) {
-    margin-right: 7px;
-  }
-  .sign-col :global(.share-slot) {
-    margin-top: var(--space-3);
-  }
-  .state-hero :global(.note-mark) {
-    margin-right: 8px;
-  }
-  .section-head :global(.head-mark) {
-    margin-right: 10px;
-  }
-  .explain .lead {
-    font-size: var(--fs-h3);
-    font-weight: 650;
-    line-height: 1.35;
-  }
-  .explain .peak {
-    font-weight: 650;
-  }
-  .explain .fine {
-    margin-top: var(--space-4);
-  }
-  .key {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 20px;
-    list-style: none;
-    margin: 0 0 var(--space-3);
-    padding: 0;
-    font-size: 15px;
-  }
-  .key li {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .key-line {
-    width: 20px;
-    height: 2px;
-  }
-  .key-primary {
-    background: var(--line-primary);
-  }
-  .key-bench {
-    background: var(--line-bench);
-  }
-  .range {
-    display: inline-flex;
-    margin: 0 0 var(--space-4);
-    padding: 0;
-    border: 1px solid var(--hairline-strong);
-    border-radius: 6px;
-  }
-  .range input {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-  }
-  .range label {
-    display: inline-flex;
-    align-items: center;
-    min-height: 40px;
-    padding: 2px 14px 0;
-    font-size: 15px;
-    font-weight: 650;
-    cursor: pointer;
-  }
-  .range label + input + label {
-    border-left: 1px solid var(--hairline-strong);
-  }
-  .range input:checked + label {
+  /* The MY STATE marker holds its place from the first paint and shows once
+     the page's script finds this state saved, so nothing moves. */
+  .mark {
+    display: inline-block;
+    min-height: 24px;
+    padding: 2px 8px;
+    border: 1px solid var(--ink);
     background: var(--ink);
-    color: var(--paper);
+    color: var(--bg);
+    font-size: var(--fs-s);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    visibility: hidden;
   }
-  .range input:first-of-type:checked + label {
-    border-radius: 5px 0 0 5px;
+  .mark[data-on] {
+    visibility: visible;
   }
-  .range input:last-of-type:checked + label {
-    border-radius: 0 5px 5px 0;
-  }
-  .range input:focus-visible + label {
-    outline: 3px solid var(--focus);
-    outline-offset: 2px;
-  }
-  .range-switch:has(#range-year:checked) :global(.chart-all),
-  .range-switch:has(#range-all:checked) :global(.chart-year) {
-    display: none;
-  }
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-5);
-    margin: 0;
-  }
-  @media (max-width: 899px) {
-    .stats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  .stats > div {
-    border-top: 2px solid var(--ink);
-    padding-top: var(--space-3);
-    min-width: 0;
-  }
-  .stats dt {
-    font-size: 15px;
-    color: var(--ink-2);
-    font-weight: 600;
-  }
-  .stats dd {
-    margin: 4px 0 0;
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 1.25;
-  }
-  .stats dd.small {
-    font-size: var(--fs-small);
-    font-weight: 400;
-  }
-  @media (max-width: 479px) {
-    .stats dd {
-      font-size: 18px;
-    }
-    .stats :global(.change) {
-      white-space: normal;
-    }
-  }
-  .peers {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    column-gap: var(--space-6);
-  }
-  .peers li {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    align-items: baseline;
-    gap: 12px;
-    padding: 9px 0 7px;
-    border-top: 1px solid var(--hairline);
-    font-variant-numeric: tabular-nums;
-  }
-  .peers a {
-    font-weight: 600;
-  }
-  .peer-change {
-    min-width: 5.5em;
-    text-align: right;
-  }
-  .same-lead {
-    margin-bottom: var(--space-1);
-  }
-  /* wrapped links, each a full size tap target */
-  .peer-links {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    column-gap: var(--space-5);
-  }
-  .peer-links a {
+  /* the range switch's labels are controls, so they get a control's height */
+  .rng label {
     display: inline-flex;
     align-items: center;
-    min-height: 44px;
-    font-weight: 600;
+    min-height: 24px;
   }
-  .groups {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--space-5) var(--space-6);
+  /* a short table of the region mates, not the wide board */
+  .peers table {
+    min-width: 0;
+    max-width: 520px;
   }
-  .same + .groups {
-    margin-top: var(--space-5);
+  /* every link on the page is a 24px target, even the small ones */
+  .back a,
+  main .note a,
+  .peers tbody a {
+    display: inline-block;
+    min-height: 24px;
+    line-height: 24px;
   }
-  .group {
-    border-top: 1px solid var(--hairline);
-    padding-top: 9px;
-  }
-  .group-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    align-items: baseline;
-    gap: 12px;
-    font-variant-numeric: tabular-nums;
-  }
-  .group-name {
-    font-weight: 700;
-  }
-  .group-row + .peer-links {
-    margin-top: 2px;
+  @media (forced-colors: active) {
+    .mark[data-on] {
+      forced-color-adjust: none;
+      background: Highlight;
+      color: HighlightText;
+    }
   }
 </style>

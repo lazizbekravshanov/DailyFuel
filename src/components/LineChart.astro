@@ -1,15 +1,21 @@
 ---
-// A line chart with one y axis, hairline grid, 2px lines, and a direct label at
-// the end of each line. Observable Plot draws the grid and lines at build time
-// (src/lib/plotting.ts), so the page gets plain SVG and no chart library.
-// Hover or keyboard focus shows a crosshair and tooltip (src/scripts/chart.js).
-import Price from "./Price.astro";
-import { chartLabel, type ChartModel } from "../lib/chart.ts";
+// A price line on the paper terminal: a 1.5px ink line over a hairline grid,
+// the newest price tagged on the axis in inverse, and a readout above the plot
+// that the pointer and the arrow keys both drive (src/scripts/chart.js).
+// Observable Plot draws the line at build time (src/lib/plotting.ts), so the
+// page gets plain SVG and no chart library. The axis labels are text beside
+// the SVG, so they never stretch with it. The readout script takes its dates
+// and prices from the NumbersTable under the chart, so the plot box carries
+// only its window.
+import { chartLabel, yLabels, type ChartModel } from "../lib/chart.ts";
+import { formatDate } from "../lib/dates.ts";
+import { changeClass, formatPrice, formatQuote, formatSignedCents, toUnits } from "../lib/format.ts";
 import { linesSvg } from "../lib/plotting.ts";
-import { EDGES } from "../lib/bins.ts";
 interface Props {
   model: ChartModel;
-  height: number;
+  /** Plot height in px, and the height under 760px. */
+  height?: number;
+  mobileHeight?: number;
   /** Full accessible name. Leave it out to build one with chartLabel from `title`. */
   label?: string;
   /** What and over what stretch, for the built name: "Midwest weekly diesel price, last 52 weeks". */
@@ -17,12 +23,12 @@ interface Props {
   /** Where the numbers are, for the built name: "Every week is in the table below." */
   tableNote?: string;
   weekly: boolean;
-  compact?: boolean;
   class?: string;
 }
-const { model, height, label, title, tableNote, weekly, compact = false, class: cls } = Astro.props;
+const { model, height = 220, mobileHeight = 160, label, title, tableNote, weekly, class: cls } = Astro.props;
 const primary = model.paths.find((p) => p.kind === "primary") ?? model.paths[0];
 const name = label ?? chartLabel({ name: title ?? primary?.label ?? "Price", points: primary?.points ?? [], weekly, tableNote });
+const end = model.ends.find((e) => e.kind === "primary") ?? model.ends[0] ?? null;
 const svg = linesSvg({
   from: model.from,
   to: model.to,
@@ -30,257 +36,51 @@ const svg = linesSvg({
   hi: model.yDomain.hi,
   grid: model.grid,
   lines: model.paths.map((p) => ({ kind: p.kind, step: p.step, points: p.points })),
+  dot: end ? { x: end.x, y: end.y } : null,
 });
-// The tooltip's change row uses the same about the same line as the map bins.
-const flat = EDGES[weekly ? "weekly" : "daily"][0];
-const hover = JSON.stringify({ weekly, flat, prev: model.hover.prev, dates: model.hover.dates, x: model.hover.x, series: model.hover.series });
+// The readout starts on the newest point that has a price, with its move
+// from the point before, the way the script will print it.
+const values = model.hover.series[0]?.values ?? [];
+let last = values.length - 1;
+while (last > 0 && values[last] === null) last -= 1;
+const nowValue = last >= 0 ? values[last] : null;
+let before: number | null = null;
+for (let k = last - 1; k >= 0 && before === null; k--) before = values[k];
+if (before === null && model.hover.prev) before = model.hover.prev[1];
+const change = nowValue !== null && before !== null ? (toUnits(nowValue) - toUnits(before)) / 10000 : null;
+const bench = model.hover.series[1] ?? null;
+const benchNow = bench && last >= 0 && bench.values[last] !== null ? `${bench.label} ${formatPrice(bench.values[last]!)}` : null;
+const unit = weekly ? "week" : "day";
 ---
-<div class:list={["chart", compact && "chart-compact", cls]} style={`--h:${height}px`}>
-  <div class="chart-plot" tabindex="0" role="img" aria-label={name} data-chart={hover}>
-    <div class="y-axis" aria-hidden="true">
-      {model.yTicks.map((t) => <span style={`top:${t.pos}%`}>{t.label}</span>)}
-    </div>
-    <div class="plot-area">
+<figure class:list={["chart", cls]} style={`--h:${height}px;--hm:${mobileHeight}px`}>
+  <p class="rdout" aria-live="polite">
+    <span class="rd-d">{last >= 0 && formatDate(model.hover.dates[last])}</span>{" "}
+    <b class="rd-v">{nowValue !== null ? formatPrice(nowValue) : "No price"}</b>{" "}
+    <span class:list={["rd-c", change !== null && changeClass(change)]}>{change !== null && formatSignedCents(change)}</span>{" "}
+    {bench && <span class="rd-b muted">{benchNow}</span>}{" "}
+    <span class="rd-h muted">Point at the line, or press the arrow keys, to read a {unit}.</span>
+  </p>
+  <div class="plot" tabindex="0" role="img" aria-label={name} data-from={model.from} data-to={model.to}>
+    <div class="pa">
       <Fragment set:html={svg} />
-      {model.ends.map((e) => <span class={`end-dot end-dot-${e.kind}`} style={`left:${e.x}%;top:${e.y}%`} aria-hidden="true"></span>)}
-    </div>
-    <div class="end-labels" aria-hidden="true">
-      {model.showEndLabels && model.ends.map((e) => <span class={`end-${e.kind}`} style={`top:${e.y}%`}><Price price={e.value} /></span>)}
-    </div>
-    <div class="x-axis" aria-hidden="true">
-      {model.xTicks.map((t) => <span class:list={[t.minor && "minor", t.thin && "thin", t.anchor === "start" && "start"]} style={`left:${t.pos}%`}>{t.label}</span>)}
+      <span class="cross" hidden></span>
+      {yLabels(model).map((t) => <span class="yl" style={`top:${t.pos}%`}>{formatQuote(t.value)}</span>)}
+      {end && <b class="ytag" style={`top:${end.y}%`}>{formatQuote(end.value)}</b>}
+      {model.xTicks.map((t) => <span class:list={["xl", t.anchor === "start" && "first"]} style={`left:${t.pos}%`}>{t.label}</span>)}
     </div>
   </div>
-</div>
+</figure>
 
-<style>
-  /* The top padding keeps the focus ring clear of the top y label, which
-     sits half above the plot. */
-  .chart-plot {
-    position: relative;
-    display: grid;
-    grid-template-columns: 48px minmax(0, 1fr) 66px;
-    grid-template-rows: var(--h) auto;
-    padding-top: 8px;
-    border-radius: 4px;
-  }
-  /* small multiples: a card can hand its y label column to the plot */
-  .chart-compact .chart-plot {
-    grid-template-columns: var(--y-axis-w, 34px) minmax(0, 1fr) 58px;
-  }
-  .chart-plot:focus-visible {
-    outline-offset: 4px;
-  }
-  .y-axis {
-    position: relative;
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .y-axis span,
-  .x-axis span,
-  .end-labels span {
-    position: absolute;
-    white-space: nowrap;
-    line-height: 1;
-  }
-  .y-axis span {
-    right: 8px;
-    transform: translateY(-45%);
-    font-size: 13px;
-    color: var(--ink-2);
-    font-variant-numeric: tabular-nums;
-  }
-  .plot-area {
-    position: relative;
-    grid-column: 2;
-    grid-row: 1;
+<style is:global>
+  /* a finger can still scroll the page over the plot */
+  .pa {
     touch-action: pan-y;
   }
-  /* the drawn chart only, not the arrow in the tooltip */
-  .plot-area > :global(svg) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
+  /* the benchmark line under a daily one, in the secondary ink */
+  .pa path.bench {
+    stroke: var(--ink2);
   }
-  .plot-area :global(.grid) {
-    stroke: var(--hairline);
-    stroke-width: 1;
-  }
-  .plot-area :global(.grid line) {
-    vector-effect: non-scaling-stroke;
-    shape-rendering: crispEdges;
-  }
-  .plot-area :global(.line) {
-    fill: none;
-    stroke-width: 2;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-  }
-  .plot-area :global(.line path) {
-    vector-effect: non-scaling-stroke;
-  }
-  .plot-area :global(.line-primary) {
-    stroke: var(--line-primary);
-  }
-  .plot-area :global(.line-bench) {
-    stroke: var(--line-bench);
-  }
-  .end-dot {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    margin: -4px 0 0 -4px;
-    border-radius: 50%;
-    box-shadow: 0 0 0 2px var(--paper);
-  }
-  .end-dot-primary {
-    background: var(--line-primary);
-  }
-  .end-dot-bench {
-    background: var(--line-bench);
-  }
-  .end-labels {
-    position: relative;
-    grid-column: 3;
-    grid-row: 1;
-  }
-  .end-labels span {
-    left: 10px;
-    transform: translateY(-45%);
-    font-size: 15px;
-    font-weight: 700;
-  }
-  .end-labels .end-bench {
-    color: var(--ink-2);
-    font-weight: 600;
-  }
-  .x-axis {
-    position: relative;
-    grid-column: 2;
-    grid-row: 2;
-    height: 26px;
-  }
-  .x-axis span {
-    top: 9px;
-    transform: translateX(-50%);
-    font-size: 13px;
-    color: var(--ink-2);
-  }
-  /* a month name that starts on the first of its month */
-  .x-axis .start {
-    transform: none;
-  }
-  @media (max-width: 639px) {
-    .x-axis .minor {
-      display: none;
-    }
-  }
-  @media (max-width: 359px) {
-    .x-axis .thin {
-      display: none;
-    }
-  }
-  .chart-compact .end-labels span {
-    font-size: 14px;
-  }
-  .chart-compact .y-axis span {
-    font-size: 12px;
-  }
-  .chart-compact .x-axis span {
-    top: 8px;
-    font-size: 12px;
-  }
-
-  .plot-area :global(.cross) {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: var(--ink-2);
-    pointer-events: none;
-  }
-  .plot-area :global(.cross-dot) {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    margin: -5px 0 0 -5px;
-    border-radius: 50%;
-    box-shadow: 0 0 0 2px var(--paper);
-    pointer-events: none;
-  }
-  .plot-area :global(.cross-dot-primary) {
-    background: var(--line-primary);
-  }
-  .plot-area :global(.cross-dot-bench) {
-    background: var(--line-bench);
-  }
-  .plot-area :global(.chart-tip) {
-    position: absolute;
-    top: 0;
-    z-index: 4;
-    padding: 8px 10px 6px;
-    background: var(--paper);
-    border: 1px solid var(--hairline-strong);
-    border-radius: 6px;
-    box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
-    font-size: 14px;
-    line-height: 1.35;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-  .plot-area :global(.tip-date) {
-    color: var(--ink-2);
-    margin-bottom: 2px;
-  }
-  .plot-area :global(.tip-row) {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .plot-area :global(.tip-row strong) {
-    font-size: 16px;
-  }
-  .plot-area :global(.tip-label) {
-    color: var(--ink-2);
-  }
-  .plot-area :global(.tip-key) {
-    width: 14px;
-    height: 2px;
-    flex: none;
-  }
-  .plot-area :global(.tip-key-primary) {
-    background: var(--line-primary);
-  }
-  .plot-area :global(.tip-key-bench) {
-    background: var(--line-bench);
-  }
-  /* the week's move under the price: the arrow in its color (the page's
-     ArrowSprite, drawn by src/scripts/chart.js), the numbers in ink. A plain
-     line of text, not a flex row, so the arrow stands on the baseline the
-     way it does everywhere else. */
-  .plot-area :global(.tip-change) {
-    display: block;
-    padding-left: 22px;
-  }
-
-  /* Windows contrast themes drop span backgrounds. The dots, the crosshair and
-     the tooltip key are data marks, so they keep a color the theme picks. The
-     arrow is an SVG fill, which global.css already sets to CanvasText. */
-  @media (forced-colors: active) {
-    .end-dot,
-    .plot-area :global(.cross),
-    .plot-area :global(.cross-dot),
-    .plot-area :global(.tip-key) {
-      forced-color-adjust: none;
-      background: CanvasText;
-      box-shadow: none;
-    }
-    /* The state page range switch marks its checked choice with a fill the
-       theme would erase, so both choices would look the same. Keep the fill. */
-    :global(.range-switch .range input:checked + label) {
-      forced-color-adjust: none;
-    }
+  .rd-b {
+    padding-left: 4px;
   }
 </style>

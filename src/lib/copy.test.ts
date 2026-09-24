@@ -3,7 +3,8 @@ import statesFile from "../data/states.json";
 import type { BenchmarkKey, Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 import {
-  countPlaces, missingNote, pctOf, regionMates, samePriceLead, sourceSentence, stateDescription, vsUsSentence,
+  countPlaces, missingNote, noSurveyNote, pctOf, regionMates, samePriceCaption, samePriceLead, samePriceMeta,
+  sourceSentence, stateDescription, vsUsSentence,
 } from "./copy.ts";
 import { homeMeta } from "../components/home/home.ts";
 import { formatChange } from "./format.ts";
@@ -130,6 +131,29 @@ describe("state page sentences", () => {
     expect(samePriceLead(by("MD"), regionMates(by("MD"), S))).toBe("Same price in 4 other Central Atlantic states and DC:");
     expect(samePriceLead(by("DC"), regionMates(by("DC"), S))).toBe("Same price in 5 Central Atlantic states:");
     expect(samePriceLead(by("WA"), regionMates(by("WA"), S))).toBe("Same price in 3 other West Coast states outside California:");
+  });
+
+  it("heads the same price table with who shares the number", () => {
+    expect(samePriceMeta(by("OH"), S)).toBe("15 states read $6.250 this week");
+    expect(samePriceMeta(by("MD"), S)).toBe("5 states and DC read $6.312 this week");
+    expect(samePriceMeta(by("DC"), S)).toBe("5 states and DC read $6.312 this week");
+    expect(samePriceMeta(by("WA"), S)).toBe("4 states read $6.566 this week");
+    expect(samePriceMeta(by("CA"), S)).toBeNull();
+    expect(samePriceMeta(by("AK"), S)).toBeNull();
+    expect(samePriceCaption(by("OH"))).toBe("One EIA price covers the whole Midwest region. The state tax on top of it is different in each one.");
+    expect(samePriceCaption(by("WA"))).toMatch(/^One EIA price covers the whole West Coast outside California region\./);
+  });
+
+  it("gives Alaska and Hawaii the nearest number EIA prints", () => {
+    const west = move(7.25, 0.263);
+    expect(noSurveyNote(by("AK"), west)).toBe(
+      "EIA doesn't survey diesel in Alaska, so there is no weekly number for it. The nearest region EIA does survey is the West Coast, which read $7.250 this week, +26.3¢ on the week.",
+    );
+    expect(noSurveyNote(by("HI"), move(7.25, -0.05))).toMatch(/Hawaii.*\$7\.250 this week, −5\.0¢ on the week\.$/);
+    expect(noSurveyNote(by("HI"), move(7.25, null))).toMatch(/read \$7\.250 this week\.$/);
+    expect(noSurveyNote(by("AK"), null)).toBe(
+      "EIA doesn't survey diesel in Alaska, so there is no weekly number for it. The nearest region EIA does survey is the West Coast.",
+    );
   });
 
   it("compares with the U.S. average from the numbers", () => {
