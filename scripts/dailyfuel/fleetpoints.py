@@ -84,7 +84,7 @@ LON_MIN, LON_MAX = -180.0, -65.0
 # ---------------------------------------------------------------- name rules
 
 # Names that are never published, whatever else they say.
-_CYRILLIC = re.compile(r"[Ѐ-ӿ]")
+_CYRILLIC = re.compile(r"[\u0400-\u04ff]")
 _PRICE = re.compile(r"\$|\b\d+\s*(?:usd|dollars?|bucks)\b|\bprice\b")
 _PHONE = re.compile(r"\d{3}[\s.\-]\d{3,4}\b|\d{7,}")
 

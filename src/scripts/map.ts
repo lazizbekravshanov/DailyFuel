@@ -116,13 +116,15 @@ export function decodePlaces(doc: { p: number; s: Record<string, [string, number
   return out;
 }
 
+type P = { label: string; lat: number; lon: number };
+
 /**
  * What the driver typed, as a point: a place on the list (exact, then a bare
  * name in one state only, then the first that starts with it), or "lat, lon".
  * A bare name in more than one state gives the first of them as a string, to
  * ask which. Null when nothing fits.
  */
-export function findPlace(q: string, pl: Places | null): { label: string; lat: number; lon: number } | string | null {
+export function findPlace(q: string, pl: Places | null): P | string | null {
   const t = q.trim().toLowerCase().replace(/\s+/g, " ");
   if (!t) return null;
   // the page prints a real minus sign; a typed hyphen works too
@@ -135,9 +137,9 @@ export function findPlace(q: string, pl: Places | null): { label: string; lat: n
   const L = pl.label.map((s) => s.toLowerCase());
   let i = L.indexOf(t);
   if (i < 0) {
-    const bare = L.flatMap((s, j) => (s.split(",")[0] === t ? [j] : []));
-    if (bare.length > 1) return pl.label[bare[0]];
-    i = bare.length ? bare[0] : L.findIndex((s) => s.startsWith(t));
+    const b = L.filter((s) => s.split(",")[0] === t);
+    if (b[1]) return pl.label[L.indexOf(b[0])];
+    i = b[0] ? L.indexOf(b[0]) : L.findIndex((s) => s.startsWith(t));
   }
   return i < 0 ? null : { label: pl.label[i], lat: pl.lat[i], lon: pl.lon[i] };
 }
@@ -232,12 +234,12 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
       : `<span class="nm">State not known</span> `;
     h += `<span class="muted">${milesText(r, res.miles)}</span></p>`;
     if (r.hits.length) {
-      h += `<div class="scroll"><table><thead><tr><th class="num">Mi</th><th>Name</th><th>Type</th><th>St</th></tr></thead><tbody>`;
+      h += `<div class="scroll"><table><thead><tr><th class="num">Mi<th>Name<th>Type<th>St<tbody>`;
       for (const x of r.hits) {
-        h += `<tr><td class="num">${Math.round(x.at)}</td><td>${withButtons ? lk(x.p) : esc(x.p.n)}</td><td>${esc(x.p.t)}</td><td>${x.p.st}</td></tr>`;
+        h += `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p) : esc(x.p.n)}<td>${esc(x.p.t)}<td>${x.p.st}`;
       }
-      h += `</tbody></table></div>`;
-    } else h += `<p class="fine">No truck stops or weigh stations on the map in this stretch of the band.</p>`;
+      h += `</table></div>`;
+    } else h += `<p class="fine">Nothing on the map in this stretch of the band.</p>`;
     h += `</div>`;
   }
   return h;
@@ -380,17 +382,17 @@ export function init(doc: Document, win: any): void {
     loadPlaces().then(() => {
       const a = findPlace(inA.value, places),
         b = findPlace(inB.value, places),
-        miss = !a || typeof a == "string" ? inA : !b || typeof b == "string" ? inB : null;
+        miss = !(a as P)?.lat ? inA : !(b as P)?.lat ? inB : null;
       if (miss) {
         const v = miss.value.trim(), f = miss === inA ? a : b;
         say(f
           ? `Which ${v}? Add the state, like ${f}.`
           : v
-          ? `No place called ${v} on the list. Pick one from the list, type lat, lon, or use the map.`
+          ? `${v} isn't on the list. Pick one from it, type lat, lon, or use the map.`
           : `Type a place for ${miss === inA ? "A" : "B"}, or use the map.`);
         return miss.focus();
       }
-      const p = a as Exclude<typeof a, string | null>, q = b as typeof p;
+      const p = a as P, q = b as P;
       if (p.lat === q.lat && p.lon === q.lon) return say("A and B are the same place.");
       run([p.lat, p.lon], [q.lat, q.lon], p.label, q.label, true);
     });
@@ -575,11 +577,17 @@ export function init(doc: Document, win: any): void {
   };
   body.addEventListener("click", focusPt);
   out.addEventListener("click", focusPt);
-  // each name in the list opens its marker
-  for (const p of pts) {
-    const td = p.tr && p.tr.children[0];
-    if (td) td.innerHTML = lk(p);
-  }
+  // each name in the list opens its marker; the buttons are made when the list is first opened
+  doc.getElementById("ls-d")?.addEventListener(
+    "toggle",
+    () => {
+      for (const p of pts) {
+        const td = p.tr && p.tr.children[0];
+        if (td) td.innerHTML = lk(p);
+      }
+    },
+    { once: true },
+  );
 
   // ---- the map as the route strip's picker
   map.on("click", (e: any) => {

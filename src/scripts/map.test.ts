@@ -162,7 +162,7 @@ describe("the route strip", () => {
     const res = corridor([61.2, -149.9], [64.8, -147.7], [], [box("AK", -170, 51, -130, 71.5)]);
     const html = stripHtml(res, "Anchorage, AK", "Fairbanks, AK", CFG, true);
     expect(html).toContain("No EIA price");
-    expect(html).toContain("No truck stops or weigh stations on the map in this stretch of the band.");
+    expect(html).toContain("Nothing on the map in this stretch of the band.");
   });
 
   it("keeps the band at 25 miles", () => {

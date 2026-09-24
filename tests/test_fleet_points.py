@@ -183,7 +183,7 @@ MADE_UP_ZIPS = {"LA": "71000", "AR": "72000", "FL": "33000", "RI": "02800"}
 
 def regression_rows() -> list[fleetpoints.Row]:
     return [
-        row(i, name, lat, lon, address=f"1 Sample Rd, Sample Town, {st} {MADE_UP_ZIPS[st]}, США")
+        row(i, name, lat, lon, address=f"1 Sample Rd, Sample Town, {st} {MADE_UP_ZIPS[st]}, \u0421\u0428\u0410")
         for i, (name, lat, lon, st) in enumerate(REGRESSION_POINTS, start=1)
     ]
 
@@ -203,7 +203,7 @@ def map_validators():
     return mapdata.MapValidators()
 
 
-def row(number: int, name: str, lat: float, lon: float, address: str = "Somewhere, IA, США", notes: str = "") -> fleetpoints.Row:
+def row(number: int, name: str, lat: float, lon: float, address: str = "Somewhere, IA, \u0421\u0428\u0410", notes: str = "") -> fleetpoints.Row:
     return fleetpoints.Row(number, name, address, lat, lon, notes)
 
 
@@ -278,9 +278,9 @@ def test_keep_rules(name, category, directions):
     [
         ("", "empty name"),
         ("   ", "empty name"),
-        ("sample truck shop рус", "cyrillic text in name"),
-        ("шина сервис 99$", "cyrillic text in name"),
-        ("weight station русский", "cyrillic text in name"),  # a keep word never saves a Cyrillic name
+        ("sample truck shop \u0440\u0443\u0441", "cyrillic text in name"),
+        ("\u0448\u0438\u043d\u0430 \u0441\u0435\u0440\u0432\u0438\u0441 99$", "cyrillic text in name"),
+        ("weight station \u0440\u0443\u0441\u0441\u043a\u0438\u0439", "cyrillic text in name"),  # a keep word never saves a Cyrillic name
         ("99 $ tire", "price in name"),
         ("tire for 99$", "price in name"),
         ("tire shop price for steer tire", "price in name"),
@@ -307,7 +307,7 @@ def test_keep_rules(name, category, directions):
         ("sample fleet services", "repair or tire shop"),
         ("sample def electric mehanic", "repair or tire shop"),
         ("sample trailer", "repair or tire shop"),
-        ("tarps sample русский", "cyrillic text in name"),
+        ("tarps sample \u0440\u0443\u0441\u0441\u043a\u0438\u0439", "cyrillic text in name"),
         ("sample engineering", fleetpoints.NO_RULE),
         ("oregon", fleetpoints.NO_RULE),
         ("sample place", fleetpoints.NO_RULE),
@@ -519,10 +519,10 @@ def test_us_bounds_and_the_state_test(boundaries):
 def test_state_hints_read_a_state_before_a_zip_and_nothing_else(boundaries):
     codes = boundaries.codes
     assert codes >= {"IA", "ND", "CA", "DC"} and len(codes) == 51
-    assert fleetpoints.state_hints("Sample station, Sample Town, UT 84000, США", codes) == {"UT"}
+    assert fleetpoints.state_hints("Sample station, Sample Town, UT 84000, \u0421\u0428\u0410", codes) == {"UT"}
     assert fleetpoints.state_hints("1 Main St, Des Moines, IA 50309 Sample Township, IL 62000", codes) == {"IA", "IL"}
     assert fleetpoints.state_hints("Sample Rd, IA 50309-1234", codes) == {"IA"}
-    assert fleetpoints.state_hints("WCHH+V2, Иллинойс, США", codes) == frozenset()
+    assert fleetpoints.state_hints("WCHH+V2, \u0418\u043b\u043b\u0438\u043d\u043e\u0439\u0441, \u0421\u0428\u0410", codes) == frozenset()
     assert fleetpoints.state_hints("US 30, box 12345", codes) == frozenset()  # not a state
     assert fleetpoints.state_hints("PR 00901", codes) == frozenset()  # not one of the 51
     assert fleetpoints.state_hints("ia 50309, IA 5030, IA50309", codes) == frozenset()  # only the exact form
@@ -781,7 +781,7 @@ MARKER = "ZQXJMARKER"
 def synthetic_csv(path: Path) -> Path:
     dm, gf = DES_MOINES, GRAND_FORKS
     return write_csv(path, [
-        {"Address": f"{MARKER} Ave, Des Moines, IA 50309, США", "Name": f"WB weight station {MARKER}", "Latitude": dm[0], "Longitude": dm[1],
+        {"Address": f"{MARKER} Ave, Des Moines, IA 50309, \u0421\u0428\u0410", "Name": f"WB weight station {MARKER}", "Latitude": dm[0], "Longitude": dm[1],
          "Radius": 250, "Tags": MARKER, "Notes": f"{MARKER} note, Des Moines, IA 50309", "Type": "Normal Geofence"},
         {"Address": f"{MARKER} Rd, Grand Forks, ND 58201", "Name": "loves shop", "Latitude": gf[0], "Longitude": gf[1], "Radius": 250,
          "Notes": MARKER, "Type": "Yard"},
@@ -810,7 +810,7 @@ def test_the_tool_builds_from_a_csv_and_nothing_from_it_leaks(tmp_path, states, 
     path = data / fleetpoints.FLEET_POINTS
     text = path.read_text(encoding="utf-8")
     assert MARKER not in text
-    assert not re.search(r"[Ѐ-ӿ]", text)
+    assert not re.search(r"[\u0400-\u04ff]", text)
     assert "88482" not in text and "Normal Geofence" not in text and "Risk Zone" not in text and "50309" not in text
     doc = json.loads(text)
     assert doc["imported"] == "2026-09-23"
@@ -980,7 +980,7 @@ def test_committed_fleet_points_match_the_schema_and_carry_no_csv_text(map_valid
     assert doc["source"] == fleetpoints.SOURCE and doc["dedupe_m"] == fleetpoints.DEDUPE_M
     assert len(doc["points"]) > 0
     assert doc["counts"] == {c: sum(1 for p in doc["points"] if p["category"] == c) for c in fleetpoints.CATEGORIES}
-    assert not re.search(r"[Ѐ-ӿ]", text)
+    assert not re.search(r"[\u0400-\u04ff]", text)
     assert "$" not in text
     # Nothing names an owner, a fleet or an export, the schema id and the ProFleet label and key aside.
     vocabulary = text.replace(f'"{fleetpoints.SCHEMA}"', "").replace("ProFleet lube", "").replace('"profleet"', "")
