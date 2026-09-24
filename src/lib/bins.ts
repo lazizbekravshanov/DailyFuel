@@ -1,6 +1,9 @@
-// Fixed color bins for price changes, so a color means the same thing every day.
-// Binning uses the change as it is shown (cents rounded to one decimal), so the
-// glyph and the number beside it never disagree.
+// Fixed bins for price changes, so "about the same" means the same thing every
+// week. Binning uses the change as it is shown (cents rounded to one decimal),
+// so the words and the number beside them never disagree. The paper terminal
+// has no map, but the bins still decide what counts as a rise or a fall: a
+// weekly move under 1¢ is flat, prints as +0.3¢ in muted ink, and is never
+// named as the biggest rise or drop.
 
 import { changeTenths } from "./format.ts";
 
@@ -12,7 +15,7 @@ export type FillKey = BinKey | "nodata";
 /** Bin edges in tenths of a cent: [about the same below, small below, medium below]. */
 export const EDGES: Record<Cadence, [number, number, number]> = {
   // under 1¢, 1 to 5¢, 5 to 15¢, 15¢ or more. About the same is 1¢ wide so a
-  // penny of noise in a quiet week doesn't paint the map red and blue.
+  // penny of noise in a quiet week doesn't read as a move.
   weekly: [10, 50, 150],
   // under 0.2¢, 0.2 to 2¢, 2 to 6¢, 6¢ or more
   daily: [2, 20, 60],
@@ -32,47 +35,13 @@ export function directionFor(change: number, cadence: Cadence): Direction {
   return b === "flat" ? "flat" : b.startsWith("up") ? "up" : "down";
 }
 
-function cents(tenths: number): string {
-  return tenths % 10 === 0 ? String(tenths / 10) : (tenths / 10).toFixed(1);
-}
-
-export interface LegendItem {
-  key: BinKey;
-  direction: Direction;
-  label: string;
-}
-
-/** Legend in reading order: biggest drop, ..., about the same, ..., biggest rise. */
-export function legendItems(cadence: Cadence): LegendItem[] {
-  const [flat, small, mid] = EDGES[cadence];
-  const ranges = [
-    `${cents(flat)} to ${cents(small)}¢`,
-    `${cents(small)} to ${cents(mid)}¢`,
-    `${cents(mid)}¢ or more`,
-  ];
-  return [
-    { key: "down-3", direction: "down", label: `Fell ${ranges[2]}` },
-    { key: "down-2", direction: "down", label: `Fell ${ranges[1]}` },
-    { key: "down-1", direction: "down", label: `Fell ${ranges[0]}` },
-    { key: "flat", direction: "flat", label: `About the same, under ${cents(flat)}¢` },
-    { key: "up-1", direction: "up", label: `Rose ${ranges[0]}` },
-    { key: "up-2", direction: "up", label: `Rose ${ranges[1]}` },
-    { key: "up-3", direction: "up", label: `Rose ${ranges[2]}` },
-  ];
-}
-
-const MINUS = "\u2212";
-
 /**
- * The six bin edges for a horizontal key, left to right: "−15¢", "−5¢", "−1¢",
- * "+1¢", "+5¢", "+15¢". Each one sits under the join between two swatches.
+ * The class a printed change wears on the paper terminal: red ink ("up") when
+ * it rose, blue ("down") when it fell, and muted ink when the bins call it
+ * about the same, so a +0.3¢ week doesn't light up. No change at all is muted too.
  */
-export function legendTicks(cadence: Cadence): string[] {
-  const [flat, small, mid] = EDGES[cadence];
-  const falls = [mid, small, flat].map((t) => `${MINUS}${cents(t)}¢`);
-  const rises = [flat, small, mid].map((t) => `+${cents(t)}¢`);
-  return [...falls, ...rises];
+export function moveClass(change: number | null, cadence: Cadence): "up" | "down" | "muted" {
+  if (change === null) return "muted";
+  const d = directionFor(change, cadence);
+  return d === "flat" ? "muted" : d;
 }
-
-/** Fill tokens whose background is dark enough to need white text on it. */
-export const DARK_FILLS: ReadonlySet<FillKey> = new Set(["up-3", "down-3"]);

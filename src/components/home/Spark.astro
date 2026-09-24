@@ -1,0 +1,14 @@
+---
+// One 52 week line in a table cell, drawn from the page's sprite so the same
+// region's line isn't repeated 15 times. The label says what a sighted reader
+// takes from the shape: the range, and where it ends.
+import { sparkLabel, type Spark } from "./chart.ts";
+interface Props {
+  /** The series key the sprite carries: "NUS", "R20". */
+  id: string;
+  name: string;
+  spark: Spark;
+}
+const { id, name, spark } = Astro.props;
+---
+<svg class="spk" viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label={sparkLabel(name, spark)}><use href={`#spk-${id}`}></use></svg>

@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import statesFile from "../data/states.json";
 import type { BenchmarkKey, Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
-import { islandJson, regionAverage, regionPlate, yourStateData } from "./yourstate.ts";
+import { regionAverage, regionPlate, yourStateData } from "./yourstate.ts";
+
+// islandJson is gone: the strip's data rides on the Find your state links as
+// attributes now, so there is no JSON island to make safe.
 
 const REGION: Record<BenchmarkKey, string> = {
   R1X: "New England",
@@ -107,41 +110,40 @@ describe("region plate under the state sign", () => {
   });
 });
 
-describe("your state data for the home page", () => {
-  it("lists all 51 in states.json order with the fields the script reads", () => {
+describe("your state data for the home page strip", () => {
+  it("lists all 51 in states.json order, printed the way the page prints money", () => {
     const d = yourStateData(site());
-    expect(d.states).toHaveLength(51);
-    expect(d.states.map((s) => s.code)).toEqual(statesFile.states.map((s) => s.code));
-    expect(d.when).toBe("this week");
-    expect(d.none).toBe("No weekly price");
-    const oh = d.states.find((s) => s.code === "OH")!;
-    expect(oh).toEqual({ code: "OH", name: "Ohio", price: 6.25, change: 0.304, direction: "up", plate: "EIA Midwest average, 15 states" });
+    expect(d).toHaveLength(51);
+    expect(d.map((s) => s.code)).toEqual(statesFile.states.map((s) => s.code));
+    expect(d.find((s) => s.code === "OH")).toEqual({
+      code: "OH", name: "Ohio", price: "$6.250", move: "+30.4¢ +5.1%", ink: "up", plate: "EIA Midwest average, 15 states",
+    });
+    expect(d.find((s) => s.code === "FL")).toEqual(expect.objectContaining({ price: "$6.096", move: "−2.1¢ −0.3%", ink: "down" }));
   });
 
   it("gives Alaska and Hawaii no number to borrow", () => {
     const d = yourStateData(site());
     for (const code of ["AK", "HI"]) {
-      expect(d.states.find((s) => s.code === code)).toEqual(expect.objectContaining({ price: null, change: null, direction: null, plate: null }));
+      expect(d.find((s) => s.code === code)).toEqual(expect.objectContaining({ price: "No weekly price", move: "", ink: "muted", plate: null }));
     }
   });
 
-  it("follows the map bins for direction, so a tiny change is about the same", () => {
+  it("follows the bins for the ink, so a tiny change prints but stays muted", () => {
     const d = yourStateData(site());
-    expect(d.states.find((s) => s.code === "TX")!.direction).toBe("flat");
-    expect(d.states.find((s) => s.code === "FL")!.direction).toBe("down");
+    expect(d.find((s) => s.code === "TX")).toEqual(expect.objectContaining({ move: "+0.4¢ +0.1%", ink: "muted" }));
   });
 
-  it("says since yesterday, or since the last price day, when AAA is on", () => {
-    expect(yourStateData(site("aaa+eia")).when).toBe("since yesterday");
-    expect(yourStateData(site("aaa+eia", { gap: 2 })).when).toBe("since Sep 15");
-    expect(yourStateData(site("aaa+eia")).states.every((s) => s.plate === null)).toBe(true);
+  it("prints the price with no move when there is nothing to compare with", () => {
+    const sd = site();
+    at(sd, "OH").primary = move(6.25, null);
+    expect(yourStateData(sd).find((s) => s.code === "OH")).toEqual(expect.objectContaining({ price: "$6.250", move: "", ink: "muted" }));
   });
 
-  it("is safe to put inside a script element", () => {
-    const d = yourStateData(site());
-    d.states[0].name = "</script><script>alert(1)</script>";
-    const json = islandJson(d);
-    expect(json).not.toContain("<");
-    expect(JSON.parse(json).states[0].name).toBe("</script><script>alert(1)</script>");
+  it("names AAA on the plate once its daily prices are the source, in place of the region", () => {
+    // The region plate goes with AAA on (the state page's rule); the strip
+    // still needs to say whose number it is, so every priced state gets AAA.
+    const d = yourStateData(site("aaa+eia"));
+    expect(d.every((s) => s.plate === "AAA daily average")).toBe(true);
+    expect(d.find((s) => s.code === "AK")!.price).toBe("$6.500");
   });
 });
