@@ -42,9 +42,16 @@ The switch is the repo variable `AAA_ENABLED`. Only the exact string `true` turn
 | State diesel tax rates | Federal Highway Administration, Highway Statistics [table MF-121T](https://www.fhwa.dot.gov/policyinformation/statistics/2024/mf121t.cfm) | U.S. government work, public domain. The site credits FHWA with the reporting period. |
 | Daily state prices (off for now) | AAA, [gasprices.aaa.com](https://gasprices.aaa.com/), data by OPIS | Not covered by this repo's license. See [data/aaa/README.md](data/aaa/README.md). |
 | Share image font | [Red Hat Mono](https://github.com/RedHatOfficial/RedHatFont) by the Red Hat Project Authors, in `src/assets/fonts/`, drawn into the `/og/` PNGs at build time only. The pages load no font. | SIL Open Font License 1.1 |
+| Truck stops and weigh stations on `/map` | [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, in `data/map/stations.json` and `data/map/weigh_osm.json` | Open Database License 1.0 |
+| More weigh stations on `/map` | U.S. DOT BTS, NTAD Truck Stop Parking (2019), in `data/map/weigh_ntad.json`, and Iowa DOT weigh scales, in `data/map/weigh_ia.json` | NTAD is public domain. Iowa DOT is CC BY 4.0. |
+| Weigh station and truck service points on `/map` | DailyFuel, in `data/map/fleet_points.json` | CC BY 4.0 |
+| Freight roads on `/map` | U.S. DOT BTS, NTAD [National Highway Freight Network](https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_National_Highway_Freight_Network/FeatureServer/0), in `data/map/roads_nhfn.json` | Public domain. The file keeps the source's metadata note, which asks to travel with the data. |
+| State outlines on `/map` | U.S. Census Bureau cartographic boundary file, in `data/map/states.json` | Public domain |
+| Place names for the route strip | [GeoNames](https://www.geonames.org) cities5000, in `data/map/places.json` | CC BY 4.0 |
+| Map library | [Leaflet](https://leafletjs.com) 1.9.4, served from `public/vendor/leaflet/` | BSD 2 clause, see `public/vendor/leaflet/LICENSE` |
 | DailyFuel code | this repo | MIT, see [LICENSE](LICENSE) |
 
-The MIT license covers the code only. Each data source keeps its own terms. DailyFuel isn't affiliated with EIA, USDA, FHWA, AAA or OPIS.
+The MIT license covers the code only. Each data source keeps its own terms, and each file under `data/map/` carries its own source and licence. DailyFuel isn't affiliated with EIA, USDA, FHWA, AAA or OPIS, or with any truck stop chain; chain names on the map only say whose stop it is.
 
 ## Run it locally
 
@@ -118,12 +125,15 @@ data/
   eia/diesel_weekly.json   EIA weekly prices since 2022-06-13, one week per line
   aaa/README.md            rights notice (aaa/daily/ only shows up once AAA is on)
   taxes/state_diesel_tax.json  state diesel tax rates from FHWA, refreshed by hand once a year
+  map/                     what /map draws: truck stops, weigh stations, fleet points, roads, state outlines, places; one file per source, never touched by the job
   latest.json              the snapshot the site renders
 schemas/                   JSON Schemas for the data files, the contract
 scripts/
   update_data.py           the data job
   health.py                fails the job on errors or stale data
   update_taxes.py          refreshes the tax file from FHWA, run by hand, not by the job
+  update_map_data.py       builds data/map/stations.json, the weigh station files and coverage.json from a local cache of OpenStreetMap, NTAD and Iowa DOT; run by hand
+  update_map_roads.py      builds data/map/roads_nhfn.json, states.json and places.json from a local cache; run by hand
   import_fleet_points.py   builds data/map/fleet_points.json (weigh stations and truck service pins) from a hand built geofence list, which stays out of the repo, and the Census state boundaries; run by hand
   make_fixtures.py         synthetic aaa+eia data for CI and previews
   make_app_icons.mjs       renders the favicon and home screen icons into public/, run by hand

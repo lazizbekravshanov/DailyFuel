@@ -17,9 +17,13 @@ export const getStaticPaths = (() => {
   ].filter(Boolean) as { params: { layer: string } }[];
 }) satisfies GetStaticPaths;
 
+// Hundredths of a degree, about a kilometre: the outlines and the roads are
+// simplified at that scale already, so a third decimal would only add weight.
+const P = 2;
+
 export const GET: APIRoute = ({ params }) => {
   const d = loadMapData();
   const body =
-    params.layer === "states" ? statesPayload(d.states) : params.layer === "roads" ? roadsPayload(d.roads) : placesPayload(d.places);
+    params.layer === "states" ? statesPayload(d.states, P) : params.layer === "roads" ? roadsPayload(d.roads, P) : placesPayload(d.places);
   return new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json" } });
 };

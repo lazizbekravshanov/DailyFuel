@@ -21,8 +21,11 @@ import {
   parseRoads,
   parseStates,
   roadsPayload,
+  routeDir,
   statesPayload,
   weighName,
+  weighParts,
+  DEDUPE_M,
 } from "./mapdata.ts";
 
 const DATA = resolve("data/map");
@@ -77,7 +80,7 @@ const PLACES = {
 // Both sides of one scale, two truck service points, and a port of entry with no state given.
 const FLEET = {
   schema: "dailyfuel/map-fleet-points/1",
-  source: "Hand built fleet geofences provided by the DailyFuel owner",
+  source: "Weigh station and truck service points compiled by DailyFuel",
   licence: "CC BY 4.0",
   points: [
     { lat: 41.1, lon: -91.0, category: "weigh", direction: "EB", state: "IA", label: "Weigh station, eastbound" },
@@ -162,10 +165,42 @@ describe("loading the map data", () => {
 
   it("loads the committed data/map with the repo's schemas, as the build does", () => {
     const d = loadMapData();
+    expect(d.present).toEqual({ fleet: true, states: true, roads: true, places: true });
     expect(d.points.filter((p) => p.kind === "s")).toHaveLength(1131);
     expect(d.counts.w).toBeGreaterThan(400);
-    if (d.present.states) expect(d.points.filter((p) => p.kind === "s" && !p.state).length).toBeLessThan(10);
-    if (d.present.fleet) expect(d.counts.v).toBeGreaterThan(0);
+    expect(d.points.filter((p) => !p.state).length).toBeLessThan(10);
+    // the fleet file's six service categories, one square each
+    expect(d.counts.v).toBe(195 + 163 + 12 + 107 + 8 + 3);
+    // its 536 weigh, inspection and port of entry pins, merged into the weigh layer
+    const fleet = d.points.filter((p) => p.kind === "w" && p.sources.includes("f"));
+    expect(fleet.length).toBeGreaterThan(400);
+    expect(fleet.length).toBeLessThanOrEqual(536);
+    expect(d.points.filter((p) => p.kind === "w" && p.sources.length > 1 && p.sources.includes("f")).length).toBeGreaterThan(100);
+    // the roads file's [sign, code, pts] rows and the places file's columns
+    expect(d.roads.length).toBe(1487);
+    expect(d.roads.some((r) => r.interstate) && d.roads.some((r) => !r.interstate)).toBe(true);
+    const chicago = d.places.find((p) => p.name === "Chicago" && p.state === "IL")!;
+    expect(chicago.lat).toBeCloseTo(41.85, 1);
+    expect(chicago.lon).toBeCloseTo(-87.65, 1);
+    expect(d.places.find((p) => p.name === "Dallas" && p.state === "TX")).toBeDefined();
+    expect(d.places.length).toBeGreaterThan(1450);
+  });
+
+  it("reads the roads file's rows in the order its fields name, and the places file's delta coded columns", () => {
+    const roads = parseRoads({ precision: 2, fields: ["pts", "sign", "code"], lines: [[[-8763, 4188, -10, 1], "I80", 1], [[-9000, 4100, 5, 5], null, 1]] }, "r.json");
+    expect(roads).toEqual([
+      { interstate: true, coords: [[-87.63, 41.88], [-87.73, 41.89]] },
+      { interstate: false, coords: [[-90, 41], [-89.95, 41.05]] },
+    ]);
+    const places = parsePlaces(
+      { precision: 2, places: { name: ["Chicago", "Aurora", "Chicago"], state: ["IL", "IL", "IL"], lat: [4185, -9, 5], lon: [-8765, -67, 67] } },
+      "p.json",
+    );
+    expect(places).toEqual([
+      { name: "Chicago", state: "IL", lat: 41.85, lon: -87.65 },
+      { name: "Aurora", state: "IL", lat: 41.76, lon: -88.32 },
+    ]);
+    expect(() => parsePlaces({ precision: 2, places: { name: ["A"], state: ["IL"], lat: [4185], lon: [] } }, "p.json")).toThrow(/lon column/);
   });
 
   it("prints the coverage the way the legend says it", () => {
@@ -188,24 +223,52 @@ describe("names", () => {
     expect(weighName("Osceola - Northbound", "I 35", "NB")).toEqual({ name: "Osceola, I 35 northbound", dir: "northbound" });
     expect(weighName("Weigh Station (Eastbound)", null, null)).toEqual({ name: "Weigh station, eastbound", dir: "eastbound" });
     expect(weighName("Weight station", null, null)).toEqual({ name: "Weigh station", dir: null });
-    expect(weighName("Weigh Scale Complex, No Facilities", "I-10W", null)).toEqual({ name: "Weigh station, I-10W", dir: null });
+    expect(weighName("Weigh Scale Complex, No Facilities", "I-10W", null)).toEqual({ name: "Weigh station, I-10 westbound", dir: "westbound" });
+    expect(weighName("Flagler I-95 Weigh Station", "I-95N", null)).toEqual({ name: "Flagler I-95 Weigh Station, northbound", dir: "northbound" });
     expect(weighName(null, null, null)).toEqual({ name: "Weigh station", dir: null });
     expect(weighName("Wyoming Port of Entry", null, null).name).toBe("Wyoming Port of Entry");
   });
 });
 
 describe("merging weigh stations", () => {
-  const at = (lat: number, lon: number, src: "o" | "n" | "i" | "f", dir: string | null, name = "Weigh station") => ({ lat, lon, name, dir, state: "IA", src });
-
-  it("makes one marker of the same scale from several sources, keeping the first name and every source", () => {
-    const out = mergeWeigh([at(41.5, -95.0, "i", null, "Avoca, I 80"), at(41.5005, -95.0, "f", "westbound"), at(41.501, -95.001, "o", null)]);
-    expect(out).toHaveLength(1);
-    expect(out[0]).toMatchObject({ name: "Avoca, I 80 westbound", dir: "westbound", sources: "oif", lat: 41.5 });
+  const at = (lat: number, lon: number, src: "o" | "n" | "i" | "f", dir: string | null, name: string | null = null, road: string | null = null) => ({
+    ...weighParts(name, road, dir),
+    ...(src === "f" ? { named: false } : {}),
+    lat, lon, state: "IA", src,
   });
 
-  it("keeps the two sides of a road apart, and scales more than 300 m apart", () => {
-    expect(mergeWeigh([at(41.5, -95, "f", "eastbound"), at(41.5, -95.001, "f", "westbound")])).toHaveLength(2);
-    expect(mergeWeigh([at(41.5, -95, "o", null), at(41.504, -95, "o", null)])).toHaveLength(2);
+  it("makes one marker of the same scale from several sources, where DailyFuel's point is, with a named source's name and every source", () => {
+    const out = mergeWeigh([at(41.5, -95.0, "f", "WB", "Weigh station, westbound"), at(41.502, -95.0, "i", null, "Avoca", "I 80"), at(41.503, -95.001, "o", null)]);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ name: "Avoca, I 80 westbound", dir: "westbound", sources: "oif", lat: 41.5, lon: -95.0 });
+  });
+
+  it("joins points up to 600 m apart, and not further", () => {
+    // 0.005 degrees of latitude is 556 m, 0.006 is 667 m
+    expect(mergeWeigh([at(41.5, -95, "f", null), at(41.505, -95, "o", null)])).toHaveLength(1);
+    expect(mergeWeigh([at(41.5, -95, "f", null), at(41.506, -95, "o", null)])).toHaveLength(2);
+    // far north a hundredth of a degree of longitude is short, and the search still reaches 600 m
+    expect(mergeWeigh([at(64.8, -147.7, "f", null), at(64.8, -147.712, "o", null)])).toHaveLength(1);
+    expect(DEDUPE_M).toBe(600);
+  });
+
+  it("keeps the two sides of a road apart, and gives a point with no direction to the nearer side", () => {
+    const out = mergeWeigh([at(41.5, -95, "f", "EB"), at(41.5, -95.004, "f", "WB"), at(41.5, -95.003, "o", null), at(41.5, -95.001, "n", null, "Scale", "I-80E")]);
+    expect(out.map((w) => [w.dir, w.sources])).toEqual([["eastbound", "nf"], ["westbound", "of"]]);
+  });
+
+  it("reads the direction NTAD writes on the end of a route", () => {
+    expect(routeDir("I-75N")).toEqual({ road: "I-75", dir: "northbound" });
+    expect(routeDir("I40 EB")).toEqual({ road: "I40", dir: "eastbound" });
+    expect(routeDir("I90/EB")).toEqual({ road: "I90", dir: "eastbound" });
+    expect(routeDir("I-80 W")).toEqual({ road: "I-80", dir: "westbound" });
+    expect(routeDir("US61/151 NB")).toEqual({ road: "US61/151", dir: "northbound" });
+    expect(routeDir("I39/NB/SB")).toEqual({ road: "I39/NB/SB", dir: null });
+    expect(routeDir("US41NB/SB")).toEqual({ road: "US41NB/SB", dir: null });
+    expect(routeDir("I-39N/I-90W")).toEqual({ road: "I-39N/I-90W", dir: null });
+    expect(routeDir("I-35W")).toEqual({ road: "I-35W", dir: null });
+    expect(routeDir("US 9W")).toEqual({ road: "US 9W", dir: null });
+    expect(routeDir("SR5/US1")).toEqual({ road: "SR5/US1", dir: null });
   });
 });
 

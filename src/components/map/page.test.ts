@@ -142,9 +142,26 @@ describe("the /map page", () => {
     expect(attr.querySelector("a")!.getAttribute("href")).toBe("https://www.openstreetmap.org/copyright");
     expect(text(attr.querySelector("a"))).toBe("© OpenStreetMap contributors, ODbL");
     const t = text(attr);
-    expect(t).toContain(data.present.fleet ? "Weigh stations: OpenStreetMap, U.S. DOT, Iowa DOT and DailyFuel." : "Weigh stations: OpenStreetMap, U.S. DOT and Iowa DOT.");
-    if (data.present.roads) expect(t).toContain("Roads: U.S. DOT National Highway Freight Network, public domain.");
-    if (data.present.places) expect(t).toContain("Place names: GeoNames, CC BY 4.0.");
+    expect(t).toContain("More weigh stations: U.S. DOT NTAD (public domain) and Iowa DOT (CC BY 4.0).");
+    if (data.present.fleet) expect(t).toContain("Weigh station and truck service points: DailyFuel, CC BY 4.0.");
+    if (data.present.roads) expect(t).toContain("Roads: NTAD National Highway Freight Network, U.S. DOT BTS, public domain.");
+    if (data.present.states) expect(t).toContain("State outlines: U.S. Census Bureau, public domain.");
+    if (data.present.places) {
+      expect(t).toContain("Place names: GeoNames, CC BY 4.0.");
+      expect(attr.querySelector('a[href="https://www.geonames.org"]')).not.toBeNull();
+    }
+  });
+
+  it("says the weigh layer includes DailyFuel's own list, and how much of it no open source has", () => {
+    const legend = text(doc().querySelector(".mp-lg"));
+    if (!data.present.fleet) return expect(legend).not.toContain("DailyFuel's own list");
+    const on = data.points.filter((p) => p.kind === "w" && p.sources.includes("f")).length;
+    const only = data.points.filter((p) => p.kind === "w" && p.sources === "f").length;
+    expect(on).toBeGreaterThan(only);
+    expect(legend).toContain(
+      `The weigh layer includes DailyFuel's own list: ${on.toLocaleString("en-US")} of the markers are on it, and ${only.toLocaleString("en-US")} of those are on no open source.`,
+    );
+    expect(legend).toContain("A missing marker doesn't mean there is no scale.");
   });
 
   it("puts the route strip's warning above the result, word for word, and never promises a cheapest stop or a truck route", () => {

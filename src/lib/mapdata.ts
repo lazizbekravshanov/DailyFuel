@@ -12,10 +12,12 @@
 // places.json.
 //
 // Weigh stations come from four sources that overlap: a scale OpenStreetMap
-// has is often in the NTAD table and the fleet file too. Points of the same
-// kind within DEDUPE_M of each other, going the same way, become one marker
-// that names every source it came from. The files themselves stay one per
-// source, so each keeps its own licence.
+// has is often in the NTAD table and DailyFuel's own list too. Points within
+// DEDUPE_M of each other, going the same way or with no way recorded, become
+// one marker that names every source it came from. DailyFuel's point wins
+// the position, since it carries the direction; a named source still gives
+// the marker its name. The files themselves stay one per source, so each
+// keeps its own licence.
 //
 // The map data is not part of the pipeline's DAILYFUEL_DATA_DIR. It lives
 // in data/map by default; DAILYFUEL_MAP_DIR points the build somewhere else.
@@ -145,7 +147,7 @@ const NAME_BY_CODE = new Map(STATE_INFO.map((s) => [s.code, s.name]));
 
 export const SOURCE_ORDER: SourceKey[] = ["o", "n", "i", "f"];
 /** Weigh points closer than this, going the same way, are one station. */
-export const DEDUPE_M = 300;
+export const DEDUPE_M = 600;
 const DIRECTION: Record<string, string> = { EB: "eastbound", WB: "westbound", NB: "northbound", SB: "southbound" };
 const WEIGH_TYPE = "Weigh station";
 const SERVICE_TYPE = "Truck service";
@@ -191,6 +193,60 @@ export function cleanName(name: string): string {
 const DIR_WORD = /[\s,(]*\b(north|south|east|west)\s*bound\b\)?/i;
 const GENERIC_WEIGH = /^(truck\s+)?(weigh|weight)(t)?\s*(station|scale|scales|stations)?(\s+complex)?(,?\s*no facilities)?$/i;
 
+/** A weigh station's name in its parts: the place, the road and the direction. */
+export interface WeighParts {
+  /** "Fremont", or "Weigh station" when the source has no real name. */
+  base: string;
+  road: string;
+  dir: string | null;
+  /** false when base is the generic "Weigh station" or a label from a fixed table, so a named source may replace it. */
+  named: boolean;
+}
+
+/**
+ * "I-75N", "I40 EB", "I90/EB", "US61/151 NB": NTAD writes the way a scale
+ * faces on the end of its route. Split off, it is the road and a direction.
+ * A route with two ways ("I39/NB/SB") keeps none, and I-35E, I-35W, I-69E
+ * and I-69W are road names, not directions. A US or state route needs the
+ * B ("US 41 NB"), since US 9W and US 19E are roads too.
+ */
+export function routeDir(route: string): { road: string; dir: string | null } {
+  const r = route.trim();
+  if (/[NSEW]B?\s*\/\s*[NSEW]B/i.test(r)) return { road: r, dir: null };
+  const m = /^(I[-\s]?(\d+))\s*\/?\s*([NSEW])B?$/i.exec(r) ?? /^(.+?\d)\s*\/?\s*([NSEW])B$/i.exec(r);
+  if (!m) return { road: r, dir: null };
+  const letter = (m.length === 4 ? m[3] : m[2]).toUpperCase();
+  if (m.length === 4 && (m[2] === "35" || m[2] === "69") && (letter === "E" || letter === "W") && !/B$/i.test(r)) return { road: r, dir: null };
+  return { road: m[1], dir: DIRECTION[`${letter}B`] };
+}
+
+export function weighParts(name: string | null, route: string | null, direction: string | null): WeighParts {
+  let base = name ? cleanName(name) : "";
+  let dir = direction ? DIRECTION[direction] ?? direction.toLowerCase() : null;
+  if (route) {
+    const rd = routeDir(route);
+    route = rd.road;
+    dir = dir ?? rd.dir;
+  }
+  const m = DIR_WORD.exec(base);
+  if (m) {
+    dir = dir ?? `${m[1].toLowerCase()}bound`;
+    base = cleanName(base.replace(DIR_WORD, ""));
+  }
+  const named = !!base && !GENERIC_WEIGH.test(base);
+  if (!named) base = WEIGH_TYPE;
+  return { base, road: route ? cleanName(route) : "", dir, named };
+}
+
+const squash = (s: string) => s.toLowerCase().replace(/[-\s]/g, "");
+
+/** "Fremont, I 29 northbound": the parts back together, the road left out when the name already says it. */
+export const joinWeigh = (w: { base: string; road: string; dir: string | null }): string => {
+  const road = w.road && !squash(w.base).includes(squash(w.road)) ? w.road : "";
+  const tail = [road, w.dir].filter(Boolean).join(" ");
+  return tail ? `${w.base}, ${tail}` : w.base;
+};
+
 /**
  * "Fremont, I 29 northbound": a weigh station's name with its road and
  * direction when the sources have them. A direction written into the name
@@ -198,17 +254,8 @@ const GENERIC_WEIGH = /^(truck\s+)?(weigh|weight)(t)?\s*(station|scale|scales|st
  * used when no source gives one, and generic names read "Weigh station".
  */
 export function weighName(name: string | null, route: string | null, direction: string | null): { name: string; dir: string | null } {
-  let base = name ? cleanName(name) : "";
-  let dir = direction ? DIRECTION[direction] ?? direction.toLowerCase() : null;
-  const m = DIR_WORD.exec(base);
-  if (m) {
-    dir = dir ?? `${m[1].toLowerCase()}bound`;
-    base = cleanName(base.replace(DIR_WORD, ""));
-  }
-  if (!base || GENERIC_WEIGH.test(base)) base = WEIGH_TYPE;
-  const road = route ? cleanName(route) : "";
-  const tail = [road, dir].filter(Boolean).join(" ");
-  return { name: tail ? `${base}, ${tail}` : base, dir };
+  const w = weighParts(name, route, direction);
+  return { name: joinWeigh(w), dir: w.dir };
 }
 
 /** A state code from whatever a GeoJSON feature calls it: a code, a postal field, or the name. */
@@ -303,7 +350,11 @@ export function isInterstate(sign: unknown, code: unknown): boolean {
   return code === 2 || code === "2";
 }
 
-/** Roads as the roads file writes them (quantized delta encoded lines) or as plain GeoJSON lines. */
+/**
+ * Roads as the roads file writes them (quantized delta encoded lines, each
+ * a [sign, code, pts] row in the order its `fields` names, or a {sign,
+ * code, pts} object) or as plain GeoJSON lines.
+ */
 export function parseRoads(doc: unknown, path: string): MapRoad[] {
   const d = doc as Record<string, unknown> | null;
   fail(!d || typeof d !== "object", `${path} is not a JSON object`);
@@ -311,7 +362,9 @@ export function parseRoads(doc: unknown, path: string): MapRoad[] {
   if (Array.isArray(d!.lines)) {
     const p = d!.precision;
     fail(typeof p !== "number" || !Number.isInteger(p) || p < 0 || p > 7, `${path} has no whole number precision for its lines`);
-    for (const line of d!.lines as Record<string, unknown>[]) {
+    const fields = Array.isArray(d!.fields) ? (d!.fields as string[]) : ["sign", "code", "pts"];
+    for (const raw of d!.lines as unknown[]) {
+      const line = (Array.isArray(raw) ? Object.fromEntries(fields.map((f, i) => [f, raw[i]])) : raw) as Record<string, unknown>;
       const pts = line?.pts;
       fail(!Array.isArray(pts) || pts.length < 4 || pts.length % 2 !== 0 || !pts.every(Number.isInteger),
         `${path} has a line whose pts is not an even list of whole numbers`);
@@ -334,12 +387,35 @@ export function parseRoads(doc: unknown, path: string): MapRoad[] {
   return out;
 }
 
-/** Places as {name, state, lat, lon} objects or [name, state, lat, lon] rows, bare or under an envelope. */
+/**
+ * The places file's columns (one list per field, lat and lon as delta
+ * encoded integers at `precision` decimals) back to rows, in file order.
+ */
+function placeColumns(d: Record<string, unknown>, path: string): unknown[] {
+  const cols = d.places as Record<string, unknown[]>;
+  const p = d.precision;
+  fail(typeof p !== "number" || !Number.isInteger(p) || p < 0 || p > 7, `${path} has no whole number precision for its places`);
+  const n = Array.isArray(cols.name) ? cols.name.length : -1;
+  for (const k of ["name", "state", "lat", "lon"]) fail(!Array.isArray(cols[k]) || cols[k].length !== n, `${path} has no ${k} column as long as the names`);
+  fail(!cols.lat.every(Number.isInteger) || !cols.lon.every(Number.isInteger), `${path} has a lat or lon that is not a whole number`);
+  const s = 10 ** (p as number);
+  let y = 0, x = 0;
+  return cols.name.map((name, i) => {
+    y += cols.lat[i] as number;
+    x += cols.lon[i] as number;
+    return [name, cols.state[i], y / s, x / s];
+  });
+}
+
+/** Places as the places file's columns, {name, state, lat, lon} objects or [name, state, lat, lon] rows, bare or under an envelope. */
 export function parsePlaces(doc: unknown, path: string): MapPlace[] {
   const d = doc as Record<string, unknown> | unknown[];
+  const cols = !Array.isArray(d) && d && typeof d.places === "object" && d.places !== null && !Array.isArray(d.places);
   const list = Array.isArray(d)
     ? d
-    : (["places", "rows", "items", "data"].map((k) => (d as Record<string, unknown>)?.[k]).find(Array.isArray) as unknown[] | undefined);
+    : cols
+      ? placeColumns(d as Record<string, unknown>, path)
+      : (["places", "rows", "items", "data"].map((k) => (d as Record<string, unknown>)?.[k]).find(Array.isArray) as unknown[] | undefined);
   fail(!list, `${path} has no places array`);
   const out: MapPlace[] = [];
   const seen = new Set<string>();
@@ -384,13 +460,21 @@ function parseFleet(doc: unknown, path: string, schemaPath: string, ajv: Instanc
   return d as unknown as FleetFile;
 }
 
-interface WeighIn {
+export interface WeighIn extends WeighParts {
+  lat: number;
+  lon: number;
+  state: string | null;
+  src: SourceKey;
+}
+
+export interface WeighOut {
   lat: number;
   lon: number;
   name: string;
   dir: string | null;
   state: string | null;
-  src: SourceKey;
+  /** Every source the marker came from, in SOURCE_ORDER. */
+  sources: string;
 }
 
 /** Metres between two points, flat earth, fine at a few hundred metres. */
@@ -401,22 +485,30 @@ function metres(a: { lat: number; lon: number }, b: { lat: number; lon: number }
   return 6371008.8 * Math.hypot(x, y);
 }
 
+/** Metres in a hundredth of a degree of latitude, the merge grid's cell. */
+const CELL_M = 1111.95;
+
 /**
- * One marker per station. Sources come in priority order (named ones
- * first), so a merged point keeps the best name and position; it takes a
- * direction from a later source when it had none, and gathers every
- * source's letter. Two points going different ways stay apart: the two
- * sides of an interstate scale are two stations.
+ * One marker per station. Sources come in priority order, DailyFuel's own
+ * list first, so a merged marker sits where the first source put it and
+ * keeps its direction. Each later point within `within` metres joins the
+ * nearest marker whose direction agrees (or where one of the two has
+ * none): it adds its source letter, a direction or a road the marker
+ * lacks, and its real name when the marker only had a generic one. Two
+ * points going different ways stay apart: the two sides of an interstate
+ * scale are two stations.
  */
-export function mergeWeigh(input: WeighIn[], within = DEDUPE_M): (WeighIn & { sources: string })[] {
-  const kept: (WeighIn & { sources: Set<SourceKey> })[] = [];
-  const cell = (lat: number, lon: number) => `${Math.floor(lat * 100)}:${Math.floor(lon * 100)}`;
+export function mergeWeigh(input: WeighIn[], within = DEDUPE_M): WeighOut[] {
+  const kept: (WeighIn & { set: Set<SourceKey> })[] = [];
   const grid = new Map<string, number[]>();
+  const reachY = Math.ceil(within / CELL_M);
   for (const w of input) {
     let best = -1, bestM = Infinity;
     const cy = Math.floor(w.lat * 100), cx = Math.floor(w.lon * 100);
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
+    // a hundredth of a degree of longitude shrinks toward the pole, so the search reaches further across
+    const reachX = Math.ceil(within / (CELL_M * Math.max(Math.cos((w.lat * Math.PI) / 180), 0.2)));
+    for (let dy = -reachY; dy <= reachY; dy++) {
+      for (let dx = -reachX; dx <= reachX; dx++) {
         for (const i of grid.get(`${cy + dy}:${cx + dx}`) ?? []) {
           const k = kept[i];
           if (k.dir && w.dir && k.dir !== w.dir) continue;
@@ -430,19 +522,28 @@ export function mergeWeigh(input: WeighIn[], within = DEDUPE_M): (WeighIn & { so
     }
     if (best >= 0) {
       const k = kept[best];
-      k.sources.add(w.src);
-      if (!k.dir && w.dir) {
-        k.dir = w.dir;
-        if (!k.name.includes(w.dir)) k.name = `${k.name}${k.name.includes(",") ? " " : ", "}${w.dir}`;
+      k.set.add(w.src);
+      k.dir = k.dir ?? w.dir;
+      k.road = k.road || w.road;
+      if (!k.named && w.named) {
+        k.base = w.base;
+        k.named = true;
       }
       k.state = k.state ?? w.state;
       continue;
     }
-    kept.push({ ...w, sources: new Set([w.src]) });
-    const key = cell(w.lat, w.lon);
+    kept.push({ ...w, set: new Set([w.src]) });
+    const key = `${cy}:${cx}`;
     grid.set(key, [...(grid.get(key) ?? []), kept.length - 1]);
   }
-  return kept.map((k) => ({ ...k, sources: SOURCE_ORDER.filter((s) => k.sources.has(s)).join("") }));
+  return kept.map((k) => ({
+    lat: k.lat,
+    lon: k.lon,
+    name: joinWeigh(k),
+    dir: k.dir,
+    state: k.state,
+    sources: SOURCE_ORDER.filter((s) => k.set.has(s)).join(""),
+  }));
 }
 
 /** Rows sort by state, then name, then position, so the list with JS off reads state by state. */
@@ -530,11 +631,16 @@ export function placesPayload(places: MapPlace[]): { p: number; s: Record<string
 
 // ------------------------------------------------------------- loading --
 
-/** The weigh station sources, in the order their points win a merge. A new source is one more entry here. */
+/**
+ * The weigh station sources, in the order their points win a merge:
+ * DailyFuel's own list first, since every scale on it that has a direction
+ * carries it, then the named public sources. A new source is one more
+ * entry here.
+ */
 const WEIGH_SOURCES: { key: SourceKey; file: string; required: boolean }[] = [
+  { key: "f", file: "fleet_points.json", required: false },
   { key: "i", file: "weigh_ia.json", required: true },
   { key: "n", file: "weigh_ntad.json", required: true },
-  { key: "f", file: "fleet_points.json", required: false },
   { key: "o", file: "weigh_osm.json", required: true },
 ];
 
@@ -586,8 +692,8 @@ export function loadMapData(dirInput = process.env.DAILYFUEL_MAP_DIR ?? "data/ma
 
   let fleet = false;
   const weighIn: WeighIn[] = [];
-  const add = (src: SourceKey, lat: number, lon: number, n: { name: string; dir: string | null }, state: string | null) =>
-    weighIn.push({ lat, lon, name: n.name, dir: n.dir, state: stateOf(lat, lon, state), src });
+  const add = (src: SourceKey, lat: number, lon: number, parts: WeighParts, state: string | null) =>
+    weighIn.push({ ...parts, lat, lon, state: stateOf(lat, lon, state), src });
   for (const src of WEIGH_SOURCES) {
     const p = join(dir, src.file);
     if (!existsSync(p)) {
@@ -595,11 +701,11 @@ export function loadMapData(dirInput = process.env.DAILYFUEL_MAP_DIR ?? "data/ma
       continue;
     }
     if (src.key === "o") {
-      for (const w of read<WeighOsmFile>(src.file, weighOsmSchema).sites) add("o", w.lat, w.lon, weighName(w.name, null, null), w.state);
+      for (const w of read<WeighOsmFile>(src.file, weighOsmSchema).sites) add("o", w.lat, w.lon, weighParts(w.name, null, null), w.state);
     } else if (src.key === "n") {
-      for (const w of read<WeighNtadFile>(src.file, weighNtadSchema).sites) add("n", w.lat, w.lon, weighName(w.name, w.route, null), w.state);
+      for (const w of read<WeighNtadFile>(src.file, weighNtadSchema).sites) add("n", w.lat, w.lon, weighParts(w.name, w.route, null), w.state);
     } else if (src.key === "i") {
-      for (const w of read<WeighIaFile>(src.file, weighIaSchema).sites) add("i", w.lat, w.lon, weighName(w.name, w.route, w.direction), "IA");
+      for (const w of read<WeighIaFile>(src.file, weighIaSchema).sites) add("i", w.lat, w.lon, weighParts(w.name, w.route, w.direction), "IA");
     } else {
       fleet = true;
       const doc = parseFleet(readJson(p), p, schemaFile("map-fleet-points.schema.json"), ajv);
@@ -611,7 +717,8 @@ export function loadMapData(dirInput = process.env.DAILYFUEL_MAP_DIR ?? "data/ma
             state: stateOf(f.lat, f.lon, f.state), sources: "f", dir: null, chain: service.chain,
           });
         } else {
-          add("f", f.lat, f.lon, weighName(f.label, null, f.direction), f.state);
+          // the list's labels come from a fixed table ("Port of entry"), so a named source may still name the marker
+          add("f", f.lat, f.lon, { ...weighParts(f.label, null, f.direction), named: false }, f.state);
         }
       }
     }

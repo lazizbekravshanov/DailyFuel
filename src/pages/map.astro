@@ -24,7 +24,9 @@ const weigh = data.coverage.weigh;
 const ref = weigh.reference;
 const checked = Object.keys(weigh.states).length;
 const osmDate = formatDate(data.osmBase.slice(0, 10));
-const weighSources = andList(["OpenStreetMap", "U.S. DOT", "Iowa DOT", ...(data.present.fleet ? ["DailyFuel"] : [])]);
+// DailyFuel's own list in the weigh layer: every marker it is part of, and the ones no open source has
+const fleetWeigh = data.points.filter((p) => p.kind === "w" && p.sources.includes("f")).length;
+const fleetOnly = data.points.filter((p) => p.kind === "w" && p.sources === "f").length;
 const taxYear = site.tax?.reporting_period ?? null;
 
 const title = "Truck stop and weigh station map | DailyFuel";
@@ -56,11 +58,11 @@ const description =
         </div>
         <p class="fine mp-attr">
           <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, ODbL</a>, extract of {osmDate}.
-          {data.present.roads && " Roads: U.S. DOT National Highway Freight Network, public domain."}
-          {" "}Weigh stations: {weighSources}.
-          {data.present.fleet && " Truck service points: DailyFuel, CC BY 4.0."}
-          {data.present.places && " Place names: GeoNames, CC BY 4.0."}
+          {" "}More weigh stations: U.S. DOT NTAD (public domain) and Iowa DOT (CC BY 4.0).
+          {data.present.fleet && " Weigh station and truck service points: DailyFuel, CC BY 4.0."}
+          {data.present.roads && " Roads: NTAD National Highway Freight Network, U.S. DOT BTS, public domain."}
           {data.present.states && " State outlines: U.S. Census Bureau, public domain."}
+          {data.present.places && <> Place names: <a href="https://www.geonames.org">GeoNames</a>, CC BY 4.0.</>}
           {" "}Drawn with Leaflet.
         </p>
       </div>
@@ -100,7 +102,9 @@ const description =
         </p>
         <p class="fine">
           Weigh stations are partial. OpenStreetMap had {weigh.share === null ? "some" : `${Math.round(weigh.share * 100)}%`} of the official ones in the {checked} states we could check,
-          and FHWA counted about {fmt(ref.count)} in {ref.year}. A missing marker doesn't mean there is no scale.
+          and FHWA counted about {fmt(ref.count)} in {ref.year}.
+          {data.present.fleet && ` The weigh layer includes DailyFuel's own list: ${fmt(fleetWeigh)} of the markers are on it, and ${fmt(fleetOnly)} of those are on no open source. Nobody has measured how many are still missing.`}
+          {" "}A missing marker doesn't mean there is no scale.
         </p>
         <p class="fine">Chain names only say whose stop it is. DailyFuel is not affiliated with or endorsed by any chain.</p>
       </aside>
