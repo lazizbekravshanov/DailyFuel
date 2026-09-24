@@ -1,0 +1,521 @@
+---
+// /map: truck stops, weigh stations and truck service points on one map, in
+// the paper terminal. No tiles: the base is the state lines and the freight
+// roads drawn from data/map, on paper. Leaflet 1.9.4 is self hosted under
+// /vendor/leaflet/, the markers are drawn on a canvas, and one inline module
+// (src/scripts/map.ts) runs the filters, the popups, the list and the route
+// strip. With JS off the page is the legend, the coverage numbers, the
+// credits and the whole list as a table.
+import Base from "../layouts/Base.astro";
+import { CHAINS } from "../components/map/chains.ts";
+import { jsonBlock, mapConfig, mapScript, rowsHtml, tally } from "../components/map/page.ts";
+import { formatDate } from "../lib/dates.ts";
+import { andList, coverageLine, loadMapData } from "../lib/mapdata.ts";
+import { getSite } from "../lib/site.ts";
+
+const site = getSite();
+const data = loadMapData();
+const t = tally(data);
+const cfg = mapConfig(site, data);
+const fmt = (n: number) => n.toLocaleString("en-US");
+const total = data.points.length;
+const cov = coverageLine(data.coverage);
+const weigh = data.coverage.weigh;
+const ref = weigh.reference;
+const checked = Object.keys(weigh.states).length;
+const osmDate = formatDate(data.osmBase.slice(0, 10));
+const weighSources = andList(["OpenStreetMap", "U.S. DOT", "Iowa DOT", ...(data.present.fleet ? ["DailyFuel"] : [])]);
+const taxYear = site.tax?.reporting_period ?? null;
+
+const title = "Truck stop and weigh station map | DailyFuel";
+const description =
+  `${fmt(t.stops)} truck stops from seven chains and ${fmt(t.weigh)} weigh stations` +
+  (t.service ? `, plus ${fmt(t.service)} truck service points,` : "") +
+  " on one map from open data, with a route strip that lists the EIA diesel price and the state tax along a straight line.";
+---
+<Base title={title} description={description} skipLabel="Skip to the map">
+  <link slot="head" rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+  <div class="mp">
+    <div class="mp-head">
+      <h1 class="lbl">Truck stops and weigh stations <span class="dot">·</span> open data, partial coverage</h1>
+      <p class="fine">
+        {fmt(t.stops)} truck stops, {fmt(t.weigh)} weigh stations{t.service ? ` and ${fmt(t.service)} truck service points` : ""}.
+        Tap a marker for the chain's own page.
+      </p>
+    </div>
+
+    <div class="mp-top">
+      <div class="mp-mc">
+        <div
+          id="map"
+          class="mp-map"
+          role="region"
+          aria-label="Map of truck stops and weigh stations. Arrow keys pan, plus and minus zoom. Every marker is also in the list below."
+        >
+          <p class="mp-msg">The map needs JavaScript. Every place on it is in the list below.</p>
+        </div>
+        <p class="fine mp-attr">
+          <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, ODbL</a>, extract of {osmDate}.
+          {data.present.roads && " Roads: U.S. DOT National Highway Freight Network, public domain."}
+          {" "}Weigh stations: {weighSources}.
+          {data.present.fleet && " Truck service points: DailyFuel, CC BY 4.0."}
+          {data.present.places && " Place names: GeoNames, CC BY 4.0."}
+          {data.present.states && " State outlines: U.S. Census Bureau, public domain."}
+          {" "}Drawn with Leaflet.
+        </p>
+      </div>
+
+      <aside class="mp-lg" aria-labelledby="lg-h">
+        <div class="sh"><h2 id="lg-h">Legend</h2><p class="meta">Untick to hide</p></div>
+        <fieldset class="lg">
+          <legend class="sr-only">Show on the map and in the list</legend>
+          <p class="lbl">Truck stops</p>
+          {CHAINS.map((ch) => (
+            <label class="lg-i">
+              <input type="checkbox" data-k={ch.key} checked disabled />
+              <span class="key" style={`--k:${ch.ink}`} aria-hidden="true">{ch.letter}</span>
+              <span>{ch.name}</span>
+              <span class="n">{fmt(data.counts[ch.key] ?? 0)}</span>
+            </label>
+          ))}
+          <p class="lbl">Other points</p>
+          <label class="lg-i">
+            <input type="checkbox" data-k="w" checked disabled />
+            <span class="key kw" aria-hidden="true"></span>
+            <span>Weigh stations</span>
+            <span class="n">{fmt(t.weigh)}</span>
+          </label>
+          {t.service > 0 && (
+            <label class="lg-i">
+              <input type="checkbox" data-k="v" checked disabled />
+              <span class="key kv" aria-hidden="true"></span>
+              <span>Truck service</span>
+              <span class="n">{fmt(t.service)}</span>
+            </label>
+          )}
+        </fieldset>
+        <p class="fine">
+          Share of each chain's own sites on the map: {cov.measured}.
+          {cov.unmeasured.length > 0 && ` ${andList(cov.unmeasured)} ${cov.unmeasured.length === 1 ? "has" : "have"} no public count to check against.`}
+        </p>
+        <p class="fine">
+          Weigh stations are partial. OpenStreetMap had {weigh.share === null ? "some" : `${Math.round(weigh.share * 100)}%`} of the official ones in the {checked} states we could check,
+          and FHWA counted about {fmt(ref.count)} in {ref.year}. A missing marker doesn't mean there is no scale.
+        </p>
+        <p class="fine">Chain names only say whose stop it is. DailyFuel is not affiliated with or endorsed by any chain.</p>
+      </aside>
+    </div>
+
+
+    <section class="mp-rt" aria-labelledby="rt-h">
+      <div class="sh">
+        <h2 id="rt-h">Route strip</h2>
+        <p class="meta">{cfg.wk}{taxYear && <> <span class="dot">·</span> FHWA {taxYear} state tax</>}</p>
+      </div>
+      <form id="rt" class="rt" autocomplete="off">
+        <fieldset disabled>
+          <legend class="sr-only">The two ends of a straight line</legend>
+          <label class="rt-f"><span>A</span><input name="a" list="pl" placeholder="Chicago, IL" spellcheck="false" /></label>
+          <label class="rt-f"><span>B</span><input name="b" list="pl" placeholder="Cheyenne, WY" spellcheck="false" /></label>
+          <button class="btn" type="submit">Go</button>
+          <button class="btn" type="button" data-pick aria-pressed="false">Use the map</button>
+        </fieldset>
+        <datalist id="pl"></datalist>
+      </form>
+      <noscript><p class="fine">The route strip needs JavaScript.</p></noscript>
+      <p class="note">
+        This is a straight line corridor, not a driving route. Prices are the EIA regional average from Monday; pumps in the same state can run more than a dollar apart. Check the chain's own page for today's price.
+      </p>
+      <p class="fine rt-st" id="rt-st" role="status"></p>
+      <div id="rt-out"></div>
+    </section>
+
+    <section class="mp-ls" aria-labelledby="ls-h">
+      <div class="sh"><h2 id="ls-h">List</h2><p class="meta" id="ls-n">{fmt(total)} places</p></div>
+      <p class="fine">Every marker on the map. With the map on, the list keeps to what is in view, and a name opens its marker.</p>
+      <div class="scroll mlist" tabindex="0" role="region" aria-label="List of every place on the map, scrolls">
+        <table id="ls">
+          <thead>
+            <tr><th scope="col" data-sort="n">Name</th><th scope="col" data-sort="t">Type</th><th scope="col" data-sort="st" aria-sort="ascending">St</th></tr>
+          </thead>
+          <tbody set:html={rowsHtml(data.points)} />
+        </table>
+      </div>
+    </section>
+  </div>
+  <script is:inline type="application/json" id="mapcfg" set:html={jsonBlock(cfg)} />
+
+  <Fragment slot="scripts">
+    <script is:inline defer src="/vendor/leaflet/leaflet.js"></script>
+    <script is:inline type="module" set:html={mapScript()}></script>
+  </Fragment>
+</Base>
+
+<style is:global>
+  .top .btn[aria-current="page"] {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .mp-head {
+    padding: 18px 0 2px;
+  }
+  .mp-head .fine {
+    margin: 0;
+  }
+  .mp-mc {
+    min-width: 0;
+  }
+  .mp-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 290px);
+    gap: 16px 28px;
+    align-items: start;
+    margin-top: 12px;
+  }
+  .mp-map {
+    position: relative;
+    z-index: 0;
+    height: 360px;
+    border: 1px solid var(--edge);
+    background: var(--bg);
+  }
+  @media (min-width: 600px) {
+    .mp-map {
+      height: 460px;
+    }
+  }
+  @media (min-width: 900px) {
+    .mp-map {
+      height: 600px;
+    }
+  }
+  @media (max-width: 899px) {
+    .mp-top {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .mp-msg {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 16px;
+    text-align: center;
+    font-size: var(--fs-s);
+    color: var(--ink2);
+  }
+  /* with JS off the box is only its one line, not an empty map */
+  @media (scripting: none) {
+    .mp-map {
+      height: auto;
+    }
+    .mp-msg {
+      position: static;
+    }
+  }
+  .mp-map.pick,
+  .mp-map.pick .leaflet-interactive {
+    cursor: crosshair;
+  }
+  .mp-lg .sh {
+    margin-top: 0;
+  }
+  .mp-lg .fine {
+    margin: 10px 0 0;
+  }
+  .mp-attr {
+    margin: 8px 0 0;
+  }
+
+  /* the legend: a tick, the marker's key, the name, the count */
+  .lg {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .lg .lbl {
+    margin: 8px 0 2px;
+  }
+  .lg-i {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+    font-size: var(--fs-t);
+    cursor: pointer;
+  }
+  .lg-i input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--ink);
+  }
+  /* with JS off there is nothing to tick */
+  .lg-i input:disabled {
+    visibility: hidden;
+  }
+  .lg-i .n {
+    margin-left: auto;
+    color: var(--ink2);
+  }
+  .key {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--k);
+    color: var(--bg);
+    font: 700 10px/1 var(--font);
+    forced-color-adjust: none;
+  }
+  .key.kw {
+    width: 12px;
+    height: 12px;
+    margin: 2px;
+    border: 1.5px solid var(--ink);
+    background: var(--bg);
+  }
+  .key.kv {
+    width: 9px;
+    height: 9px;
+    margin: 3.5px;
+    border-radius: 0;
+    background: var(--ink2);
+  }
+
+  /* Leaflet in the paper terminal: paper, ink, hairlines, no shadows, no tip */
+  .mp .leaflet-container {
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--fs-t);
+  }
+  .mp .leaflet-container a {
+    color: inherit;
+  }
+  .mp .leaflet-container:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .mp .leaflet-bar {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .mp .leaflet-bar a,
+  .mp .leaflet-bar a:first-child,
+  .mp .leaflet-bar a:last-child {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--edge);
+    border-radius: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 700 16px/28px var(--font);
+  }
+  .mp .leaflet-bar a + a {
+    border-top: 0;
+  }
+  .mp .leaflet-bar a:hover {
+    background: var(--mark);
+  }
+  .mp .leaflet-bar a.leaflet-disabled {
+    background: var(--bg);
+    color: var(--edge);
+  }
+  .mp .leaflet-bar a:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 0;
+  }
+  .mp path.st {
+    stroke: var(--ink2);
+    stroke-width: 0.7;
+  }
+  .mp path.ro {
+    stroke: var(--hair);
+    stroke-width: 1;
+  }
+  .mp path.ri {
+    stroke: var(--edge);
+    stroke-width: 1.1;
+  }
+  .mp path.rb {
+    stroke: var(--ink);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+    fill: var(--ink);
+    fill-opacity: 0.05;
+  }
+  .mp path.rl {
+    stroke: var(--ink);
+    stroke-width: 2;
+    fill: none;
+  }
+  .mp .rab {
+    display: grid;
+    place-items: center;
+    background: var(--ink);
+    color: var(--bg);
+    font: 700 12px/1 var(--font);
+  }
+  .mp .leaflet-popup {
+    margin-bottom: 16px;
+  }
+  .mp .leaflet-popup-content-wrapper {
+    padding: 0;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    background: var(--bg);
+    color: var(--ink);
+    box-shadow: none;
+  }
+  .mp .leaflet-popup-content {
+    min-width: 180px;
+    margin: 10px 12px;
+    font-size: var(--fs-t);
+    line-height: 1.45;
+  }
+  .mp .leaflet-popup-content p {
+    margin: 0 0 3px;
+  }
+  .mp .leaflet-popup-content a {
+    display: inline-block;
+    min-height: 24px;
+    line-height: 24px;
+  }
+  .mp .leaflet-popup-tip-container {
+    display: none;
+  }
+  .pp-in:focus {
+    outline: none;
+  }
+  .pp-s {
+    font-size: var(--fs-s);
+    color: var(--ink2);
+  }
+  .pp-in .btn {
+    margin-top: 6px;
+  }
+
+  /* the route strip */
+  .rt fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .rt-f {
+    display: inline-flex;
+    flex: 1 1 200px;
+    align-items: center;
+    gap: 8px;
+    max-width: 320px;
+    min-height: 30px;
+    padding: 1px 8px;
+    border: 1px solid var(--edge);
+  }
+  .rt-f span {
+    font-weight: 700;
+  }
+  .rt-f input {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: var(--fs-t);
+  }
+  .rt-f:focus-within {
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
+  }
+  .rt-f input:focus {
+    outline: none;
+  }
+  .rt-f input::-webkit-calendar-picker-indicator {
+    display: none !important;
+  }
+  .rt .btn {
+    min-height: 30px;
+  }
+  .rt fieldset:disabled .btn,
+  .rt fieldset:disabled .rt-f {
+    opacity: 0.5;
+  }
+  .mp-rt .note {
+    margin-top: 12px;
+  }
+  .rt-st:empty {
+    display: none;
+  }
+  .rsum {
+    margin: 14px 0 0;
+  }
+  .rs {
+    margin-top: 12px;
+  }
+  .rs .strip {
+    margin: 0 0 4px;
+  }
+  .rs table {
+    width: auto;
+    min-width: 0;
+  }
+  .rs td:nth-child(2) {
+    min-width: 14ch;
+    white-space: normal;
+  }
+
+  /* the list: a box of its own, the heads stay put while it scrolls */
+  .mlist {
+    max-height: 480px;
+    overflow: auto;
+  }
+  .mlist thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--bg);
+  }
+  .mlist td:first-child {
+    white-space: normal;
+    min-width: 16ch;
+  }
+  .lk {
+    min-height: 24px;
+    padding: 2px 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: underline;
+    text-decoration-color: var(--edge);
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+  .lk:hover {
+    text-decoration-color: currentColor;
+  }
+  @media print {
+    .mp-map,
+    .mp-rt {
+      display: none;
+    }
+    .mlist {
+      max-height: none;
+      overflow: visible;
+    }
+  }
+</style>
