@@ -1,0 +1,12 @@
+---
+// The DARK control in the header. Rendered hidden: the inline script right
+// after it (src/scripts/theme.ts) shows it once it is wired, so with JS off
+// there is no button that does nothing. The page follows the system theme
+// on its own; a tap forces the other one and remembers the choice on this
+// phone, in localStorage under "dailyfuel:theme".
+import { inlineCall } from "../lib/inline.ts";
+import { themeToggle } from "../scripts/theme.ts";
+const script = inlineCall(themeToggle, "document", "window", "function(){return window.localStorage}");
+---
+<button type="button" class="btn" data-theme-toggle hidden>Dark</button>
+<script is:inline set:html={script}></script>

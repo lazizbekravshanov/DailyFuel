@@ -1,10 +1,10 @@
 ---
-// Share this page: the phone's share sheet, or the link on the clipboard.
-// Rendered hidden. The inline script right after it (src/scripts/share.ts)
-// shows it only when the browser can share or copy, so with JS off there's no
-// button that does nothing. The status next to it says "Link copied", or shows
-// the link when copying fails too. No tracking, nothing sent anywhere.
-import Icon from "./Icon.astro";
+// The SHARE control in the header: the phone's share sheet, or the link on
+// the clipboard. Rendered hidden. The inline script right after it
+// (src/scripts/share.ts) shows it only when the browser can share or copy, so
+// with JS off there's no button that does nothing. The status before it says
+// "Link copied", or shows the link when copying fails too. No tracking,
+// nothing sent anywhere.
 import { SITE_URL } from "../lib/site.ts";
 import { inlineCall } from "../lib/inline.ts";
 import { shareButton } from "../scripts/share.ts";
@@ -19,61 +19,8 @@ const url = new URL(Astro.url.pathname, Astro.site?.href ?? SITE_URL).href;
 const script = inlineCall(shareButton, "document", "navigator");
 ---
 <div class:list={["share", cls]} data-share hidden>
-  <button type="button" class="share-button" data-text={text} data-url={url}>
-    <Icon name="share" size={15} class="share-mark" />Share
-  </button>
-  <span class="share-status" data-share-status role="status"></span>
+  {/* always in the page, even empty, so screen readers hear it change */}
+  <span class="tag share-status" data-share-status role="status"></span>
+  <button type="button" class="btn" data-text={text} data-url={url}>Share</button>
 </div>
 <script is:inline set:html={script}></script>
-
-<style>
-  /* the status reads on the same line as the button's word */
-  .share {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 6px 14px;
-  }
-  .share[hidden] {
-    display: none;
-  }
-  /* Quiet, like the chart range switch: a hairline and gray words, not a
-     colored button that competes with the sign. A button centers its line by
-     itself, so the icon stays inline and stands on the baseline like the
-     other icons on the site. */
-  .share-button {
-    min-height: 44px;
-    padding: 2px 16px 0 13px;
-    border: 1px solid var(--hairline-strong);
-    border-radius: 6px;
-    background: transparent;
-    color: var(--ink-2);
-    font: inherit;
-    font-size: 15px;
-    font-weight: 650;
-    cursor: pointer;
-  }
-  .share-button:hover {
-    border-color: var(--ink-2);
-    color: var(--ink);
-  }
-  .share-button :global(.share-mark) {
-    margin-right: 8px;
-  }
-  .share-button:hover :global(.share-mark) {
-    color: var(--ink);
-  }
-  @media (forced-colors: active) {
-    .share-button :global(.share-mark) {
-      color: inherit;
-    }
-  }
-  /* always in the page, even empty, so screen readers hear it change */
-  .share-status {
-    min-width: 0;
-    font-size: 15px;
-    font-weight: 650;
-    color: var(--ink);
-    overflow-wrap: anywhere;
-  }
-</style>

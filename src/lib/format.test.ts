@@ -1,22 +1,77 @@
 import { describe, expect, it } from "vitest";
 import {
   centsSign,
+  changeClass,
   changeTenths,
   changeVerb,
   formatCents,
   formatChange,
+  formatMove,
   formatPct,
   formatPrice,
+  formatQuote,
   formatSignedCents,
   formatTick,
   pctHasSign,
   priceParts,
+  signedCents,
+  signedPct,
   spokenChange,
   spokenPrice,
   toMills,
 } from "./format.ts";
 
-describe("price with a raised tenth of a cent", () => {
+describe("money on the paper terminal", () => {
+  it("prints a price as $6.285 in a heading and 6.285 in a table", () => {
+    expect(formatPrice(6.285)).toBe("$6.285");
+    expect(formatQuote(6.285)).toBe("6.285");
+    expect(formatQuote(5)).toBe("5.000");
+    expect(formatQuote(12.001)).toBe("12.001");
+    expect(formatQuote(6.5595)).toBe("6.560");
+  });
+
+  it("prints a change as +31.8¢ +5.3%, the sign carrying the direction", () => {
+    expect(formatMove(0.318, 5.33)).toBe("+31.8¢ +5.3%");
+    expect(formatMove(-0.16, -2.17)).toBe("−16.0¢ −2.2%");
+    expect(formatMove(0, 0)).toBe("0.0¢ 0.0%");
+    expect(formatMove(0.012, null)).toBe("+1.2¢");
+    // a move too small for the percent to show a sign still says which way it went
+    expect(formatMove(0.001, 0.016)).toBe("+0.1¢ 0.0%");
+    expect(formatMove(-0.001, -0.016)).toBe("−0.1¢ 0.0%");
+  });
+
+  it("gives a table cell the signed number alone, the unit being in the column head", () => {
+    expect(signedCents(0.318)).toBe("+31.8");
+    expect(signedCents(-0.042)).toBe("−4.2");
+    expect(signedCents(0.0003)).toBe("0.0");
+    expect(signedCents(-0.5213)).toBe("−52.1");
+    expect(signedPct(5.33)).toBe("+5.3");
+    expect(signedPct(-0.05)).toBe("−0.1");
+    expect(signedPct(0.04)).toBe("0.0");
+    expect(signedPct(12.25)).toBe("+12.3");
+  });
+
+  it("names the class a change wears, and none for no move", () => {
+    expect(changeClass(0.318)).toBe("up");
+    expect(changeClass(-0.001)).toBe("down");
+    expect(changeClass(0.0004)).toBe("");
+    expect(changeClass(-0.0004)).toBe("");
+    expect(changeClass(0)).toBe("");
+    expect(changeClass(null)).toBe("");
+  });
+
+  it("agrees with itself: the cell, the heading and the class come from one rounding", () => {
+    for (const change of [0.318, -0.16, 0.0125, -0.0125, 0.0004, 0.001, 3.2]) {
+      const cents = signedCents(change);
+      expect(formatSignedCents(change)).toBe(`${cents}¢`);
+      expect(formatMove(change, null)).toBe(`${cents}¢`);
+      const cls = changeClass(change);
+      expect(cls === "" ? "0.0" : cls === "up" ? "+" : "−").toBe(cls === "" ? cents : cents.charAt(0));
+    }
+  });
+});
+
+describe("price parts, kept for the parts of the old look not yet redrawn", () => {
   it("splits $6.285 into $6.28 and a raised 5", () => {
     expect(priceParts(6.285)).toEqual({ main: "$6.28", tenth: "5", plain: "$6.285" });
   });

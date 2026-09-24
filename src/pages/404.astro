@@ -35,10 +35,11 @@ if(t!==location.pathname)location.replace(t+location.hash);
   skipLabel="Skip to main content"
 >
   <script slot="head" is:inline set:html={redirect}></script>
-  <div class="wrap missing">
-    <h1>That page isn't here</h1>
+  <div class="prose">
+    <p class="back"><a href="/">‹ All states</a></p>
+    <h1 class="nmbig">That page isn't here</h1>
     <p>The link may be old or mistyped. State pages use the two letter code, like /state/oh/ for Ohio.</p>
-    <p><a href="/#every-state">See diesel prices for every state</a></p>
+    <p><a href="/">See diesel prices for every state</a></p>
     {/* the same list as the home page's Find your state, open from the start */}
     <div class="jump">
       <FindYourState open />
@@ -47,14 +48,8 @@ if(t!==location.pathname)location.replace(t+location.hash);
 </Base>
 
 <style>
-  .missing {
-    padding-block: var(--space-7) var(--space-8);
-  }
-  h1 {
-    margin-bottom: var(--space-4);
-  }
   .jump {
     max-width: 760px;
-    margin-top: var(--space-6);
+    margin-top: 24px;
   }
 </style>
