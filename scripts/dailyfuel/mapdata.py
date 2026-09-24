@@ -62,6 +62,7 @@ SCHEMA_FILES = {
     "map-weigh-ntad": "map-weigh-ntad.schema.json",
     "map-weigh-ia": "map-weigh-ia.schema.json",
     "map-coverage": "map-coverage.schema.json",
+    "map-fleet-points": "map-fleet-points.schema.json",  # written by fleetpoints, not by build()
 }
 
 # Raw responses inside the cache directory, plus a sidecar that records the
@@ -447,6 +448,11 @@ class Boundaries:
         # (code, polygon, bbox of its outer ring)
         self._polys = [(code, poly, _bbox(poly[0])) for code, poly in polygons if poly and poly[0]]
 
+    @property
+    def codes(self) -> frozenset[str]:
+        """The state codes these polygons cover."""
+        return frozenset(code for code, _, _ in self._polys)
+
     @classmethod
     def from_topology(cls, topo: dict, states: StateTable, obj: str = "states") -> "Boundaries":
         by_fips = {s.fips: s.code for s in states.states}
@@ -467,7 +473,7 @@ class Boundaries:
     def from_us_atlas(cls, states: StateTable, path: Path | str = US_ATLAS_STATES) -> "Boundaries":
         path = Path(path)
         if not path.exists():
-            raise MapDataError(f"{path} is missing. Run npm ci first; us-atlas is a package of the site.")
+            raise MapDataError(f"{path} is missing. Pass the us-atlas 3 file; see scripts/update_map_data.py.")
         return cls.from_topology(store.read_json(path), states)
 
     def _state_at(self, lat: float, lon: float) -> str | None:
@@ -530,7 +536,7 @@ class Outline:
     def from_us_atlas(cls, path: Path | str = US_ATLAS_NATION) -> "Outline":
         path = Path(path)
         if not path.exists():
-            raise MapDataError(f"{path} is missing. Run npm ci first; us-atlas is a package of the site.")
+            raise MapDataError(f"{path} is missing. Pass the us-atlas 3 file; see scripts/update_map_data.py.")
         return cls.from_topology(store.read_json(path))
 
     def distance_km(self, lat: float, lon: float) -> float:

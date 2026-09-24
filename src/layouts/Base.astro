@@ -110,6 +110,7 @@ const LATE = "next update is late";
               )}
             </span>
           ) : null}
+          <a class="btn" href="/map/" aria-current={current.startsWith("/map") ? "page" : undefined}>Map</a>
           {share && <ShareButton text={share} />}
           <ThemeToggle />
         </div>
