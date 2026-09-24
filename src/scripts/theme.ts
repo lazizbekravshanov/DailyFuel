@@ -25,8 +25,9 @@ export function applyStoredTheme(doc: Document, getStore: () => Storage): void {
 
 /**
  * The button says what a tap does: "Dark" on a light page, "Light" on a dark
- * one. It wears the `on` class while the page is dark, and keeps the browser's
- * theme-color in step once a theme is forced.
+ * one. It wears the `on` class while the page is dark, which the stylesheet
+ * draws as the inverse fill (the mockup's pressed look), and keeps the
+ * browser's theme-color in step once a theme is forced.
  */
 export function themeToggle(doc: Document, win: Window, getStore: () => Storage): void {
   const button = doc.querySelector("[data-theme-toggle]");

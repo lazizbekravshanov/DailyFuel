@@ -127,7 +127,9 @@ main:focus {
   border-color: var(--ink);
 }
 
-.btn[aria-pressed="true"] {
+/* a pressed control, and the DARK control while the page is dark, invert */
+.btn[aria-pressed="true"],
+.btn.on {
   background: var(--ink);
   color: var(--bg);
   border-color: var(--ink);
@@ -148,7 +150,11 @@ main:focus {
   padding-bottom: 9px;
 }
 
+/* the wordmark is a link, so it stands a control's 24px tall */
 .brand {
+  display: inline-block;
+  min-height: 24px;
+  line-height: 24px;
   font-size: var(--fs-brand);
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -494,6 +500,12 @@ th[aria-sort] .sortb {
   outline: none;
 }
 
+/* the datalist's own drop arrow would be the one arrow on the page; Chromium
+   draws it with an important rule of its own, so this one has to be too */
+.sh .find input::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+
 /* the key cap that says "/" focuses the box */
 .sh .find .k {
   padding: 0 4px;
@@ -650,12 +662,14 @@ th[aria-sort] .sortb {
   transform: none;
 }
 
+/* the readout's hairline over the week under the pointer: a border, which
+   forced colours keep, where a background would be painted out */
 .cross {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 1px;
-  background: var(--ink);
+  width: 0;
+  border-left: 1px solid var(--ink);
 }
 
 @media (max-width: 760px) {
@@ -842,7 +856,7 @@ th[aria-sort] .sortb {
   margin: 0 0 10px;
 }
 
-/* keeps the browser's own disclosure triangle, so it reads as something to open */
+/* a summary in the prose (the 404 page's Find your state) at a control's size */
 .prose summary {
   min-height: 24px;
   line-height: 24px;
@@ -876,13 +890,26 @@ th[aria-sort] .sortb {
   font-weight: 700;
 }
 
+/* every link in the footer and the prose is a 24px target, like the notes' links on a state page */
+.foot a,
+.prose a {
+  display: inline-block;
+  min-height: 24px;
+  line-height: 24px;
+}
+
 /* --------------------------------------------------------------- modes --- */
 
 @media (forced-colors: active) {
+  /* every inverse fill that carries a state: a pressed control, the DARK
+     control while dark, the price tag, your state's row, the chosen range */
   .btn[aria-pressed="true"],
+  .btn.on,
   .ytag,
   tr.mine th,
-  tr.mine td {
+  tr.mine td,
+  #r1:checked ~ .sh label[for="r1"],
+  #r2:checked ~ .sh label[for="r2"] {
     forced-color-adjust: none;
     background: Highlight;
     color: HighlightText;

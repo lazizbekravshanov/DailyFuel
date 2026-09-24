@@ -9,13 +9,13 @@
 // the date is the card's drawing, so a redrawn card gets a new URL too.
 
 import { resolve } from "node:path";
-import type { Direction } from "./bins.ts";
+import { moveClass, type Cadence, type Direction } from "./bins.ts";
 import { pctOf } from "./copy.ts";
 import { formatDate, when } from "./dates.ts";
-import { changeClass, formatMove, formatPrice, spokenChange } from "./format.ts";
+import { formatMove, formatPrice, spokenChange } from "./format.ts";
 import { palettePng } from "./png.ts";
 import { SITE_URL } from "./url.ts";
-import { regionAverage } from "./yourstate.ts";
+import { eiaPlate } from "./yourstate.ts";
 import type { Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 
@@ -93,9 +93,7 @@ export function cardKeyFor(pathname: string, site: SiteData): string {
  * and DC": the same words as the plate under a state's price.
  */
 export function regionLabel(s: StateView, site: SiteData): string {
-  if (!s.eia_series || !s.regionName) return `EIA doesn't survey diesel prices in ${s.name}`;
-  if (s.eia_series === "SCA") return "EIA California average";
-  return regionAverage(s, site) ?? `EIA ${s.regionName} average`;
+  return eiaPlate(s, site) ?? `EIA doesn't survey diesel prices in ${s.name}`;
 }
 
 interface Timing {
@@ -124,11 +122,16 @@ function timing(site: SiteData, daily: boolean): Timing {
   return { dateLine: `Week of ${formatDate(site.national.date)}`, compareLine: null };
 }
 
-function moveParts(move: Move | null) {
+/**
+ * The change and the ink it wears. The direction follows the bins, the same
+ * as the page: a weekly move under 1¢ is flat and prints in the muted ink, so
+ * the card and the page never colour the same number differently.
+ */
+function moveParts(move: Move | null, cadence: Cadence) {
   if (!move || move.change === null) return { direction: null, change: null, spoken: null };
-  const cls = changeClass(move.change);
+  const ink = moveClass(move.change, cadence);
   return {
-    direction: (cls || "flat") as Direction,
+    direction: (ink === "muted" ? "flat" : ink) as Direction,
     change: formatMove(move.change, pctOf(move)),
     spoken: spokenChange(move.change),
   };
@@ -146,7 +149,7 @@ export function cardFor(site: SiteData, key: string): Card {
     const daily = site.national.cadence === "daily";
     const move = site.national.move;
     const t = timing(site, daily);
-    const parts = moveParts(move);
+    const parts = moveParts(move, site.national.cadence);
     // AAA's national change is its own today minus yesterday, even after a
     // missed day, so it's always "since yesterday".
     const compareLine = daily ? "Since yesterday" : t.compareLine;
@@ -169,7 +172,7 @@ export function cardFor(site: SiteData, key: string): Card {
   const daily = s.cadence === "daily";
   const move = s.primary;
   const t = timing(site, daily && aaaMode);
-  const parts = moveParts(move);
+  const parts = moveParts(move, s.cadence);
   // A state EIA doesn't survey has no reading for any week, so the card says
   // what its page says instead of printing a survey week.
   const unsurveyed = !aaaMode && !move && s.eia_series === null;

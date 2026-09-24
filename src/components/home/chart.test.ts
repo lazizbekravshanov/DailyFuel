@@ -114,6 +114,17 @@ describe("the sparklines", () => {
     expect(sparkLabel("Midwest", off)).toBe("Midwest, 52 weeks, now $6.100");
   });
 
+  it("open the same 364 day window as the state page's key stats, so a missing week never widens them", () => {
+    // 60 weeks with a hole inside the last year: slice(-52) would reach back a
+    // 53rd week for its low, while highLow on the state page would not
+    const vals = Array.from({ length: 60 }, (_, i) => 4 + i / 100);
+    vals[20] = null as unknown as number;
+    const series = weeks("2025-01-06", vals);
+    const s = spark(series)!;
+    expect(s.low).toEqual(series[8]);
+    expect(s.d).toMatch(/^M1 \d+(L\d+ \d+){50}$/);
+  });
+
   it("skip the weeks with no price and need two of them", () => {
     expect(spark(weeks("2025-09-15", [null, 3.5, null, 3.6]))!.d).toMatch(/^M1 \d+L99 \d+$/);
     expect(spark(weeks("2025-09-15", [3.5]))).toBeNull();

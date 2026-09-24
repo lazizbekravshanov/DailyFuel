@@ -40,7 +40,10 @@ const website = current === "/"
     }).replace(/</g, "\\u003c")
   : null;
 // Visit counts: Vercel Web Analytics, first party, no cookies. Only in Vercel
-// production builds, so preview deploys and local builds never load it.
+// production builds, so preview deploys and local builds never load it. The
+// script records the page view by itself; the site never calls va(), so the
+// queue stub Vercel's snippet starts with is left out (it cost the home page
+// its inline script budget).
 const analytics = process.env.VERCEL_ENV === "production";
 // A saved light or dark choice goes on <html> before the first paint.
 const themeBoot = inlineCall(applyStoredTheme, "document", "function(){return window.localStorage}");
@@ -118,11 +121,6 @@ const LATE = "next update is late";
     </main>
     <Footer site={site} compact={current.startsWith("/about")} />
     <slot name="scripts" />
-    {analytics && (
-      <>
-        <script is:inline>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
-        <script is:inline defer src="/_vercel/insights/script.js"></script>
-      </>
-    )}
+    {analytics && <script is:inline defer src="/_vercel/insights/script.js"></script>}
   </body>
 </html>

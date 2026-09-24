@@ -23,7 +23,7 @@ interface Props {
 const { caption, firstColumn, columns, rows, label } = Astro.props;
 ---
 <details class="numbers">
-  <summary>Show the numbers</summary>
+  <summary class="btn">Show the numbers</summary>
   <div class="scroll" tabindex="0" role="region" aria-label={label}>
     <table>
       <caption class="sr-only">{caption}</caption>
@@ -49,14 +49,13 @@ const { caption, firstColumn, columns, rows, label } = Astro.props;
   .numbers {
     margin-top: 12px;
   }
-  /* keeps the browser's own disclosure triangle, so it reads as something to open */
-  .numbers summary {
-    min-height: 24px;
-    line-height: 24px;
-    cursor: pointer;
-    font-size: var(--fs-s);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  /* the summary is the control, drawn like Find your state's: no disclosure
+     triangle, since the design has no arrows */
+  .numbers > summary {
+    list-style: none;
+  }
+  .numbers > summary::-webkit-details-marker {
+    display: none;
   }
   /* two hundred weeks stay shorter than the screen, and scroll inside their box */
   .numbers .scroll {

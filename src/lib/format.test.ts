@@ -11,7 +11,6 @@ import {
   formatQuote,
   formatSignedCents,
   formatTick,
-  priceParts,
   signedCents,
   signedPct,
   spokenChange,
@@ -69,22 +68,21 @@ describe("money on the paper terminal", () => {
   });
 });
 
-describe("price parts, kept for the parts of the old look not yet redrawn", () => {
-  it("splits $6.285 into $6.28 and a raised 5", () => {
-    expect(priceParts(6.285)).toEqual({ main: "$6.28", tenth: "5", plain: "$6.285" });
-  });
-
+describe("the price string", () => {
+  // priceParts ("$6.28" and a raised "5") went with the road sign: the paper
+  // terminal prints a price as one string, so these check formatPrice itself.
   it("rounds AAA four decimal prices half up to the tenth of a cent", () => {
-    expect(priceParts(6.5597).plain).toBe("$6.560");
-    expect(priceParts(6.5595).plain).toBe("$6.560");
-    expect(priceParts(6.5594).plain).toBe("$6.559");
-    expect(priceParts(3.9995)).toEqual({ main: "$4.00", tenth: "0", plain: "$4.000" });
+    expect(formatPrice(6.5597)).toBe("$6.560");
+    expect(formatPrice(6.5595)).toBe("$6.560");
+    expect(formatPrice(6.5594)).toBe("$6.559");
+    expect(formatPrice(3.9995)).toBe("$4.000");
   });
 
   it("keeps zeros where they belong", () => {
-    expect(priceParts(5).plain).toBe("$5.000");
-    expect(priceParts(5.05)).toEqual({ main: "$5.05", tenth: "0", plain: "$5.050" });
-    expect(priceParts(12.001)).toEqual({ main: "$12.00", tenth: "1", plain: "$12.001" });
+    expect(formatPrice(5)).toBe("$5.000");
+    expect(formatPrice(5.05)).toBe("$5.050");
+    expect(formatPrice(12.001)).toBe("$12.001");
+    expect(formatPrice(0.005)).toBe("$0.005");
   });
 
   it("survives float noise", () => {
@@ -98,7 +96,7 @@ describe("price parts, kept for the parts of the old look not yet redrawn", () =
   });
 
   it("rejects negative prices", () => {
-    expect(() => priceParts(-1)).toThrow(RangeError);
+    expect(() => formatPrice(-1)).toThrow(RangeError);
   });
 });
 

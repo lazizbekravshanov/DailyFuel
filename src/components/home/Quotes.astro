@@ -21,9 +21,13 @@ const daily = site.mode === "aaa+eia";
 const eia = site.latest.eia;
 const tax = site.tax;
 const states = [...site.states].sort((a, b) => a.name.localeCompare(b.name));
-/** Numbers for the sort keys: cents and percent to one decimal, as printed. */
+/**
+ * Numbers for the sort keys: cents and percent to one decimal, rounded the
+ * same way as the printed cells (half away from zero), so a −2.45% row
+ * sorts where its cell says.
+ */
 const centsKey = (change: number) => String(changeTenths(change) / 10);
-const pctKey = (pct: number) => String(Math.round(pct * 10) / 10);
+const pctKey = (pct: number) => String(Number(signedPct(pct).replace("−", "-")));
 const noTax = tax ? states.filter((s) => s.tax && s.tax.state === null).map((s) => s.code) : [];
 const staleTax = tax ? states.filter((s) => s.tax?.outOfDate).map((s) => s.code) : [];
 const andList = (codes: string[]) => (codes.length < 2 ? codes.join("") : `${codes.slice(0, -1).join(", ")} and ${codes[codes.length - 1]}`);

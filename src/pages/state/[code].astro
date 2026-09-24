@@ -15,6 +15,7 @@ import NumbersTable from "../../components/NumbersTable.astro";
 import TaxPanel from "../../components/TaxPanel.astro";
 import chartScript from "../../scripts/chart.js?raw";
 import { getSite, weeklyMove, weeklySeries, type StateView } from "../../lib/site.ts";
+import { moveClass } from "../../lib/bins.ts";
 import { buildChart, type ChartSeries } from "../../lib/chart.ts";
 import { addDays, formatDate, formatMonthYear, formatShortDate, todayInNewYork, when } from "../../lib/dates.ts";
 import { changeClass, formatMove, formatPct, formatPrice, formatQuote, formatSignedCents, signedCents, spokenChange } from "../../lib/format.ts";
@@ -190,11 +191,13 @@ const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return w
     <span class="acts"><span class="mark" data-my-state>My state ✓</span></span>
   </div>
 
+  {/* the change wears the ink the bins give it, the same as the home page's
+      table and strip: a weekly move under 1¢ prints in muted ink, not red */}
   <p class="big">
     {move ? (
       <>
         <span>{formatPrice(move.price)}</span>
-        {move.change !== null && <span class:list={["d", changeClass(move.change)]}>{formatMove(move.change, pct)}</span>}
+        {move.change !== null && <span class:list={["d", moveClass(move.change, s.cadence)]}>{formatMove(move.change, pct)}</span>}
       </>
     ) : (
       <span>{aaaMode ? "No price today" : "No EIA price"}</span>
@@ -221,7 +224,6 @@ const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return w
   {aaaMode && s.eia && eia && (
     <p class="note fine">EIA weekly {s.regionName} average {formatPrice(s.eia.price)}, week of {formatShortDate(eia.period)}.</p>
   )}
-  {move && <p class="note fine">{!aaaMode && `${DOE_LINE} `}{DYED_DIESEL_HERE}</p>}
   <p class="note fine"><a href={aaaLink}>AAA's daily average for {s.name}</a></p>
 
   {charts.length > 1 ? (
@@ -316,6 +318,9 @@ const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return w
   )}
 
   {site.tax && s.tax && <TaxPanel site={site} state={s} priced={Boolean(move)} />}
+  {/* what the number is, in the small print under the tax boxes, where the
+      mockup keeps its fine print, so the head reads like the mockup's */}
+  {move && <p class="note fine">{!aaaMode && `${DOE_LINE} `}{DYED_DIESEL_HERE}</p>}
 
   {mates.length > 0 && (
     <section class="board peers" aria-labelledby="peers-title">
@@ -353,7 +358,7 @@ const save = inlineCall(saveOnView, JSON.stringify(s.code), "function(){return w
                 <td>{p.name}</td>
                 {p.primary ? <td class="num">{formatQuote(p.primary.price)}</td> : <td class="num muted">n/a</td>}
                 {p.primary && p.primary.change !== null
-                  ? <td class:list={["num", changeClass(p.primary.change)]}>{signedCents(p.primary.change)}</td>
+                  ? <td class:list={["num", moveClass(p.primary.change, p.cadence)]}>{signedCents(p.primary.change)}</td>
                   : <td class="num muted">n/a</td>}
                 {taxCell(p) === null ? <td class="num muted">n/a</td> : <td class="num">{taxCell(p)}</td>}
               </tr>

@@ -12,7 +12,7 @@ import type { SiteData, StateView } from "./site.ts";
 /**
  * "this week", "since yesterday", "since Sep 15": the span a state's change
  * covers. After a skipped AAA day the states compare with the last day AAA
- * had, the way the state sign's "vs Sep 15" does.
+ * had, the way the state page's week line does.
  */
 function stateSpan(site: SiteData, daily: boolean): string {
   if (!daily) return "this week";
@@ -38,13 +38,13 @@ function sourceLine(s: StateView | null, daily: boolean): string {
   return `DOE ${s.regionName} weekly average.`;
 }
 
-/** The home page's sentence: the U.S. price the sign shows. */
+/** The home page's sentence: the U.S. price its headline shows. */
 export function homeShareText(site: SiteData): string {
   const us = site.national.move;
   if (!us) return "Diesel prices for every state, and which way they moved.";
   const daily = site.national.cadence === "daily";
-  // AAA's national number always moves since yesterday, like the sign says,
-  // even after a day the state prices skipped.
+  // AAA's national number always moves since yesterday, like the headline
+  // says, even after a day the state prices skipped.
   return `${priceLine("U.S.", us, daily ? "since yesterday" : "this week")} ${sourceLine(null, daily)}`;
 }
 

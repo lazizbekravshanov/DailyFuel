@@ -117,13 +117,13 @@ describe("share sentence on a state page", () => {
 });
 
 describe("share sentence on the home page", () => {
-  it("is the U.S. number on the sign", () => {
+  it("is the U.S. number the headline prints", () => {
     expect(homeShareText(S)).toBe("U.S. diesel is $6.285 a gallon, up 31.8 cents this week. DOE weekly average.");
     const a = aaaSite();
     expect(homeShareText(a)).toBe("U.S. diesel is $6.200 a gallon, up 1.8 cents since yesterday. AAA daily average.");
   });
 
-  it("keeps AAA's national move since yesterday after a skipped state day, like the sign", () => {
+  it("keeps AAA's national move since yesterday after a skipped state day, like the headline", () => {
     expect(homeShareText(aaaSite(3))).toBe("U.S. diesel is $6.200 a gallon, up 1.8 cents since yesterday. AAA daily average.");
   });
 

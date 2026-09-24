@@ -6,8 +6,11 @@
 // change starts with its sign, no dashes as punctuation, nothing loaded from
 // anywhere else. Then the home page and the state pages are checked against
 // the data and the mockup, and against their size budgets. It builds the site
-// from data/ into tmp/dist-test once (a few seconds), or reads an existing
-// build when DAILYFUEL_BUILT_DIR names one.
+// from data/ into tmp/dist-test once (a few seconds), and once more the way
+// Vercel builds it for production (VERCEL_ENV=production, which adds the
+// analytics script) into tmp/dist-test-prod, since that is the page that
+// ships and its budget is the one that counts. DAILYFUEL_BUILT_DIR and
+// DAILYFUEL_BUILT_PROD_DIR name existing builds instead.
 //
 // The road sign checks that were here (every arrow an icon, the sprite on
 // every page, the map chips) went with that design. There are no arrows to
@@ -26,18 +29,26 @@ import { getSite } from "./site.ts";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 let dist = process.env.DAILYFUEL_BUILT_DIR ? resolve(ROOT, process.env.DAILYFUEL_BUILT_DIR) : "";
+// the production build: with an existing plain build named, only an existing production build counts
+let prod = process.env.DAILYFUEL_BUILT_PROD_DIR ? resolve(ROOT, process.env.DAILYFUEL_BUILT_PROD_DIR) : "";
+
+function build(outDir: string, extra: Record<string, string>): void {
+  rmSync(outDir, { recursive: true, force: true });
+  // a plain build, without the test runner's environment
+  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith("VITEST") && k !== "NODE_ENV" && k !== "TEST"));
+  execFileSync(process.execPath, [resolve(ROOT, "node_modules/astro/bin/astro.mjs"), "build", "--outDir", outDir, "--silent"], {
+    cwd: ROOT,
+    env: { ...env, ...extra },
+    stdio: "pipe",
+  });
+}
 
 beforeAll(() => {
   if (dist) return;
   dist = resolve(ROOT, "tmp/dist-test");
-  rmSync(dist, { recursive: true, force: true });
-  // a plain production build, without the test runner's environment
-  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith("VITEST") && k !== "NODE_ENV" && k !== "TEST"));
-  execFileSync(process.execPath, [resolve(ROOT, "node_modules/astro/bin/astro.mjs"), "build", "--outDir", dist, "--silent"], {
-    cwd: ROOT,
-    env,
-    stdio: "pipe",
-  });
+  build(dist, { VERCEL_ENV: "" });
+  prod = resolve(ROOT, "tmp/dist-test-prod");
+  build(prod, { VERCEL_ENV: "production" });
 }, 180_000);
 
 const PAGES = {
@@ -55,8 +66,17 @@ const html = (file: string) => readFileSync(resolve(dist, file), "utf8");
 const doc = (file: string) => parseHTML(html(file)).document;
 const gz = (s: string) => gzipSync(s, { level: 9 }).length;
 const text = (el: Element | null) => (el?.textContent ?? "").replace(/\s+/g, " ").trim();
+/** The inline scripts on a page, joined, the way the budget counts them. */
+const inlineScripts = (page: string) =>
+  [...page.matchAll(/<script(?![^>]*type="application\/(?:ld\+)?json")[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
 
 const TYPED_ARROWS = /[▲▼●▴▾△▽◆⬆⬇↑↓→←]/;
+// Every arrow, geometric shape, dingbat and angle quote a page could type.
+// Three marks from the mockup are allowed, and no others: ‹ on the "All
+// states" link, ✓ on the MY STATE marker, ▸ before your state's row in the
+// quote table (the stylesheet prints it, as \25b8).
+const MARKS = /[‹›←-⇿─-➿⬀-⯿]/g;
+const ALLOWED_MARKS = "‹✓▸";
 const DASH = /[–—]| - /;
 
 describe("built pages", () => {
@@ -66,6 +86,9 @@ describe("built pages", () => {
       expect(page.length).toBeGreaterThan(1000);
       const hit = TYPED_ARROWS.exec(page);
       expect(hit ? page.slice(Math.max(0, hit.index - 80), hit.index + 20) : null).toBeNull();
+      for (const m of page.matchAll(MARKS)) {
+        expect(ALLOWED_MARKS, page.slice(Math.max(0, m.index - 60), m.index + 20)).toContain(m[0]);
+      }
       const d = doc(file);
       expect(d.querySelector("svg.glyph, .arrow-sprite, symbol[id^='arrow-'], svg.icon")).toBeNull();
       expect(d.querySelector("img, .glyph, .icon, [data-map], .us-map")).toBeNull();
@@ -187,7 +210,9 @@ describe("the home page", () => {
     for (const a of links) {
       const s = site.byCode.get(a.getAttribute("data-ys-pick")!)!;
       expect(a.getAttribute("href")).toBe(s.href);
-      expect(a.getAttribute("data-px")).toBe(s.primary ? formatPrice(s.primary.price) : daily ? "No price yet" : "No weekly price");
+      // "No EIA price" and the plate say what the state page says (the mockup's words), so the strip never contradicts the page it opens
+      expect(a.getAttribute("data-px")).toBe(s.primary ? formatPrice(s.primary.price) : daily ? "No price yet" : "No EIA price");
+      if (!daily) expect(a.getAttribute("data-pl"), s.code).toBe(s.eia_series === null ? "EIA doesn't survey this state" : text(doc(`state/${s.slug}/index.html`).querySelector(".plate")));
     }
     // the script comes right after the list, and nothing else sits between
     const page = html(PAGES.home);
@@ -288,9 +313,36 @@ describe("the home page", () => {
   it("stays inside its budget: under 20 KB gzipped, under 3 KB of inline JS", () => {
     const page = html(PAGES.home);
     expect(gz(page)).toBeLessThan(20 * 1024);
-    const scripts = [...page.matchAll(/<script(?![^>]*type="application\/(?:ld\+)?json")[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+    const scripts = inlineScripts(page);
     expect(scripts.length).toBeGreaterThan(3);
     expect(gz(scripts.join("\n"))).toBeLessThan(3 * 1024);
+  });
+});
+
+describe("the production build, the one Vercel ships", () => {
+  // with an existing plain build named and no production one, there is nothing to read
+  const noProd = Boolean(process.env.DAILYFUEL_BUILT_DIR) && !process.env.DAILYFUEL_BUILT_PROD_DIR;
+
+  it.skipIf(noProd)("stays inside the same budgets with the analytics script on the page", () => {
+    const page = readFileSync(resolve(prod, PAGES.home), "utf8");
+    expect(gz(page)).toBeLessThan(20 * 1024);
+    // the analytics tag has no body; what it adds to the inline scripts is nothing
+    expect(gz(inlineScripts(page).join("\n"))).toBeLessThan(3 * 1024);
+    for (const file of [PAGES.ohio, PAGES.alaska]) {
+      const state = readFileSync(resolve(prod, file), "utf8");
+      expect(gz(state), file).toBeLessThan(12 * 1024);
+      expect(gz([...state.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n")), file).toBeLessThan(3 * 1024);
+    }
+  });
+
+  it.skipIf(noProd)("loads Vercel's own analytics script and nothing else from anywhere, with no queue stub", () => {
+    for (const file of Object.values(PAGES)) {
+      const d = parseHTML(readFileSync(resolve(prod, file), "utf8")).document;
+      expect(Array.from(d.querySelectorAll("script[src]")).map((s) => s.getAttribute("src")), file).toEqual(["/_vercel/insights/script.js"]);
+      expect(d.querySelector("script[src]")!.hasAttribute("defer")).toBe(true);
+      // the site never calls va(), so the stub Vercel's snippet starts with stays out
+      for (const s of Array.from(d.querySelectorAll("script:not([src])"))) expect(s.textContent, file).not.toMatch(/window\.va\b/);
+    }
   });
 });
 

@@ -147,18 +147,21 @@ describe("chartLabel", () => {
     );
   });
 
-  it("says a year ago only for a true 52 weeks", () => {
-    // a 52 week window opens 363 days back, so its first Monday is 51 weeks back
+  it("says a year ago only for a true 52 weeks, and otherwise that the move is over the weeks shown", () => {
+    // A 52 week window opens 363 days back, so its first Monday is 51 weeks
+    // back: the chart's move is over the 52 weeks shown, while the key stat
+    // beside it compares with the week 52 weeks back. Both are right, so the
+    // label says which one it is.
     const pts = weekly("2025-09-22", Array.from({ length: 52 }, (_, i) => (i === 51 ? 6.25 : 3.73)));
     expect(chartLabel({ name: "Midwest, last 52 weeks", points: pts, weekly: true })).toMatch(
-      /^Midwest, last 52 weeks\. Now \$6\.250, up \$2\.52 since the week of Sep 22, 2025\. /,
+      /^Midwest, last 52 weeks\. Now \$6\.250, up \$2\.52 since the week of Sep 22, 2025, the first week shown\. /,
     );
   });
 
   it("names the start when the stretch isn't a year", () => {
     const pts = weekly("2022-06-13", [5.8, 5.5, 6.1]);
     expect(chartLabel({ name: "U.S.", points: pts, weekly: true })).toBe(
-      "U.S. Now $6.100, up 30.0 cents since the week of Jun 13, 2022. High $6.100, week of Jun 27, 2022. Low $5.500, week of Jun 20, 2022.",
+      "U.S. Now $6.100, up 30.0 cents since the week of Jun 13, 2022, the first week shown. High $6.100, week of Jun 27, 2022. Low $5.500, week of Jun 20, 2022.",
     );
   });
 
@@ -168,7 +171,7 @@ describe("chartLabel", () => {
       { date: "2026-09-02", value: 6 },
     ];
     expect(chartLabel({ name: "Ohio", points: pts, weekly: false })).toBe(
-      "Ohio. Now $6.000, the same as Sep 1, 2026. High $6.000, Sep 2, 2026. Low $6.000, Sep 2, 2026.",
+      "Ohio. Now $6.000, the same as Sep 1, 2026, the first day shown. High $6.000, Sep 2, 2026. Low $6.000, Sep 2, 2026.",
     );
   });
 

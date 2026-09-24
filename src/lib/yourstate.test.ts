@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import statesFile from "../data/states.json";
 import type { BenchmarkKey, Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
-import { regionAverage, regionPlate, yourStateData } from "./yourstate.ts";
+import { eiaPlate, NO_SURVEY_PLATE, regionAverage, regionPlate, yourStateData } from "./yourstate.ts";
 
 // islandJson is gone: the strip's data rides on the Find your state links as
 // attributes now, so there is no JSON island to make safe.
@@ -61,7 +61,7 @@ function site(mode: "eia_only" | "aaa+eia" = "eia_only", opts: { priced?: (code:
 
 const at = (sd: SiteData, code: string) => sd.byCode.get(code)!;
 
-describe("region plate under the state sign", () => {
+describe("the plate under the price", () => {
   const sd = site();
 
   it("names the region and how many share its price", () => {
@@ -79,10 +79,12 @@ describe("region plate under the state sign", () => {
     expect(regionPlate(at(sd, "WA"), sd)).toBe("EIA West Coast average outside California, 4 states");
   });
 
-  it("skips California, which EIA prices on its own, and Alaska and Hawaii, which it doesn't survey", () => {
-    expect(regionPlate(at(sd, "CA"), sd)).toBeNull();
-    expect(regionPlate(at(sd, "AK"), sd)).toBeNull();
-    expect(regionPlate(at(sd, "HI"), sd)).toBeNull();
+  it("gives California its own, and says why Alaska and Hawaii have none, so every state's row carries one like the mockup", () => {
+    // these three read null before: the strip printed no plate for them,
+    // while the state page and the card printed "EIA California average"
+    expect(regionPlate(at(sd, "CA"), sd)).toBe("EIA California average");
+    expect(regionPlate(at(sd, "AK"), sd)).toBe(NO_SURVEY_PLATE);
+    expect(regionPlate(at(sd, "HI"), sd)).toBe("EIA doesn't survey this state");
   });
 
   it("goes away once AAA's per state prices are the source", () => {
@@ -99,14 +101,17 @@ describe("region plate under the state sign", () => {
     for (const s of sd.states) expect(regionPlate(s, sd) ?? "").not.toMatch(/[–—]| - /);
   });
 
-  it("uses the same words the share cards use, in any mode", () => {
+  it("uses the same words the state page and the share cards use, in any mode", () => {
     const aaa = site("aaa+eia");
     for (const s of sd.states) {
-      if (regionPlate(s, sd)) expect(regionAverage(s, sd)).toBe(regionPlate(s, sd));
+      if (s.eia_series) expect(eiaPlate(s, sd)).toBe(regionPlate(s, sd));
     }
     expect(regionAverage(at(aaa, "WA"), aaa)).toBe("EIA West Coast average outside California, 4 states");
+    expect(eiaPlate(at(aaa, "WA"), aaa)).toBe("EIA West Coast average outside California, 4 states");
     expect(regionAverage(at(aaa, "CA"), aaa)).toBeNull();
+    expect(eiaPlate(at(aaa, "CA"), aaa)).toBe("EIA California average");
     expect(regionAverage(at(aaa, "AK"), aaa)).toBeNull();
+    expect(eiaPlate(at(aaa, "AK"), aaa)).toBeNull();
   });
 });
 
@@ -121,11 +126,12 @@ describe("your state data for the home page strip", () => {
     expect(d.find((s) => s.code === "FL")).toEqual(expect.objectContaining({ price: "$6.096", move: "−2.1¢ −0.3%", ink: "down" }));
   });
 
-  it("gives Alaska and Hawaii no number to borrow", () => {
+  it("gives Alaska and Hawaii no number to borrow, in the words their page and the mockup use", () => {
     const d = yourStateData(site());
     for (const code of ["AK", "HI"]) {
-      expect(d.find((s) => s.code === code)).toEqual(expect.objectContaining({ price: "No weekly price", move: "", ink: "muted", plate: null }));
+      expect(d.find((s) => s.code === code)).toEqual(expect.objectContaining({ price: "No EIA price", move: "", ink: "muted", plate: "EIA doesn't survey this state" }));
     }
+    expect(d.find((s) => s.code === "CA")).toEqual(expect.objectContaining({ price: "$8.039", plate: "EIA California average" }));
   });
 
   it("follows the bins for the ink, so a tiny change prints but stays muted", () => {

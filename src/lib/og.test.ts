@@ -147,6 +147,19 @@ describe("what a card says", () => {
     expect(cardFor(same, "oh").change).toBe("0.0¢ 0.0%");
   });
 
+  it("wears the page's ink: a weekly move under 1¢ is flat and muted, the way the home page and the state page print it", () => {
+    const small = fakeSite();
+    small.byCode.get("OH")!.primary = move(6.253, 6.25);
+    const c = cardFor(small, "oh");
+    expect(c.change).toBe("+0.3¢ 0.0%");
+    expect(c.direction).toBe("flat");
+    expect(c.spoken).toBe("up 0.3 cents");
+    // the same 0.3¢ is a real move at AAA's daily cadence, where the bins are finer
+    const daily = fakeSite({ aaa: true });
+    daily.byCode.get("OH")!.primary = move(6.253, 6.25);
+    expect(cardFor(daily, "oh").direction).toBe("up");
+  });
+
   it("counts DC apart from the states", () => {
     expect(cardFor(site, "dc").label).toBe("EIA Central Atlantic average, 1 state and DC");
     expect(cardFor(site, "pa").label).toBe("EIA Central Atlantic average, 1 state and DC");

@@ -4,7 +4,7 @@ import {
 } from "./release.ts";
 
 describe("short weekday dates", () => {
-  it("reads like a sign", () => {
+  it("prints the weekday and the short date, the way the header's next update line does", () => {
     expect(formatShortWeekdayDate("2026-09-22")).toBe("Tue, Sep 22");
     expect(formatShortWeekdayDate("2026-09-14")).toBe("Mon, Sep 14");
     expect(formatShortWeekdayDate("2027-01-03")).toBe("Sun, Jan 3");

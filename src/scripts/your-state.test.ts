@@ -5,9 +5,9 @@ import { describe, expect, it, vi } from "vitest";
 import { inlineCall } from "../lib/inline.ts";
 import { rememberPick, saveOnView, yourState } from "./your-state.ts";
 
-// The mini sign tests went with the green sign: the strip prints strings the
-// build formatted (yourstate.test.ts checks those), so there is no money math
-// in the browser to check against format.ts any more.
+// The strip prints strings the build formatted (yourstate.test.ts checks
+// those), so there is no money math in the browser to check against
+// format.ts; the tests that did that went with the road sign.
 
 const KEY = "dailyfuel:state";
 
@@ -24,8 +24,8 @@ interface Line {
 const STATES: Line[] = [
   { code: "AL", name: "Alabama", px: "$6.177", ch: "+15.0¢ +2.5%", ink: "up", pl: "EIA Gulf Coast average, 6 states" },
   { code: "OH", name: "Ohio", px: "$6.250", ch: "+30.4¢ +5.1%", ink: "up", pl: "EIA Midwest average, 15 states" },
-  { code: "AK", name: "Alaska", px: "No weekly price" },
-  { code: "CA", name: "California", px: "$8.039", ch: "+27.5¢ +3.5%", ink: "up" },
+  { code: "AK", name: "Alaska", px: "No EIA price", pl: "EIA doesn't survey this state" },
+  { code: "CA", name: "California", px: "$8.039", ch: "+27.5¢ +3.5%", ink: "up", pl: "EIA California average" },
   { code: "FL", name: "Florida", px: "$6.096", ch: "−2.1¢ −0.3%", ink: "down", pl: "EIA Lower Atlantic average, 6 states" },
   // a move the bins call about the same rides with no ink
   { code: "TX", name: "Texas", px: "$6.027", ch: "+0.4¢ +0.1%", pl: "EIA Gulf Coast average, 6 states" },
@@ -129,10 +129,10 @@ describe("the your state strip, filled from a saved state", () => {
 
   it("never borrows a number for Alaska", () => {
     const { $ } = run({ stored: "AK" });
-    expect($("[data-ys-price]").textContent).toBe("No weekly price");
+    expect($("[data-ys-price]").textContent).toBe("No EIA price");
     expect($("[data-ys-move]").textContent).toBe("");
     expect($("[data-ys-move]").getAttribute("class")).toBe("ch muted");
-    expect($("[data-ys-plate]").textContent).toBe("");
+    expect($("[data-ys-plate]").textContent).toBe("EIA doesn't survey this state");
     expect($("[data-ys-open]").getAttribute("href")).toBe("/state/ak/");
   });
 
@@ -147,8 +147,8 @@ describe("the your state strip, filled from a saved state", () => {
     expect(r.$("[data-ys-plate]").textContent).toBe("EIA Central Atlantic average, 5 states and DC");
   });
 
-  it("gives California no plate, since EIA prices it on its own", () => {
-    expect(run({ stored: "CA" }).$("[data-ys-plate]").textContent).toBe("");
+  it("gives California its own plate, the one its page and its card print", () => {
+    expect(run({ stored: "CA" }).$("[data-ys-plate]").textContent).toBe("EIA California average");
   });
 });
 

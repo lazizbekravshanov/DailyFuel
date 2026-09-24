@@ -9,7 +9,7 @@
 
 import { addDays, daysBetween, formatDate } from "../../lib/dates.ts";
 import { formatPrice, formatQuote } from "../../lib/format.ts";
-import { present, type Point, type Valued } from "../../lib/stats.ts";
+import { lastDays, present, type Point, type Valued } from "../../lib/stats.ts";
 
 /** The line box of the big chart. */
 export const W = 1000;
@@ -162,9 +162,14 @@ export interface Spark {
   last: Valued;
 }
 
-/** The last 52 weeks of a series as a sparkline path. Null with fewer than two prices. */
+/**
+ * The last 52 weeks of a series as a sparkline path: the same 364 day window
+ * as a state page's key stats (highLow), so the low and high beside the line
+ * are the ones the state page prints even when a week is missing. Null with
+ * fewer than two prices.
+ */
 export function spark(series: Point[]): Spark | null {
-  const p = present(series).slice(-52);
+  const p = present(lastDays(series, 364));
   if (p.length < 2) return null;
   const vals = p.map((q) => q.value);
   const lo = Math.min(...vals);

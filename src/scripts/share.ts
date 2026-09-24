@@ -1,4 +1,4 @@
-// The Share button under a sign. ShareButton.astro renders it hidden, so with
+// The Share control in the header. ShareButton.astro renders it hidden, so with
 // JS off, or on a browser that can neither share nor copy, there's no button
 // that does nothing. This script shows it when the browser has one of the two.
 //

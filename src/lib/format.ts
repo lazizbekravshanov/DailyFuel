@@ -8,8 +8,8 @@
 //                             and formatPct on their own
 //   a change in a table cell  +31.8 and +5.3    signedCents and signedPct
 // The sign carries the direction, so nothing else has to. A real minus sign,
-// not a hyphen. The raised tenth of a cent is retired: priceParts is only the
-// rounding behind formatPrice now.
+// not a hyphen. A price is one string: the raised tenth of a cent went with
+// the road sign, and priceParts (its "$6.28" and "5") with it.
 
 /** Integer ten thousandths of a dollar. Safe for inputs with at most 4 decimals. */
 export function toUnits(dollars: number): number {
@@ -28,28 +28,11 @@ export function toMills(price: number): number {
   return sign * roundHalfUp(Math.abs(units), 10);
 }
 
-export interface PriceParts {
-  /** "$6.28" */
-  main: string;
-  /** "5", the raised tenth of a cent */
-  tenth: string;
-  /** "$6.285" */
-  plain: string;
-}
-
-export function priceParts(price: number): PriceParts {
+/** "$6.285": dollars to the tenth of a cent, rounded half away from zero. */
+export function formatPrice(price: number): string {
   const mills = toMills(price);
   if (mills < 0) throw new RangeError(`negative price ${price}`);
-  const dollars = Math.floor(mills / 1000);
-  const cents = Math.floor((mills % 1000) / 10);
-  const tenth = mills % 10;
-  const main = `$${dollars}.${String(cents).padStart(2, "0")}`;
-  return { main, tenth: String(tenth), plain: `${main}${tenth}` };
-}
-
-/** "$6.285" */
-export function formatPrice(price: number): string {
-  return priceParts(price).plain;
+  return `$${Math.floor(mills / 1000)}.${String(mills % 1000).padStart(3, "0")}`;
 }
 
 /** "6.285": a price in a table cell, where the column head says it is dollars. */

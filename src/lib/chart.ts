@@ -333,7 +333,10 @@ export function chartLabel(input: LabelInput): string {
     const span = daysBetween(first.date, last.date);
     // only a true year: 52 weeks, or 365 or 366 days
     const yearAgo = span >= 364 && span <= 366;
-    const start = input.weekly ? `the week of ${formatDate(first.date)}` : formatDate(first.date);
+    // Short of a year the move is over the points shown, and says so: the 52
+    // week chart opens 51 weeks back, while the key stat beside it compares
+    // with the week 52 weeks back, so the two are different numbers on purpose.
+    const start = input.weekly ? `the week of ${formatDate(first.date)}, the first week shown` : `${formatDate(first.date)}, the first day shown`;
     const change = last.value - first.value;
     if (changeTenths(change) === 0) move = `, the same as ${yearAgo ? "a year ago" : start}`;
     else move = `, ${spokenMove(change)} ${yearAgo ? "from a year ago" : `since ${start}`}`;

@@ -1,26 +1,42 @@
-// Build time data for the "your state" strip on the home page and the small
-// region plate under the price on a state page.
+// Build time data for the "your state" strip on the home page, and the plate
+// that says whose number a state reads: under the price on its page, on the
+// strip, and on its share card.
 
 import { moveClass } from "./bins.ts";
 import { countPlaces, pctOf, regionMates } from "./copy.ts";
 import { formatMove, formatPrice } from "./format.ts";
 import type { SiteData, StateView } from "./site.ts";
 
+/** What the strip prints in the plate's slot for Alaska and Hawaii, the mockup's words. */
+export const NO_SURVEY_PLATE = "EIA doesn't survey this state";
+
 /**
- * The plate under the price on a state page, the way a guide sign carries a
- * smaller panel under its main legend: "EIA Midwest average, 15 states".
- * Only while EIA is the source and only when the price is shared, so never for
- * California (EIA prices it on its own), Alaska or Hawaii (EIA doesn't survey
- * them), or any state once AAA's per state prices are on.
+ * The plate on the your state strip while EIA is the source: "EIA Midwest
+ * average, 15 states", "EIA California average", or for the two states EIA
+ * doesn't survey, why there is none. The state page and the share card print
+ * the same words (eiaPlate), so the strip never disagrees with the page it
+ * opens. Null once AAA's per state prices are on, or under a missing price.
  */
 export function regionPlate(s: StateView, site: SiteData): string | null {
-  if (site.mode !== "eia_only" || !s.primary) return null;
-  return regionAverage(s, site);
+  if (site.mode !== "eia_only") return null;
+  if (s.eia_series === null) return NO_SURVEY_PLATE;
+  return s.primary ? eiaPlate(s, site) : null;
 }
 
 /**
- * Whose average a shared EIA price is, in the plate's words, for any mode:
- * the share cards say it too. Null when the region is one place (California)
+ * Whose EIA number a state reads, in any mode: the shared region average
+ * with how many read it, or California's own. Null for a state EIA doesn't
+ * survey. The state page's plate and the share card's source line use it.
+ */
+export function eiaPlate(s: StateView, site: SiteData): string | null {
+  if (!s.eia_series || !s.regionName) return null;
+  if (s.eia_series === "SCA") return "EIA California average";
+  return regionAverage(s, site) ?? `EIA ${s.regionName} average`;
+}
+
+/**
+ * Whose average a shared EIA price is, with the count of who shares it: "EIA
+ * Midwest average, 15 states". Null when the region is one place (California)
  * or none (Alaska, Hawaii).
  */
 export function regionAverage(s: StateView, site: SiteData): string | null {
@@ -43,19 +59,19 @@ export const AAA_PLATE = "AAA daily average";
 export interface YourStateEntry {
   code: string;
   name: string;
-  /** "$6.250", or what the strip says with no price: "No weekly price". */
+  /** "$6.250", or what the strip says with no price: "No EIA price", the state page's own words. */
   price: string;
   /** "+30.4¢ +5.1%", or "" when there is nothing to compare with. */
   move: string;
   /** The ink the move wears: red when it rose, blue when it fell, muted when the bins call it about the same. */
   ink: "up" | "down" | "muted";
-  /** Where the number comes from: the region plate, or AAA once its daily prices are on. */
+  /** Where the number comes from: the plate, or AAA once its daily prices are on. */
   plate: string | null;
 }
 
 export function yourStateData(site: SiteData): YourStateEntry[] {
   const aaa = site.mode === "aaa+eia";
-  const none = aaa ? "No price yet" : "No weekly price";
+  const none = aaa ? "No price yet" : "No EIA price";
   return site.states.map((s) => {
     const m = s.primary;
     return {

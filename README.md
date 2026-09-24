@@ -132,7 +132,7 @@ scripts/
 tests/                     pytest, synthetic fixtures only
 src/
   assets/fonts/            Red Hat Mono, for the share images only
-  data/states.json         every state with its FIPS code, EIA region and tile map spot
+  data/states.json         every state with its FIPS code, PADD and EIA region (the tile field stays for the data schema only)
   lib/                     data loading, formatting, stats and share cards, with vitest tests
   components/              header controls, footer, tables, charts
   layouts/  pages/  styles/  the page shell, the pages, the paper terminal tokens and base styles
