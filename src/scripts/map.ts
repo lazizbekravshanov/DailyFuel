@@ -409,7 +409,11 @@ export function init(doc: Document, win: any): void {
   // ---- the map
   const msg = box.querySelector(".mp-msg");
   if (msg) msg.remove();
+  // No tiles, and the outlines and roads are good to about a kilometre and a
+  // half: past zoom 10 there is nothing more to see and the roads drift off
+  // the markers, so the map stops there.
   map = L.map(box, {
+    maxZoom: 10,
     zoomSnap: 0.25,
     zoomDelta: 1,
     attributionControl: false,

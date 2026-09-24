@@ -61,6 +61,8 @@ describe("the /map page", () => {
     const fetches = [...modules[0][1].matchAll(/fetch\(([^)]*)\)/g)].map((m) => m[1]);
     expect(fetches).toHaveLength(1);
     expect(fetches[0]).toMatch(/^`\/map\/\$\{\w+\}\.json`$/);
+    // the outlines and roads are good to about a kilometre and a half, so the map stops at zoom 10
+    expect(modules[0][1]).toContain("maxZoom:10");
   });
 
   it("ships Leaflet 1.9.4 as the pinned npm package has it, with its licence and no image rules", () => {
