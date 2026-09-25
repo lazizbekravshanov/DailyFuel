@@ -33,6 +33,8 @@ export interface Cfg {
   l48: [[number, number], [number, number]];
   /** the base layers the build wrote: states, roads, places */
   ly: string[];
+  /** the base map's tile URL (see baseMap in src/components/map/page.ts) */
+  tl: string;
 }
 
 export interface Pt {
@@ -433,8 +435,9 @@ export function init(doc: Document, win: any): void {
 
   // ---- the map
   box.querySelector(".mp-msg")?.remove();
-  // The base is CARTO's light map (every road, place and border, in grey; the
-  // page's CSS turns it to ink in dark mode). Street level is zoom 16. The
+  // The base map (cfg.tl: CARTO's light map, or OpenStreetMap's) has every
+  // road, place and border; the page's CSS turns it grey, and inverts it in
+  // dark mode. Street level is zoom 16. The
   // freight roads drawn on top are good to about a kilometre, so the CSS
   // hides them past zoom 10, where the base map's own roads take over.
   map = L.map(box, {
@@ -458,7 +461,7 @@ export function init(doc: Document, win: any): void {
   };
   map.fitBounds(cfg.l48, { animate: false });
   fit();
-  L.tileLayer("https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png").addTo(map);
+  L.tileLayer(cfg.tl).addTo(map);
   // Leaflet follows the window's size itself; the floor moves with it, so the lower 48 always fits
   map.on("resize", fit);
 

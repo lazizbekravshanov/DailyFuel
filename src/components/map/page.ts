@@ -73,6 +73,38 @@ export function priceRows(site: SiteData): PriceRow[] {
 export const LOWER48: [[number, number], [number, number]] = [[24.4, -124.8], [49.4, -66.9]];
 export const MAX_BOUNDS: [[number, number], [number, number]] = [[15, -190], [72.5, -60]];
 
+export interface BaseMap {
+  /** Leaflet's tile URL template */
+  url: string;
+  /** the one other host the page talks to, for the preconnect and the credits */
+  origin: string;
+  /** who drew it, linked, for the credits under the map */
+  credit: { name: string; href: string };
+}
+
+/**
+ * The base map under /map. CARTO's light map when the build has a CARTO
+ * basemaps key (CARTO_BASEMAPS_KEY; free, carto.com/basemaps/apikey), since
+ * CARTO has watermarked keyless tiles since September 23, 2026. Without one,
+ * OpenStreetMap's own tiles, which need no key and are fine for a light
+ * site under OSM's tile usage policy. The page turns either one grey.
+ */
+export function baseMap(env: Record<string, string | undefined> = process.env): BaseMap {
+  const key = env.CARTO_BASEMAPS_KEY?.trim();
+  if (key) {
+    return {
+      url: `https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(key)}`,
+      origin: "https://a.basemaps.cartocdn.com",
+      credit: { name: "CARTO", href: "https://carto.com/attributions" },
+    };
+  }
+  return {
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    origin: "https://tile.openstreetmap.org",
+    credit: { name: "OpenStreetMap", href: "https://www.openstreetmap.org/copyright" },
+  };
+}
+
 export function mapConfig(site: SiteData, data: MapData): Cfg {
   const c: Cfg["c"] = {};
   for (const ch of CHAINS) c[ch.key] = [ch.name, ch.letter, ch.locator];
@@ -85,6 +117,7 @@ export function mapConfig(site: SiteData, data: MapData): Cfg {
     mb: MAX_BOUNDS,
     l48: LOWER48,
     ly: (["states", "roads", "places"] as const).filter((k) => data.present[k]),
+    tl: baseMap().url,
   };
 }
 

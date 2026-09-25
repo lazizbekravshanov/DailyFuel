@@ -1,6 +1,6 @@
 // Checks on the built /map page: what it loads (Leaflet from our own
-// origin, the base map's tiles from CARTO and nothing else from anywhere
-// else), what it says with JS off (the
+// origin, the base map's tiles from their one host and nothing from
+// anywhere else), what it says with JS off (the
 // legend, the coverage, the credits, the whole list), the route strip's
 // wording, the data the script reads, and the weight of everything the page
 // loads against its budget. It builds the site from data/ and data/map into
@@ -16,6 +16,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { loadMapData } from "../../lib/mapdata.ts";
 import { getSite } from "../../lib/site.ts";
 import { CHAINS } from "./chains.ts";
+import { baseMap } from "./page.ts";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 let dist = process.env.DAILYFUEL_MAP_BUILT_DIR ? resolve(ROOT, process.env.DAILYFUEL_MAP_BUILT_DIR) : "";
@@ -43,7 +44,7 @@ describe("the /map page", () => {
   const data = loadMapData();
   const site = getSite();
 
-  it("loads Leaflet from its own origin, the base map from CARTO, and nothing from anywhere else", () => {
+  it("loads Leaflet from its own origin, the base map's tiles from their one host, and nothing from anywhere else", () => {
     const d = doc();
     expect(Array.from(d.querySelectorAll("script[src]")).map((s) => s.getAttribute("src"))).toEqual(["/vendor/leaflet/leaflet.js"]);
     expect(d.querySelector("script[src]")!.hasAttribute("defer")).toBe(true);
@@ -52,7 +53,7 @@ describe("the /map page", () => {
     for (const m of page.matchAll(/<(?:script|img|iframe)[^>]*\ssrc="([^"]+)"|<link[^>]*rel="(?:stylesheet|preload|modulepreload|icon)"[^>]*\shref="([^"]+)"/g)) {
       expect(m[1] ?? m[2], m[0]).not.toMatch(/^(https?:)?\/\//);
     }
-    expect(page).not.toMatch(/@import|url\((https?:)?\/\/|tile\.openstreetmap|unpkg|cdnjs|jsdelivr/);
+    expect(page).not.toMatch(/@import|url\((https?:)?\/\/|unpkg|cdnjs|jsdelivr/);
     expect(page).not.toContain("_vercel/insights");
     // the one inline module runs after the deferred Leaflet script
     const modules = [...page.matchAll(/<script type="module">([\s\S]*?)<\/script>/g)];
@@ -62,12 +63,12 @@ describe("the /map page", () => {
     const fetches = [...modules[0][1].matchAll(/fetch\(([^)]*)\)/g)].map((m) => m[1]);
     expect(fetches).toHaveLength(1);
     expect(fetches[0]).toMatch(/^`\/map\/\$\{\w+\}\.json`$/);
-    // the one other host is CARTO's tile server, which the head warms up and the credits name
-    const hosts = new Set([...modules[0][1].matchAll(/https?:\/\/([^/"`'{}\s]+)/g)].map((m) => m[1]));
-    expect([...hosts]).toEqual(["a.basemaps.cartocdn.com"]);
-    expect(modules[0][1]).toContain('"https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"');
-    expect(d.querySelector('link[rel="preconnect"]')!.getAttribute("href")).toBe("https://a.basemaps.cartocdn.com");
-    expect(d.querySelector('.mp-attr a[href="https://carto.com/attributions"]')).not.toBeNull();
+    // the script names no host; the base map's tile URL comes from the config, and is the page's one other host
+    expect(modules[0][1]).not.toMatch(/https?:\/\//);
+    const cfg = JSON.parse(d.getElementById("mapcfg")!.textContent!);
+    const origin = new URL(cfg.tl.replace(/\{\w+\}/g, "0")).origin;
+    expect(["https://tile.openstreetmap.org", "https://a.basemaps.cartocdn.com"]).toContain(origin);
+    expect(d.querySelector('link[rel="preconnect"]')!.getAttribute("href")).toBe(origin);
     // street level, with the freight roads hidden past 10 by the CSS
     expect(modules[0][1]).toContain("maxZoom:16");
   });
@@ -148,10 +149,11 @@ describe("the /map page", () => {
   it("credits every source under the map", () => {
     const d = doc();
     const attr = d.querySelector(".mp-mc .mp-attr")!;
-    expect(Array.from(attr.querySelectorAll("a")).slice(0, 2).map((a) => [a.getAttribute("href"), text(a)])).toEqual([
-      ["https://carto.com/attributions", "© CARTO"],
-      ["https://www.openstreetmap.org/copyright", "© OpenStreetMap contributors, ODbL"],
-    ]);
+    // OpenStreetMap's tiles need only OpenStreetMap's credit; CARTO's add CARTO's
+    const links = Array.from(attr.querySelectorAll("a")).map((a) => [a.getAttribute("href"), text(a)]);
+    expect(links).toContainEqual(["https://www.openstreetmap.org/copyright", "© OpenStreetMap contributors, ODbL"]);
+    if (baseMap().credit.name === "CARTO") expect(links[0]).toEqual(["https://carto.com/attributions", "© CARTO"]);
+    else expect(text(attr)).toMatch(/^Base map, map data and stops © OpenStreetMap contributors, ODbL/);
     const t = text(attr);
     expect(t).toContain("More weigh stations: U.S. DOT NTAD (public domain) and Iowa DOT (CC BY 4.0).");
     if (data.present.fleet) expect(t).toContain("Weigh station and truck service points: DailyFuel, CC BY 4.0.");
@@ -221,5 +223,20 @@ describe("the /map page", () => {
     expect(doc().querySelector('header a[href="/map/"]')!.getAttribute("aria-current")).toBe("page");
     // the home page loads none of it
     expect(file("index.html").toString("utf8")).not.toMatch(/leaflet|mapcfg/);
+  });
+});
+
+describe("the base map", () => {
+  it("is OpenStreetMap's own without a CARTO key, and CARTO's light map with one, the key on every tile", () => {
+    expect(baseMap({})).toEqual({
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      origin: "https://tile.openstreetmap.org",
+      credit: { name: "OpenStreetMap", href: "https://www.openstreetmap.org/copyright" },
+    });
+    expect(baseMap({ CARTO_BASEMAPS_KEY: "  " }).origin).toBe("https://tile.openstreetmap.org");
+    const carto = baseMap({ CARTO_BASEMAPS_KEY: "abc 123" });
+    expect(carto.url).toBe("https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=abc%20123");
+    expect(carto.origin).toBe("https://a.basemaps.cartocdn.com");
+    expect(carto.credit.name).toBe("CARTO");
   });
 });

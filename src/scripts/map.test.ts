@@ -69,6 +69,7 @@ const CFG: Cfg = {
   mb: [[15, -190], [72.5, -60]],
   l48: [[24.4, -124.8], [49.4, -66.9]],
   ly: ["states"],
+  tl: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 };
 
 /** A point `off` miles to the left (south, going west) of the Chicago to Cheyenne line, `at` miles along it. */
