@@ -414,16 +414,6 @@ tr.us td {
   font-weight: 700;
 }
 
-/* the marker slot before a row's code, filled on your state's row */
-.mk {
-  display: inline-block;
-  width: 11px;
-}
-
-tr.mine .mk::before {
-  content: "\25b8";
-}
-
 /* a column head that sorts: the script wraps the head's words in this */
 .sortb {
   min-height: 24px;

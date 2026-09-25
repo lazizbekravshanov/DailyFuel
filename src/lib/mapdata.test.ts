@@ -15,6 +15,8 @@ import {
   comparePoints,
   coverageLine,
   isInterstate,
+  nearestRoute,
+  routeName,
   loadMapData,
   mergeWeigh,
   parsePlaces,
@@ -189,8 +191,8 @@ describe("loading the map data", () => {
   it("reads the roads file's rows in the order its fields name, and the places file's delta coded columns", () => {
     const roads = parseRoads({ precision: 2, fields: ["pts", "sign", "code"], lines: [[[-8763, 4188, -10, 1], "I80", 1], [[-9000, 4100, 5, 5], null, 1]] }, "r.json");
     expect(roads).toEqual([
-      { interstate: true, coords: [[-87.63, 41.88], [-87.73, 41.89]] },
-      { interstate: false, coords: [[-90, 41], [-89.95, 41.05]] },
+      { interstate: true, sign: "I80", coords: [[-87.63, 41.88], [-87.73, 41.89]] },
+      { interstate: false, sign: null, coords: [[-90, 41], [-89.95, 41.05]] },
     ]);
     const places = parsePlaces(
       { precision: 2, places: { name: ["Chicago", "Aurora", "Chicago"], state: ["IL", "IL", "IL"], lat: [4185, -9, 5], lon: [-8765, -67, 67] } },
@@ -283,6 +285,7 @@ describe("interstates", () => {
   it("are an I route sign or NHFN code 2, never code 1 on its own", () => {
     expect(isInterstate("I80", "1")).toBe(true);
     expect(isInterstate("I-80", 1)).toBe(true);
+    expect(isInterstate("IH1", 1)).toBe(true);
     expect(isInterstate("U30", 1)).toBe(false);
     expect(isInterstate(null, 1)).toBe(false);
     expect(isInterstate(null, "2")).toBe(true);
@@ -300,6 +303,34 @@ describe("interstates", () => {
       "roads.json",
     );
     expect(roads.map((r) => r.interstate)).toEqual([true, false, false]);
+    expect(roads.map((r) => r.sign)).toEqual(["I94", "S1", "S1"]);
+    // the source writes Alaska's A1 as I1; west of 129° W it gets its A back
+    const ak = parseRoads(
+      { type: "FeatureCollection", features: [{ type: "Feature", properties: { SIGN1: "I1", NHFN_CODE: 1 }, geometry: { type: "LineString", coordinates: [[-150, 61], [-149, 61]] } }] },
+      "roads.json",
+    );
+    expect(ak[0].sign).toBe("IA1");
+  });
+
+  it("are named by number, saying whether each is an interstate", () => {
+    expect(routeName("I80", true)).toEqual({ short: "I 80", long: "I 80, interstate" });
+    expect(routeName("I35E", true)).toEqual({ short: "I 35E", long: "I 35E, interstate" });
+    expect(routeName("U30", false)).toEqual({ short: "US 30", long: "US 30, not an interstate" });
+    expect(routeName("S12", false)).toEqual({ short: "SR 12", long: "State route 12, not an interstate" });
+    expect(routeName("C5", false)).toEqual({ short: "CR 5", long: "County road 5, not an interstate" });
+    expect(routeName("IH1", true)).toEqual({ short: "H1", long: "H1, interstate" });
+    expect(routeName("IA1", true)).toEqual({ short: "A1", long: "A1, interstate" });
+    expect(routeName(null, true)).toBeNull();
+    expect(routeName("X9", false)).toBeNull();
+  });
+
+  it("name a weigh station's nearest signed highway within 2 km, and nothing further", () => {
+    const roads = parseRoads(ROADS, "roads.json");
+    // I 80 runs west from 41.878, -87.630; a point about 1 km north of it
+    expect(nearestRoute(roads, 41.887, -87.66)).toBe("I 80, interstate");
+    expect(nearestRoute(roads, 41.95, -87.66)).toBeNull();
+    // the unsigned interstate near 42, -95 has no name to give
+    expect(nearestRoute(roads, 42.0, -95.0)).toBeNull();
   });
 });
 
@@ -314,9 +345,13 @@ describe("the files the page ships", () => {
     expect(back.rings.some((poly) => poly[0].some(([lat, lon]) => lat === 42.5 && lon === -91.5))).toBe(true);
     const roads = parseRoads(ROADS, "roads.json");
     const pay = roadsPayload(roads);
-    expect(pay.i).toHaveLength(2);
-    expect(pay.o).toHaveLength(1);
-    expect(decodeLines(pay.i, pay.p)[0]).toEqual([[41.878, -87.63], [41.888, -87.73], [41.888, -87.93]]);
+    // the signed routes are layers of their own, named; only the unsigned line is left plain
+    expect(pay.i).toHaveLength(1);
+    expect(pay.o).toHaveLength(0);
+    expect(pay.r.map(([t, w]) => [t, w])).toEqual([["I 80, interstate", 1], ["US 30, not an interstate", 0]]);
+    expect(decodeLines(pay.r[0][2], pay.p)[0]).toEqual([[41.878, -87.63], [41.888, -87.73], [41.888, -87.93]]);
+    // each route short of a label step gets one label; interstates first
+    expect(pay.l.map((x) => x[0])).toEqual(["I 80", "US 30"]);
   });
 
   it("leave places whole", () => {
