@@ -1,7 +1,8 @@
 ---
 // /map: truck stops, weigh stations and truck service points on one map, in
-// the paper terminal. No tiles: the base is the state lines and the freight
-// roads drawn from data/map, on paper. Leaflet 1.9.4 is self hosted under
+// the paper terminal. The base is CARTO's light map, in grey and inverted in
+// dark mode, the one request to another host; the freight roads from
+// data/map are drawn over it up to zoom 10. Leaflet 1.9.4 is self hosted under
 // /vendor/leaflet/, the markers are drawn on a canvas, and one inline module
 // (src/scripts/map.ts) runs the filters, the popups, the list and the route
 // strip. With JS off the page is the legend, the coverage numbers, the
@@ -37,6 +38,7 @@ const description =
 ---
 <Base title={title} description={description} skipLabel="Skip to the page">
   <link slot="head" rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+  <link slot="head" rel="preconnect" href="https://a.basemaps.cartocdn.com" />
   <div class="mp">
     <div class="mp-head">
       <h1 class="lbl">Truck stops and weigh stations <span class="dot">·</span> open data, partial coverage</h1>
@@ -57,7 +59,7 @@ const description =
           <p class="mp-msg">The map needs JavaScript. Every place on it is in the list below.</p>
         </div>
         <p class="fine mp-attr">
-          <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, ODbL</a>, extract of {osmDate}.
+          Base map <a href="https://carto.com/attributions">© CARTO</a>, map data and stops <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, ODbL</a>, extract of {osmDate}.
           {" "}More weigh stations: U.S. DOT NTAD (public domain) and Iowa DOT (CC BY 4.0).
           {data.present.fleet && " Weigh station and truck service points: DailyFuel, CC BY 4.0."}
           {data.present.roads && " Roads: NTAD National Highway Freight Network, U.S. DOT BTS, public domain."}
@@ -348,17 +350,37 @@ const description =
     outline: 2px solid var(--ink);
     outline-offset: 0;
   }
-  .mp path.st {
-    stroke: var(--ink2);
-    stroke-width: 0.7;
+  /* the base map in grey, colour on the page being only for a price change, and inverted for a true inverse dark mode */
+  .mp .leaflet-tile-pane {
+    filter: grayscale(1);
   }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .mp .leaflet-tile-pane {
+      filter: grayscale(1) invert(1);
+    }
+  }
+  :root[data-theme="dark"] .mp .leaflet-tile-pane {
+    filter: grayscale(1) invert(1);
+  }
+  @media (forced-colors: active) {
+    .mp .leaflet-tile-pane {
+      opacity: 0.4;
+    }
+  }
+  /* the freight network over it, darker than the base map's roads */
   .mp path.ro {
-    stroke: var(--hair);
-    stroke-width: 1;
+    stroke: var(--ink);
+    stroke-opacity: 0.3;
+    stroke-width: 1.5;
   }
   .mp path.ri {
-    stroke: var(--edge);
-    stroke-width: 1.1;
+    stroke: var(--ink);
+    stroke-opacity: 0.5;
+    stroke-width: 2;
+  }
+  /* past zoom 10 the freight lines, good to about a kilometre, would drift off the base map's roads */
+  #map:is([data-z="11"], [data-z="12"], [data-z="13"], [data-z="14"], [data-z="15"], [data-z="16"]) :is(path.ro, path.ri) {
+    display: none;
   }
   /* a route's number: interstates boxed in ink from zoom 6, US routes from 7, the rest from 8, the others in a hairline (the script sets data-z) */
   .mp .hl {

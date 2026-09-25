@@ -4,7 +4,7 @@ Diesel prices for every US state plus DC, and which way they moved.
 
 Live at **[dailydiesel.vercel.app](https://dailydiesel.vercel.app)**
 
-DailyFuel is a free site for truck drivers, owner operators, dispatchers, farmers and anyone else who fills up with diesel. It answers one question fast: what does diesel cost in my state right now, and did it go up or down? No ads, no cookies, no accounts. Visits are counted with Vercel Web Analytics, which uses no cookies and stores no personal data.
+DailyFuel is a free site for truck drivers, owner operators, dispatchers, farmers and anyone else who fills up with diesel. It answers one question fast: what does diesel cost in my state right now, and did it go up or down? No ads, no cookies, no accounts. Visits are counted with Vercel Web Analytics, which uses no cookies and stores no personal data. The `/map` page's base map loads from CARTO's tile servers, which see a visitor's IP address like any web server; that is the one request the site makes to another company.
 
 ## Design
 
@@ -49,6 +49,7 @@ The switch is the repo variable `AAA_ENABLED`. Only the exact string `true` turn
 | State outlines on `/map` | U.S. Census Bureau cartographic boundary file, in `data/map/states.json` | Public domain |
 | Place names for the route strip | [GeoNames](https://www.geonames.org) cities5000, in `data/map/places.json` | CC BY 4.0 |
 | Map library | [Leaflet](https://leafletjs.com) 1.9.4, served from `public/vendor/leaflet/` | BSD 2 clause, see `public/vendor/leaflet/LICENSE` |
+| Base map on `/map` | [CARTO](https://carto.com/attributions) light basemap, loaded from `a.basemaps.cartocdn.com` | © CARTO, map data © OpenStreetMap contributors (ODbL); free for non commercial use up to 75,000 map views a month |
 | DailyFuel code | this repo | MIT, see [LICENSE](LICENSE) |
 
 The MIT license covers the code only. Each data source keeps its own terms, and each file under `data/map/` carries its own source and licence. DailyFuel isn't affiliated with EIA, USDA, FHWA, AAA or OPIS, or with any truck stop chain; chain names on the map only say whose stop it is.
