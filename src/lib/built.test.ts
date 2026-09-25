@@ -72,11 +72,11 @@ const inlineScripts = (page: string) =>
 
 const TYPED_ARROWS = /[▲▼●▴▾△▽◆⬆⬇↑↓→←]/;
 // Every arrow, geometric shape, dingbat and angle quote a page could type.
-// Three marks from the mockup are allowed, and no others: ‹ on the "All
-// states" link, ✓ on the MY STATE marker, ▸ before your state's row in the
-// quote table (the stylesheet prints it, as \25b8).
+// Two marks from the mockup are allowed, and no others: ‹ on the "All
+// states" link and ✓ on the MY STATE marker. Your state's row is marked by
+// its shade and weight alone.
 const MARKS = /[‹›←-⇿─-➿⬀-⯿]/g;
-const ALLOWED_MARKS = "‹✓▸";
+const ALLOWED_MARKS = "‹✓";
 const DASH = /[–—]| - /;
 
 describe("built pages", () => {

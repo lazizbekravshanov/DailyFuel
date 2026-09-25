@@ -75,7 +75,7 @@ const description =
           {CHAINS.map((ch) => (
             <label class="lg-i">
               <input type="checkbox" data-k={ch.key} checked disabled />
-              <span class="key" style={`--k:${ch.ink}`} aria-hidden="true">{ch.letter}</span>
+              <span class="key" aria-hidden="true">{ch.letter}</span>
               <span>{ch.name}</span>
               <span class="n">{fmt(data.counts[ch.key] ?? 0)}</span>
             </label>
@@ -284,7 +284,7 @@ const description =
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: var(--k);
+    background: var(--ink);
     color: var(--bg);
     font: 700 10px/1 var(--font);
     forced-color-adjust: none;
@@ -359,6 +359,39 @@ const description =
   .mp path.ri {
     stroke: var(--edge);
     stroke-width: 1.1;
+  }
+  /* a route's number: interstates boxed in ink from zoom 6, the rest in a hairline from zoom 8 (the script sets data-z) */
+  .mp .hl {
+    display: none;
+    translate: -50% -50%;
+    padding: 0 3px;
+    border: 1px solid var(--hair);
+    background: var(--bg);
+    color: var(--ink2);
+    font: 10px/14px var(--font);
+    white-space: nowrap;
+  }
+  .mp .hl.hi {
+    border-color: var(--ink);
+    color: var(--ink);
+    font-weight: 700;
+  }
+  #map:is([data-z="6"], [data-z="7"]) .hl.hi,
+  #map:is([data-z="8"], [data-z="9"], [data-z="10"]) .hl {
+    display: block;
+  }
+  /* a road's name on hover or tap: paper and a hairline, no shadow, no tip */
+  .mp .leaflet-tooltip {
+    padding: 2px 6px;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    background: var(--bg);
+    color: var(--ink);
+    box-shadow: none;
+    font: var(--fs-s) / 1.4 var(--font);
+  }
+  .mp .leaflet-tooltip::before {
+    display: none;
   }
   .mp path.rb {
     stroke: var(--ink);

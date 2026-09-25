@@ -31,7 +31,7 @@ function page(opts: { mine?: string; find?: boolean } = {}): string {
     const cells = r.l
       ? `<td>${r.n}</td><td class="num">${r.l}</td><td class="num c-chg up">+${r.c}</td><td class="num c-pct up">+${r.q}</td><td>${r.r}</td>`
       : `<td>${r.n}</td><td colspan="4" class="muted">No EIA survey</td>`;
-    return `<tr${attrs} data-h="/state/${r.s.toLowerCase()}/"><th scope="row"><span class="mk"></span><a href="/state/${r.s.toLowerCase()}/">${r.s}</a></th>${cells}<td class="num">${r.t ?? "n/a"}</td></tr>`;
+    return `<tr${attrs} data-h="/state/${r.s.toLowerCase()}/"><th scope="row"><a href="/state/${r.s.toLowerCase()}/">${r.s}</a></th>${cells}<td class="num">${r.t ?? "n/a"}</td></tr>`;
   }).join("");
   return `<!doctype html><html><body>
     <section class="ys" data-ys${mine ? ` data-ys-state="${mine}"` : ""}></section>

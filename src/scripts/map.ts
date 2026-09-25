@@ -15,10 +15,10 @@
 //
 // Pure functions are exported for src/scripts/map.test.ts.
 
-import { band, bboxOf, distMi, sample, shapeAt, track, undelta, type Shape } from "../components/map/geo.ts";
+import { band, distMi, sample, shapeAt, track, undelta, type Shape } from "../components/map/geo.ts";
 
-/** One chain: name, ink, letter, locator. */
-export type ChainCfg = [string, string, string, string];
+/** One chain: name, letter, locator. */
+export type ChainCfg = [string, string, string];
 /** One state for the route strip: code, name, price, move, move class, plate, state tax. */
 export type PriceRow = [string, string, string | null, string | null, string, string, string];
 
@@ -49,6 +49,8 @@ export interface Pt {
   s: string;
   d: string;
   c: string;
+  /** a weigh station's line on its nearest freight highway: "Nearest freight highway: I 80, interstate" */
+  h: string;
   on: boolean;
   /** the Leaflet marker, once there is a map */
   m?: any;
@@ -57,7 +59,7 @@ export interface Pt {
 
 export const BAND_MI = 25;
 export const STEP_MI = 5;
-const DIRS: Record<string, string> = { n: "northbound", s: "southbound", e: "eastbound", w: "westbound" };
+const DIRS: Record<string, string> = { n: "north", s: "south", e: "east", w: "west" };
 
 export const esc = (s: string): string =>
   s.replace(/[&<>"]/g, (ch) => (ch === "&" ? "&amp;" : ch === "<" ? "&lt;" : ch === ">" ? "&gt;" : "&quot;"));
@@ -75,18 +77,18 @@ export function readRow(tr: HTMLTableRowElement, i: number): Pt {
     k: f === "w" ? "w" : f === "v" ? "v" : "s",
     lat: +ll[0], lon: +ll[1],
     n: cells[0].textContent || "", t: cells[1].textContent || "", st: cells[2].textContent || "",
-    s: a("s") || "o", d: a("d"), c: a("c") || (f === "w" || f === "v" ? "" : f),
+    s: a("s") || "o", d: a("d"), c: a("c") || (f === "w" || f === "v" ? "" : f), h: a("h"),
     on: true,
   };
 }
 
 /** The outlines from /map/states.json, as shapes for point in polygon and as Leaflet's [lat, lon] rings. */
-export function decodeStates(doc: { p: number; s: [string, number[][][]][] }): { shapes: Shape[]; rings: [number, number][][][] } {
+export function decodeStates(doc: { p: number; s: [string, number[][][], Shape["bbox"]][] }): { shapes: Shape[]; rings: [number, number][][][] } {
   const shapes: Shape[] = [], rings: [number, number][][][] = [];
-  for (const [code, polys] of doc.s) {
+  for (const [code, polys, bbox] of doc.s) {
     const coordinates = polys.map((rs) => rs.map((r) => undelta(r, doc.p)));
     const geometry = { type: "MultiPolygon" as const, coordinates };
-    shapes.push({ code, geometry, bbox: bboxOf(geometry) });
+    shapes.push({ code, geometry, bbox });
     for (const poly of coordinates) rings.push(poly.map((r) => r.map(([x, y]) => [y, x] as [number, number])));
   }
   return { shapes, rings };
@@ -215,7 +217,8 @@ export const milesText = (r: Run, last: number): string =>
   `Miles ${Math.round(r.from)} to ${Math.round(r.to === r.from ? Math.min(r.to + STEP_MI, last) : r.to)}`;
 
 /** The name cell's button: it opens the point's popup on the map. */
-const lk = (p: Pt) => `<button type="button" class="lk" data-i="${p.i}">${esc(p.n)}</button>`;
+// no form holds the list, the route strip's result or a popup, so a button there is a plain button
+const lk = (p: Pt) => `<button class="lk" data-i="${p.i}">${esc(p.n)}</button>`;
 
 /** The route strip's result: a summary line, then one boxed strip per state with its stops in order. */
 export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, withButtons: boolean): string {
@@ -250,10 +253,11 @@ export function popupHtml(p: Pt, cfg: Cfg): string {
   const ch = p.c ? cfg.c[p.c] : null,
     src = p.s.split("").map((k) => cfg.src[k]).filter(Boolean),
     what = p.k === "s" ? `${p.t} truck stop` : p.t;
-  let h = `<div class="pp-in" tabindex="-1"><p class="pp-n"><b>${esc(p.n)}</b></p><p>${esc(what)}${p.st ? ` <span class="dot">·</span> ${p.st}` : ""}</p>`;
-  if (p.k === "w") h += `<p>${p.d ? `Direction: ${DIRS[p.d] || p.d}` : "Direction not recorded"}</p>`;
-  if (ch) h += `<p><a href="${esc(ch[3])}">${esc(ch[0])} locator</a> for today's price</p>`;
-  h += `<p class="pp-s">${src.length > 1 ? "Sources" : "Source"}: ${esc(src.join("; "))}</p><button type="button" class="btn" data-close>Close</button></div>`;
+  let h = `<div class="pp-in" tabindex="-1"><p class="pp-n"><b>${esc(p.n)}</b><p>${esc(what)}${p.st ? ` <span class="dot">·</span> ${p.st}` : ""}`;
+  if (p.k === "w") h += `<p>${p.d ? `Direction: ${DIRS[p.d]}bound` : "Direction not recorded"}`;
+  if (p.h) h += `<p>${esc(p.h)}`;
+  if (ch) h += `<p><a href="${esc(ch[2])}">${esc(ch[0])} locator</a> for today's price`;
+  h += `<p class="pp-s">${src.length > 1 ? "Sources" : "Source"}: ${esc(src.join("; "))}</p><button class="btn" data-close>Close</button></div>`;
   return h;
 }
 
@@ -265,7 +269,8 @@ export function radius(k: string, z: number): number {
 
 /** Sort the points by a column: n name, t type, st state, then name, then state. */
 export function sortPts(pts: Pt[], key: "n" | "t" | "st", dir: 1 | -1): Pt[] {
-  return pts.slice().sort((x, y) => (x[key].localeCompare(y[key]) || x.n.localeCompare(y.n) || x.st.localeCompare(y.st)) * dir || x.i - y.i);
+  // the sort is stable and pts is always in list order, so a full tie keeps that order
+  return pts.slice().sort((x, y) => (x[key].localeCompare(y[key]) || x.n.localeCompare(y.n) || x.st.localeCompare(y.st)) * dir);
 }
 
 // ----------------------------------------------------------------- page --
@@ -287,11 +292,22 @@ export function init(doc: Document, win: any): void {
   let map: any = null,
     shapes: Shape[] = [],
     last: { a: [number, number]; b: [number, number]; al: string; bl: string } | null = null,
-    back: HTMLElement | null = null;
+    back: HTMLElement | null = null,
+    hl: [string, number, number, number][] | null = null;
 
   // ---- the list: what is on screen, sortable, each name opening its marker
   const list = () => {
     const bounds = map && map.getBounds();
+    // the whole zoom, for the CSS that shows the route labels, which are made the first time the map reaches 6
+    if (map) {
+      const z = map.getZoom() | 0;
+      box.setAttribute("data-z", z as any); // the DOM makes it a string
+      if (z > 5 && hl) {
+        for (const [t, y, x, w] of hl)
+          L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: w ? "hl hi" : "hl", html: t, iconSize: null }), keyboard: false }).addTo(map);
+        hl = null;
+      }
+    }
     let n = 0;
     for (const p of pts) {
       const v = p.on && (!bounds || bounds.contains([p.lat, p.lon]));
@@ -370,8 +386,8 @@ export function init(doc: Document, win: any): void {
     const ab = (ll: [number, number], t: string) =>
       L.marker(ll, { icon: L.divIcon({ className: "rab", html: t, iconSize: [20, 20] }), keyboard: false, interactive: false });
     drawn = [
-      L.polygon(res.ring, { className: "rb", interactive: false }),
-      L.polyline(res.line, { className: "rl", interactive: false }),
+      L.polygon(res.ring, { className: "rb" }),
+      L.polyline(res.line, { className: "rl" }),
       ab(a, "A"),
       ab(b, "B"),
     ];
@@ -417,8 +433,7 @@ export function init(doc: Document, win: any): void {
   if (!L || !box) return list();
 
   // ---- the map
-  const msg = box.querySelector(".mp-msg");
-  if (msg) msg.remove();
+  box.querySelector(".mp-msg")?.remove();
   // No tiles, and the outlines and roads are good to about a kilometre and a
   // half: past zoom 10 there is nothing more to see and the roads drift off
   // the markers, so the map stops there.
@@ -450,8 +465,7 @@ export function init(doc: Document, win: any): void {
   const col: Record<string, string> = { bg: "#fff", ink: "#111", ink2: "#595959", font: "monospace" };
   const readCol = () => {
     const cs = win.getComputedStyle(root);
-    for (const k of ["bg", "ink", "ink2"]) col[k] = cs.getPropertyValue("--" + k).trim() || col[k];
-    col.font = win.getComputedStyle(doc.body).fontFamily || col.font;
+    for (const k of ["bg", "ink", "ink2", "font"]) col[k] = cs.getPropertyValue("--" + k).trim() || col[k];
   };
   readCol();
 
@@ -469,11 +483,10 @@ export function init(doc: Document, win: any): void {
       const r = this._renderer, p: Pt = this.p;
       if (!r._drawing || this._empty() || !p.on) return;
       const c = r._ctx, x = this._point.x, y = this._point.y, s = this._radius;
-      c.globalAlpha = 1;
       c.beginPath();
       if (p.k === "v") c.rect(x - s, y - s, 2 * s, 2 * s);
-      else c.arc(x, y, s, 0, 6.2832);
-      c.fillStyle = p.k === "w" ? col.bg : p.k === "v" ? col.ink2 : cfg.c[p.f][1];
+      else c.arc(x, y, s, 0, 7);
+      c.fillStyle = p.k === "w" ? col.bg : p.k === "v" ? col.ink2 : col.ink;
       c.fill();
       c.lineWidth = p.k === "w" ? 1.5 : 1;
       c.strokeStyle = p.k === "w" ? col.ink : col.bg;
@@ -483,11 +496,11 @@ export function init(doc: Document, win: any): void {
         c.font = `700 10px ${col.font}`;
         c.textAlign = "center";
         c.textBaseline = "middle";
-        c.fillText(cfg.c[p.f][2], x, y + 0.5);
+        c.fillText(cfg.c[p.f][1], x, y + 0.5);
       }
       if (p.sel) {
         c.beginPath();
-        c.arc(x, y, s + 3.5, 0, 6.2832);
+        c.arc(x, y, s + 3.5, 0, 7);
         c.lineWidth = 2;
         c.strokeStyle = col.ink;
         c.stroke();
@@ -510,13 +523,26 @@ export function init(doc: Document, win: any): void {
   Promise.all([get("states"), get("roads")]).then(([st, rd]) => {
     const base: any[] = [];
     if (rd) {
-      base.push(L.polyline(decodeLines(rd.o, rd.p), { className: "ro", interactive: false, smoothFactor: 1.5 }));
-      base.push(L.polyline(decodeLines(rd.i, rd.p), { className: "ri", interactive: false, smoothFactor: 1.5 }));
+      const I = decodeLines(rd.i, rd.p), O = decodeLines(rd.o, rd.p);
+      // A signed route is drawn with the rest, and named on hover or tap by an
+      // unseen twin on the markers' canvas, which is on top and takes every
+      // pointer: the twin sits under the markers, and the canvas's tolerance
+      // makes a thin road easy to tap.
+      for (const [t, w, l] of rd.r) {
+        const ll = decodeLines(l, rd.p);
+        (w ? I : O).push(...ll);
+        L.polyline(ll, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }).addTo(map).bringToBack();
+      }
+      base.push(L.polyline(O, { className: "ro", smoothFactor: 1.5 }));
+      base.push(L.polyline(I, { className: "ri", smoothFactor: 1.5 }));
+      // the labels wait for the map to reach zoom 6 (see list); data-z then shows interstates from 6 and the rest from 8
+      hl = rd.l;
+      list();
     }
     if (st) {
       const d = decodeStates(st);
       shapes = d.shapes;
-      base.unshift(L.polygon(d.rings, { className: "st", interactive: false, fill: false, smoothFactor: 1.5 }));
+      base.unshift(L.polygon(d.rings, { className: "st", fill: false, smoothFactor: 1.5 }));
     }
     // behind whatever the route strip has drawn: roads over the state lines
     for (const l of base.reverse()) {
@@ -537,10 +563,7 @@ export function init(doc: Document, win: any): void {
     p.m.redraw();
     back = from;
     pop.setLatLng([p.lat, p.lon]).setContent(popupHtml(p, cfg)).openOn(map);
-    if (from) {
-      const el = pop.getElement() && pop.getElement().querySelector(".pp-in");
-      if (el) el.focus();
-    }
+    if (from) pop.getElement()?.querySelector(".pp-in")?.focus();
   };
   map.on("popupclose", () => {
     if (open) {
@@ -554,12 +577,11 @@ export function init(doc: Document, win: any): void {
   const closeBack = () => {
     const b = back;
     map.closePopup();
-    if (b) b.focus();
+    b?.focus();
   };
   // Leaflet stops clicks at the popup's edge, so its Close button is wired on each open
   map.on("popupopen", (e: any) => {
-    const c = e.popup.getElement().querySelector("[data-close]");
-    if (c) c.addEventListener("click", closeBack);
+    e.popup.getElement().querySelector("[data-close]")?.addEventListener("click", closeBack);
   });
   box.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && (e.target as Element).closest(".pp")) closeBack();

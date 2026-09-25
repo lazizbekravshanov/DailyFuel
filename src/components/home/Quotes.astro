@@ -99,7 +99,7 @@ const width = `min-width:calc(${86 + (tax ? 6.5 : 0)}ch + ${242 + (tax ? 20 : 0)
               data-t={tax ? (taxed === null ? "" : String(taxed)) : undefined}
               data-h={s.href}
             >
-              <th scope="row"><span class="mk" aria-hidden="true"></span><a href={s.href}>{s.code}</a></th>
+              <th scope="row"><a href={s.href}>{s.code}</a></th>
               <td>{s.name}</td>
               {m ? (
                 <>

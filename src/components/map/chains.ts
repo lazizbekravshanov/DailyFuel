@@ -1,21 +1,17 @@
 // The chains the map knows, in one place for the page, the legend, the list
-// and the inline script: the name as a driver says it, the ink its dots wear,
-// the letter drawn in the dot, and the chain's own locator page, which is
+// and the inline script: the name as a driver says it, the letter drawn in
+// the dot, and the chain's own locator page, which is
 // where a popup sends anyone who wants today's price. Names identify
 // locations only; there are no logos and DailyFuel is not affiliated with
 // or endorsed by any chain.
 //
-// Inks: seven colours of our own (not the chains' palettes) that clear 3:1
-// against white and against black, so a dot reads on the paper in both
-// modes and the paper coloured letter reads on the dot (checked in
-// src/scripts/map.test.ts). None is the red or the blue a price change
-// wears. The letter, the legend and the list carry the chain too, so colour
-// is never the only signal.
+// Every chain's dot is ink with a paper letter: colour on the site is only
+// for a price change, so the letter, the legend and the list tell the
+// chains apart.
 
 export interface Chain {
   key: string;
   name: string;
-  ink: string;
   letter: string;
   locator: string;
 }
@@ -27,13 +23,13 @@ const TAP = "https://www.ta-petro.com/location/";
 const LOVES = "https://www.loves.com/locations";
 
 export const CHAINS: Chain[] = [
-  { key: "loves", name: "Love's", ink: "#c2410c", letter: "L", locator: LOVES },
-  { key: "pilot", name: "Pilot", ink: "#a16207", letter: "P", locator: PFJ },
-  { key: "flyingj", name: "Flying J", ink: "#4d7c0f", letter: "J", locator: PFJ },
-  { key: "ta", name: "TA", ink: "#0e7490", letter: "T", locator: TAP },
-  { key: "petro", name: "Petro", ink: "#7c3aed", letter: "E", locator: TAP },
-  { key: "one9", name: "ONE9", ink: "#be185d", letter: "9", locator: PFJ },
-  { key: "roadranger", name: "Road Ranger", ink: "#047857", letter: "R", locator: "https://www.roadrangerusa.com/" },
+  { key: "loves", name: "Love's", letter: "L", locator: LOVES },
+  { key: "pilot", name: "Pilot", letter: "P", locator: PFJ },
+  { key: "flyingj", name: "Flying J", letter: "J", locator: PFJ },
+  { key: "ta", name: "TA", letter: "T", locator: TAP },
+  { key: "petro", name: "Petro", letter: "E", locator: TAP },
+  { key: "one9", name: "ONE9", letter: "9", locator: PFJ },
+  { key: "roadranger", name: "Road Ranger", letter: "R", locator: "https://www.roadrangerusa.com/" },
 ];
 
 export const CHAIN_BY_KEY: Record<string, Chain> = Object.fromEntries(CHAINS.map((c) => [c.key, c]));

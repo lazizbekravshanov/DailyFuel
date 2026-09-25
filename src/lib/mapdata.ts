@@ -60,6 +60,8 @@ export interface MapPoint {
   dir: string | null;
   /** The chain whose locator the popup links to, if any. */
   chain: string | null;
+  /** A weigh station's nearest signed freight highway, "I 80, interstate", when one is within NEAR_ROAD_KM. */
+  highway?: string;
 }
 
 export interface MapStateShape extends Shape {
@@ -68,6 +70,8 @@ export interface MapStateShape extends Shape {
 
 export interface MapRoad {
   interstate: boolean;
+  /** The route's sign as the source writes it, I80, U30, S12, or null. */
+  sign: string | null;
   /** [lon, lat] pairs. */
   coords: [number, number][];
 }
@@ -345,8 +349,42 @@ export function parseStates(doc: unknown, path: string): MapStateShape[] {
  * Code 1 is the primary freight system, which has some US and state routes
  * in it, so it says nothing on its own.
  */
+/**
+ * A sign as I80: no spaces or dashes, upper case, null when there is none.
+ * Alaska's interstates are A1 to A4 and the source writes them I1 to I4, so a
+ * line west of 129° W gets its A back (IA1); Hawaii's come as IH1 already.
+ */
+function signOf(sign: unknown, coords?: [number, number][]): string | null {
+  if (typeof sign !== "string" || !sign.trim()) return null;
+  const s = sign.replace(/[\s-]+/g, "").toUpperCase();
+  return /^I\d$/.test(s) && coords?.[0] && coords[0][0] < -129 ? `IA${s.slice(1)}` : s;
+}
+
+const ROUTE_KIND: Record<string, [string, string]> = {
+  I: ["I", "I"],
+  U: ["US", "US"],
+  S: ["SR", "State route"],
+  C: ["CR", "County road"],
+};
+
+/**
+ * A sign as the map prints it: the short label drawn on the line ("I 80",
+ * "US 30", "SR 12") and the words its tooltip and the weigh station popups
+ * use, which say whether it is an interstate ("I 80, interstate", "US 30,
+ * not an interstate"). Alaska's and Hawaii's interstates go by their own
+ * letters, A1 and H1. Null for a sign the page can't read.
+ */
+export function routeName(sign: string | null, interstate: boolean): { short: string; long: string } | null {
+  const m = sign ? /^([IUSC])([AH]?)(\d+[A-Z]*)$/.exec(sign) : null;
+  if (!m || (m[2] && m[1] !== "I")) return null;
+  const [short, long] = ROUTE_KIND[m[1]];
+  const kind = interstate ? "interstate" : "not an interstate";
+  if (m[2]) return { short: m[2] + m[3], long: `${m[2]}${m[3]}, ${kind}` };
+  return { short: `${short} ${m[3]}`, long: `${long} ${m[3]}, ${kind}` };
+}
+
 export function isInterstate(sign: unknown, code: unknown): boolean {
-  if (typeof sign === "string" && /^I[- ]?\d/i.test(sign.trim())) return true;
+  if (typeof sign === "string" && /^I[- ]?[AH]?[- ]?\d/i.test(sign.trim())) return true;
   return code === 2 || code === "2";
 }
 
@@ -370,7 +408,7 @@ export function parseRoads(doc: unknown, path: string): MapRoad[] {
         `${path} has a line whose pts is not an even list of whole numbers`);
       const coords = undelta(pts as number[], p as number);
       for (const [x, y] of coords) fail(x < -180 || x > 180 || y < 15 || y > 72, `${path} has a road point outside the United States (${x}, ${y})`);
-      out.push({ interstate: isInterstate(line.sign, line.code), coords });
+      out.push({ interstate: isInterstate(line.sign, line.code), sign: signOf(line.sign, coords), coords });
     }
     return out;
   }
@@ -382,7 +420,7 @@ export function parseRoads(doc: unknown, path: string): MapRoad[] {
     const props = f.properties ?? {};
     const interstate = isInterstate(props.SIGN1 ?? props.sign, props.NHFN_CODE ?? props.code);
     const parts = (g.type === "LineString" ? [g.coordinates] : g.coordinates) as [number, number][][];
-    for (const coords of parts) out.push({ interstate, coords });
+    for (const coords of parts) out.push({ interstate, sign: signOf(props.SIGN1 ?? props.sign, coords), coords });
   }
   return out;
 }
@@ -592,26 +630,129 @@ export function stateAt(lat: number, lon: number, states: Shape[]): string | nul
 
 // ------------------------------------------------------ browser payloads --
 
-/** The outlines as the page ships them: {p, s: [[code, [[ring delta], ...] per polygon, ...]]}. */
-export function statesPayload(states: MapStateShape[], p = 3): { p: number; s: [string, number[][][]][] } {
+export type Bbox = [number, number, number, number];
+
+/**
+ * The outlines as the page ships them: {p, s: [[code, [[ring delta], ...]
+ * per polygon, bbox], ...]}. The box is worked out here from the rounded
+ * rings, so the page gets the one it would have found itself.
+ */
+export function statesPayload(states: MapStateShape[], p = 3): { p: number; s: [string, number[][][], Bbox][] } {
   return {
     p,
     s: states.map((st) => {
       const g = st.geometry;
       const polys = (g.type === "Polygon" ? [g.coordinates] : g.coordinates) as number[][][][];
-      return [st.code, polys.map((rings) => rings.map((r) => delta(r, p)).filter((d) => d.length >= 8))] as [string, number[][][]];
+      const d = polys.map((rings) => rings.map((r) => delta(r, p)).filter((x) => x.length >= 8));
+      const bbox = bboxOf({ type: "MultiPolygon", coordinates: d.map((rs) => rs.map((r) => undelta(r, p))) });
+      return [st.code, d, bbox] as [string, number[][][], Bbox];
     }),
   };
 }
 
-/** The roads as the page ships them: interstates and the rest apart, so each can wear its own line. */
-export function roadsPayload(roads: MapRoad[], p = 3): { p: number; i: number[][]; o: number[][] } {
+export interface RoadsPayload {
+  p: number;
+  /** the lines with no sign the page can read, interstates and the rest apart */
+  i: number[][];
+  o: number[][];
+  /** one entry per signed route: its tooltip ("I 80, interstate"), 1 for an interstate, its lines */
+  r: [string, 0 | 1, number[][]][];
+  /** the labels drawn on the lines: text, lat, lon, 1 for an interstate */
+  l: [string, number, number, 0 | 1][];
+}
+
+/** Kilometres between labels along one route: interstates sparser, since the page shows them from further out. */
+export const LABEL_KM = { interstate: 400, other: 200 };
+/** No label within this many kilometres of one already placed, interstates placed first. */
+export const LABEL_GAP_KM = 40;
+
+/** Flat earth kilometres, fine for a label's spacing. */
+function km(a: [number, number], b: [number, number]): number {
+  const kx = 111.32 * Math.cos((((a[1] + b[1]) / 2) * Math.PI) / 180);
+  return Math.hypot((b[0] - a[0]) * kx, (b[1] - a[1]) * 110.57);
+}
+
+/**
+ * The roads as the page ships them. Each signed route is one layer, so a
+ * hover or a tap names it; the lines with no sign stay in two plain layers.
+ * The labels are placed here, every LABEL_KM along a route, so the page
+ * only has to draw them.
+ */
+export function roadsPayload(roads: MapRoad[], p = 3): RoadsPayload {
   const i: number[][] = [], o: number[][] = [];
+  const groups = new Map<string, { name: { short: string; long: string }; interstate: boolean; lines: MapRoad[] }>();
   for (const r of roads) {
-    const d = delta(r.coords, p);
-    if (d.length >= 4) (r.interstate ? i : o).push(d);
+    const name = routeName(r.sign, r.interstate);
+    if (!name) {
+      const d = delta(r.coords, p);
+      if (d.length >= 4) (r.interstate ? i : o).push(d);
+      continue;
+    }
+    const key = `${r.sign} ${r.interstate}`;
+    if (!groups.has(key)) groups.set(key, { name, interstate: r.interstate, lines: [] });
+    groups.get(key)!.lines.push(r);
   }
-  return { p, i, o };
+  const r: RoadsPayload["r"] = [];
+  const cand: { t: string; at: [number, number]; w: 0 | 1 }[] = [];
+  for (const g of groups.values()) {
+    const lines = g.lines.map((l) => delta(l.coords, p)).filter((d) => d.length >= 4);
+    if (!lines.length) continue;
+    const w = g.interstate ? 1 : 0;
+    r.push([g.name.long, w, lines]);
+    // a label every step along the route, the first half a step in; a route shorter than that gets one at its middle
+    const step = g.interstate ? LABEL_KM.interstate : LABEL_KM.other;
+    let next = step / 2, run = 0;
+    const placed = cand.length;
+    for (const l of g.lines) {
+      for (let k = 1; k < l.coords.length; k++) {
+        const a = l.coords[k - 1], b = l.coords[k], d = km(a, b);
+        while (d > 0 && run + d >= next) {
+          const f = (next - run) / d;
+          cand.push({ t: g.name.short, at: [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f], w });
+          next += step;
+        }
+        run += d;
+      }
+    }
+    if (cand.length === placed && run >= 20) {
+      const longest = g.lines.reduce((x, y) => (y.coords.length > x.coords.length ? y : x));
+      cand.push({ t: g.name.short, at: longest.coords[Math.floor(longest.coords.length / 2)], w });
+    }
+  }
+  r.sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], "en", { numeric: true }));
+  const l: RoadsPayload["l"] = [];
+  const kept: [number, number][] = [];
+  for (const c of cand.sort((x, y) => y.w - x.w)) {
+    if (kept.some((k) => km(k, c.at) < LABEL_GAP_KM)) continue;
+    kept.push(c.at);
+    l.push([c.t, Math.round(c.at[1] * 100) / 100, Math.round(c.at[0] * 100) / 100, c.w]);
+  }
+  return { p, i, o, r, l };
+}
+
+/** How far a weigh station may be from a signed freight highway for its popup to name it. The lines are good to about a kilometre. */
+export const NEAR_ROAD_KM = 2;
+
+/** The signed freight highway nearest a point, within NEAR_ROAD_KM, as its popup words it: "I 80, interstate". */
+export function nearestRoute(roads: MapRoad[], lat: number, lon: number): string | null {
+  const kx = 111.32 * Math.cos((lat * Math.PI) / 180), ky = 110.57;
+  const padX = NEAR_ROAD_KM / kx, padY = NEAR_ROAD_KM / ky;
+  let best: MapRoad | null = null, bestKm = NEAR_ROAD_KM;
+  for (const r of roads) {
+    if (!routeName(r.sign, r.interstate)) continue;
+    for (let k = 1; k < r.coords.length; k++) {
+      const [x1, y1] = r.coords[k - 1], [x2, y2] = r.coords[k];
+      if (Math.min(x1, x2) - padX > lon || Math.max(x1, x2) + padX < lon || Math.min(y1, y2) - padY > lat || Math.max(y1, y2) + padY < lat) continue;
+      const ax = (x1 - lon) * kx, ay = (y1 - lat) * ky, vx = (x2 - x1) * kx, vy = (y2 - y1) * ky;
+      const n = vx * vx + vy * vy, t = n ? Math.max(0, Math.min(1, -(ax * vx + ay * vy) / n)) : 0;
+      const d = Math.hypot(ax + vx * t, ay + vy * t);
+      if (d <= bestKm) {
+        best = r;
+        bestKm = d;
+      }
+    }
+  }
+  return best ? routeName(best.sign, best.interstate)?.long ?? null : null;
 }
 
 /**
@@ -726,7 +867,11 @@ export function loadMapData(dirInput = process.env.DAILYFUEL_MAP_DIR ?? "data/ma
     }
   }
   for (const w of mergeWeigh(weighIn)) {
-    points.push({ kind: "w", filter: WEIGH_KEY, lat: w.lat, lon: w.lon, name: w.name, type: WEIGH_TYPE, state: w.state, sources: w.sources, dir: w.dir, chain: null });
+    const highway = nearestRoute(roads, w.lat, w.lon);
+    points.push({
+      kind: "w", filter: WEIGH_KEY, lat: w.lat, lon: w.lon, name: w.name, type: WEIGH_TYPE, state: w.state, sources: w.sources, dir: w.dir, chain: null,
+      ...(highway && { highway }),
+    });
   }
   points.sort(comparePoints);
 

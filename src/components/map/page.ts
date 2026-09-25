@@ -33,6 +33,7 @@ export function rowsHtml(points: MapPoint[]): string {
     if (p.sources !== "o") h += ` data-s="${p.sources}"`;
     if (p.dir) h += ` data-d="${p.dir[0]}"`;
     if (p.kind === "v" && p.chain) h += ` data-c="${p.chain}"`;
+    if (p.highway) h += ` data-h="Nearest freight highway: ${esc(p.highway)}"`;
     h += `><td>${esc(p.name)}<td>${esc(p.type)}<td>${p.state ?? ""}`;
   }
   return h;
@@ -74,7 +75,7 @@ export const MAX_BOUNDS: [[number, number], [number, number]] = [[15, -190], [72
 
 export function mapConfig(site: SiteData, data: MapData): Cfg {
   const c: Cfg["c"] = {};
-  for (const ch of CHAINS) c[ch.key] = [ch.name, ch.ink, ch.letter, ch.locator];
+  for (const ch of CHAINS) c[ch.key] = [ch.name, ch.letter, ch.locator];
   const period = site.latest.eia?.period;
   return {
     c,
@@ -118,7 +119,7 @@ export function mapScript(): string {
     bundle: true,
     minify: true,
     format: "iife",
-    target: "es2019",
+    target: "es2020",
     legalComments: "none",
     write: false,
   });

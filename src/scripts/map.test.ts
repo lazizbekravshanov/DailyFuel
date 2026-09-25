@@ -1,7 +1,7 @@
 // The map page's script, in the parts that are plain functions: reading a
 // row back into a point, the base layers' decoding, finding a place, the
 // route strip's maths and markup, the popup, the marker sizes, the sort.
-// Plus the chain inks, which have to read on the paper in both themes.
+// Plus the chains' letters, which are all that tells their ink dots apart.
 
 import { parseHTML } from "linkedom";
 import { describe, expect, it } from "vitest";
@@ -25,30 +25,13 @@ import {
   type Pt,
 } from "./map.ts";
 
-const lum = (hex: string) => {
-  const lin = (c: number) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
-  const n = parseInt(hex.slice(1), 16);
-  return 0.2126 * lin(n >> 16) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
-};
-const contrast = (a: string, b: string) => {
-  const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
-  return (x + 0.05) / (y + 0.05);
-};
 
-describe("the chain inks", () => {
-  it("clear 3:1 on the white page and on the black one, so a dot and its paper letter read in both themes", () => {
-    for (const ch of CHAINS) {
-      expect(contrast(ch.ink, "#ffffff"), ch.name).toBeGreaterThanOrEqual(3);
-      expect(contrast(ch.ink, "#000000"), ch.name).toBeGreaterThanOrEqual(3);
-    }
-  });
-
-  it("are seven different inks, none the red or the blue a price change wears, each with its own letter", () => {
+describe("the chains", () => {
+  it("are seven, each with its own letter and a locator, and no colour of their own", () => {
     expect(CHAINS).toHaveLength(7);
-    expect(new Set(CHAINS.map((c) => c.ink)).size).toBe(7);
     expect(new Set(CHAINS.map((c) => c.letter)).size).toBe(7);
     for (const ch of CHAINS) {
-      expect(["#b3151b", "#0f4fbf", "#ff7070", "#7fadff"]).not.toContain(ch.ink);
+      expect(ch).not.toHaveProperty("ink");
       expect(ch.locator).toMatch(/^https:\/\//);
     }
   });
@@ -69,11 +52,11 @@ const CHEYENNE: [number, number] = [41.14, -104.82];
 
 function pt(i: number, f: string, lat: number, lon: number, n = "Stop", st = "IL"): Pt {
   const k = f === "w" ? "w" : f === "v" ? "v" : "s";
-  return { i, tr: null, f, k, lat, lon, n, t: k === "s" ? CHAINS.find((c) => c.key === f)!.name : k === "w" ? "Weigh station" : "Truck service", st, s: "o", d: "", c: k === "s" ? f : "", on: true };
+  return { i, tr: null, f, k, lat, lon, n, t: k === "s" ? CHAINS.find((c) => c.key === f)!.name : k === "w" ? "Weigh station" : "Truck service", st, s: "o", d: "", c: k === "s" ? f : "", h: "", on: true };
 }
 
 const CFG: Cfg = {
-  c: Object.fromEntries(CHAINS.map((c) => [c.key, [c.name, c.ink, c.letter, c.locator]])),
+  c: Object.fromEntries(CHAINS.map((c) => [c.key, [c.name, c.letter, c.locator]])),
   src: SOURCES,
   px: [
     ["IL", "Illinois", "$6.250", "+30.4¢ +5.1%", "up", "EIA Midwest average, 15 states", "54.5¢"],
@@ -239,6 +222,8 @@ describe("the list's rows and the popups", () => {
     expect(scale).toContain("Sources: U.S. DOT NTAD 2019, public domain; DailyFuel, CC BY 4.0");
     expect(scale).not.toContain("href=");
     expect(popupHtml(pts[3], CFG)).toContain("Direction not recorded");
+    expect(scale).not.toContain("highway");
+    expect(popupHtml({ ...pts[1], h: "Nearest freight highway: I 80, interstate" }, CFG)).toContain("<p>Nearest freight highway: I 80, interstate");
     expect(popupHtml(pts[2], CFG)).toContain("Love's locator");
     for (const p of pts) expect(popupHtml(p, CFG)).not.toMatch(/[–—]|\s-\s/);
   });
