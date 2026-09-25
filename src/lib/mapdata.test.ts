@@ -351,7 +351,24 @@ describe("the files the page ships", () => {
     expect(pay.r.map(([t, w]) => [t, w])).toEqual([["I 80, interstate", 1], ["US 30, not an interstate", 0]]);
     expect(decodeLines(pay.r[0][2], pay.p)[0]).toEqual([[41.878, -87.63], [41.888, -87.73], [41.888, -87.93]]);
     // each route short of a label step gets one label; interstates first
-    expect(pay.l.map((x) => x[0])).toEqual(["I 80", "US 30"]);
+    expect(pay.l.map((x) => [x[0], x[3]])).toEqual([["I 80", 1], ["US 30", 2]]);
+  });
+
+  it("label a US route from 3 km, where a state route needs 20", () => {
+    // beside a 100 km I 80, a 5 km US 6 gets a label and a 5 km SR 2 doesn't
+    const roads = parseRoads(
+      {
+        precision: 2,
+        fields: ["sign", "code", "pts"],
+        lines: [
+          ["I80", 1, [-9000, 4100, -120, 0]],
+          ["U6", 1, [-9060, 4118, 0, 5]],
+          ["S2", 1, [-9060, 4082, 0, -5]],
+        ],
+      },
+      "r.json",
+    );
+    expect(roadsPayload(roads, 2).l.map((x) => [x[0], x[3]])).toEqual([["I 80", 1], ["US 6", 2]]);
   });
 
   it("leave places whole", () => {

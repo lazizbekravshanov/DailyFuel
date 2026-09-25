@@ -360,7 +360,7 @@ const description =
     stroke: var(--edge);
     stroke-width: 1.1;
   }
-  /* a route's number: interstates boxed in ink from zoom 6, the rest in a hairline from zoom 8 (the script sets data-z) */
+  /* a route's number: interstates boxed in ink from zoom 6, US routes from 7, the rest from 8, the others in a hairline (the script sets data-z) */
   .mp .hl {
     display: none;
     translate: -50% -50%;
@@ -371,12 +371,13 @@ const description =
     font: 10px/14px var(--font);
     white-space: nowrap;
   }
-  .mp .hl.hi {
+  .mp .hl.h1 {
     border-color: var(--ink);
     color: var(--ink);
     font-weight: 700;
   }
-  #map:is([data-z="6"], [data-z="7"]) .hl.hi,
+  #map:is([data-z="6"], [data-z="7"]) .hl.h1,
+  #map[data-z="7"] .hl.h2,
   #map:is([data-z="8"], [data-z="9"], [data-z="10"]) .hl {
     display: block;
   }

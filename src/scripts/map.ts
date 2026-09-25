@@ -304,7 +304,7 @@ export function init(doc: Document, win: any): void {
       box.setAttribute("data-z", z as any); // the DOM makes it a string
       if (z > 5 && hl) {
         for (const [t, y, x, w] of hl)
-          L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: w ? "hl hi" : "hl", html: t, iconSize: null }), keyboard: false }).addTo(map);
+          L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }).addTo(map);
         hl = null;
       }
     }
@@ -535,7 +535,7 @@ export function init(doc: Document, win: any): void {
       }
       base.push(L.polyline(O, { className: "ro", smoothFactor: 1.5 }));
       base.push(L.polyline(I, { className: "ri", smoothFactor: 1.5 }));
-      // the labels wait for the map to reach zoom 6 (see list); data-z then shows interstates from 6 and the rest from 8
+      // the labels wait for the map to reach zoom 6 (see list); data-z then shows interstates (h1) from 6, US routes (h2) from 7 and the rest from 8
       hl = rd.l;
       list();
     }

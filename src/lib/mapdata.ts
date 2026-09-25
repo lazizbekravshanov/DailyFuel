@@ -657,14 +657,24 @@ export interface RoadsPayload {
   o: number[][];
   /** one entry per signed route: its tooltip ("I 80, interstate"), 1 for an interstate, its lines */
   r: [string, 0 | 1, number[][]][];
-  /** the labels drawn on the lines: text, lat, lon, 1 for an interstate */
-  l: [string, number, number, 0 | 1][];
+  /** the labels drawn on the lines: text, lat, lon, and 1 for an interstate, 2 for a US route, 0 for the rest */
+  l: [string, number, number, LabelKind][];
 }
 
-/** Kilometres between labels along one route: interstates sparser, since the page shows them from further out. */
-export const LABEL_KM = { interstate: 400, other: 200 };
-/** No label within this many kilometres of one already placed, interstates placed first. */
-export const LABEL_GAP_KM = 40;
+export type LabelKind = 0 | 1 | 2;
+
+/**
+ * How each kind of route is labelled, by LabelKind: kilometres between
+ * labels along it, the shortest route that gets one, and how close it may
+ * come to a label already placed (interstates are placed first, then US
+ * routes). The freight network's US routes are mostly short city links,
+ * so they get a label from 3 km and may sit closer to the others.
+ */
+export const LABEL_RULES: Record<LabelKind, { step: number; min: number; gap: number }> = {
+  1: { step: 400, min: 20, gap: 40 },
+  2: { step: 100, min: 3, gap: 15 },
+  0: { step: 200, min: 20, gap: 40 },
+};
 
 /** Flat earth kilometres, fine for a label's spacing. */
 function km(a: [number, number], b: [number, number]): number {
@@ -693,14 +703,14 @@ export function roadsPayload(roads: MapRoad[], p = 3): RoadsPayload {
     groups.get(key)!.lines.push(r);
   }
   const r: RoadsPayload["r"] = [];
-  const cand: { t: string; at: [number, number]; w: 0 | 1 }[] = [];
+  const cand: { t: string; at: [number, number]; w: LabelKind }[] = [];
   for (const g of groups.values()) {
     const lines = g.lines.map((l) => delta(l.coords, p)).filter((d) => d.length >= 4);
     if (!lines.length) continue;
-    const w = g.interstate ? 1 : 0;
-    r.push([g.name.long, w, lines]);
+    r.push([g.name.long, g.interstate ? 1 : 0, lines]);
+    const w: LabelKind = g.interstate ? 1 : g.name.short.startsWith("US ") ? 2 : 0;
     // a label every step along the route, the first half a step in; a route shorter than that gets one at its middle
-    const step = g.interstate ? LABEL_KM.interstate : LABEL_KM.other;
+    const { step, min } = LABEL_RULES[w];
     let next = step / 2, run = 0;
     const placed = cand.length;
     for (const l of g.lines) {
@@ -714,7 +724,7 @@ export function roadsPayload(roads: MapRoad[], p = 3): RoadsPayload {
         run += d;
       }
     }
-    if (cand.length === placed && run >= 20) {
+    if (cand.length === placed && run >= min) {
       const longest = g.lines.reduce((x, y) => (y.coords.length > x.coords.length ? y : x));
       cand.push({ t: g.name.short, at: longest.coords[Math.floor(longest.coords.length / 2)], w });
     }
@@ -722,8 +732,9 @@ export function roadsPayload(roads: MapRoad[], p = 3): RoadsPayload {
   r.sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], "en", { numeric: true }));
   const l: RoadsPayload["l"] = [];
   const kept: [number, number][] = [];
-  for (const c of cand.sort((x, y) => y.w - x.w)) {
-    if (kept.some((k) => km(k, c.at) < LABEL_GAP_KM)) continue;
+  const order = [1, 2, 0];
+  for (const c of cand.sort((x, y) => order.indexOf(x.w) - order.indexOf(y.w))) {
+    if (kept.some((k) => km(k, c.at) < LABEL_RULES[c.w].gap)) continue;
     kept.push(c.at);
     l.push([c.t, Math.round(c.at[1] * 100) / 100, Math.round(c.at[0] * 100) / 100, c.w]);
   }
