@@ -45,7 +45,7 @@ const box = (code: string, w: number, s: number, e: number, n: number): MapState
   bbox: [w, s, e, n],
 });
 const STATES = [box("IL", -91.5, 37, -87.5, 42.5), box("IA", -96.5, 40.4, -91.5, 43.5), box("NE", -104.05, 40, -96.5, 43), box("WY", -111, 41, -104.05, 45)];
-const shapes = decodeStates(statesPayload(STATES)).shapes;
+const shapes = decodeStates(statesPayload(STATES));
 
 const CHICAGO: [number, number] = [41.878, -87.63];
 const CHEYENNE: [number, number] = [41.14, -104.82];

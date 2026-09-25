@@ -82,16 +82,15 @@ export function readRow(tr: HTMLTableRowElement, i: number): Pt {
   };
 }
 
-/** The outlines from /map/states.json, as shapes for point in polygon and as Leaflet's [lat, lon] rings. */
-export function decodeStates(doc: { p: number; s: [string, number[][][], Shape["bbox"]][] }): { shapes: Shape[]; rings: [number, number][][][] } {
-  const shapes: Shape[] = [], rings: [number, number][][][] = [];
+/** The outlines from /map/states.json, as shapes for point in polygon. */
+export function decodeStates(doc: { p: number; s: [string, number[][][], Shape["bbox"]][] }): Shape[] {
+  const shapes: Shape[] = [];
   for (const [code, polys, bbox] of doc.s) {
     const coordinates = polys.map((rs) => rs.map((r) => undelta(r, doc.p)));
     const geometry = { type: "MultiPolygon" as const, coordinates };
     shapes.push({ code, geometry, bbox });
-    for (const poly of coordinates) rings.push(poly.map((r) => r.map(([x, y]) => [y, x] as [number, number])));
   }
-  return { shapes, rings };
+  return shapes;
 }
 
 /** Delta lines to Leaflet's [lat, lon] lists. */
@@ -434,11 +433,12 @@ export function init(doc: Document, win: any): void {
 
   // ---- the map
   box.querySelector(".mp-msg")?.remove();
-  // No tiles, and the outlines and roads are good to about a kilometre and a
-  // half: past zoom 10 there is nothing more to see and the roads drift off
-  // the markers, so the map stops there.
+  // The base is CARTO's light map (every road, place and border, in grey; the
+  // page's CSS turns it to ink in dark mode). Street level is zoom 16. The
+  // freight roads drawn on top are good to about a kilometre, so the CSS
+  // hides them past zoom 10, where the base map's own roads take over.
   map = L.map(box, {
-    maxZoom: 10,
+    maxZoom: 16,
     zoomSnap: 0.25,
     zoomDelta: 1,
     attributionControl: false,
@@ -458,6 +458,7 @@ export function init(doc: Document, win: any): void {
   };
   map.fitBounds(cfg.l48, { animate: false });
   fit();
+  L.tileLayer("https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png").addTo(map);
   // Leaflet follows the window's size itself; the floor moves with it, so the lower 48 always fits
   map.on("resize", fit);
 
@@ -519,7 +520,8 @@ export function init(doc: Document, win: any): void {
   }
   grp.addTo(map);
 
-  // the base: state lines and the freight roads, on SVG so the page's CSS tokens colour them in both themes
+  // over the base map: the freight roads, on SVG so the page's CSS tokens colour them in both themes, and the
+  // outlines, which are not drawn (the base map has the borders) but tell the route strip which state it is in
   Promise.all([get("states"), get("roads")]).then(([st, rd]) => {
     const base: any[] = [];
     if (rd) {
@@ -540,11 +542,9 @@ export function init(doc: Document, win: any): void {
       list();
     }
     if (st) {
-      const d = decodeStates(st);
-      shapes = d.shapes;
-      base.unshift(L.polygon(d.rings, { className: "st", fill: false, smoothFactor: 1.5 }));
+      shapes = decodeStates(st);
     }
-    // behind whatever the route strip has drawn: roads over the state lines
+    // behind whatever the route strip has drawn
     for (const l of base.reverse()) {
       l.addTo(map);
       l.bringToBack();

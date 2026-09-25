@@ -338,11 +338,10 @@ describe("the files the page ships", () => {
   it("carry the outlines and the roads to the browser and back, to the thousandth of a degree", () => {
     const states = parseStates(statesDoc(), "states.json");
     const back = decodeStates(statesPayload(states));
-    expect(back.shapes.map((s) => s.code)).toEqual(states.map((s) => s.code));
-    const il = back.shapes.find((s) => s.code === "IL")!;
+    expect(back.map((s) => s.code)).toEqual(states.map((s) => s.code));
+    const il = back.find((s) => s.code === "IL")!;
     expect(il.bbox).toEqual([-91.5, 37, -87.5, 42.5]);
-    // Leaflet takes [lat, lon]
-    expect(back.rings.some((poly) => poly[0].some(([lat, lon]) => lat === 42.5 && lon === -91.5))).toBe(true);
+    expect((il.geometry.coordinates as number[][][][])[0][0]).toContainEqual([-91.5, 42.5]);
     const roads = parseRoads(ROADS, "roads.json");
     const pay = roadsPayload(roads);
     // the signed routes are layers of their own, named; only the unsigned line is left plain
