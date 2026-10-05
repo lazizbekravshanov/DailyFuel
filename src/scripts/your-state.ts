@@ -104,8 +104,11 @@ export function yourState(doc: Document, getStore: () => Storage): void {
     v: string[];
   try {
     code = getStore().getItem("dailyfuel:state") || "";
-    const all = JSON.parse(data.textContent || "{}"),
-      s = all.s[code];
+    const all = JSON.parse(data.textContent || "{}");
+    // only a state really in the block: a saved "constructor" or "__proto__"
+    // would find Object's own members, which throw nothing and fill nothing
+    if (!Object.prototype.hasOwnProperty.call(all.s, code)) return;
+    const s = all.s[code];
     v = [s[0]].concat(all.l[s[1]]);
   } catch (err) {
     return;

@@ -43,12 +43,14 @@ function site(opts: { us?: Move | null; noChange?: string } = {}): SiteData {
       primary: series ? move(price, info.code === opts.noChange ? null : change) : null,
     } as unknown as StateView;
   });
+  const us = opts.us === undefined ? move(6.285, 0.318) : opts.us;
   return {
     mode: "eia_only",
     latest: { eia: { period: "2026-09-14", prev_period: "2026-09-07" }, aaa: null },
     states,
     byCode: new Map(states.map((s) => [s.code, s])),
-    national: { cadence: "weekly", move: opts.us === undefined ? move(6.285, 0.318) : opts.us, date: "2026-09-14", prevDate: "2026-09-07" },
+    national: { cadence: "weekly", move: us, date: "2026-09-14", prevDate: "2026-09-07" },
+    eiaUs: us,
   } as unknown as SiteData;
 }
 
@@ -73,33 +75,60 @@ const S = site();
 const by = (code: string, from = S) => from.byCode.get(code)!;
 
 describe("share sentence on a state page", () => {
-  it("names the price, the move and whose number it is", () => {
-    expect(stateShareText(by("OH"), S)).toBe("Ohio diesel is $6.250 a gallon, up 30.4 cents this week. DOE Midwest weekly average.");
-    expect(stateShareText(by("FL"), S)).toBe("Florida diesel is $6.096 a gallon, down 2.1 cents this week. DOE Lower Atlantic weekly average.");
-  });
-
-  it("calls California's number its own and the rest of the coast what it is", () => {
-    expect(stateShareText(by("CA"), S)).toBe("California diesel is $8.039 a gallon, up 27.5 cents this week. DOE weekly California price.");
-    expect(stateShareText(by("OR"), S)).toBe(
-      "Oregon diesel is $6.566 a gallon, up 25.2 cents this week. DOE weekly average for the West Coast outside California.",
+  // In a group chat a bare "Ohio diesel is $6.250" reads as Ohio's own
+  // measured price. EIA prices regions, so the sentence says whose average
+  // it is before it gives the number.
+  it("says the price is the region's average, then the move", () => {
+    expect(stateShareText(by("OH"), S)).toBe(
+      "Diesel in Ohio's region, the Midwest, averaged $6.250 a gallon this week, up 30.4 cents. Weekly DOE price.",
+    );
+    expect(stateShareText(by("FL"), S)).toBe(
+      "Diesel in Florida's region, the Lower Atlantic, averaged $6.096 a gallon this week, down 2.1 cents. Weekly DOE price.",
     );
   });
 
-  it("says unchanged, or leaves the move out when there's no week before", () => {
-    expect(stateShareText(by("UT"), S)).toBe("Utah diesel is $6.066 a gallon, unchanged this week. DOE Rocky Mountain weekly average.");
+  it("calls California's number its own and the rest of the coast what it is", () => {
+    expect(stateShareText(by("CA"), S)).toBe("California diesel averaged $8.039 a gallon this week, up 27.5 cents. Weekly DOE price.");
+    expect(stateShareText(by("OR"), S)).toBe(
+      "Diesel in Oregon's region, the West Coast outside California, averaged $6.566 a gallon this week, up 25.2 cents. Weekly DOE price.",
+    );
+  });
+
+  it("never words a regional price as the state's own", () => {
+    for (const s of S.states) {
+      if (!s.primary || s.eia_series === "SCA") continue;
+      const text = stateShareText(s, S);
+      expect(text).toMatch(/^Diesel in .+'s region, the /);
+      expect(text).not.toMatch(new RegExp(`^${s.code === "DC" ? "DC" : s.name} diesel`));
+    }
+  });
+
+  it("says no change, or leaves the move out when there's no week before", () => {
+    expect(stateShareText(by("UT"), S)).toBe(
+      "Diesel in Utah's region, the Rocky Mountain, averaged $6.066 a gallon this week, no change. Weekly DOE price.",
+    );
     const s = site({ noChange: "OH" });
-    expect(stateShareText(by("OH", s), s)).toBe("Ohio diesel is $6.250 a gallon. DOE Midwest weekly average.");
+    expect(stateShareText(by("OH", s), s)).toBe("Diesel in Ohio's region, the Midwest, averaged $6.250 a gallon this week. Weekly DOE price.");
   });
 
   it("calls DC by its short name", () => {
-    expect(stateShareText(by("DC"), S)).toMatch(/^DC diesel is \$6\.312 a gallon/);
+    expect(stateShareText(by("DC"), S)).toBe(
+      "Diesel in DC's region, the Central Atlantic, averaged $6.312 a gallon this week, up 29.1 cents. Weekly DOE price.",
+    );
   });
 
-  it("says Alaska and Hawaii have no DOE weekly number, like their pages, with no number", () => {
+  it("says Alaska and Hawaii have no price of their own and gives the U.S. one, like their pages", () => {
     for (const [code, name] of [["AK", "Alaska"], ["HI", "Hawaii"]]) {
       const text = stateShareText(by(code), S);
-      expect(text).toBe(`EIA doesn't survey diesel prices in ${name}, so there's no DOE weekly number. The closest region EIA surveys is the West Coast.`);
-      expect(text).not.toMatch(/\$/);
+      expect(text).toBe(
+        `The government's weekly survey does not cover ${name}, so there is no ${name} price. U.S. diesel averaged $6.285 a gallon this week.`,
+      );
+      // the only number is the U.S. average, said as the U.S. one
+      expect(text.match(/\$[\d.]+/g)).toEqual(["$6.285"]);
+      expect(text).not.toMatch(new RegExp(`${name} (diesel|price) (is|averaged)`));
+      // with no U.S. price either, there is no number at all
+      const bare = site({ us: null });
+      expect(stateShareText(by(code, bare), bare)).toBe(`The government's weekly survey does not cover ${name}, so there is no ${name} price.`);
     }
   });
 

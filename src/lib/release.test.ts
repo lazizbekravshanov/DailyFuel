@@ -75,11 +75,15 @@ describe("next EIA release", () => {
 });
 
 describe("wording", () => {
-  // The paper terminal's week line ends "Next release Tue, Sep 22.", and the
-  // "Weekly number." lead of the old sign went with the sign.
-  it("reads the way the mockup's week line says", () => {
-    expect(nextUpdateText("2026-09-22")).toBe("Next release Tue, Sep 22.");
-    expect(LATE_TEXT).toBe("The next release is late.");
+  // The site has one phrase for when the next numbers land, on the week
+  // line, the footer and the late banner: "New prices Tue, Sep 22." and
+  // "New prices are late." The old "Next release" wording went with the
+  // mobile plan, since drivers wait for prices, not releases.
+  it("says when new prices land in the site's one phrase", () => {
+    expect(nextUpdateText("2026-09-22")).toBe("New prices Tue, Sep 22.");
+    expect(nextUpdateText("2026-10-06")).toBe("New prices Tue, Oct 6.");
+    expect(LATE_TEXT).toBe("New prices are late.");
+    for (const t of [LATE_TEXT, nextUpdateText("2026-09-22")]) expect(t).not.toMatch(/release|update/i);
   });
 
   it("never uses dashes as punctuation", () => {

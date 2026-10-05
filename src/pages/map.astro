@@ -575,7 +575,8 @@ const description =
     background: none;
     color: inherit;
     font: inherit;
-    font-size: var(--fs-t);
+    /* 16px at least, or iOS zooms the page when a field takes focus */
+    font-size: max(16px, var(--fs-t));
   }
   .rt-f:focus-within {
     outline: 2px solid var(--ink);

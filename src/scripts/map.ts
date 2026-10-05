@@ -213,26 +213,26 @@ export const milesText = (r: Run, last: number): string =>
 const lk = (p: Pt) => `<button class="lk" data-i="${p.i}">${esc(p.n)}</button>`;
 
 /**
- * The trip's result: the line, the price in each state it crosses, the
- * lowest of them, then each state's places, folded, with its miles and tax.
+ * The trip's result: the line, the price in each state it crosses (once,
+ * where the line first enters it, however often it crosses back), the
+ * lowest of them, then each stretch's places, folded, with its miles and tax.
+ * Many states share one regional average, so the lowest is named only when
+ * some state on the line is above it, and a tie names every state in it.
  */
 export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, withButtons: boolean): string {
-  const byCode: Record<string, PriceRow> = {};
+  const byCode: Record<string, PriceRow> = {},
+    seen: PriceRow[] = [],
+    num = (r: PriceRow) => +r[2]!.slice(1);
   for (const r of cfg.px) byCode[r[0]] = r;
   let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles in a straight line</p>`,
-    lo: PriceRow | null = null,
-    n = 0,
     rest = "";
   if (res.outside) h += `<p class="fine">Part of the line runs over water or outside the 50 states.</p>`;
   h += `<ul class="rp">`;
   for (const r of res.runs) {
     const row = r.code ? byCode[r.code] : null,
       k = r.hits.length;
-    if (row) {
-      if (row[2]) {
-        n++;
-        if (!lo || +row[2].slice(1) < +lo[2]!.slice(1)) lo = row;
-      }
+    if (row && !seen.includes(row)) {
+      seen.push(row);
       h += `<li><b>${esc(row[1])}</b> ${row[2] ? `${row[2]} <span class="${row[4]}">${row[3] || ""}</span>` : "No weekly price"}`;
     }
     rest += `<details class="rs"><summary>${row ? esc(row[1]) : "State not known"}: ${k} ${k == 1 ? "place" : "places"}, ${milesText(r, res.miles).toLowerCase()}${row ? `, state tax ${row[6]}` : ""}</summary>`;
@@ -244,7 +244,12 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     rest += `</details>`;
   }
   h += `</ul>`;
-  if (lo && n > 1) h += `<p>Lowest weekly average on this line: <b>${esc(lo[1])}, ${lo[2]}</b></p>`;
+  // "$10.100" sorts before "$9.900" as text, so the numbers are compared
+  const priced = seen.filter((r) => r[2]),
+    lo = Math.min(...priced.map(num)),
+    low = priced.filter((r) => num(r) == lo);
+  if (low.length < priced.length)
+    h += `<p>Lowest weekly average on this line: <b>${esc(low.map((r) => r[1]).join(", ").replace(/, ([^,]*)$/, " and $1"))}, ${low[0][2]}</b></p>`;
   return h + rest;
 }
 
@@ -290,6 +295,8 @@ export function init(doc: Document, win: any): void {
     root = doc.documentElement;
   let map: any = null,
     shapes: Shape[] = [],
+    // the driver has moved the map (or a find, Near me or a trip has), so the opening view stays out of the way
+    moved = 0,
     last: { a: [number, number]; b: [number, number]; al: string; bl: string } | null = null,
     back: HTMLElement | null = null,
     hl: [string, number, number, number][] | null = null;
@@ -434,6 +441,7 @@ export function init(doc: Document, win: any): void {
   };
   map.fitBounds(cfg.l48, { animate: false });
   fit();
+  map.on("movestart", () => (moved = 1));
   L.tileLayer(cfg.tl).addTo(map);
   // Leaflet follows the window's size itself; the floor moves with it, so the lower 48 always fits
   map.on("resize", fit);
@@ -496,54 +504,57 @@ export function init(doc: Document, win: any): void {
   }
   grp.addTo(map);
 
-  // over the base map: the freight roads, on SVG so the page's CSS tokens colour them in both themes, and the
-  // outlines, which are not drawn (the base map has the borders) but tell the route strip which state it is in
-  const stP = get("states");
-  // a state's outline box: for #oh, the saved state, and a state typed in the find box
+  // A state's outline box: for #oh, the saved state, and a state typed in
+  // the find box. It jumps rather than glides: Leaflet drops a new view asked
+  // for while a zoom is still gliding, so a town found or a trip drawn just
+  // as the opening view lands would be lost.
   const toState = (c: string) => {
     const x = shapes.find((y) => y.code == c.toUpperCase());
-    if (x) map.fitBounds([[x.bbox[1], x.bbox[0]], [x.bbox[3], x.bbox[2]]]);
+    if (x) map.fitBounds([[x.bbox[1], x.bbox[0]], [x.bbox[3], x.bbox[2]]], { animate: false });
     return x;
   };
-  Promise.all([stP, get("roads")]).then(([st, rd]) => {
-    const base: any[] = [];
-    if (rd) {
-      const I = decodeLines(rd.i, rd.p), O = decodeLines(rd.o, rd.p);
-      // A signed route is drawn with the rest, and named on hover or tap by an
-      // unseen twin on the markers' canvas, which is on top and takes every
-      // pointer: the twin sits under the markers, and the canvas's tolerance
-      // makes a thin road easy to tap.
-      for (const [t, w, l] of rd.r) {
-        const ll = decodeLines(l, rd.p);
-        (w ? I : O).push(...ll);
-        L.polyline(ll, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }).addTo(map).bringToBack();
-      }
-      base.push(L.polyline(O, { className: "ro", smoothFactor: 1.5 }));
-      base.push(L.polyline(I, { className: "ri", smoothFactor: 1.5 }));
-      // the labels wait for the map to reach zoom 6 (see list); data-z then shows interstates (h1) from 6, US routes (h2) from 7 and the rest from 8
-      hl = rd.l;
-      list();
-    }
-    if (st) {
-      shapes = decodeStates(st);
-      let c = decodeURIComponent(win.location.hash.slice(1));
-      const ab = c.split("|");
-      if (ab[1] && inA) {
-        inA.value = ab[0];
-        inB.value = ab[1];
-        go();
-      }
+  // The outlines, which are not drawn (the base map has the borders) but
+  // tell the find box and the route strip which state is which. They come on
+  // their own, so a state typed in the find box needn't wait for the roads.
+  const stP = get("states").then((st) => {
+    if (st) shapes = decodeStates(st);
+    // the address: a trip "A|B", a state "#oh", or one of the page's own anchors (#credits), which is neither
+    let c = "";
+    try {
+      c = decodeURIComponent(win.location.hash.slice(1));
+    } catch (e) {}
+    const ab = c.split("|");
+    if (ab[1] && inA) {
+      inA.value = ab[0];
+      inB.value = ab[1];
+      go();
+    } else if (!moved)
       try {
-        c = c || win.localStorage.getItem("dailyfuel:state");
+        // the state in the address, else the saved one
+        toState(c) || toState(win.localStorage.getItem("dailyfuel:state"));
       } catch (e) {}
-      if (c && !last && !ab[1]) toState(c);
-    }
-    // behind whatever the route strip has drawn
-    for (const l of base.reverse()) {
-      l.addTo(map);
-      l.bringToBack();
-    }
+    // a trip run before the outlines came knew no states
     if (last) run(last.a, last.b, last.al, last.bl);
+  });
+  // over the base map, the freight roads, on SVG so the page's CSS tokens colour them in both themes
+  get("roads").then((rd) => {
+    if (!rd) return;
+    const I = decodeLines(rd.i, rd.p), O = decodeLines(rd.o, rd.p);
+    // A signed route is drawn with the rest, and named on hover or tap by an
+    // unseen twin on the markers' canvas, which is on top and takes every
+    // pointer: the twin sits under the markers, and the canvas's tolerance
+    // makes a thin road easy to tap.
+    for (const [t, w, l] of rd.r) {
+      const ll = decodeLines(l, rd.p);
+      (w ? I : O).push(...ll);
+      L.polyline(ll, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }).addTo(map).bringToBack();
+    }
+    // behind whatever the route strip has drawn, the other roads under the interstates
+    L.polyline(I, { className: "ri", smoothFactor: 1.5 }).addTo(map).bringToBack();
+    L.polyline(O, { className: "ro", smoothFactor: 1.5 }).addTo(map).bringToBack();
+    // the labels wait for the map to reach zoom 6 (see list); data-z then shows interstates (h1) from 6, US routes (h2) from 7 and the rest from 8
+    hl = rd.l;
+    list();
   });
 
   // ---- popups
@@ -580,13 +591,20 @@ export function init(doc: Document, win: any): void {
   box.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && (e.target as Element).closest(".pp")) closeBack();
   });
-  // on a phone, far out, a tap zooms in on the spot; close in it opens the nearest dot, not the one drawn on top
+  // On a phone, far out, a tap zooms in on the spot. Close in it opens the
+  // dot nearest the finger, not just the one drawn on top. Leaflet gives a
+  // small marker's own spot as the event's point, so this measures from the
+  // pointer. The dot hit, which is the bigger, lettered one when two overlap,
+  // keeps a 1px lead: two dots within a pixel of each other can't be told
+  // apart by a tap, so the one that shows wins.
   grp.on("click", (e: any) => {
-    const z = map.getZoom();
+    const z = map.getZoom(),
+      at = map.mouseEventToLayerPoint(e.originalEvent),
+      far = (p: Pt) => (p.on ? p.m._point.distanceTo(at) : 1e9);
     if (L.Browser.mobile && z < 6) return map.setView(e.latlng, z + 2);
-    let best = e.layer.p, bd = 1e9;
+    let best: Pt = e.layer.p, bd = far(best) - 1;
     for (const p of pts) {
-      const d = p.on ? p.m._point.distanceTo(e.layerPoint) : 1e9;
+      const d = far(p);
       if (d < bd) (bd = d), (best = p);
     }
     show(best, null);
@@ -613,6 +631,9 @@ export function init(doc: Document, win: any): void {
       e.preventDefault();
       const v = fq.value.trim().toLowerCase(),
         r = cfg.px.find((x) => x[0].toLowerCase() == v || x[1].toLowerCase() == v);
+      if (!v) return tell("Type a town or state.");
+      // what was asked for wins over the opening view, even if the outlines are still on their way
+      moved = 1;
       tell("");
       Promise.all([stP, loadPlaces()]).then(() => {
         const p = findPlace(fq.value, places) as any;
@@ -627,9 +648,13 @@ export function init(doc: Document, win: any): void {
     (fd.querySelector("[data-near]") as HTMLElement).onclick = () => {
       tell("");
       map.locate({ setView: true, maxZoom: 9 });
-      box.scrollIntoView();
     };
-    map.on("locationerror", () => tell("Your phone did not share where you are. Type a town instead."));
+    // the map comes into view only once it is there; a refusal is said by the find box, kept in view
+    map.on("locationfound", () => box.scrollIntoView());
+    map.on("locationerror", () => {
+      tell("Your phone did not share where you are. Type a town instead.");
+      fst.scrollIntoView({ block: "nearest" });
+    });
   }
 
   // ---- the theme: the canvas has no CSS, so a flip repaints the markers

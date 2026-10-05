@@ -110,7 +110,10 @@ if (aaaMode && s.eia_series === null) {
 // Next door: the states across the border with this one, lowest price
 // first, this state in its place among them, then the U.S. average. While
 // EIA is the source these are region averages, and the caption says which
-// region a neighbour with a different price is in.
+// region a neighbour with a different price is in. California is the one
+// state EIA prices on its own (SCA), which is why its number stands apart,
+// so wherever it is in the list the caption says so rather than calling it
+// a region.
 const andList = (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`);
 const near = !aaaMode && move ? (NEIGHBORS[s.code] ?? []).map((c) => site.byCode.get(c)!).filter((n) => n.primary) : [];
 const nextDoor = near.length
@@ -118,11 +121,14 @@ const nextDoor = near.length
   : [];
 const elsewhere = new Map<string, string[]>();
 for (const n of near) {
-  if (n.eia_series === s.eia_series || !n.regionName) continue;
+  if (n.eia_series === s.eia_series || !n.regionName || n.eia_series === "SCA") continue;
   elsewhere.set(n.regionName, [...(elsewhere.get(n.regionName) ?? []), shortName(n)]);
 }
 const ndRegions = [...elsewhere].map(([r, names]) => `${andList(names)} ${names.length > 1 ? "are" : "is"} in the ${r} region`);
-const ndCap = `Each price is the weekly average for that state's region, not a pump price.${ndRegions.length ? ` ${andList(ndRegions)}.` : ""}`;
+const ndCap =
+  "Each price is the weekly average for that state's region, not a pump price." +
+  (nextDoor.some((n) => n.eia_series === "SCA") ? " California has its own average." : "") +
+  (ndRegions.length ? ` ${andList(ndRegions)}.` : "");
 // the other states that read this same number, as codes
 const mates = !aaaMode && move ? regionMates(s, site).sort((a, b) => a.code.localeCompare(b.code)) : [];
 

@@ -30,21 +30,21 @@ function page(opts: { mine?: string; find?: boolean } = {}): string {
     const attrs = (["s", "n", "l", "c", "q", "r", "t"] as const).map((k) => ` data-${k}="${r[k] ?? ""}"`).join("");
     const cells = r.l
       ? `<td>${r.n}</td><td class="num">${r.l}</td><td class="num c-chg up">+${r.c}</td><td class="num c-pct up">+${r.q}</td><td>${r.r}</td>`
-      : `<td>${r.n}</td><td colspan="4" class="muted">No EIA survey</td>`;
+      : `<td>${r.n}</td><td colspan="4" class="muted">No weekly survey</td>`;
     return `<tr${attrs} data-h="/state/${r.s.toLowerCase()}/"><th scope="row"><a href="/state/${r.s.toLowerCase()}/">${r.s}</a></th>${cells}<td class="num">${r.t ?? "n/a"}</td></tr>`;
   }).join("");
   return `<!doctype html><html><body>
     <section class="ys" data-ys${mine ? ` data-ys-state="${mine}"` : ""}></section>
-    <div class="sh"><p class="meta" id="count" role="status">${ROWS.length} states</p>
-    ${find ? `<span class="find"><input id="find" type="text"></span>` : ""}</div>
+    <div class="sh"><p class="meta" id="count" role="status">5 states and DC</p>
+    ${find ? `<span class="find"><input id="find" type="text" disabled></span>` : ""}</div>
     <table id="quotes"><thead><tr>
-      <th scope="col" data-k="s" aria-label="State code">Sym<span class="ar" aria-hidden="true"></span></th>
-      <th scope="col" data-k="n" aria-sort="ascending" aria-label="State name">Name<span class="ar" aria-hidden="true"></span></th>
-      <th scope="col" class="num" data-k="l" data-num="1" aria-label="Last price, dollars a gallon">Last $<span class="ar" aria-hidden="true"></span></th>
-      <th scope="col" class="num" data-k="c" data-num="1" aria-label="Change in cents from last week">Chg ¢<span class="ar" aria-hidden="true"></span></th>
-      <th scope="col" class="num" data-k="q" data-num="1" aria-label="Change in percent from last week">%Chg<span class="ar" aria-hidden="true"></span></th>
-      <th scope="col" data-k="r" aria-label="EIA region">Region<span class="ar" aria-hidden="true"></span></th>
-      <th scope="col" class="num" data-k="t" data-num="1" aria-label="State diesel tax, cents a gallon">Tax ¢<span class="ar" aria-hidden="true"></span></th>
+      <th scope="col" data-k="s" data-w="state code" aria-label="State code">State</th>
+      <th scope="col" data-k="n" data-w="name" aria-sort="ascending" aria-label="State name">Name</th>
+      <th scope="col" class="num" data-k="l" data-num="1" data-w="price" aria-label="Price, dollars a gallon">Price $</th>
+      <th scope="col" class="num" data-k="c" data-num="1" data-w="change" aria-label="Change in cents from last week">Change ¢</th>
+      <th scope="col" class="num" data-k="q" data-num="1" data-w="change in percent" aria-label="Change in percent from last week">Change %</th>
+      <th scope="col" data-k="r" data-w="region" aria-label="Region">Region</th>
+      <th scope="col" class="num" data-k="t" data-num="1" data-w="tax" aria-label="State diesel tax, cents a gallon">Tax ¢</th>
     </tr></thead><tbody>${rows}</tbody></table></body></html>`;
 }
 
@@ -67,43 +67,50 @@ function run(opts: { mine?: string; find?: boolean; html?: string } = {}) {
   return { document, $, $$, order, head, key, find: find as HTMLInputElement };
 }
 
+// No sort marks: the design has no arrows or glyphs, so the order is said in
+// words on the count line and aria-sort tells a screen reader.
+const GLYPH = /[▲▼△▽◀▶←→↑↓⇅]/;
+
 describe("the column heads", () => {
-  it("become buttons, with the sort mark on the head the table opens sorted by", () => {
+  it("become buttons with the head's own words and no sort mark", () => {
     const { $$, head } = run();
     const buttons = $$("th[data-k] button.sortb");
     expect(buttons).toHaveLength(7);
     expect(buttons.map((b) => b.getAttribute("type"))).toEqual(Array(7).fill("button"));
-    expect(head("n").querySelector("button")!.textContent).toBe("Name▲");
-    expect(head("s").querySelector("button")!.textContent).toBe("Sym");
-    // the mark's slot moves from the head into the button, so nothing changes width
-    expect($$(".ar")).toHaveLength(7);
-    for (const ar of $$("button.sortb > .ar")) expect(ar.getAttribute("aria-hidden")).toBe("true");
-    expect($$("th > .ar")).toHaveLength(0);
+    expect(buttons.map((b) => b.textContent)).toEqual(["State", "Name", "Price $", "Change ¢", "Change %", "Region", "Tax ¢"]);
+    for (const b of buttons) expect(b.textContent).not.toMatch(GLYPH);
+    expect($$(".ar")).toHaveLength(0);
+    // the table opens in name order, and says so to a screen reader
+    expect(head("n").getAttribute("aria-sort")).toBe("ascending");
     // the head's spoken name stays on the head
-    expect(head("l").getAttribute("aria-label")).toBe("Last price, dollars a gallon");
+    expect(head("l").getAttribute("aria-label")).toBe("Price, dollars a gallon");
   });
 
-  it("sort numbers highest first, then flip, keeping aria-sort in step and saying so", () => {
-    const { $, head, order } = run();
+  it("sort numbers lowest first, then flip, keeping aria-sort in step and saying so in words", () => {
+    const { $, $$, head, order } = run();
     const btn = head("l").querySelector("button") as HTMLElement;
     btn.click();
-    expect(order()).toEqual(["CA", "DC", "OH", "FL", "AL", "AK"]);
-    expect(head("l").getAttribute("aria-sort")).toBe("descending");
+    expect(order()).toEqual(["AL", "FL", "OH", "DC", "CA", "AK"]);
+    expect(head("l").getAttribute("aria-sort")).toBe("ascending");
     expect(head("n").hasAttribute("aria-sort")).toBe(false);
-    expect(head("l").querySelector(".ar")!.textContent).toBe("▼");
-    expect(head("n").querySelector(".ar")!.textContent).toBe("");
-    expect($("#count").textContent).toBe("6 states, sorted by Last price, dollars a gallon, highest first");
+    expect($("#count").textContent).toBe("Sorted by price, lowest first");
     btn.click();
     // a row with no value goes last either way
     expect(order()[5]).toBe("AK");
-    expect(order().slice(0, 5)).toEqual(["AL", "FL", "OH", "DC", "CA"]);
-    expect(head("l").getAttribute("aria-sort")).toBe("ascending");
-    expect($("#count").textContent).toBe("6 states, sorted by Last price, dollars a gallon, lowest first");
+    expect(order().slice(0, 5)).toEqual(["CA", "DC", "OH", "FL", "AL"]);
+    expect(head("l").getAttribute("aria-sort")).toBe("descending");
+    expect($("#count").textContent).toBe("Sorted by price, highest first");
+    // still no mark anywhere once sorted
+    for (const b of $$("button.sortb")) expect(b.textContent).not.toMatch(GLYPH);
+    expect($("#count").textContent).not.toMatch(GLYPH);
   });
 
   it("sort a fall below every rise, by the number and not the text", () => {
     const { head, order } = run();
-    (head("c").querySelector("button") as HTMLElement).click();
+    const btn = head("c").querySelector("button") as HTMLElement;
+    btn.click();
+    expect(order()).toEqual(["FL", "DC", "AL", "CA", "OH", "AK"]);
+    btn.click();
     expect(order()).toEqual(["OH", "CA", "AL", "DC", "FL", "AK"]);
   });
 
@@ -113,16 +120,26 @@ describe("the column heads", () => {
     // Name opens ascending, so the first press flips it
     btn.click();
     expect(order()).toEqual(["OH", "FL", "DC", "CA", "AK", "AL"]);
-    expect($("#count").textContent).toBe("6 states, sorted by State name, Z to A");
+    expect($("#count").textContent).toBe("Sorted by name, Z to A");
     btn.click();
     expect(order()).toEqual(["AL", "AK", "CA", "DC", "FL", "OH"]);
+    expect($("#count").textContent).toBe("Sorted by name, A to Z");
     (head("r").querySelector("button") as HTMLElement).click();
     expect(order()).toEqual(["CA", "DC", "AL", "FL", "OH", "AK"]);
+    expect($("#count").textContent).toBe("Sorted by region, A to Z");
+  });
+
+  it("name the column in the plain words on its head, never its long spoken label", () => {
+    const { $, head } = run();
+    for (const [k, w] of [["s", "state code"], ["c", "change"], ["q", "change in percent"], ["t", "tax"]]) {
+      (head(k).querySelector("button") as HTMLElement).click();
+      expect($("#count").textContent).toMatch(new RegExp(`^Sorted by ${w}, (lowest first|A to Z)$`));
+    }
   });
 });
 
 describe("your state's row", () => {
-  it("is marked from the strip's slot, never from storage", () => {
+  it("is marked from the your state block's data-ys-state, never from storage", () => {
     const { $ } = run({ mine: "OH" });
     expect($('tr[data-s="OH"]').getAttribute("class")).toBe("mine");
     expect($('tr[data-s="AL"]').hasAttribute("class")).toBe(false);
@@ -153,21 +170,40 @@ describe("a tap on a row", () => {
 });
 
 describe("the find box", () => {
+  it("is built switched off, so with JS off it takes no typing, and the script switches it on", () => {
+    const { find } = run();
+    expect(find.disabled).toBe(false);
+    const off = parseHTML(page()).document.getElementById("find") as unknown as HTMLInputElement;
+    expect(off.disabled).toBe(true);
+  });
+
   it("keeps the rows that match a code's start or a name's middle, and counts them", () => {
     const { $, find, order } = run();
     find.value = "oh";
     find.dispatchEvent(new (find.ownerDocument.defaultView as unknown as typeof globalThis).Event("input"));
     expect(order()).toEqual(["OH"]);
-    expect($("#count").textContent).toBe("1 of 6 states");
+    expect($("#count").textContent).toBe("1 found");
     find.value = "A";
     find.dispatchEvent(new (find.ownerDocument.defaultView as unknown as typeof globalThis).Event("input"));
     // AL and AK by code, everyone with an a in the name
     expect(order()).toEqual(["AL", "AK", "CA", "DC", "FL"]);
-    expect($("#count").textContent).toBe("5 of 6 states");
+    expect($("#count").textContent).toBe("5 found");
     find.value = "  ";
     find.dispatchEvent(new (find.ownerDocument.defaultView as unknown as typeof globalThis).Event("input"));
     expect(order()).toHaveLength(6);
-    expect($("#count").textContent).toBe("6 states");
+    // an empty box puts back the count the page was built with
+    expect($("#count").textContent).toBe("5 states and DC");
+  });
+
+  it("puts back the built count once cleared, even after a sort", () => {
+    const { $, find, head } = run();
+    (head("l").querySelector("button") as HTMLElement).click();
+    find.value = "oh";
+    find.dispatchEvent(new (find.ownerDocument.defaultView as unknown as typeof globalThis).Event("input"));
+    expect($("#count").textContent).toBe("1 found");
+    find.value = "";
+    find.dispatchEvent(new (find.ownerDocument.defaultView as unknown as typeof globalThis).Event("input"));
+    expect($("#count").textContent).toBe("5 states and DC");
   });
 
   it("clears on Escape", () => {
@@ -177,7 +213,7 @@ describe("the find box", () => {
     key(find, "Escape");
     expect(find.value).toBe("");
     expect(order()).toHaveLength(6);
-    expect($("#count").textContent).toBe("6 states");
+    expect($("#count").textContent).toBe("5 states and DC");
   });
 
   it("opens the one match on Enter, by exact code or name, or when one row is left", () => {
@@ -215,7 +251,7 @@ describe("the find box", () => {
   it("is optional: the table still sorts without it", () => {
     const { head, order } = run({ find: false });
     (head("l").querySelector("button") as HTMLElement).click();
-    expect(order()[0]).toBe("CA");
+    expect(order()[0]).toBe("AL");
   });
 });
 
@@ -232,9 +268,10 @@ describe("what ships", () => {
     expect(document.querySelectorAll("button.sortb")).toHaveLength(7);
   });
 
-  it("stays under 1.2 KB gzipped, with the sort marks escaped rather than typed", () => {
+  it("stays under 1.2 KB gzipped, with no sort mark typed or escaped", () => {
     const code = inlineCall(quotes, "document");
-    expect(code).not.toMatch(/[▲▼]/);
+    expect(code).not.toMatch(GLYPH);
+    expect(code).not.toMatch(/\\u25(b[2-9a-f]|c[0-9a-f])|\\u219[0-9a-f]|\\u21c5/i);
     expect(gzipSync(code, { level: 9 }).length).toBeLessThan(1229);
   });
 });

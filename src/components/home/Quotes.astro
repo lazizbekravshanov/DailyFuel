@@ -1,9 +1,9 @@
 ---
 // The ALL STATES quote table: every state on one line, in name order, with a
 // find box in the head. src/components/home/quotes.ts sorts it, filters it
-// and opens a row; with JS off every code is still a link and the table
-// reads in name order. The SYM column stays put while the rest scrolls on a
-// phone (the shell's sticky row head).
+// and opens a row; with JS off every code is still a link, the table reads
+// in name order and the find box stays switched off. The State column stays
+// put while the rest scrolls sideways (the shell's sticky row head).
 import Spark from "./Spark.astro";
 import type { Spark as SparkLine } from "./chart.ts";
 import { moveClass } from "../../lib/bins.ts";
@@ -35,9 +35,12 @@ const andList = (codes: string[]) => (codes.length < 2 ? codes.join("") : `${cod
 const aaa = site.latest.aaa;
 const since = daily ? sinceText(site) : "";
 // The columns below, summed: their widths in the table's ch plus the cell
-// padding in px. The table is at least that wide, so a narrow box never
-// squeezes the columns on the first paint only to widen them as rows arrive.
-const width = `min-width:calc(${89.5 + (tax ? 6.5 : 0)}ch + ${242 + (tax ? 20 : 0)}px)`;
+// padding in px (8px a side on this table, none before the first column or
+// after the last; see home.css), which keeps all ten inside a 1024px screen.
+// The table is at least that wide, so a narrow box never squeezes the
+// columns on the first paint only to widen them as rows arrive. On a phone
+// the table drops to four columns and these widths are let go.
+const width = `min-width:calc(${89.5 + (tax ? 7 : 0)}ch + ${200 + (tax ? 16 : 0)}px)`;
 ---
 {/* #states is where a state page's "All states" link lands */}
 <section class="q" id="states" aria-labelledby="states-title">
@@ -46,7 +49,8 @@ const width = `min-width:calc(${89.5 + (tax ? 6.5 : 0)}ch + ${242 + (tax ? 20 : 
   <div class="sh">
     <h2 id="states-title">All states</h2>
     <p class="meta" id="count" role="status">{coverage(states.map((s) => s.code)).replace(/^all /, "")}</p>
-    <span class="find"><label class="sr-only" for="find">Find a state</label><input id="find" type="text" autocomplete="off" spellcheck="false" placeholder="Find a state" list="state-names" /><span class="k" aria-hidden="true">/</span></span>
+    {/* off until the quote table's script runs, so with JS off there is no box that finds nothing */}
+    <span class="find"><label class="sr-only" for="find">Find a state</label><input id="find" type="text" autocomplete="off" spellcheck="false" placeholder="Find a state" list="state-names" disabled /><span class="k" aria-hidden="true">/</span></span>
   </div>
   <label for="qa" class="btn wide qa-l"><span class="q1">Show all {coverage(states.map((s) => s.code)).replace(/^all /, "")}</span><span class="q2">Hide the list</span></label>
   <datalist id="state-names">{states.map((s) => <option value={s.name}></option>)}</datalist>
@@ -58,16 +62,18 @@ const width = `min-width:calc(${89.5 + (tax ? 6.5 : 0)}ch + ${242 + (tax ? 20 : 
           of characters: "District of Columbia" is 20, "West Coast outside
           California" 29, and the heads run 0.85ch a character at 11px. */}
       <colgroup>
-        <col style="width:calc(4.5ch + 10px)" />
-        <col style="width:calc(20ch + 20px)" />
-        <col style="width:calc(7ch + 20px)" />
-        <col style="width:calc(7ch + 20px)" />
-        <col style="width:calc(7ch + 20px)" />
-        <col style="width:calc(29ch + 20px)" />
-        {tax && <col style="width:calc(6.5ch + 20px)" />}
-        <col style="width:calc(7ch + 20px)" />
-        <col style="width:calc(8ch + 20px)" />
-        <col style="width:92px" />
+        <col style="width:calc(4.5ch + 8px)" />
+        <col style="width:calc(20ch + 16px)" />
+        <col style="width:calc(7ch + 16px)" />
+        <col style="width:calc(7ch + 16px)" />
+        <col style="width:calc(7ch + 16px)" />
+        <col style="width:calc(29ch + 16px)" />
+        {/* "unknown" is the widest tax cell */}
+        {tax && <col style="width:calc(7ch + 16px)" />}
+        <col style="width:calc(7ch + 16px)" />
+        <col style="width:calc(8ch + 16px)" />
+        {/* the 72px line and its padding */}
+        <col style="width:80px" />
       </colgroup>
       <thead>
         <tr>
@@ -164,7 +170,7 @@ const width = `min-width:calc(${89.5 + (tax ? 6.5 : 0)}ch + ${242 + (tax ? 20 : 
     line-height: 24px;
     vertical-align: top;
   }
-  /* the table is about 990px wide, so it scrolls sideways under 1024px */
+  /* the table is about 980px wide, so it scrolls sideways under 1024px */
   @media (max-width: 1023px) {
     .q .swipe {
       display: block;

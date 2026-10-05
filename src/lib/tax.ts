@@ -145,5 +145,5 @@ export function newestRate(tax: TaxFile): string | null {
 export function taxVintage(tax: TaxFile): string {
   const newest = newestRate(tax);
   const when = newest ? ` The newest rate in it took effect in ${formatMonthYear(newest)}, and many` : " Many";
-  return `From FHWA's ${tax.reporting_period} table.${when} states change their rate every year, so it may be different now.`;
+  return `From the ${tax.reporting_period} federal highway table.${when} states change their rate every year, so it may be different now.`;
 }

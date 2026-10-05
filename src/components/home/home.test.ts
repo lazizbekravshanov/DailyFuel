@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { parseHTML } from "linkedom";
 import {
-  biggestNote, coverage, fromLine, homeMeta, homeTitle, keyLine, leaders, memberCount, movers, recordLine, sharedNote,
+  biggestNote, coverage, fromLine, homeMeta, homeTitle, keyLine, leaders, memberCount, movers, recordLine, recordNote, sharedNote,
 } from "./home.ts";
 
 // regionNote, withNote, byChange and topWithTies went with the map and the
@@ -134,14 +138,53 @@ describe("the sentence under the headline price", () => {
   });
 });
 
+describe("the board's Record high note", () => {
+  const r = (name: string, kind: "record" | "52week" | null) => ({ name, kind });
+  const tail = "in our records, which start June 2022.";
+
+  it("names one region, two or three, then counts", () => {
+    expect(recordNote([r("Rocky Mountain", "record"), r("Midwest", null)])).toBe(`Rocky Mountain is at its highest price ${tail}`);
+    expect(recordNote([r("Rocky Mountain", "record"), r("Midwest", "record"), r("Gulf Coast", "52week")])).toBe(
+      `Rocky Mountain and Midwest are at their highest prices ${tail}`,
+    );
+    expect(recordNote([r("A", "record"), r("B", "record"), r("C", "record"), r("D", null)])).toBe(
+      `A, B and C are at their highest prices ${tail}`,
+    );
+    const eight = ["A", "B", "C", "D", "E", "F", "G", "H"].map((n, i) => r(n, i < 6 ? "record" : null));
+    expect(recordNote(eight)).toBe(`6 of the 8 regions are at their highest prices ${tail}`);
+  });
+
+  it("says every region when they all are, and nothing when none is", () => {
+    expect(recordNote([r("A", "record"), r("B", "record")])).toBe(`Every region is at its highest price ${tail}`);
+    // a 52 week high is not a record
+    expect(recordNote([r("A", "52week"), r("B", null)])).toBeNull();
+    expect(recordNote([])).toBeNull();
+  });
+
+  it("never uses a dash", () => {
+    for (const n of [1, 2, 4, 8]) {
+      const s = recordNote(Array.from({ length: 8 }, (_, i) => r(`R${i}`, i < n ? "record" : null)));
+      expect(s).not.toMatch(NO_DASH);
+    }
+  });
+});
+
 describe("the ONE PRICE, MANY STATES note", () => {
   const midwest = { name: "Midwest", codes: ["IL", "IN", "IA", "KS", "KY", "MI", "MN", "MO", "NE", "ND", "OH", "OK", "SD", "TN", "WI"], price: 6.25 };
 
-  it("uses the biggest region's real count and price", () => {
-    expect(sharedNote(midwest, false)).toBe("EIA surveys regions, not every state, so all 15 Midwest states read $6.250 this week.");
-    expect(sharedNote({ name: "Central Atlantic", codes: ["DE", "DC", "MD", "NJ", "NY", "PA"], price: 6.312 }, false)).toBe(
-      "EIA surveys regions, not every state, so all 5 Central Atlantic states and DC read $6.312 this week.",
+  it("uses the biggest region's real count and price, and says the price is the region's", () => {
+    expect(sharedNote(midwest, false)).toBe(
+      "All 15 Midwest states show the same price, $6.250, because the survey covers regions, not single states.",
     );
+    expect(sharedNote({ name: "Central Atlantic", codes: ["DE", "DC", "MD", "NJ", "NY", "PA"], price: 6.312 }, false)).toBe(
+      "All 5 Central Atlantic states and DC show the same price, $6.312, because the survey covers regions, not single states.",
+    );
+    // never a dash, and never a price that reads as measured in one state
+    for (const d of [false, true]) {
+      const s = sharedNote(midwest, d);
+      expect(s).not.toMatch(NO_DASH);
+      expect(s).toMatch(/regions, not (single|every) state/);
+    }
   });
 
   it("says whose daily price the table has once AAA is on", () => {
@@ -205,5 +248,110 @@ describe("home meta description", () => {
     expect(homeMeta({ price: null, change: null, daily: false, priced: surveyed })).toBe(
       "See the DOE weekly price and change for 48 states and DC.",
     );
+  });
+});
+
+// The phone layout on the built home page. These read a build that already
+// exists, never make one: DAILYFUEL_BUILT_DIR names it, else the build
+// src/lib/built.test.ts leaves in tmp/dist-test. With neither they skip.
+// What a phone shows is decided by the order of the blocks and by the CSS
+// the page carries, so that is what they check: your saved state answers
+// first, the U.S. average follows it, and the region board keeps its change
+// column in view with nothing to scroll sideways. The page's budgets are
+// checked in src/lib/built.test.ts.
+const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
+const BUILT = process.env.DAILYFUEL_BUILT_DIR ? resolve(ROOT, process.env.DAILYFUEL_BUILT_DIR) : resolve(ROOT, "tmp/dist-test");
+const HAS_BUILD = existsSync(resolve(BUILT, "index.html"));
+
+describe.skipIf(!HAS_BUILD)("the built home page on a phone", () => {
+  const html = HAS_BUILD ? readFileSync(resolve(BUILT, "index.html"), "utf8") : "";
+  const { document } = parseHTML(html);
+  const $ = (sel: string) => document.querySelector(sel) as unknown as HTMLElement;
+  const $$ = (sel: string) => Array.from(document.querySelectorAll(sel)) as unknown as HTMLElement[];
+  const css = $$("style").map((s) => s.textContent).join("\n");
+  /** The rules inside every @media (max-width: 479px) block, flattened. */
+  const phone = (() => {
+    let out = "";
+    const re = /@media \(max-width: ?479px\)\{/g;
+    for (let m = re.exec(css); m; m = re.exec(css)) {
+      let depth = 1, i = re.lastIndex;
+      for (; i < css.length && depth; i++) depth += css[i] === "{" ? 1 : css[i] === "}" ? -1 : 0;
+      out += css.slice(re.lastIndex, i - 1) + "\n";
+    }
+    return out;
+  })();
+  const sign = /^(\+|−|Up |Down )[\d$]/;
+
+  it("puts your state first in main, with the U.S. block right after it", () => {
+    const main = $("main");
+    const ys = main.firstElementChild as HTMLElement;
+    expect(ys.matches("section.ys[data-ys]")).toBe(true);
+    // the CSS keys the smaller U.S. block on ".ys[data-ys-state] + .hero", so it must be the very next block
+    const hero = ys.nextElementSibling as HTMLElement;
+    expect(hero.classList.contains("hero")).toBe(true);
+    expect(hero.querySelector("h1")!.textContent!.trim()).toBe("U.S. diesel average");
+    expect(css).toMatch(/\.ys:not\(\[data-ys-state\]\) \.ans\{display:none\}/);
+    expect(phone).toMatch(/\.ys\[data-ys-state\]\+\.hero \.big\{font-size:1\.5rem\}/);
+  });
+
+  it("answers with the saved state's own line, and Alaska with no price at all", () => {
+    const data = JSON.parse($("#ys-data").textContent!) as { s: Record<string, [string, string]>; l: Record<string, string[]> };
+    expect(Object.keys(data.s)).toHaveLength(51);
+    const oh = data.l[data.s.OH[1]];
+    expect(data.s.OH[0]).toBe("Ohio");
+    expect(oh[0]).toMatch(/^\$\d\.\d{3}$/);
+    // only a change wears colour, and it says its direction in words
+    expect(oh[1]).toMatch(/^(Up|Down) [\d$]|^No change$/);
+    if (oh[3] === "up") expect(oh[1]).toMatch(/^Up /);
+    if (oh[3] === "down") expect(oh[1]).toMatch(/^Down /);
+    if (/^No change$/.test(oh[1])) expect(oh[3]).toBe("muted");
+    // a regional average, said as one, never as Ohio's own measured price
+    expect(oh[4]).toMatch(/^Midwest average, same in \d+ states$/);
+    for (const code of ["AK", "HI"]) {
+      expect(data.s[code][1]).toBe("");
+      expect(data.l[""]).toEqual(["", "No weekly price", "", "muted", "The weekly survey does not cover this state."]);
+    }
+    for (const line of Object.values(data.l)) for (const t of line) {
+      expect(t).not.toMatch(NO_DASH);
+      expect(t).not.toMatch(/[▲▼←→↑↓]/);
+    }
+  });
+
+  it("shows the region board's change on a phone with nothing to scroll sideways", () => {
+    const board = $("section.board");
+    const heads = Array.from(board.querySelectorAll("thead th")).map((t) => t.textContent);
+    // the first three columns stay on a phone, and change is one of them
+    expect(heads.slice(0, 3)).toEqual(["Region", "Price $", "Change ¢"]);
+    expect(phone).toContain(".board table{min-width:0!important}");
+    expect(phone).toMatch(/\.board th:nth-child\(n\+4\),\.board td:nth-child\(n\+4\)[^{]*\{display:none\}/);
+    expect(phone).toMatch(/\.board tr\.us[,{]/);
+    expect(phone).toMatch(/\.board tr\.mr\{display:table-row\}/);
+    // every coloured change starts with its sign; a change too small to call is grey
+    for (const td of Array.from(board.querySelectorAll("tbody td.up, tbody td.down"))) expect(td.textContent).toMatch(sign);
+  });
+
+  it("lists each region's states under it as code links, A to Z, and none under the U.S.", () => {
+    const rows = $$("section.board tbody tr");
+    const us = rows.find((r) => r.classList.contains("us"))!;
+    expect(us.nextElementSibling!.classList.contains("mr")).toBe(false);
+    const regions = rows.filter((r) => r.classList.contains("hm"));
+    expect(regions).toHaveLength(8);
+    const seen: string[] = [];
+    for (const r of regions) {
+      const mr = r.nextElementSibling as HTMLElement;
+      expect(mr.classList.contains("mr")).toBe(true);
+      const codes = Array.from(mr.querySelectorAll("a")).map((a) => a.textContent!);
+      expect(codes.length).toBeGreaterThan(0);
+      expect(codes).toEqual([...codes].sort());
+      for (const a of Array.from(mr.querySelectorAll("a"))) expect(a.getAttribute("href")).toBe(`/state/${a.textContent!.toLowerCase()}/`);
+      seen.push(...codes);
+    }
+    // 48 states and DC, each once; Alaska and Hawaii have no region
+    expect(new Set(seen).size).toBe(49);
+    expect(seen).toHaveLength(49);
+    expect(seen).not.toContain("AK");
+    expect(seen).not.toContain("HI");
+    const ns = $("section.board p.ns");
+    expect(ns.textContent).toBe("No weekly survey. Alaska and Hawaii have no weekly price.");
   });
 });

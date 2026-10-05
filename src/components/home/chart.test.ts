@@ -29,7 +29,8 @@ describe("the U.S. line", () => {
     expect(c.grid).toMatch(/^(M0 \d+H1000)+$/);
     // five rules at 5.4 to 5.8; the 5.4 label would sit under the 5.432 tag, so it goes
     expect(c.grid.split("M").length - 1).toBe(5);
-    expect(c.yLabels.map((l) => l.text)).toEqual(["5.500", "5.600", "5.700", "5.800"]);
+    // axis labels are round dollars and cents; only the tag keeps the third decimal
+    expect(c.yLabels.map((l) => l.text)).toEqual(["$5.50", "$5.60", "$5.70", "$5.80"]);
     expect(c.line).not.toMatch(/\d\.\d/);
     expect(H).toBe(300);
   });
@@ -44,13 +45,22 @@ describe("the U.S. line", () => {
     expect(c.high).toEqual({ date: "2022-06-20", value: 5.81 });
   });
 
-  it("labels the axis in dollars with three decimals, clear of the tag", () => {
+  it("labels the axis in dollars and cents, clear of the tag", () => {
+    // the price tag keeps three decimals, the axis reads like money: "$5.50"
+    expect(c.tag.text).toMatch(/^\d\.\d{3}$/);
     for (const l of c.yLabels) {
-      expect(l.text).toMatch(/^\d\.\d{3}$/);
+      expect(l.text).toMatch(/^\$\d\.\d{2}$/);
+      expect(l.text).not.toMatch(/[–—▲▼←→↑↓]/);
       expect(Math.abs(l.at - c.tag.at)).toBeGreaterThan(((18 / 130) * 100) - 0.01);
       expect(l.at).toBeGreaterThanOrEqual(0);
       expect(l.at).toBeLessThanOrEqual(100);
     }
+  });
+
+  it("reads whole dollar rules as $4.00, $5.00, $6.00 on a long line", () => {
+    const wide = chart(weeks("2022-06-13", [3.4, 4.2, 5.1, 6.0, 6.5, 5.5]), { label: "x", mobileHeight: 130 })!;
+    expect(wide.yLabels.map((l) => l.text)).toEqual(["$4.00", "$5.00", "$6.00"]);
+    expect(wide.tag.text).toBe("5.500");
   });
 
   it("marks each year at its first week, and drops a stub first year", () => {

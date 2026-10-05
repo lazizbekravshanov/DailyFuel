@@ -44,6 +44,26 @@
   min-width: 740px;
 }
 
+/* Off a phone the quote table shows all ten columns. At 8px a side, and none
+   after the last, they fit a 1024px screen (iPad across, a small laptop)
+   with no sideways scroll; Quotes.astro's colgroup counts the same padding.
+   Phones keep the shell's 10px around their four columns. */
+@media (min-width: 480px) {
+  .q th,
+  .q td {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+  .q th:first-child,
+  .q td:first-child {
+    padding-left: 0;
+  }
+  .q th:last-child,
+  .q td:last-child {
+    padding-right: 0;
+  }
+}
+
 .board table {
   min-width: 620px;
 }
@@ -153,7 +173,7 @@ th[aria-sort] .sortb {
   background: none;
   color: inherit;
   font: inherit;
-  font-size: var(--fs-t);
+  font-size: max(16px, var(--fs-t));
 }
 
 .sh .find input:focus {

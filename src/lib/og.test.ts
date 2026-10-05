@@ -132,7 +132,7 @@ describe("what a card says", () => {
     expect(c.change).toBe("+30.4¢ +5.1%");
     expect(c.dateLine).toBe("Week of Sep 14, 2026");
     expect(c.compareLine).toBe("Since the week of Sep 7");
-    expect(c.label).toBe("EIA Midwest average, 2 states");
+    expect(c.label).toBe("Midwest average, same in 2 states");
   });
 
   it("signs a fall with a real minus and calls a move of exactly nothing flat", () => {
@@ -161,16 +161,26 @@ describe("what a card says", () => {
   });
 
   it("counts DC apart from the states", () => {
-    expect(cardFor(site, "dc").label).toBe("EIA Central Atlantic average, 1 state and DC");
-    expect(cardFor(site, "pa").label).toBe("EIA Central Atlantic average, 1 state and DC");
+    expect(cardFor(site, "dc").label).toBe("Central Atlantic average, same in 1 state and DC");
+    expect(cardFor(site, "pa").label).toBe("Central Atlantic average, same in 1 state and DC");
   });
 
   it("says the West Coast outside California in the plate's words", () => {
-    expect(cardFor(site, "wa").label).toBe("EIA West Coast average outside California, 2 states");
+    expect(cardFor(site, "wa").label).toBe("West Coast average outside California, same in 2 states");
+  });
+
+  it("says a shared price is the region's average on every regional card", () => {
+    for (const code of ["oh", "in", "dc", "pa", "or", "wa"]) {
+      const c = cardFor(site, code);
+      const st = site.byCode.get(code.toUpperCase())!;
+      const region = st.eia_series === "R5XCA" ? "West Coast" : st.regionName!;
+      expect(c.label).toMatch(new RegExp(`^${region} average( outside California)?, same in `));
+      expect(cardAlt(c)).toContain(`${c.label}.`);
+    }
   });
 
   it("names California as its own price", () => {
-    expect(cardFor(site, "ca").label).toBe("EIA California average");
+    expect(cardFor(site, "ca").label).toBe("California's own average");
   });
 
   it("says so when EIA doesn't survey a state", () => {
@@ -198,7 +208,7 @@ describe("what a card says", () => {
 
   it("reads the whole card as one sentence for the alt text", () => {
     expect(cardAlt(cardFor(site, "oh"))).toBe(
-      "Ohio diesel average: $6.250 a gallon, up 30.4 cents since the week of Sep 7. Week of Sep 14, 2026. EIA Midwest average, 2 states.",
+      "Ohio diesel average: $6.250 a gallon, up 30.4 cents since the week of Sep 7. Week of Sep 14, 2026. Midwest average, same in 2 states.",
     );
   });
 
@@ -254,7 +264,7 @@ describe("drawing a card", () => {
     expect(svg).toContain(">$6.250</text>");
     expect(svg).toContain(">+30.4¢ +5.1%</text>");
     expect(svg).toContain(">Week of Sep 14, 2026 · since the week of Sep 7</text>");
-    expect(svg).toContain(">EIA Midwest average, 2 states</text>");
+    expect(svg).toContain(">Midwest average, same in 2 states</text>");
     expect(svg).toContain(">dailydiesel.vercel.app</text>");
     expect(svg).not.toMatch(/NaN|undefined/);
   });

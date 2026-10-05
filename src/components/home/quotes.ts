@@ -3,7 +3,8 @@
 // on a row to open its state. Your saved state's row is marked from the strip
 // above (data-ys-state on the your state slot, set by src/scripts/your-state.ts),
 // so this never reads storage itself. With JS off the table stays in name
-// order and every code is still a link.
+// order, every code is still a link, and the find box, rendered disabled,
+// stays off rather than taking typing it can't act on.
 //
 // It ships as an inline script through inlineCall, so it must stand alone
 // with no imports and no helpers outside its body.
@@ -62,6 +63,7 @@ export function quotes(doc: Document): void {
   });
 
   if (!find) return;
+  find.disabled = false;
   const filter = () => {
     const q = find.value.trim().toLowerCase();
     let shown = 0;
