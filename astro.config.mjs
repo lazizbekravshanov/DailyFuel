@@ -75,5 +75,11 @@ export default defineConfig({
   },
   vite: {
     plugins: [minifyInlineScripts()],
+    // Keep media queries as (max-width: 479px). Without a target, Lightning
+    // CSS writes the range form, (width<=479px), which iOS before 16.4 and
+    // Chrome before 104 drop, and with it every phone rule.
+    build: {
+      cssTarget: ["safari14", "ios14", "chrome87", "firefox78"],
+    },
   },
 });

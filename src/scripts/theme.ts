@@ -24,10 +24,10 @@ export function applyStoredTheme(doc: Document, getStore: () => Storage): void {
 }
 
 /**
- * The button says what a tap does: "Dark" on a light page, "Light" on a dark
- * one. It wears the `on` class while the page is dark, which the stylesheet
- * draws as the inverse fill (the mockup's pressed look), and keeps the
- * browser's theme-color in step once a theme is forced.
+ * The button says what a tap does, in the words truck screens use: "Night" on
+ * a light page, "Day" on a dark one. It is never filled, so it never reads as
+ * a mode that is on. It keeps the browser's theme-color in step once a theme
+ * is forced.
  */
 export function themeToggle(doc: Document, win: Window, getStore: () => Storage): void {
   const button = doc.querySelector("[data-theme-toggle]");
@@ -40,8 +40,7 @@ export function themeToggle(doc: Document, win: Window, getStore: () => Storage)
   };
   const paint = () => {
     const dark = isDark();
-    button.textContent = dark ? "Light" : "Dark";
-    button.classList.toggle("on", dark);
+    button.textContent = dark ? "Day" : "Night";
     if (!root.hasAttribute("data-theme")) return;
     for (const m of Array.from(doc.querySelectorAll('meta[name="theme-color"]'))) {
       m.removeAttribute("media");

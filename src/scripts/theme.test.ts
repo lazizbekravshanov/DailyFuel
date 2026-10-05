@@ -11,7 +11,7 @@ function page(withButton = true): string {
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   </head><body>
-    ${withButton ? '<button type="button" class="btn" data-theme-toggle hidden>Dark</button>' : ""}
+    ${withButton ? '<button type="button" class="btn" data-theme-toggle hidden>Night</button>' : ""}
   </body></html>`;
 }
 
@@ -82,15 +82,16 @@ describe("before the first paint", () => {
   });
 });
 
-describe("the DARK button", () => {
-  it("shows itself and says what a tap does: Dark on a light page, Light on a dark one", () => {
+describe("the NIGHT button", () => {
+  it("shows itself and says what a tap does: Night on a light page, Day on a dark one, never filled", () => {
     const light = run({ systemDark: false });
     expect(light.button!.hasAttribute("hidden")).toBe(false);
-    expect(light.button!.textContent).toBe("Dark");
+    expect(light.button!.textContent).toBe("Night");
     expect(light.button!.classList.contains("on")).toBe(false);
     const dark = run({ systemDark: true });
-    expect(dark.button!.textContent).toBe("Light");
-    expect(dark.button!.classList.contains("on")).toBe(true);
+    expect(dark.button!.textContent).toBe("Day");
+    // never filled: it names what a tap does, not a mode that is on
+    expect(dark.button!.classList.contains("on")).toBe(false);
     // the system setting alone forces nothing on <html> and leaves theme-color to its media queries
     expect(dark.html.hasAttribute("data-theme")).toBe(false);
     expect(dark.metas()).toEqual([["#ffffff", "(prefers-color-scheme: light)"], ["#000000", "(prefers-color-scheme: dark)"]]);
@@ -101,13 +102,13 @@ describe("the DARK button", () => {
     t.click();
     expect(t.html.getAttribute("data-theme")).toBe("dark");
     expect((t.store as unknown as { dump: () => Record<string, string> }).dump()).toEqual({ "dailyfuel:theme": "dark" });
-    expect(t.button!.textContent).toBe("Light");
-    expect(t.button!.classList.contains("on")).toBe(true);
+    expect(t.button!.textContent).toBe("Day");
+    expect(t.button!.classList.contains("on")).toBe(false);
     expect(t.metas()).toEqual([["#000000", null], ["#000000", null]]);
     t.click();
     expect(t.html.getAttribute("data-theme")).toBe("light");
     expect((t.store as unknown as { dump: () => Record<string, string> }).dump()).toEqual({ "dailyfuel:theme": "light" });
-    expect(t.button!.textContent).toBe("Dark");
+    expect(t.button!.textContent).toBe("Night");
     expect(t.metas()).toEqual([["#ffffff", null], ["#ffffff", null]]);
   });
 
@@ -118,31 +119,31 @@ describe("the DARK button", () => {
     const { w } = win(true);
     themeToggle(document as unknown as Document, w, () => store);
     const button = document.querySelector("[data-theme-toggle]")!;
-    expect(button.textContent).toBe("Dark");
+    expect(button.textContent).toBe("Night");
     button.dispatchEvent(new (document.defaultView as unknown as { Event: typeof Event }).Event("click"));
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
-    expect(button.textContent).toBe("Light");
+    expect(button.textContent).toBe("Day");
   });
 
   it("follows the system when it changes and nothing is forced", () => {
     const t = run({ systemDark: false });
     t.flip();
-    expect(t.button!.textContent).toBe("Light");
+    expect(t.button!.textContent).toBe("Day");
     expect(t.html.hasAttribute("data-theme")).toBe(false);
     t.flip();
-    expect(t.button!.textContent).toBe("Dark");
+    expect(t.button!.textContent).toBe("Night");
   });
 
   it("still switches the page when storage throws", () => {
     const t = run({ store: storage({}, true) });
     expect(() => t.click()).not.toThrow();
     expect(t.html.getAttribute("data-theme")).toBe("dark");
-    expect(t.button!.textContent).toBe("Light");
+    expect(t.button!.textContent).toBe("Day");
   });
 
   it("treats a browser with no matchMedia as light", () => {
     const t = run({ matchMedia: false });
-    expect(t.button!.textContent).toBe("Dark");
+    expect(t.button!.textContent).toBe("Night");
     t.click();
     expect(t.html.getAttribute("data-theme")).toBe("dark");
   });
@@ -165,7 +166,7 @@ describe("what ships in the page", () => {
     new Function("document", "window", toggle)(document, window);
     const button = document.querySelector("[data-theme-toggle]")!;
     expect(button.hasAttribute("hidden")).toBe(false);
-    expect(button.textContent).toBe("Light");
+    expect(button.textContent).toBe("Day");
   });
 
   it("stays small: the two scripts under 700 bytes gzipped together", () => {
@@ -177,6 +178,11 @@ describe("what ships in the page", () => {
   it("uses only hooks the component and the layout render, hidden until wired", () => {
     const component = readFileSync(new URL("../components/ThemeToggle.astro", import.meta.url), "utf8");
     expect(component).toMatch(/<button[^>]*\bdata-theme-toggle\b[^>]*\bhidden\b/);
+    // a light page is the default, so the button starts out saying Night, and nothing draws it filled
+    expect(component).toMatch(/<button[^>]*\bdata-theme-toggle\b[^>]*>Night<\/button>/);
+    for (const css of ["global.css", "home.css", "tokens.css"]) {
+      expect(readFileSync(new URL(`../styles/${css}`, import.meta.url), "utf8")).not.toMatch(/\.btn\.on\b/);
+    }
     expect(component).toContain('inlineCall(themeToggle, "document", "window", "function(){return window.localStorage}")');
     const base = readFileSync(new URL("../layouts/Base.astro", import.meta.url), "utf8");
     expect(base).toContain('inlineCall(applyStoredTheme, "document", "function(){return window.localStorage}")');

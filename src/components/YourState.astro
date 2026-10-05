@@ -1,56 +1,32 @@
 ---
-// The your state strip under the U.S. average: one boxed line with the saved
-// state's code, name, price, change and where the number comes from, and the
-// OPEN, CHANGE and FORGET controls. The server renders "Nothing saved yet"
-// with the Find your state list under it, which is what anyone sees with no
-// saved state, with JS off, or when storage is blocked. When a state was saved
-// before (a state page was opened, or one was picked from the list), the
-// inline script right after the list (src/scripts/your-state.ts) fills the
-// hidden saved strip from that state's link in the list and swaps it in, and
-// CSS keeps the list out of the way. Both strips are one line tall, so the
-// page under them never moves. The same script wires CHANGE and FORGET.
-import FindYourState from "./FindYourState.astro";
+// Your state, first on the home page. It is empty in the HTML; the inline
+// script right after it (src/scripts/your-state.ts) reads the saved state,
+// fills the answer from the JSON block and marks the section with
+// data-ys-state, before anything under it is parsed, so nothing moves. With
+// nothing saved, JS off or storage blocked, the section shows nothing and the
+// U.S. average leads, with the picker under it. On a phone the saved state's
+// price is the headline; on a wide screen the answer is one boxed line.
 import { inlineCall } from "../lib/inline.ts";
+import { getSite } from "../lib/site.ts";
+import { yourStateJson } from "../lib/yourstate.ts";
 import { yourState } from "../scripts/your-state.ts";
 
+const site = getSite();
+// JSON for a <script type="application/json"> block: nothing in it can close the tag
+const data = JSON.stringify(yourStateJson(site)).replace(/</g, "\\u003c");
 // Reaching localStorage can throw by itself, so the script asks for it inside its own try.
-const wire = inlineCall(yourState, "document", "function(){return window.localStorage}", "location.hash");
+const wire = inlineCall(yourState, "document", "function(){return window.localStorage}");
 ---
 <section class="ys" aria-label="Your state" data-ys>
-  <div class="strip" data-ys-saved hidden>
-    <p class="lbl">Your state</p>
-    <span class="sym" data-ys-code></span>
-    <span class="nm" data-ys-name></span>
-    <span class="px" data-ys-price></span>
-    <span class="ch muted" data-ys-move></span>
-    <span class="muted pl" data-ys-plate></span>
-    <span class="acts">
-      <a class="btn" href="/#find-your-state" data-ys-open>Open</a>
-      <button type="button" class="btn" data-ys-change aria-controls="find-your-state" aria-expanded="false">Change</button>
-      <button type="button" class="btn" data-ys-forget>Forget</button>
-    </span>
+  <div class="ans">
+    <p class="lbl"><span data-f="n"></span> diesel</p>
+    <p class="big"><span data-f="p"></span></p>
+    <p class="chw"><b data-f="c"></b> <span data-f="f"></span></p>
+    <p class="pl" data-f="l"></p>
+    {/* the week line the page prints under the U.S. price, passed in */}
+    <p class="wkl"><slot /></p>
+    <p class="op"><a class="btn wide" href="/#find-your-state" data-ys-open>Open the <span data-f="n"></span> page</a></p>
   </div>
-  <div class="strip" data-ys-none>
-    <p class="lbl">Your state</p>
-    <span class="muted">Nothing saved yet. Open any state, or pick one from the list, and it stays on this phone.</span>
-  </div>
-  <FindYourState strip />
+  <script is:inline type="application/json" id="ys-data" set:html={data}></script>
   <script is:inline set:html={wire}></script>
 </section>
-
-<style is:global>
-  /* both strips stand the same 44px tall on one line, so a saved state and
-     "nothing saved" take the same room and nothing below them moves */
-  .ys .strip {
-    min-height: 44px;
-  }
-  /* a saved state takes the row; the list shows under it only when asked for */
-  .ys[data-ys-state]:not([data-ys-list]) .pick {
-    display: none;
-  }
-  @media (max-width: 479px) {
-    .ys .acts {
-      margin-left: 0;
-    }
-  }
-</style>

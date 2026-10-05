@@ -127,7 +127,8 @@ describe("tax views", () => {
       effective: { UT: "2021-01-01", KY: "2024-10-01", DC: null },
     }));
     expect(dated.get("KY")!.since).toBe("2024-10-01");
-    expect(sinceLabel(dated.get("KY")!)).toBe("Since October 2024");
+    expect(sinceLabel(dated.get("KY")!)).toBe("Rate set October 2024");
+    expect(sinceLabel(dated.get("UT")!)).toBe("Rate set January 2021");
     expect(sinceLabel(dated.get("DC")!)).toBeNull();
   });
 
@@ -181,9 +182,11 @@ describe("labels", () => {
     });
     expect(newestRate(tax)).toBe("2024-10-01");
     expect(taxVintage(tax)).toBe(
-      "From FHWA's 2024 table. The newest rate in it took effect in October 2024, and many states change their " +
+      "From the 2024 federal highway table. The newest rate in it took effect in October 2024, and many states change their " +
       "rate every year, so it may be different now.");
     expect(taxVintage(tax)).not.toContain("2025");
+    // plain words for drivers: no agency initials
+    expect(taxVintage(tax)).not.toContain("FHWA");
   });
 });
 

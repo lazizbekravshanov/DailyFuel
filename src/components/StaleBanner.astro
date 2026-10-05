@@ -1,16 +1,19 @@
 ---
 import staleScript from "../scripts/stale.js?raw";
 import type { SiteData } from "../lib/site.ts";
+import { formatShortDate } from "../lib/dates.ts";
 interface Props {
   site: SiteData;
 }
 const { site } = Astro.props;
 const aaa = site.mode === "aaa+eia" ? (site.latest.aaa?.as_of ?? "") : "";
 const eia = site.latest.eia?.period ?? "";
+// Says which week the page still shows, so nobody takes it for this week's.
+const week = site.latest.eia ? ` These are still the prices for the week of ${formatShortDate(site.latest.eia.period)}.` : "";
 ---
 <div class="wrap">
   <p id="stale-banner" class="stale" role="status" data-aaa={aaa} data-eia={eia} hidden>
-    These prices are older than usual. The next update is late.
+    New prices are late.{week}
   </p>
 </div>
 <script is:inline set:html={staleScript}></script>

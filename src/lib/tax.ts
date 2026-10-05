@@ -127,9 +127,9 @@ export function inSentence(name: string): string {
   return name === "District of Columbia" ? `the ${name}` : name;
 }
 
-/** "Since July 2024": when this state's rate took effect, as FHWA has it. */
+/** "Rate set July 2024": when this state's rate took effect, as FHWA has it. */
 export function sinceLabel(view: TaxView): string | null {
-  return view.since ? `Since ${formatMonthYear(view.since)}` : null;
+  return view.since ? `Rate set ${formatMonthYear(view.since)}` : null;
 }
 
 /** The newest effective date in the table, which is how current the table really is. */
@@ -145,5 +145,5 @@ export function newestRate(tax: TaxFile): string | null {
 export function taxVintage(tax: TaxFile): string {
   const newest = newestRate(tax);
   const when = newest ? ` The newest rate in it took effect in ${formatMonthYear(newest)}, and many` : " Many";
-  return `From FHWA's ${tax.reporting_period} table.${when} states change their rate every year, so it may be different now.`;
+  return `From the ${tax.reporting_period} federal highway table.${when} states change their rate every year, so it may be different now.`;
 }

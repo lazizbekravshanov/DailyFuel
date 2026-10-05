@@ -1,6 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
+    { "source": "/go", "has": [{ "type": "query", "key": "s", "value": "(?<s>[a-z]{2})" }], "destination": "/state/:s/", "permanent": false },
+    { "source": "/go", "destination": "/#find-your-state", "permanent": false },
     { "source": "/state", "destination": "/#find-your-state", "permanent": false },
     { "source": "/state/", "destination": "/#find-your-state", "permanent": false },
     { "source": "/states", "destination": "/#find-your-state", "permanent": false },

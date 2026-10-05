@@ -1,11 +1,11 @@
 // The map page's script, in the parts that are plain functions: reading a
 // row back into a point, the base layers' decoding, finding a place, the
-// route strip's maths and markup, the popup, the marker sizes, the sort.
+// trip's maths and markup, the popup, the marker sizes, the sort.
 // Plus the chains' letters, which are all that tells their ink dots apart.
 
 import { parseHTML } from "linkedom";
 import { describe, expect, it } from "vitest";
-import { CHAINS, SOURCES } from "../components/map/chains.ts";
+import { CHAINS } from "../components/map/chains.ts";
 import { bearing, destination, distMi } from "../components/map/geo.ts";
 import { rowsHtml } from "../components/map/page.ts";
 import { placesPayload, statesPayload, type MapPoint, type MapStateShape } from "../lib/mapdata.ts";
@@ -22,6 +22,7 @@ import {
   sortPts,
   stripHtml,
   type Cfg,
+  type PriceRow,
   type Pt,
 } from "./map.ts";
 
@@ -52,20 +53,19 @@ const CHEYENNE: [number, number] = [41.14, -104.82];
 
 function pt(i: number, f: string, lat: number, lon: number, n = "Stop", st = "IL"): Pt {
   const k = f === "w" ? "w" : f === "v" ? "v" : "s";
-  return { i, tr: null, f, k, lat, lon, n, t: k === "s" ? CHAINS.find((c) => c.key === f)!.name : k === "w" ? "Weigh station" : "Truck service", st, s: "o", d: "", c: k === "s" ? f : "", h: "", on: true };
+  return { i, tr: null, f, k, lat, lon, n, t: k === "s" ? CHAINS.find((c) => c.key === f)!.name : k === "w" ? "Weigh station" : "Repair and lube", st, s: "o", d: "", c: k === "s" ? f : "", on: true };
 }
 
 const CFG: Cfg = {
   c: Object.fromEntries(CHAINS.map((c) => [c.key, [c.name, c.letter, c.locator]])),
-  src: SOURCES,
   px: [
-    ["IL", "Illinois", "$6.250", "+30.4¢ +5.1%", "up", "EIA Midwest average, 15 states", "54.5¢"],
-    ["IA", "Iowa", "$6.250", "+30.4¢ +5.1%", "up", "EIA Midwest average, 15 states", "32.5¢"],
-    ["NE", "Nebraska", "$6.250", "+30.4¢ +5.1%", "up", "EIA Midwest average, 15 states", "29.6¢"],
-    ["WY", "Wyoming", "$6.066", "−2.0¢ −0.3%", "down", "EIA Rocky Mountain average, 5 states", "24.0¢"],
+    ["IL", "Illinois", "$6.250", "up 30.4¢", "up", "Midwest average, same in 15 states", "54.5¢"],
+    ["IA", "Iowa", "$6.250", "up 30.4¢", "up", "Midwest average, same in 15 states", "32.5¢"],
+    ["NE", "Nebraska", "$6.250", "up 30.4¢", "up", "Midwest average, same in 15 states", "29.6¢"],
+    ["WY", "Wyoming", "$6.066", "down 2.0¢", "down", "Rocky Mountain average, same in 5 states", "24.0¢"],
     ["AK", "Alaska", null, null, "muted", "EIA doesn't survey this state", "8.95¢"],
   ],
-  wk: "EIA week of Sep 14, 2026",
+  wk: "Week of Sep 14, 2026 prices",
   mb: [[15, -190], [72.5, -60]],
   l48: [[24.4, -124.8], [49.4, -66.9]],
   ly: ["states"],
@@ -123,30 +123,101 @@ describe("the route strip", () => {
     expect(none.hits).toBe(4);
   });
 
-  it("prints a strip per state with the EIA price, its move, the plate and the state tax, and no dash as punctuation", () => {
+  it("prints the line, each state's weekly price and its move in words, the lowest, then each state's places folded, and no dash as punctuation", () => {
     const res = corridor(CHICAGO, CHEYENNE, pts, shapes);
     const html = stripHtml(res, "Chicago, IL", "Cheyenne, WY", CFG, true);
     const d = parseHTML(`<div>${html}</div>`).document;
-    const strips = Array.from(d.querySelectorAll(".rs"));
-    expect(strips).toHaveLength(4);
-    const il = strips[0].querySelector(".strip")!.textContent!.replace(/\s+/g, " ");
-    expect(il).toContain("IL Illinois $6.250 +30.4¢ +5.1% EIA Midwest average, 15 states State tax 54.5¢ Miles 0 to");
-    expect(strips[0].querySelector(".up")!.textContent).toMatch(/^\+\d/);
-    expect(strips[3].querySelector(".down")!.textContent).toMatch(/^−\d/);
-    expect(d.querySelector(".rsum")!.textContent).toMatch(/^Chicago, IL to Cheyenne, WY · 8\d\d miles in a straight line · 4 states · 4 places within 25 miles$/);
-    const text = d.body.textContent!;
+    const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
+    expect(t(d.querySelector(".rsum"))).toMatch(/^Chicago, IL to Cheyenne, WY, 8\d\d miles in a straight line$/);
+    // one line per state: the name, the weekly price, the move in words
+    const lines = Array.from(d.querySelectorAll(".rp li")).map(t);
+    expect(lines).toEqual(["Illinois $6.250 up 30.4¢", "Iowa $6.250 up 30.4¢", "Nebraska $6.250 up 30.4¢", "Wyoming $6.066 down 2.0¢"]);
+    // colour only on the change: the move wears up or down, the name and the price wear nothing
+    const moves = Array.from(d.querySelectorAll(".rp li span"));
+    expect(moves.map((m) => m.getAttribute("class"))).toEqual(["up", "up", "up", "down"]);
+    expect(moves.map(t)).toEqual(["up 30.4¢", "up 30.4¢", "up 30.4¢", "down 2.0¢"]);
+    expect(d.querySelectorAll(".rp li [class]")).toHaveLength(4);
+    // the lowest is named as a weekly average, never as a cheapest stop
+    expect(t(d.querySelector("div"))).toContain("Lowest weekly average on this line: Wyoming, $6.066");
+    // then each state, folded, with its places, miles and tax
+    const folds = Array.from(d.querySelectorAll("details.rs"));
+    expect(folds).toHaveLength(4);
+    const sums = folds.map((f) => t(f.querySelector("summary")));
+    expect(sums[0]).toMatch(/^Illinois: 1 place, miles 0 to \d+, state tax 54\.5¢$/);
+    expect(sums[1]).toMatch(/^Iowa: 1 place, miles \d+ to \d+, state tax 32\.5¢$/);
+    expect(sums[3]).toMatch(/^Wyoming: 1 place, miles \d+ to 8\d\d, state tax 24\.0¢$/);
+    // a Mile and Name table, its end tags left out as HTML allows (which linkedom can't nest, so read as text)
+    expect(html.match(/<thead><tr><th class="num">Mile<th>Name<tbody>/g)).toHaveLength(4);
+    expect(html).toMatch(/<tr><td class="num">\d+<td><button class="lk" data-i="0">Pilot Joliet<\/button>/);
+    const text = d.querySelector("div")!.textContent!;
+    expect(text).toContain("Illinois");
     expect(text).not.toMatch(/[–—]|\s-\s/);
+    expect(text).not.toMatch(/[▲▼▴▾△▽◆⬆⬇↑↓→←‹›✓]/);
     expect(text).not.toMatch(/cheapest|truck route/i);
+    // the move never rests on a sign
+    expect(text).not.toMatch(/[+−]\d/);
     // each name opens its marker
     expect(d.querySelectorAll(".lk[data-i]")).toHaveLength(4);
     expect(stripHtml(res, "A", "B", CFG, false)).not.toContain("class=\"lk\"");
   });
 
-  it("says No EIA price where EIA has none, and when a stretch has nothing", () => {
+  it("finds the lowest weekly average by number, names every state in a tie, and names none when nothing on the line is higher", () => {
+    const res = corridor(CHICAGO, CHEYENNE, [], shapes);
+    const prices = (by: Record<string, string | null>): Cfg => ({
+      ...CFG,
+      px: CFG.px.map((r): PriceRow => (r[0] in by ? [r[0], r[1], by[r[0]], r[3], r[4], r[5], r[6]] : r)),
+    });
+    // "$10.100" sorts before "$9.900" as text; the line compares the numbers
+    expect(stripHtml(res, "A", "B", prices({ IL: "$10.100", IA: "$9.900", NE: "$10.000", WY: "$11.000" }), false)).toContain(
+      "Lowest weekly average on this line: <b>Iowa, $9.900</b>",
+    );
+    // states that share the lowest regional average are named together, never the first of them alone
+    expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: "$6.000", NE: "$6.500", WY: "$6.500" }), false)).toContain(
+      "Lowest weekly average on this line: <b>Illinois and Iowa, $6.000</b>",
+    );
+    expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: "$6.000", NE: "$6.000", WY: "$6.500" }), false)).toContain(
+      "<b>Illinois, Iowa and Nebraska, $6.000</b>",
+    );
+    // one region's average all along the line: no state is lower than another
+    expect(stripHtml(res, "A", "B", prices({ IL: "$6.526", IA: "$6.526", NE: "$6.526", WY: "$6.526" }), false)).not.toContain("Lowest");
+    // one state with a price has nothing to compare
+    expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: null, NE: null, WY: null }), false)).not.toContain("Lowest");
+  });
+
+  it("prices a state once however often the line crosses back into it, and folds each stretch", () => {
+    // a line along a border, like Cincinnati to Louisville: in and out of the same states
+    const run = (code: string, from: number, to: number) => ({ code, from, to, hits: [] });
+    const res = {
+      miles: 100, line: [], ring: [], outside: false, hits: 0,
+      runs: [run("IL", 0, 20), run("IA", 25, 40), run("IL", 45, 60), run("IA", 65, 80), run("WY", 85, 100)],
+    };
+    const d = parseHTML(`<div>${stripHtml(res, "A", "B", CFG, false)}</div>`).document;
+    const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
+    expect(Array.from(d.querySelectorAll(".rp li")).map(t)).toEqual(["Illinois $6.250 up 30.4¢", "Iowa $6.250 up 30.4¢", "Wyoming $6.066 down 2.0¢"]);
+    expect(t(d.querySelector("div"))).toContain("Lowest weekly average on this line: Wyoming, $6.066");
+    // the places still fold stretch by stretch, in order along the line
+    expect(Array.from(d.querySelectorAll("details.rs summary")).map((s) => t(s).split(":")[0])).toEqual(["Illinois", "Iowa", "Illinois", "Iowa", "Wyoming"]);
+    // two states on one average, crossed five times: still no lowest
+    const two = { ...res, runs: res.runs.slice(0, 4) };
+    expect(stripHtml(two, "A", "B", CFG, false)).not.toContain("Lowest");
+  });
+
+  it("says No weekly price where the survey has none, and folds a stretch with nothing in it as 0 places", () => {
     const res = corridor([61.2, -149.9], [64.8, -147.7], [], [box("AK", -170, 51, -130, 71.5)]);
     const html = stripHtml(res, "Anchorage, AK", "Fairbanks, AK", CFG, true);
-    expect(html).toContain("No EIA price");
-    expect(html).toContain("Nothing on the map in this stretch of the band.");
+    const d = parseHTML(`<div>${html}</div>`).document;
+    const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
+    expect(Array.from(d.querySelectorAll(".rp li")).map(t)).toEqual(["Alaska No weekly price"]);
+    // no price, so nothing to colour and nothing lowest
+    expect(d.querySelectorAll(".rp li span")).toHaveLength(0);
+    expect(html).not.toContain("$");
+    expect(html).not.toContain("Lowest");
+    expect(t(d.querySelector("details.rs summary"))).toMatch(/^Alaska: 0 places, miles 0 to 2\d\d, state tax 8\.95¢$/);
+    expect(d.querySelector("details.rs table")).toBeNull();
+    // with no outlines the places still fold, under a state not known, and no price is guessed
+    const none = stripHtml(corridor(CHICAGO, CHEYENNE, pts, []), "A", "B", CFG, false);
+    expect(none).toContain("<summary>State not known: 4 places, miles 0 to");
+    expect(none).not.toContain("$");
   });
 
   it("keeps the band at 25 miles", () => {
@@ -176,7 +247,7 @@ describe("finding A and B", () => {
     expect(places.label).toContain("Bloomington, IL");
   });
 
-  it("matches a picked label, a start, a bare name or lat, lon", () => {
+  it("matches a picked label, a start or a bare name, and no longer reads a typed lat, lon", () => {
     expect(findPlace("Chicago, IL", places)).toEqual({ label: "Chicago, IL", lat: 41.85, lon: -87.65 });
     expect(findPlace("  chicago, il ", places)).toMatchObject({ label: "Chicago, IL" });
     expect(findPlace("chicago", places)).toMatchObject({ label: "Chicago, IL" });
@@ -184,12 +255,27 @@ describe("finding A and B", () => {
     expect(findPlace("Springfield, MO", places)).toMatchObject({ label: "Springfield, MO" });
     // a bare name in two states asks which, rather than picking the first state in the alphabet
     expect(findPlace("springfield", places)).toBe("Springfield, IL");
-    expect(findPlace("41.878, -87.630", null)).toEqual({ label: "41.878, −87.630", lat: 41.878, lon: -87.63 });
-    expect(findPlace("41.878, −87.63", null)).toEqual({ label: "41.878, −87.630", lat: 41.878, lon: -87.63 });
     expect(findPlace("Nowhere", places)).toBeNull();
     expect(findPlace("", places)).toBeNull();
-    // abroad
+    expect(findPlace("   ", places)).toBeNull();
+    // typed coordinates were traded for the module's budget: they find nothing now, and never a wrong place
+    expect(findPlace("41.878, -87.630", places)).toBeNull();
+    expect(findPlace("41.878, -87.630", null)).toBeNull();
     expect(findPlace("48.85, 2.35", places)).toBeNull();
+    // with no places list there is nothing to match
+    expect(findPlace("Chicago, IL", null)).toBeNull();
+  });
+
+  it("reads a town and state typed without the comma, as phones type it", () => {
+    expect(findPlace("chicago il", places)).toEqual({ label: "Chicago, IL", lat: 41.85, lon: -87.65 });
+    expect(findPlace("Chicago IL", places)).toMatchObject({ label: "Chicago, IL" });
+    expect(findPlace("  CHICAGO   IL ", places)).toMatchObject({ label: "Chicago, IL" });
+    // the state settles a name two states share
+    expect(findPlace("springfield mo", places)).toMatchObject({ label: "Springfield, MO" });
+    expect(findPlace("springfield il", places)).toMatchObject({ label: "Springfield, IL" });
+    // a state with no such town finds nothing rather than another state's
+    expect(findPlace("cheyenne il", places)).toBeNull();
+    expect(findPlace("normal zz", places)).toBeNull();
   });
 });
 
@@ -197,7 +283,7 @@ describe("the list's rows and the popups", () => {
   const points: MapPoint[] = [
     { kind: "s", filter: "ta", lat: 41.123456, lon: -87.98765, name: "TA <Joliet> & \"Co\"", type: "TA", state: "IL", sources: "o", dir: null, chain: "ta" },
     { kind: "w", filter: "w", lat: 41.3, lon: -95.8, name: "Weigh station, I 80 westbound", type: "Weigh station", state: "IA", sources: "nf", dir: "westbound", chain: null },
-    { kind: "v", filter: "v", lat: 41.5, lon: -90.5, name: "Love's shop", type: "Truck service", state: "IL", sources: "f", dir: null, chain: "loves" },
+    { kind: "v", filter: "v", lat: 41.5, lon: -90.5, name: "Love's shop", type: "Repair and lube", state: "IL", sources: "f", dir: null, chain: "loves" },
     { kind: "w", filter: "w", lat: 44, lon: -100, name: "Weigh station", type: "Weigh station", state: null, sources: "o", dir: null, chain: null },
   ];
   const d = parseHTML(`<table><tbody>${rowsHtml(points)}</tbody></table>`).document;
@@ -212,28 +298,72 @@ describe("the list's rows and the popups", () => {
     expect(pts[3]).toMatchObject({ st: "", d: "" });
   });
 
-  it("gives a truck stop its chain's locator and its source, and a scale its direction", () => {
+  it("gives a truck stop its region's weekly average, plainly not its own price, and its chain's website; a scale its direction", () => {
     const stop = popupHtml(pts[0], CFG);
-    expect(stop).toContain("TA &lt;Joliet&gt; &amp; &quot;Co&quot;");
-    expect(stop).toContain("TA truck stop");
-    expect(stop).toContain(`href="${CHAINS.find((c) => c.key === "ta")!.locator}"`);
-    expect(stop).toContain("Source: OpenStreetMap, ODbL");
+    expect(stop).toContain("<b>TA &lt;Joliet&gt; &amp; &quot;Co&quot;</b>");
+    expect(stop).toContain("TA truck stop in IL");
+    // the price is the region's, and says it is not this stop's
+    expect(stop).toContain(`<a href="/state/il/">Illinois's region averages $6.250</a> this week, not this stop's price.`);
+    expect(stop).toContain(`<a class="btn" href="${CHAINS.find((c) => c.key === "ta")!.locator}">TA website</a>`);
+    expect(stop).toContain(`<button class="btn" data-close>Close</button>`);
+    // the source and licence line lives in Map credits now
+    expect(stop).not.toMatch(/Sources?:/);
     const scale = popupHtml(pts[1], CFG);
-    expect(scale).toContain("Direction: westbound");
-    expect(scale).toContain("Sources: U.S. DOT NTAD 2019, public domain; DailyFuel, CC BY 4.0");
+    expect(scale).toContain("Weigh station in IA");
+    expect(scale).toContain("<p>For westbound traffic");
     expect(scale).not.toContain("href=");
-    expect(popupHtml(pts[3], CFG)).toContain("Direction not recorded");
-    expect(scale).not.toContain("highway");
-    expect(popupHtml({ ...pts[1], h: "Nearest freight highway: I 80, interstate" }, CFG)).toContain("<p>Nearest freight highway: I 80, interstate");
-    expect(popupHtml(pts[2], CFG)).toContain("Love's locator");
-    for (const p of pts) expect(popupHtml(p, CFG)).not.toMatch(/[–—]|\s-\s/);
+    expect(scale).not.toContain("averages");
+    // a scale with no direction says nothing about one, and one with no state names none
+    const bare = popupHtml(pts[3], CFG);
+    expect(bare).not.toMatch(/bound|Direction/);
+    expect(bare).not.toContain(" in ");
+    // a repair shop links its chain's website but quotes no fuel price
+    const shop = popupHtml(pts[2], CFG);
+    expect(shop).toContain("Repair and lube in IL");
+    expect(shop).toContain("Love's website</a>");
+    expect(shop).not.toContain("averages");
+    // a truck stop in a state with no weekly price quotes none
+    const ak = popupHtml({ ...pts[0], st: "AK" }, CFG);
+    expect(ak).toContain("TA truck stop in AK");
+    expect(ak).not.toMatch(/averages|\$\d/);
+    for (const p of [...pts, { ...pts[0], st: "AK" }]) {
+      const h = popupHtml(p, CFG);
+      expect(h).not.toMatch(/[–—]|\s-\s/);
+      expect(h).not.toMatch(/[▲▼▴▾△▽◆⬆⬇↑↓→←‹›✓]/);
+      expect(h).not.toMatch(/cheapest/i);
+      // no colour in a popup: nothing there is a change over time
+      expect(h).not.toMatch(/class="(up|down)"/);
+    }
+  });
+
+  it("names a place by the highway beside it, in the list, the popup and the trip", () => {
+    const near: MapPoint[] = [
+      { kind: "s", filter: "pilot", lat: 39.95, lon: -82.9, name: "Pilot", type: "Pilot", state: "OH", sources: "o", dir: null, chain: "pilot", highway: "I 70, interstate" },
+      { kind: "w", filter: "w", lat: 39.6, lon: -83.1, name: "Weigh station", type: "Weigh station", state: "OH", sources: "o", dir: "southbound", chain: null, highway: "I 71, interstate" },
+      { kind: "v", filter: "v", lat: 40.0, lon: -83.0, name: "Love's shop", type: "Repair and lube", state: "OH", sources: "f", dir: null, chain: "loves", highway: "US 30, not an interstate" },
+      { kind: "s", filter: "ta", lat: 41.0, lon: -84.0, name: "TA", type: "TA", state: "OH", sources: "o", dir: null, chain: "ta" },
+    ];
+    const html = rowsHtml(near);
+    // the highway is in the name cell only, not in a data attribute the script would have to read
+    expect(html).not.toContain("data-h");
+    const dd = parseHTML(`<table><tbody>${html}</tbody></table>`).document;
+    const got = (Array.from(dd.querySelectorAll("tr")) as unknown as HTMLTableRowElement[]).map(readRow);
+    expect(got.map((p) => p.n)).toEqual(["Pilot, near I 70", "Weigh station, near I 71", "Love's shop, near US 30", "TA"]);
+    expect(popupHtml(got[0], CFG)).toContain("<b>Pilot, near I 70</b>");
+    expect(popupHtml(got[1], CFG)).toContain("<b>Weigh station, near I 71</b>");
+    expect(popupHtml(got[1], CFG)).toContain("For southbound traffic");
+    expect(popupHtml(got[3], CFG)).toContain("<b>TA</b>");
+    // and the trip's folded rows print the same name
+    const trip = stripHtml(corridor([39.95, -83.5], [39.95, -82.3], got, []), "A", "B", CFG, false);
+    expect(trip).toContain("<td>Pilot, near I 70");
+    for (const p of got) expect(p.n).not.toMatch(/[–—]|\s-\s|,$/);
   });
 
   it("sorts by name, type or state either way, ties by name", () => {
     expect(sortPts(pts, "n", 1).map((p) => p.i)).toEqual([2, 0, 3, 1]);
     expect(sortPts(pts, "n", -1).map((p) => p.i)).toEqual([1, 3, 0, 2]);
     expect(sortPts(pts, "st", 1).map((p) => p.st)).toEqual(["", "IA", "IL", "IL"]);
-    expect(sortPts(pts, "t", 1).map((p) => p.t)).toEqual(["TA", "Truck service", "Weigh station", "Weigh station"]);
+    expect(sortPts(pts, "t", 1).map((p) => p.t)).toEqual(["Repair and lube", "TA", "Weigh station", "Weigh station"]);
   });
 
   it("escapes what it prints", () => {
@@ -242,13 +372,16 @@ describe("the list's rows and the popups", () => {
 });
 
 describe("the markers", () => {
-  it("grow with the zoom, big enough for the chain's letter from zoom 7, stops over scales over service squares", () => {
+  it("grow with the zoom, big enough for the chain's letter from zoom 6, stops over scales over service squares", () => {
     for (const z of [3, 5, 7, 10]) {
       expect(radius("s", z)).toBeGreaterThan(radius("w", z));
       expect(radius("w", z)).toBeGreaterThan(radius("v", z));
     }
-    expect(radius("s", 6.75)).toBeLessThan(8);
-    expect(radius("s", 7)).toBe(8);
+    // the letter is drawn at a radius of 8 or more, which a stop reaches at zoom 6, where a state fits a phone
+    expect(radius("s", 5.75)).toBeLessThan(8);
+    expect(radius("s", 6)).toBe(8);
+    expect(radius("s", 16)).toBe(8);
+    expect(radius("w", 6)).toBeLessThan(8);
     expect(radius("s", 3)).toBeLessThan(radius("s", 5));
   });
 });

@@ -9,7 +9,7 @@
 // only its window.
 import { chartLabel, yLabels, type ChartModel } from "../lib/chart.ts";
 import { formatDate } from "../lib/dates.ts";
-import { changeClass, formatPrice, formatQuote, formatSignedCents, toUnits } from "../lib/format.ts";
+import { changeClass, formatPrice, formatQuote, formatSignedCents, formatTick, toUnits } from "../lib/format.ts";
 import { linesSvg } from "../lib/plotting.ts";
 interface Props {
   model: ChartModel;
@@ -58,13 +58,13 @@ const unit = weekly ? "week" : "day";
     <b class="rd-v">{nowValue !== null ? formatPrice(nowValue) : "No price"}</b>{" "}
     <span class:list={["rd-c", change !== null && changeClass(change)]}>{change !== null && formatSignedCents(change)}</span>{" "}
     {bench && <span class="rd-b muted">{benchNow}</span>}{" "}
-    <span class="rd-h muted">Point at the line, or press the arrow keys, to read a {unit}.</span>
+    <span class="rd-h muted">Point at the line, or press the arrow keys, to read a {unit}.</span><span class="rd-t muted">Slide a finger along the line to read a {unit}.</span>
   </p>
   <div class="plot" tabindex="0" role="img" aria-label={name} data-from={model.from} data-to={model.to}>
     <div class="pa">
       <Fragment set:html={svg} />
       <span class="cross" hidden></span>
-      {yLabels(model).map((t) => <span class="yl" style={`top:${t.pos}%`}>{formatQuote(t.value)}</span>)}
+      {yLabels(model).map((t) => <span class="yl" style={`top:${t.pos}%`}>{formatTick(t.value)}</span>)}
       {end && <b class="ytag" style={`top:${end.y}%`}>{formatQuote(end.value)}</b>}
       {model.xTicks.map((t) => <span class:list={["xl", t.anchor === "start" && "first"]} style={`left:${t.pos}%`}>{t.label}</span>)}
     </div>
@@ -72,10 +72,6 @@ const unit = weekly ? "week" : "day";
 </figure>
 
 <style is:global>
-  /* a finger can still scroll the page over the plot */
-  .pa {
-    touch-action: pan-y;
-  }
   /* the benchmark line under a daily one, in the secondary ink */
   .pa path.bench {
     stroke: var(--ink2);

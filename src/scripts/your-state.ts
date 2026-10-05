@@ -1,20 +1,18 @@
-// "Your state": the boxed strip under the U.S. average on the home page shows
-// one state's price, so a return visit takes zero taps. Opening a state's page
-// saves it, and so does a pick from the Find your state list, so the last
-// state you looked at is the one waiting on the home page. The state code is
-// the only thing stored, in this browser's localStorage under
+// "Your state": the state a driver saved, shown first on the home page, so a
+// return visit takes zero taps. A state is saved only on purpose: the home
+// page's picker, the Save as my state button on a state page, or a pick from
+// the 404 page's list. Looking at other states never changes it. The state
+// code is the only thing stored, in this browser's localStorage under
 // "dailyfuel:state". Nothing is sent anywhere.
 //
 // All three functions ship as inline scripts: the pages print `(${fn})(...)`,
 // so each one must stand alone, with no imports and no helpers outside its
 // body. Anything unexpected (storage that throws, a value that isn't a state,
-// JS off) leaves the strip as the server rendered it: "Nothing saved yet",
-// with the Find your state list under it.
+// JS off) leaves the page as the server rendered it.
 
 /**
  * Right after the Find your state list on the 404 page: a tap on a state saves
- * it, then the link goes on to its page as usual. The home page's list does
- * the same inside yourState, so it ships one script instead of two.
+ * it, then the link goes on to its page as usual.
  */
 export function rememberPick(doc: Document, getStore: () => Storage): void {
   const list = doc.querySelector("[data-ys-list]");
@@ -32,117 +30,104 @@ export function rememberPick(doc: Document, getStore: () => Storage): void {
 }
 
 /**
- * On every state page: remember the state being viewed, so the home page
- * shows it next time. Storage that throws is ignored; the page works the same.
+ * On every state page, right after the head row: the slot at the right of the
+ * name shows "Save as my state", or "Your saved state" when this is the saved
+ * one. Both sit in one grid cell from the first paint, so showing either moves
+ * nothing. A tap saves this state and says so. Storage that throws shows
+ * neither. A page brought back by the back button reloads, since another page
+ * may have saved a different state in between.
  */
-export function saveOnView(code: string, getStore: () => Storage): void {
+export function myState(doc: Document, code: string, getStore: () => Storage): void {
+  const slot = doc.querySelector("[data-mine]");
+  if (!slot) return;
+  addEventListener("pageshow", (e) => {
+    if ((e as PageTransitionEvent).persisted) location.reload();
+  });
+  let st: Storage;
+  const paint = () => slot.setAttribute("data-mine", st.getItem("dailyfuel:state") === code ? "y" : "n");
   try {
-    getStore().setItem("dailyfuel:state", code);
+    st = getStore();
+    paint();
   } catch (err) {
-    // private mode, blocked storage, quota: nothing to do
+    return;
   }
+  (slot.querySelector("button") as HTMLElement).addEventListener("click", () => {
+    try {
+      st.setItem("dailyfuel:state", code);
+      paint();
+      (slot.querySelector("[tabindex]") as HTMLElement).focus();
+    } catch (err) {
+      // blocked storage: the button stays
+    }
+  });
 }
 
 /**
- * On the home page, right after the Find your state list: fill the saved
- * strip from the saved state's link in the list (the build prints its price,
- * change and plate on the link), show it in place of "Nothing saved yet", and
- * mark the slot with data-ys-state so the quote table's script can bold the
- * row. CSS hides the list on a marked slot until CHANGE asks for it. Then
- * wire CHANGE and FORGET, and open the list for a link to /#find-your-state
- * (every state page's "All states"). `hash` is location.hash.
+ * On the home page, right after the your state section: fill the answer from
+ * the page's JSON block (yourStateJson in src/lib/yourstate.ts) and mark the
+ * section with data-ys-state, which the CSS keys every show and hide on and
+ * the quote table's script reads to bold the row. It also wires the picker,
+ * which saves the state it opens (with JS off the form goes through /go, a
+ * redirect, and saves nothing), and Forget my state, at the end of the page,
+ * which drops it and starts the page over. A page brought back by the back
+ * button reloads, since a state page may have saved a different state.
  */
-export function yourState(doc: Document, getStore: () => Storage, hash: string): void {
+export function yourState(doc: Document, getStore: () => Storage): void {
   const slot = doc.querySelector("[data-ys]"),
-    find = doc.querySelector("[data-ys-find]");
-  if (!slot || !find) return;
-  const setOpen = (on: boolean) => find.toggleAttribute("open", on);
-  if (hash === "#find-your-state") setOpen(true);
-  // a pick from the list saves it, the way rememberPick does on the 404 page
-  find.addEventListener("click", (e) => {
-    const a = (e.target as Element).closest("[data-ys-pick]");
-    if (!a) return;
+    data = doc.getElementById("ys-data");
+  if (!slot || !data) return;
+  addEventListener("pageshow", (e) => {
+    if ((e as PageTransitionEvent).persisted) location.reload();
+  });
+  doc.addEventListener("submit", (e) => {
+    const f = e.target as HTMLFormElement,
+      v = f.id == "find-your-state" && (f.elements.namedItem("s") as HTMLSelectElement).value;
+    if (!v) return;
+    e.preventDefault();
     try {
-      getStore().setItem("dailyfuel:state", a.getAttribute("data-ys-pick") as string);
+      getStore().setItem("dailyfuel:state", v.toUpperCase());
     } catch (err) {
-      // private mode, blocked storage, quota: the link still works
+      // blocked storage: the page still opens
     }
+    location.href = "/state/" + v + "/";
   });
-
-  const q = (sel: string) => slot.querySelector("[data-ys-" + sel + "]") as HTMLElement | null,
-    saved = q("saved"),
-    none = q("none"),
-    open = q("open"),
-    change = q("change"),
-    forget = q("forget"),
-    move = q("move");
-  if (!saved || !none || !open || !change || !forget || !move) return;
-  const text = (sel: string, value: string) => {
-    const el = q(sel);
-    if (el) el.textContent = value;
-  };
-  let code = "";
-  try {
-    // the saved value only counts when it names a link in the list; anything
-    // else (a value that isn't a state, a selector that won't parse) leaves
-    // the strip alone
-    const a = find.querySelector('[data-ys-pick="' + getStore().getItem("dailyfuel:state") + '"]');
-    if (!a) return;
-    const attr = (name: string) => a.getAttribute("data-" + name) || "";
-    code = attr("ys-pick");
-    const name = (a.textContent || "").replace(code, "").trim();
-    text("code", code);
-    text("name", name);
-    text("price", attr("px"));
-    text("plate", attr("pl"));
-    move.textContent = attr("ch");
-    // the ink rides on the link only when the move rose or fell
-    move.className = "ch " + (attr("ink") || "muted");
-    open.setAttribute("href", a.getAttribute("href") as string);
-    open.setAttribute("aria-label", "Open " + name);
-  } catch (e) {
-    return;
-  }
-  none.setAttribute("hidden", "");
-  saved.removeAttribute("hidden");
-  slot.setAttribute("data-ys-state", code);
-
-  // The list stays in the page for CHANGE. It shows only while it is open,
-  // and the CSS hides a closed list on a marked slot.
-  const sync = () => {
-    const on = find.hasAttribute("open");
-    slot.toggleAttribute("data-ys-list", on);
-    change.setAttribute("aria-expanded", String(on));
-  };
-  sync();
-  // CHANGE opens the list under the strip, and closes it again.
-  change.addEventListener("click", () => {
-    setOpen(!find.hasAttribute("open"));
-    sync();
-    const list = find.querySelector("[data-ys-list]") as HTMLElement | null;
-    // keep the strip in view; the list opens right under it
-    if (list && find.hasAttribute("open")) list.focus({ preventScroll: true });
-  });
-  // Closing the list from its own summary tucks it away and hands focus back
-  // to CHANGE, since the summary goes with it. (Browsers fire toggle a tick
-  // after CHANGE sets open too, which does the same again, harmlessly.)
-  find.addEventListener("toggle", () => {
-    sync();
-    if (!find.hasAttribute("open") && slot.hasAttribute("data-ys-state")) change.focus();
-  });
-  forget.addEventListener("click", () => {
+  doc.addEventListener("click", (e) => {
+    if (!(e.target as Element).closest("[data-ys-forget]")) return;
     try {
       getStore().removeItem("dailyfuel:state");
-    } catch (e) {
-      // still forget it on this page
+    } catch (err) {
+      // nothing saved to drop
     }
-    saved.setAttribute("hidden", "");
-    none.removeAttribute("hidden");
-    slot.removeAttribute("data-ys-state");
-    for (const row of Array.from(doc.querySelectorAll("tr.mine"))) row.classList.remove("mine");
-    setOpen(false);
-    sync();
-    const summary = find.querySelector("summary") as HTMLElement | null;
-    if (summary) summary.focus();
+    location.reload();
+  });
+  let code = "",
+    v: string[];
+  try {
+    code = getStore().getItem("dailyfuel:state") || "";
+    const all = JSON.parse(data.textContent || "{}");
+    // only a state really in the block: a saved "constructor" or "__proto__"
+    // would find Object's own members, which throw nothing and fill nothing
+    if (!Object.prototype.hasOwnProperty.call(all.s, code)) return;
+    const s = all.s[code];
+    v = [s[0]].concat(all.l[s[1]]);
+  } catch (err) {
+    return;
+  }
+  const put = (k: string, t: string) => {
+    for (const el of Array.from(slot.querySelectorAll("[data-f=" + k + "]"))) el.textContent = t;
+  };
+  put("n", v[0]);
+  put("p", v[1]);
+  put("c", v[2]);
+  put("f", v[3]);
+  put("l", v[5]);
+  (slot.querySelector("[data-f=c]") as Element).className = v[4];
+  const lower = code.toLowerCase();
+  (slot.querySelector("[data-ys-open]") as HTMLAnchorElement).href = "/state/" + lower + "/";
+  slot.setAttribute("data-ys-state", code);
+  // the picker shows the saved state; it comes later in the page
+  doc.addEventListener("DOMContentLoaded", () => {
+    const s = doc.getElementById("go-s") as HTMLSelectElement | null;
+    if (s) s.value = lower;
   });
 }

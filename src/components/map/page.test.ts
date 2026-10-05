@@ -1,8 +1,8 @@
 // Checks on the built /map page: what it loads (Leaflet from our own
 // origin, the base map's tiles from their one host and nothing from
 // anywhere else), what it says with JS off (the
-// legend, the coverage, the credits, the whole list), the route strip's
-// wording, the data the script reads, and the weight of everything the page
+// legend, the coverage, the credits, the whole list), the find row and the
+// trip's wording, the data the script reads, and the weight of everything the page
 // loads against its budget. It builds the site from data/ and data/map into
 // tmp/dist-map-test once; DAILYFUEL_MAP_BUILT_DIR names an existing build.
 
@@ -71,6 +71,69 @@ describe("the /map page", () => {
     expect(d.querySelector('link[rel="preconnect"]')!.getAttribute("href")).toBe(origin);
     // street level, with the freight roads hidden past 10 by the CSS
     expect(modules[0][1]).toContain("maxZoom:16");
+    // the one thing the browser is asked for besides the page's own files is the phone's place, and only on Near me
+    expect(modules[0][1].match(/\.locate\(/g)).toHaveLength(1);
+    expect(page).not.toMatch(/aaa\.com|serviceWorker|sw\.js/);
+  });
+
+  it("lets one finger scroll the page on a phone, zooms in on a far out tap, and opens the nearest dot close in", () => {
+    const script = [...html().matchAll(/<script type="module">([\s\S]*?)<\/script>/g)][0][1];
+    // one finger scrolls the page; two move and zoom the map
+    expect(script).toMatch(/dragging:!\w+\.Browser\.mobile/);
+    // below zoom 6 a tap on a phone zooms in two levels on the spot, so 3 goes to 5 and 5 to 7
+    expect(script).toMatch(/\w+\.Browser\.mobile&&(\w+)<6\)return \w+\.setView\(\w+\.latlng,\1\+2\)/);
+    // from 6 the tap opens the nearest switched on dot, measured on screen from the finger: Leaflet's own
+    // point for a small marker's event is the marker's spot, which would always pick the dot drawn on top
+    expect(script).toMatch(/\.mouseEventToLayerPoint\(\w+\.originalEvent\)/);
+    expect(script).toMatch(/\.on\?\w+\.m\._point\.distanceTo\(\w+\):1e9/);
+    expect(script).not.toContain(".layerPoint");
+    // the dot hit, the bigger lettered one when two overlap, keeps a 1px lead
+    expect(script).toMatch(/\w+=\w+\.layer\.p,\w+=\w+\(\w+\)-1[;,]/);
+    // a found town and Near me land at zoom 9, where the stops are told apart
+    expect(script).toMatch(/setView\(\[\w+\.lat,\w+\.lon\],9\)/);
+    expect(script).toContain("locate({setView:!0,maxZoom:9})");
+    // the map opens on the state in the address or the saved one, and a trip in the address comes back
+    expect(script).toContain("dailyfuel:state");
+    expect(script).toMatch(/replaceState\(null,"","#"\+encodeURIComponent\(/);
+  });
+
+  it("keeps a bad address, an empty box and a refused location from leaving the driver guessing", () => {
+    const script = [...html().matchAll(/<script type="module">([\s\S]*?)<\/script>/g)][0][1];
+    // a malformed address (#100%) can't stop the roads or a trip from loading
+    expect(script).toMatch(/try\{\w+=decodeURIComponent\(\w+\.location\.hash\.slice\(1\)\)\}catch/);
+    // an anchor on the page (#credits) is not a state: the saved state is tried next
+    expect(script).toMatch(/\w+\(\w+\)\|\|\w+\(\w+\.localStorage\.getItem\("dailyfuel:state"\)\)/);
+    // Show with nothing typed asks for a town, and never quotes an empty box
+    expect(script).toContain('"Type a town or state."');
+    // Near me scrolls to the map only once the phone says where it is; a refusal stays by the find box
+    expect(script).toMatch(/locate\(\{setView:!0,maxZoom:9\}\)\}/);
+    expect(script).toMatch(/on\("locationfound",\(\)=>\w+\.scrollIntoView\(\)\)/);
+    expect(script).toMatch(/on\("locationerror",\(\)=>\{\w+\("Your phone did not share where you are\. Type a town instead\."\),\w+\.scrollIntoView\(/);
+  });
+
+  it("finds a town or a state from a row above the map, with Near me, and nothing to press until the script runs", () => {
+    const d = doc();
+    expect(text(d.querySelector("h1.mp-h"))).toBe("Truck stops and weigh stations");
+    expect(text(d.querySelector(".mp-in"))).toBe("Zoom in, then tap a dot to see what it is. Not every truck stop or scale is on the map.");
+    const fd = d.getElementById("fd")!;
+    expect(fd.querySelector("fieldset")!.hasAttribute("disabled")).toBe(true);
+    const q = fd.querySelector('input[name="q"]')!;
+    expect(q.getAttribute("placeholder")).toBe("Town or state");
+    expect(q.getAttribute("list")).toBe("pl");
+    // a visible name or a hidden label for every control
+    expect(text(fd.querySelector("label"))).toBe("Town or state");
+    expect(Array.from(fd.querySelectorAll("button")).map(text)).toEqual(["Show", "Near me"]);
+    expect(fd.querySelector("[data-near]")!.getAttribute("type")).toBe("button");
+    expect(d.getElementById("fd-st")!.getAttribute("role")).toBe("status");
+    // the find row comes before the map, and the trip after it
+    const page = html();
+    expect(page.indexOf('id="fd"')).toBeLessThan(page.indexOf('id="map"'));
+    expect(page.indexOf('id="map"')).toBeLessThan(page.indexOf('id="trip"'));
+    expect(text(d.querySelector(".mp-tip"))).toBe("Use two fingers to move the map, or tap + and −.");
+  });
+
+  it("keeps every media query in a form older phones read", () => {
+    expect(html()).not.toMatch(/\((?:width|height)\s*[<>]/);
   });
 
   it("ships Leaflet 1.9.4 as the pinned npm package has it, with its licence and no image rules", () => {
@@ -125,11 +188,22 @@ describe("the /map page", () => {
       expect(r.querySelectorAll("td")).toHaveLength(3);
     }
     expect(text(d.getElementById("ls-n"))).toBe(`${data.points.length.toLocaleString("en-US")} places`);
-    expect(Array.from(d.querySelectorAll("#ls thead th")).map(text)).toEqual(["Name", "Type", "St"]);
-    expect(d.querySelector('#ls th[aria-sort="ascending"]')!.getAttribute("data-sort")).toBe("st");
+    expect(Array.from(d.querySelectorAll("#ls thead th")).map(text)).toEqual(["Name", "Type", "State"]);
+    // the list is in the build's order and offers no sorting
+    expect(d.querySelector("#ls th[aria-sort], #ls th[data-sort]")).toBeNull();
+    // a name says the highway beside it, when there is one; the script reads it from the cell
+    const near = data.points.filter((p) => p.highway).length;
+    expect(near).toBeGreaterThan(data.points.length / 2);
+    const names = rows.map((r) => text(r.querySelector("td")));
+    const want = data.points.map((p) => (p.name + (p.highway ? `, near ${p.highway.split(",")[0]}` : "")).replace(/\s+/g, " ").trim());
+    expect(names.filter((n, i) => n !== want[i]).length).toBe(0);
+    expect(names.filter((n) => n.includes(", near ")).length).toBe(near);
+    expect(rows.some((r) => r.hasAttribute("data-h"))).toBe(false);
+    expect(text(d.querySelector(".mp-ls"))).toContain("Every place on the map. With the map on, the list shows what is in view.");
     // nothing to tick, type or press until the script runs
     for (const cb of Array.from(d.querySelectorAll("input[data-k]"))) expect(cb.hasAttribute("disabled")).toBe(true);
     expect(d.querySelector("#rt fieldset")!.hasAttribute("disabled")).toBe(true);
+    expect(d.querySelector("#fd fieldset")!.hasAttribute("disabled")).toBe(true);
     expect(text(d.querySelector("#map .mp-msg"))).toBe("The map needs JavaScript. Every place on it is in the list below.");
   });
 
@@ -137,32 +211,55 @@ describe("the /map page", () => {
     const d = doc();
     const items = Array.from(d.querySelectorAll(".lg-i"));
     const want = [...CHAINS.map((c) => [c.name, data.counts[c.key] ?? 0]), ["Weigh stations", data.counts.w]];
-    if (data.counts.v) want.push(["Truck service", data.counts.v]);
+    if (data.counts.v) want.push(["Repair and lube", data.counts.v]);
     expect(items.map((i) => [text(i.querySelector("span:not(.key):not(.n)")), Number(text(i.querySelector(".n")).replace(/,/g, ""))])).toEqual(want);
     for (const ch of CHAINS) expect(text(d.querySelector(`input[data-k="${ch.key}"] + .key`))).toBe(ch.letter);
-    const legend = text(d.querySelector(".mp-lg"));
-    expect(legend).toContain("Share of each chain's own sites on the map: Love's 70%, Pilot and Flying J 56%, TA 25%");
-    expect(legend).toContain("Weigh stations are partial.");
-    expect(legend).toContain("not affiliated with or endorsed by any chain");
+    const lg = d.querySelector(".mp-lg")!;
+    // on a phone the key folds behind one button; with CSS off or on a wide screen it is all there
+    expect(Array.from(lg.querySelectorAll("label.lgt-l > span")).map(text)).toEqual(["Show the key and filters", "Hide the key and filters"]);
+    expect(lg.querySelector("label.lgt-l")!.getAttribute("for")).toBe("lgt");
+    expect(lg.querySelector("#lgt")!.getAttribute("type")).toBe("checkbox");
+    // that nothing is complete is said outside the fold, under the key
+    expect(text(lg)).toContain("Not every truck stop or scale is on the map. A missing dot doesn't mean there is none.");
+    const more = lg.querySelector("details.more")!;
+    expect(text(more.querySelector("summary"))).toBe("How complete is this map?");
+    const coverage = text(more);
+    expect(coverage).toContain("How much of each chain's own list of stops is on the map: Love's 70%, Pilot and Flying J 56%, TA 25%");
+    expect(coverage).toContain("Some weigh stations are missing.");
+    expect(coverage).toContain("not affiliated with or endorsed by any chain");
   });
 
-  it("credits every source under the map", () => {
+  it("credits the base map under the map, and every source in full in Map credits on the same page", () => {
     const d = doc();
     const attr = d.querySelector(".mp-mc .mp-attr")!;
-    // OpenStreetMap's tiles need only OpenStreetMap's credit; CARTO's add CARTO's
+    // OpenStreetMap's tiles need only OpenStreetMap's credit beside the map; CARTO's add CARTO's, first
     const links = Array.from(attr.querySelectorAll("a")).map((a) => [a.getAttribute("href"), text(a)]);
-    expect(links).toContainEqual(["https://www.openstreetmap.org/copyright", "© OpenStreetMap contributors, ODbL"]);
     if (baseMap().credit.name === "CARTO") expect(links[0]).toEqual(["https://carto.com/attributions", "© CARTO"]);
-    else expect(text(attr)).toMatch(/^Base map, map data and stops © OpenStreetMap contributors, ODbL/);
-    const t = text(attr);
+    expect(links.slice(-2)).toEqual([
+      ["https://www.openstreetmap.org/copyright", "© OpenStreetMap contributors"],
+      ["#credits", "Map credits"],
+    ]);
+    // the full credits, always visible (not folded), with ODbL and every CC BY source named
+    const cr = d.querySelector("section.mp-cr")!;
+    expect(d.getElementById("credits")!.closest("section")).toBe(cr);
+    expect(text(cr.querySelector("h2"))).toBe("Map credits");
+    expect(cr.closest("details")).toBeNull();
+    const full = cr.querySelector("p.fine")!;
+    expect(Array.from(full.querySelectorAll("a")).map((a) => [a.getAttribute("href"), text(a)])).toContainEqual([
+      "https://www.openstreetmap.org/copyright",
+      "© OpenStreetMap contributors, ODbL",
+    ]);
+    const t = text(full);
+    expect(t).toMatch(/^Base map, map data and stops © OpenStreetMap contributors, ODbL/);
     expect(t).toContain("More weigh stations: U.S. DOT NTAD (public domain) and Iowa DOT (CC BY 4.0).");
     if (data.present.fleet) expect(t).toContain("Weigh station and truck service points: DailyFuel, CC BY 4.0.");
     if (data.present.roads) expect(t).toContain("Roads: NTAD National Highway Freight Network, U.S. DOT BTS, public domain.");
     if (data.present.states) expect(t).toContain("State outlines: U.S. Census Bureau, public domain.");
     if (data.present.places) {
       expect(t).toContain("Place names: GeoNames, CC BY 4.0.");
-      expect(attr.querySelector('a[href="https://www.geonames.org"]')).not.toBeNull();
+      expect(full.querySelector('a[href="https://www.geonames.org"]')).not.toBeNull();
     }
+    expect(t).toContain("Drawn with Leaflet.");
   });
 
   it("says the weigh layer includes DailyFuel's own list, and how much of it no open source has", () => {
@@ -172,20 +269,31 @@ describe("the /map page", () => {
     const only = data.points.filter((p) => p.kind === "w" && p.sources === "f").length;
     expect(on).toBeGreaterThan(only);
     expect(legend).toContain(
-      `The weigh layer includes DailyFuel's own list: ${on.toLocaleString("en-US")} of the markers are on it, and ${only.toLocaleString("en-US")} of those are on no open source.`,
+      `DailyFuel's own list adds more: ${on.toLocaleString("en-US")} of the scales on the map are on it, and ${only.toLocaleString("en-US")} of those are on no open source.`,
     );
-    expect(legend).toContain("A missing marker doesn't mean there is no scale.");
+    expect(legend).toContain("If you don't see a scale, there may still be one.");
   });
 
-  it("puts the route strip's warning above the result, word for word, and never promises a cheapest stop or a truck route", () => {
+  it("puts the trip's warning right under its result, word for word, and never promises a cheapest stop or a truck route", () => {
     const d = doc();
-    const section = d.querySelector(".mp-rt")!;
-    const note = text(section.querySelector(".note"));
-    expect(note).toBe(
-      "This is a straight line corridor, not a driving route. Prices are the EIA regional average from Monday; pumps in the same state can run more than a dollar apart. Check the chain's own page for today's price.",
+    const section = d.querySelector("section.mp-rt#trip")!;
+    expect(text(section.querySelector("h2"))).toBe("Prices along a trip");
+    const cfg = JSON.parse(d.getElementById("mapcfg")!.textContent!);
+    expect(text(section.querySelector(".meta"))).toMatch(new RegExp(`^${cfg.wk}( · \\d{4} state tax)?$`));
+    expect(cfg.wk).toMatch(/^Week of [A-Z][a-z]{2} \d{1,2}, \d{4} prices$/);
+    const note = section.querySelector(".note")!;
+    expect(text(note)).toBe(
+      "This follows a straight line, not the roads you will drive. Each price is the region's weekly average, and pumps in one state can differ by more than a dollar, so check the chain's website for today's price.",
     );
+    // the status and the result sit under the button, where the keyboard can't cover them, and the warning follows at once, never folded
     const all = Array.from(section.children);
-    expect(all.indexOf(section.querySelector(".note")!)).toBeLessThan(all.indexOf(d.getElementById("rt-out")!));
+    const out = d.getElementById("rt-out")!;
+    expect(all.indexOf(d.getElementById("rt-st")!)).toBeLessThan(all.indexOf(out));
+    expect(all.indexOf(note)).toBe(all.indexOf(out) + 1);
+    expect(note.closest("details")).toBeNull();
+    expect(Array.from(section.querySelectorAll("#rt label span")).map(text)).toEqual(["From", "To"]);
+    expect(Array.from(section.querySelectorAll("#rt input")).map((i) => i.getAttribute("placeholder"))).toEqual(["Town, like Chicago, IL", "Town, like Denver, CO"]);
+    expect(text(section.querySelector('#rt button[type="submit"]'))).toBe("Show prices");
     expect(html()).not.toMatch(/cheapest|truck route/i);
   });
 
@@ -195,10 +303,22 @@ describe("the /map page", () => {
     const oh = cfg.px.find((r: string[]) => r[0] === "OH");
     const s = site.byCode.get("OH")!;
     expect(oh[2]).toMatch(/^\$\d\.\d{3}$/);
-    expect(oh[5]).toBe("EIA Midwest average, 15 states");
-    if (s.eia?.change) expect(oh[3]).toMatch(oh[4] === "up" ? /^\+/ : oh[4] === "down" ? /^−/ : /./);
+    expect(oh[5]).toBe("Midwest average, same in 15 states");
+    // the move in words, so the trip's prices never rest on a sign, and its colour only when it moved
+    for (const r of cfg.px as (string | null)[][]) {
+      if (r[3] === null) continue;
+      // a move too small to colour stays in plain ink, still in words
+      expect(r[3]).toMatch(r[4] === "up" ? /^up (\d+\.\d¢|\$\d\.\d{3})$/ : r[4] === "down" ? /^down (\d+\.\d¢|\$\d\.\d{3})$/ : /^((up|down) \d+\.\d¢|no change)$/);
+      if (r[3] === "no change") expect(r[4]).not.toMatch(/^(up|down)$/);
+    }
+    if (s.eia?.change) expect(oh[3]).toMatch(/^(up|down) /);
+    // the config carries no source list any more: the popup no longer prints one
+    expect(cfg).not.toHaveProperty("src");
     const ak = cfg.px.find((r: string[]) => r[0] === "AK");
     expect(ak[2]).toBeNull();
+    expect(ak[3]).toBeNull();
+    expect(ak[4]).toBe("muted");
+    expect(cfg.px.find((r: string[]) => r[0] === "HI")[2]).toBeNull();
     expect(Object.keys(cfg.c)).toEqual(CHAINS.map((c) => c.key));
   });
 

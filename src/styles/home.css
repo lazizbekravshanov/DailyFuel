@@ -1,0 +1,493 @@
+/*
+  The home page's own styles: the headline and its chart, the region board,
+  the quote table with its find box and sparklines. They sit here, not in
+  global.css, so the state pages and the map don't carry them.
+*/
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+  gap: 16px 36px;
+  padding: 22px 0 4px;
+  align-items: start;
+}
+
+/* a wide column and a narrow one of notes beside it */
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 290px);
+  gap: 28px;
+  align-items: start;
+}
+
+.notes p {
+  margin: 0 0 10px;
+  font-size: var(--fs-s);
+  color: var(--ink2);
+  max-width: 46ch;
+}
+
+.notes b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+@media (max-width: 899px) {
+  .hero,
+  .cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* the quote table (every state) and the region board */
+.q table {
+  min-width: 740px;
+}
+
+/* Off a phone the quote table shows all ten columns. At 8px a side, and none
+   after the last, they fit a 1024px screen (iPad across, a small laptop)
+   with no sideways scroll; Quotes.astro's colgroup counts the same padding.
+   Phones keep the shell's 10px around their four columns. */
+@media (min-width: 480px) {
+  .q th,
+  .q td {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+  .q th:first-child,
+  .q td:first-child {
+    padding-left: 0;
+  }
+  .q th:last-child,
+  .q td:last-child {
+    padding-right: 0;
+  }
+}
+
+.board table {
+  min-width: 620px;
+}
+
+/* a hairline every fifth row of the quote table keeps the eye on its line */
+.q tbody tr:nth-child(5n of :not([hidden])) th,
+.q tbody tr:nth-child(5n of :not([hidden])) td,
+.board tbody th,
+.board tbody td,
+tbody tr:last-child th,
+tbody tr:last-child td {
+  border-bottom: 1px solid var(--hair);
+}
+
+/* the first column stays put while the rest scrolls sideways */
+.q th[scope="row"],
+.board th[scope="row"] {
+  position: sticky;
+  left: 0;
+  background: var(--bg);
+  box-shadow: 1px 0 0 var(--hair);
+}
+
+/* a whole row of the quote table opens the state, so it reads as a link */
+.q tbody tr {
+  cursor: pointer;
+}
+
+/* the row that is your state, and the U.S. row on the board */
+tr.mine th,
+tr.mine td {
+  background: var(--mark);
+  font-weight: 700;
+}
+
+tr.us th,
+tr.us td {
+  font-weight: 700;
+}
+
+/* a column head that sorts: the script wraps the head's words in this */
+.sortb {
+  min-height: 24px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sortb:hover {
+  text-decoration: underline;
+}
+
+th[aria-sort] .sortb {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* the sort direction after the words */
+.ar {
+  padding-left: 3px;
+}
+
+/* ---------------------------------------------------------- sparklines --- */
+
+/* one 52 week line in a table cell, drawn from the page's sprite */
+.spk {
+  display: block;
+  width: 72px;
+  height: 18px;
+  overflow: visible;
+  color: var(--ink);
+}
+
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* ------------------------------------------------------------ find box --- */
+
+/* the find box lives in a section head, so it is scoped to .sh */
+.sh .find {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 8px;
+  border: 1px solid var(--edge);
+}
+
+.sh .find:focus-within {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.sh .find input {
+  width: 20ch;
+  min-width: 0;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: max(16px, var(--fs-t));
+}
+
+.sh .find input:focus {
+  outline: none;
+}
+
+/* the datalist's own drop arrow would be the one arrow on the page; Chromium
+   draws it with an important rule of its own, so this one has to be too */
+.sh .find input::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+
+/* the key cap that says "/" focuses the box */
+.sh .find .k {
+  padding: 0 4px;
+  border: 1px solid var(--hair);
+  font-size: var(--fs-xs);
+  color: var(--ink2);
+}
+
+@media (max-width: 700px) {
+  .sh .find {
+    display: flex;
+  }
+  .sh .find .k {
+    display: none;
+  }
+  .sh .find input {
+    width: 100%;
+  }
+}
+
+
+
+
+@media (max-width: 479px) {
+  .sortb {
+    min-height: 44px;
+  }
+}
+
+/* ------------------------------------------------------------ headline --- */
+
+.hero .lead {
+  min-width: 0;
+}
+
+/* your state: nothing until the script finds a saved one */
+.ys:not([data-ys-state]) .ans {
+  display: none;
+}
+
+/* on a wide screen the answer is one boxed line */
+.ys .ans {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 22px;
+  padding: 9px 12px;
+  border: 1px solid var(--edge);
+}
+
+.ys .ans > * {
+  margin: 0;
+}
+
+.ys .ans .big {
+  font-size: 17px;
+  letter-spacing: 0;
+}
+
+.ys .ans .wkl {
+  display: none;
+}
+
+.ys .ans .op {
+  margin-left: auto;
+}
+
+/* the picker: the phone's own list, in a box with an ink edge */
+.go {
+  max-width: 460px;
+  margin-top: 18px;
+}
+
+.go .lbl {
+  display: block;
+}
+
+.go-r {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.go select {
+  flex: 1 1 14ch;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  appearance: none;
+}
+
+.go select:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.ys[data-ys-state] + .hero .g1,
+.ys:not([data-ys-state]) + .hero .g2 {
+  display: none;
+}
+
+/* the phone's extras: the then line and the chart's button */
+.then,
+.usc-l,
+#usc,
+.qa-l,
+#qa,
+.board tr.mr,
+.fg {
+  display: none;
+}
+
+/* Forget my state, at the end of the page, once a state is saved */
+.ys[data-ys-state] ~ .fg {
+  display: block;
+  margin-top: 28px;
+}
+
+/* a control drawn on a hidden checkbox shows the checkbox's focus */
+#usc:focus-visible + .usc-l,
+#qa:focus-visible ~ .qa-l {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+#usc:checked + .usc-l .o1,
+#usc:not(:checked) + .usc-l .o2,
+#qa:checked ~ .qa-l .q1,
+#qa:not(:checked) ~ .qa-l .q2 {
+  display: none;
+}
+
+/* -------------------------------------------------------------- phones --- */
+
+@media (max-width: 479px) {
+  /* the saved state is the headline */
+  .ys .ans {
+    display: block;
+    margin-top: 18px;
+    padding: 0;
+    border: 0;
+  }
+  .ys .ans > * {
+    margin-top: 8px;
+  }
+  .ys .ans > .lbl {
+    margin: 0 0 6px;
+  }
+  .ys .ans > .big {
+    margin: 0;
+    font-size: var(--fs-big);
+    letter-spacing: -0.02em;
+  }
+  .ys .ans .wkl {
+    display: block;
+  }
+  .ys .ans .op {
+    margin-top: 14px;
+  }
+  .hero {
+    gap: 0;
+    padding-top: 16px;
+  }
+  /* under a saved state, the U.S. average is three short lines */
+  .ys[data-ys-state] + .hero {
+    padding-top: 26px;
+  }
+  .ys[data-ys-state] + .hero .big {
+    font-size: 1.5rem;
+  }
+  .ys[data-ys-state] + .hero .chw {
+    font-size: var(--fs-b);
+  }
+  .ys[data-ys-state] + .hero .wkl,
+  .ys[data-ys-state] + .hero .then {
+    display: none;
+  }
+  .go {
+    max-width: none;
+  }
+  .then {
+    display: block;
+    margin: 12px 0 0;
+  }
+  /* the U.S. chart, one tap away */
+  #usc,
+  #qa {
+    display: block;
+  }
+  .usc-l {
+    display: block;
+    margin-top: 14px;
+  }
+  #usc:not(:checked) ~ .us-chart {
+    display: none;
+  }
+  .us-chart {
+    margin-top: 14px;
+  }
+
+  /* prices by region: three columns that fit, each region with its states */
+  .board table {
+    min-width: 0 !important;
+  }
+  .board col {
+    width: auto !important;
+  }
+  .board th:nth-child(n + 4),
+  .board td:nth-child(n + 4),
+  .board td[colspan] ~ td,
+  .board tr.us,
+  .board p.swipe,
+  .board .notes p:not(.ns) {
+    display: none;
+  }
+  .board th[scope="row"] {
+    position: static;
+    box-shadow: none;
+    white-space: normal;
+    font-weight: 700;
+  }
+  .board tr.mr {
+    display: table-row;
+  }
+  .board tr.hm th,
+  .board tr.hm td {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+  .board td.mem {
+    padding-top: 0;
+    white-space: normal;
+  }
+  .mem a {
+    display: inline-block;
+    min-width: 44px;
+    min-height: 44px;
+    line-height: 44px;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  /* every state, one tap away; a link to /#states opens it */
+  .qa-l {
+    display: block;
+    margin-top: 4px;
+  }
+  .q:not(:target) #qa:not(:checked) ~ .scroll,
+  .q:not(:target) #qa:not(:checked) ~ .cap,
+  .q:not(:target) #qa:not(:checked) ~ .sh .find,
+  .q:not(:target) #qa:not(:checked) ~ .sh #count,
+  .q:target .qa-l,
+  .q p.swipe {
+    display: none;
+  }
+  .q .scroll {
+    overflow: visible;
+  }
+  .q table {
+    min-width: 0 !important;
+  }
+  .q col {
+    width: auto !important;
+  }
+  .q th:nth-child(n + 5),
+  .q td:nth-child(n + 5),
+  .q td[colspan] ~ td {
+    display: none;
+  }
+  .q th[scope="row"] {
+    position: static;
+    box-shadow: none;
+  }
+  .q tr.mine th[scope="row"] {
+    background: var(--mark);
+  }
+  .q td:nth-child(2) {
+    white-space: normal;
+  }
+  /* the heads stay in view down the 51 rows */
+  .q thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--bg);
+  }
+  .sh .find {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* at 200% zoom on a small phone the table scrolls inside its box, never the page */
+@media (max-width: 299px) {
+  .q .scroll {
+    overflow-x: auto;
+  }
+}

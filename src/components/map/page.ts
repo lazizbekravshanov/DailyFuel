@@ -6,14 +6,13 @@ import { buildSync } from "esbuild";
 import { resolve } from "node:path";
 import { moveClass } from "../../lib/bins.ts";
 import { formatDate } from "../../lib/dates.ts";
-import { formatMove, formatPrice } from "../../lib/format.ts";
-import { pctOf } from "../../lib/copy.ts";
+import { changeWords, formatPrice } from "../../lib/format.ts";
 import type { MapData, MapPoint } from "../../lib/mapdata.ts";
 import { regionLabel } from "../../lib/og.ts";
 import type { SiteData } from "../../lib/site.ts";
 import { formatCpg } from "../../lib/tax.ts";
 import type { Cfg, PriceRow } from "../../scripts/map.ts";
-import { CHAINS, SOURCES } from "./chains.ts";
+import { CHAINS } from "./chains.ts";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -24,7 +23,10 @@ const ll = (n: number) => String(Math.round(n * 10000) / 10000);
  * One row per point, written by hand rather than by Astro so the 2,700 rows
  * stay small: the cell end tags are left out, which HTML allows. Name, type
  * and state are the cells; everything else is a data attribute the script
- * reads (see src/scripts/map.ts).
+ * reads (see src/scripts/map.ts). The name says the signed freight highway
+ * the place is on, when one is within NEAR_ROAD_KM, so three Pilots in one
+ * state read apart: "Pilot, near I 70". The popup, the list and the trip's
+ * rows all print it.
  */
 export function rowsHtml(points: MapPoint[]): string {
   let h = "";
@@ -33,8 +35,8 @@ export function rowsHtml(points: MapPoint[]): string {
     if (p.sources !== "o") h += ` data-s="${p.sources}"`;
     if (p.dir) h += ` data-d="${p.dir[0]}"`;
     if (p.kind === "v" && p.chain) h += ` data-c="${p.chain}"`;
-    if (p.highway) h += ` data-h="Nearest freight highway: ${esc(p.highway)}"`;
-    h += `><td>${esc(p.name)}<td>${esc(p.type)}<td>${p.state ?? ""}`;
+    const road = p.highway ? `, near ${p.highway.split(",")[0]}` : "";
+    h += `><td>${esc(p.name + road)}<td>${esc(p.type)}<td>${p.state ?? ""}`;
   }
   return h;
 }
@@ -61,7 +63,8 @@ export function priceRows(site: SiteData): PriceRow[] {
       s.code,
       s.name,
       m ? formatPrice(m.price) : null,
-      m && m.change !== null ? formatMove(m.change, pctOf(m)) : null,
+      // the move in words, "down 15.4¢", so the trip's prices never rest on a minus sign
+      m && m.change !== null ? changeWords(m.change).toLowerCase() : null,
       m ? moveClass(m.change, "weekly") : "muted",
       s.eia_series ? regionLabel(s, site) : "EIA doesn't survey this state",
       tax,
@@ -111,9 +114,8 @@ export function mapConfig(site: SiteData, data: MapData): Cfg {
   const period = site.latest.eia?.period;
   return {
     c,
-    src: SOURCES,
     px: priceRows(site),
-    wk: period ? `EIA week of ${formatDate(period)}` : "No EIA week",
+    wk: period ? `Week of ${formatDate(period)} prices` : "No weekly prices",
     mb: MAX_BOUNDS,
     l48: LOWER48,
     ly: (["states", "roads", "places"] as const).filter((k) => data.present[k]),

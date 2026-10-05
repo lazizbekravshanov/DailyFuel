@@ -31,7 +31,7 @@ const description = aaaMode
 ---
 <Base title="Where the numbers come from | DailyFuel" description={description} skipLabel="Skip to main content">
   <article class="prose">
-    <p class="back"><a href="/">‹ All states</a></p>
+    <p class="back"><a href="/#states">All states</a></p>
     <h1 class="nmbig">Where the numbers come from</h1>
 
     <section aria-labelledby="weekly">
@@ -92,13 +92,12 @@ const description = aaaMode
       <section aria-labelledby="tax">
         <div class="sh"><h2 id="tax">Tax on every gallon</h2><p class="meta">FHWA table MF-121T, {tax.reporting_period}</p></div>
         <p>
-          Every state taxes diesel, and the federal government adds {spokenCpg(tax.federal_cpg)} on top. Each state page
-          shows the tax on a gallon there and where the state ranks.
+          Every state taxes diesel, and there is also a federal tax of {spokenCpg(tax.federal_cpg)}. Both are already in the
+          pump price. Each state page shows the tax on a gallon there and where the state ranks.
         </p>
         <p>
-          Keep the tax apart from the prices here. It comes from a different source and covers a different time,
-          {aaaMode ? "" : " and most prices here are regional averages,"} so taking the tax off a price won't tell you
-          what diesel costs before tax.
+          Don't subtract the tax from a price here to get a price before tax. The tax table and the prices come from
+          different sources and dates{aaaMode ? "" : ", and most prices are regional averages"}.
         </p>
         <p>
           The rates come from the Federal Highway Administration, which collects them from the states once a year. This
@@ -140,8 +139,8 @@ const description = aaaMode
         </p>
       ) : (
         <p>
-          Tell us on <a href={`${REPO_URL}/issues/new`}>GitHub</a>. Say which page and what looks off, and we'll check it
-          against the source.
+          Tell us on <a href={`${REPO_URL}/issues/new`}>GitHub</a> (a free account is needed). Say which page and what looks
+          off, and we'll check it against the source.
         </p>
       )}
     </section>

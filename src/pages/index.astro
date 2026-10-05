@@ -1,25 +1,30 @@
 ---
-// The home page, in the paper terminal: the U.S. average and its line since
-// our records start, the your state strip, the REGIONS board and the ALL
-// STATES quote table. Every printed value comes from the data.
+// The home page, in the paper terminal. Your state first once one is saved,
+// its price the headline; then the U.S. average with its change in words, the
+// week, and the picker; then the prices by region, each with its states; then
+// every state in one sortable table. On a phone the U.S. chart and the full
+// table are one tap away, so the answers fit on the first two screens. Every
+// printed value comes from the data.
 import Base from "../layouts/Base.astro";
+import "../styles/home.css";
 import YourState from "../components/YourState.astro";
 import UsChart from "../components/home/UsChart.astro";
 import RegionsBoard from "../components/home/RegionsBoard.astro";
 import Quotes from "../components/home/Quotes.astro";
 import { spark, type Spark } from "../components/home/chart.ts";
-import { fromLine, homeMeta, homeTitle, recordLine } from "../components/home/home.ts";
+import { homeMeta, homeTitle } from "../components/home/home.ts";
 import { quotes } from "../components/home/quotes.ts";
 import { readout } from "../components/home/readout.ts";
 import { moveClass } from "../lib/bins.ts";
 import { missingNote, pctOf } from "../lib/copy.ts";
+import { peakSentence } from "../lib/doe.ts";
 import { formatDate, formatShortDate, todayInNewYork } from "../lib/dates.ts";
-import { formatMove, formatPrice } from "../lib/format.ts";
+import { changeTenths, changeWords, formatMove, formatPrice } from "../lib/format.ts";
 import { inlineCall } from "../lib/inline.ts";
-import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease } from "../lib/release.ts";
+import { formatShortWeekdayDate, LATE_TEXT, nextEiaRelease, nextUpdateText } from "../lib/release.ts";
 import { homeShareText } from "../lib/share.ts";
 import { getSite, weeklySeries } from "../lib/site.ts";
-import { peakKind } from "../lib/stats.ts";
+import { changeOver, peakKind } from "../lib/stats.ts";
 
 const site = getSite();
 const { national, latest } = site;
@@ -27,34 +32,37 @@ const daily = national.cadence === "daily";
 const aaaMode = site.mode === "aaa+eia";
 const nm = national.move;
 
-// The headline: which day it is for, the price, and its change in the ink of
-// its direction (muted when the bins call it about the same).
-const dateLine = daily ? `as of ${formatDate(national.date)}` : `week of ${formatDate(national.date)}`;
+// The headline: the price, and its change in the ink of its direction (muted
+// when the bins call it about the same). On a phone the words line says it.
 const move = nm && nm.change !== null ? formatMove(nm.change, pctOf(nm)) : null;
 const ink = nm ? moveClass(nm.change, national.cadence) : "muted";
 
-// The sentence under it: where the price came from, and how high it is.
-const from = nm && nm.change !== null && nm.prev !== null
-  ? fromLine(nm.change, nm.prev, daily ? "yesterday" : national.prevDate ? `the week of ${formatShortDate(national.prevDate)}` : "the week before")
-  : null;
+// The change in words, its ink only on the change: "Down 14.7¢ from $6.529 last week."
+const since = daily ? "yesterday" : "last week";
+const t = nm && nm.change !== null ? changeTenths(nm.change) : null;
+const fromText = !nm || t === null ? "" : t === 0 || nm.prev === null ? `from ${since}.` : `from ${formatPrice(nm.prev)} ${since}.`;
 const usSeries = weeklySeries(site.weekly, "NUS");
-// Said only while the headline is EIA's weekly number, which is what the records are.
-const record = daily ? null : recordLine(peakKind(usSeries), site.regions.map((r) => peakKind(r.history)));
+// How high the U.S. price is, said only while the headline is EIA's weekly
+// number, which is what the records are. The regions' records go with the board.
+const usPeak = daily ? null : peakSentence(peakKind(usSeries), "U.S.");
 
-// When the next numbers land. EIA's own next release date, checked against
-// the holiday schedule; the stale script turns it into a late notice in the
-// browser once that day has passed with nothing new.
+// Which week, and when the next numbers land. EIA's own next release date,
+// checked against the holiday schedule; the stale script turns it into the
+// late notice in the browser once that day has passed with nothing new.
 const release = latest.eia
   ? nextEiaRelease(latest.eia.period, latest.eia.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork())
   : null;
-const nextEia = release
-  ? aaaMode
-    ? `EIA's next weekly numbers land ${formatShortWeekdayDate(release.date)}.`
-    : `EIA posts next week's prices on ${formatShortWeekdayDate(release.date)}.`
-  : aaaMode
-    ? null
-    : "EIA posts new prices every Tuesday.";
+const week = daily ? `Prices as of ${formatDate(national.date)}.` : `Prices for the week of ${formatDate(national.date)}.`;
+const nextText = release ? (aaaMode ? `EIA's next weekly numbers land ${formatShortWeekdayDate(release.date)}.` : nextUpdateText(release.date)) : null;
 const late = aaaMode ? "The next weekly EIA update is running late." : LATE_TEXT;
+
+// Then, in two prices, for a phone that has the chart folded away.
+const fourAgo = usSeries.length ? changeOver(usSeries, 28, 0) : null;
+const yearAgo = usSeries.length ? changeOver(usSeries, 364, 0) : null;
+const then = [fourAgo && `4 weeks ago ${formatPrice(fourAgo.from.value)}.`, yearAgo && `A year ago ${formatPrice(yearAgo.from.value)}.`].filter(Boolean).join(" ");
+
+// The picker, A to Z by name.
+const picks = [...site.states].sort((a, b) => a.name.localeCompare(b.name));
 
 // The 52 week lines the two tables share, drawn once into a sprite.
 const sparks = new Map<string, Spark>();
@@ -82,33 +90,56 @@ const readoutScript = inlineCall(readout, "document");
 const quotesScript = inlineCall(quotes, "document");
 ---
 <Base title={title} description={description} share={share}>
+  <YourState>
+    {week}{nextText && <> <span data-next-release={release?.date} data-late={late}>{release?.late ? late : nextText}</span></>}
+  </YourState>
+
   <section class="hero" aria-label="U.S. average">
     <div class="lead">
-      <h1 class="lbl">U.S. diesel average <span class="dot">·</span> {dateLine}</h1>
+      <h1 class="lbl">U.S. diesel average</h1>
       {nm ? (
         <p class="big"><span>{formatPrice(nm.price)}</span>{move && <span class:list={["d", ink]}>{move}</span>}</p>
       ) : (
         <p class="big"><span>No national price</span></p>
       )}
-      {(from || record) && <p class="note">{from}{from && record ? " " : ""}{record}</p>}
+      {nm && nm.change !== null && <p class="chw"><b class={ink}>{changeWords(nm.change)}</b> {fromText}</p>}
+      {usPeak && <p class="note">{usPeak}</p>}
       {aaaMode && site.eiaUs && latest.eia && (
         <p class="note fine">EIA weekly average: {formatPrice(site.eiaUs.price)} for the week of {formatShortDate(latest.eia.period)}.</p>
       )}
-      <p class="note fine">
-        {aaaMode && "Daily prices update every morning."}{aaaMode && nextEia && " "}
-        {nextEia && <span data-next-release={release?.date} data-late={late}>{release?.late ? late : nextEia}</span>}
+      <p class="wkl">
+        {week}{nextText && <> <span data-next-release={release?.date} data-late={late}>{release?.late ? late : nextText}</span></>}
       </p>
+      {/* With JS on, the page's script saves the pick and opens its page; with
+          JS off the form goes to /go, which vercel.json sends to the state's page.
+          The id keeps every old /#find-your-state link landing here. */}
+      <form class="go" action="/go" id="find-your-state">
+        <label class="lbl" for="go-s"><span class="g1">Your state</span><span class="g2">Change your state</span></label>
+        <div class="go-r">
+          <select id="go-s" name="s" required>
+            <option value="">Pick your state</option>
+            {picks.map((s) => <option value={s.slug}>{s.name}</option>)}
+          </select>
+          <button class="btn">Show price</button>
+        </div>
+      </form>
+      {then && <p class="then">{then}</p>}
     </div>
     {site.weekly && (
-      <UsChart series={usSeries} name={aaaMode ? "EIA U.S. average" : "U.S. average"} spoken={aaaMode ? "EIA weekly U.S. diesel average" : "U.S. weekly diesel average"} id="c-us" />
+      <>
+        <input type="checkbox" id="usc" class="sr-only" />
+        <label for="usc" class="btn wide usc-l"><span class="o1">Show the U.S. price chart</span><span class="o2">Hide the U.S. price chart</span></label>
+        <UsChart series={usSeries} name={aaaMode ? "EIA U.S. average" : "U.S. average"} spoken={aaaMode ? "EIA weekly U.S. diesel average" : "U.S. weekly diesel average"} id="c-us" />
+      </>
     )}
   </section>
-
-  <YourState />
 
   {site.weekly && <RegionsBoard site={site} sparks={sparks} />}
 
   <Quotes site={site} sparks={sparks} />
+
+  {/* far from Change your state, so a gloved thumb can't hit it by mistake */}
+  <p class="fg fine">This phone remembers your state. <button type="button" class="btn" data-ys-forget>Forget my state</button></p>
 
   {sparks.size > 0 && (
     <svg class="sprite" aria-hidden="true" focusable="false">
@@ -130,12 +161,3 @@ const quotesScript = inlineCall(quotes, "document");
     <script is:inline set:html={quotesScript}></script>
   </Fragment>
 </Base>
-
-<style is:global>
-  .hero .lead {
-    min-width: 0;
-  }
-  .hero .lead .note.fine {
-    margin-top: 12px;
-  }
-</style>

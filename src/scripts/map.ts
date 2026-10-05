@@ -24,7 +24,6 @@ export type PriceRow = [string, string, string | null, string | null, string, st
 
 export interface Cfg {
   c: Record<string, ChainCfg>;
-  src: Record<string, string>;
   px: PriceRow[];
   /** "EIA week of Sep 14, 2026", for the route strip's meta. */
   wk: string;
@@ -51,8 +50,6 @@ export interface Pt {
   s: string;
   d: string;
   c: string;
-  /** a weigh station's line on its nearest freight highway: "Nearest freight highway: I 80, interstate" */
-  h: string;
   on: boolean;
   /** the Leaflet marker, once there is a map */
   m?: any;
@@ -79,7 +76,7 @@ export function readRow(tr: HTMLTableRowElement, i: number): Pt {
     k: f === "w" ? "w" : f === "v" ? "v" : "s",
     lat: +ll[0], lon: +ll[1],
     n: cells[0].textContent || "", t: cells[1].textContent || "", st: cells[2].textContent || "",
-    s: a("s") || "o", d: a("d"), c: a("c") || (f === "w" || f === "v" ? "" : f), h: a("h"),
+    s: a("s") || "o", d: a("d"), c: a("c") || (f === "w" || f === "v" ? "" : f),
     on: true,
   };
 }
@@ -128,15 +125,9 @@ type P = { label: string; lat: number; lon: number };
  * ask which. Null when nothing fits.
  */
 export function findPlace(q: string, pl: Places | null): P | string | null {
-  const t = q.trim().toLowerCase().replace(/\s+/g, " ");
-  if (!t) return null;
-  // the page prints a real minus sign; a typed hyphen works too
-  const m = /^([-−]?\d{1,2}(?:\.\d+)?)\s*[, ]\s*([-−]?\d{1,3}(?:\.\d+)?)$/.exec(t);
-  if (m) {
-    const lat = +m[1].replace("−", "-"), lon = +m[2].replace("−", "-");
-    return lat > 15 && lat < 72 && lon > -190 && lon < -60 ? { label: llText(lat, lon), lat, lon } : null;
-  }
-  if (!pl) return null;
+  // "chicago il" reads as "chicago, il", the way the places list writes it
+  const t = q.trim().toLowerCase().replace(/\s+/g, " ").replace(/,? ([a-z]{2})$/, ", $1");
+  if (!t || !pl) return null;
   const L = pl.label.map((s) => s.toLowerCase());
   let i = L.indexOf(t);
   if (i < 0) {
@@ -221,50 +212,62 @@ export const milesText = (r: Run, last: number): string =>
 // no form holds the list, the route strip's result or a popup, so a button there is a plain button
 const lk = (p: Pt) => `<button class="lk" data-i="${p.i}">${esc(p.n)}</button>`;
 
-/** The route strip's result: a summary line, then one boxed strip per state with its stops in order. */
+/**
+ * The trip's result: the line, the price in each state it crosses (once,
+ * where the line first enters it, however often it crosses back), the
+ * lowest of them, then each stretch's places, folded, with its miles and tax.
+ * Many states share one regional average, so the lowest is named only when
+ * some state on the line is above it, and a tie names every state in it.
+ */
 export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, withButtons: boolean): string {
-  const byCode: Record<string, PriceRow> = {};
+  const byCode: Record<string, PriceRow> = {},
+    seen: PriceRow[] = [],
+    num = (r: PriceRow) => +r[2]!.slice(1);
   for (const r of cfg.px) byCode[r[0]] = r;
-  const states = res.runs.filter((r) => r.code).length;
-  let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b> <span class="dot">·</span> ${fmt(Math.round(res.miles))} miles in a straight line <span class="dot">·</span> ${states} ${states === 1 ? "state" : "states"} <span class="dot">·</span> ${fmt(res.hits)} ${res.hits === 1 ? "place" : "places"} within ${BAND_MI} miles</p>`;
+  let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles in a straight line</p>`,
+    rest = "";
   if (res.outside) h += `<p class="fine">Part of the line runs over water or outside the 50 states.</p>`;
+  h += `<ul class="rp">`;
   for (const r of res.runs) {
-    const row = r.code ? byCode[r.code] : null;
-    h += `<div class="rs"><p class="strip">`;
-    h += row
-      ? `<span class="sym">${row[0]}</span> <span class="nm">${esc(row[1])}</span> ` +
-        (row[2] ? `<span class="px">${row[2]}</span> ${row[3] ? `<span class="${row[4]}">${row[3]}</span> ` : ""}` : `<span class="px">No EIA price</span> `) +
-        `<span class="plate">${esc(row[5])}</span> <span>State tax ${row[6]}</span> `
-      : `<span class="nm">State not known</span> `;
-    h += `<span class="muted">${milesText(r, res.miles)}</span></p>`;
-    if (r.hits.length) {
-      h += `<div class="scroll"><table><thead><tr><th class="num">Mi<th>Name<th>Type<th>St<tbody>`;
-      for (const x of r.hits) {
-        h += `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p) : esc(x.p.n)}<td>${esc(x.p.t)}<td>${x.p.st}`;
-      }
-      h += `</table></div>`;
-    } else h += `<p class="fine">Nothing on the map in this stretch of the band.</p>`;
-    h += `</div>`;
+    const row = r.code ? byCode[r.code] : null,
+      k = r.hits.length;
+    if (row && !seen.includes(row)) {
+      seen.push(row);
+      h += `<li><b>${esc(row[1])}</b> ${row[2] ? `${row[2]} <span class="${row[4]}">${row[3] || ""}</span>` : "No weekly price"}`;
+    }
+    rest += `<details class="rs"><summary>${row ? esc(row[1]) : "State not known"}: ${k} ${k == 1 ? "place" : "places"}, ${milesText(r, res.miles).toLowerCase()}${row ? `, state tax ${row[6]}` : ""}</summary>`;
+    if (k) {
+      rest += `<table><thead><tr><th class="num">Mile<th>Name<tbody>`;
+      for (const x of r.hits) rest += `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p) : esc(x.p.n)}`;
+      rest += `</table>`;
+    }
+    rest += `</details>`;
   }
-  return h;
+  h += `</ul>`;
+  // "$10.100" sorts before "$9.900" as text, so the numbers are compared
+  const priced = seen.filter((r) => r[2]),
+    lo = Math.min(...priced.map(num)),
+    low = priced.filter((r) => num(r) == lo);
+  if (low.length < priced.length)
+    h += `<p>Lowest weekly average on this line: <b>${esc(low.map((r) => r[1]).join(", ").replace(/, ([^,]*)$/, " and $1"))}, ${low[0][2]}</b></p>`;
+  return h + rest;
 }
 
-/** A point's popup: its name, what it is and where, the direction for a scale, the chain's own page, and the source. */
+/** A point's popup: its name, what it is and where, the road it is near, a scale's direction, and the chain's own website. */
 export function popupHtml(p: Pt, cfg: Cfg): string {
   const ch = p.c ? cfg.c[p.c] : null,
-    src = p.s.split("").map((k) => cfg.src[k]).filter(Boolean),
     what = p.k === "s" ? `${p.t} truck stop` : p.t;
-  let h = `<div class="pp-in" tabindex="-1"><p class="pp-n"><b>${esc(p.n)}</b><p>${esc(what)}${p.st ? ` <span class="dot">·</span> ${p.st}` : ""}`;
-  if (p.k === "w") h += `<p>${p.d ? `Direction: ${DIRS[p.d]}bound` : "Direction not recorded"}`;
-  if (p.h) h += `<p>${esc(p.h)}`;
-  if (ch) h += `<p><a href="${esc(ch[2])}">${esc(ch[0])} locator</a> for today's price`;
-  h += `<p class="pp-s">${src.length > 1 ? "Sources" : "Source"}: ${esc(src.join("; "))}</p><button class="btn" data-close>Close</button></div>`;
-  return h;
+  let h = `<div class="pp-in" tabindex="-1"><p class="pp-n"><b>${esc(p.n)}</b><p>${esc(what)}${p.st ? ` in ${p.st}` : ""}`;
+  if (p.d) h += `<p>For ${DIRS[p.d]}bound traffic`;
+  const r = p.k == "s" && cfg.px.find((x) => x[0] == p.st);
+  if (r && r[2]) h += `<p><a href="/state/${p.st.toLowerCase()}/">${esc(r[1])}'s region averages ${r[2]}</a> this week, not this stop's price.`;
+  if (ch) h += `<p><a class="btn" href="${esc(ch[2])}">${esc(ch[0])} website</a>`;
+  return h + `<p><button class="btn" data-close>Close</button></div>`;
 }
 
-/** Marker radius by kind and zoom: bigger with a letter from zoom 7. */
+/** Marker radius by kind and zoom: bigger with a letter from zoom 6. */
 export function radius(k: string, z: number): number {
-  const i = z >= 7 ? 2 : z >= 5 ? 1 : 0;
+  const i = z >= 6 ? 2 : z >= 5 ? 1 : 0;
   return (k === "s" ? [4, 5, 8] : k === "w" ? [3.5, 4.5, 6] : [2.5, 3.5, 4.5])[i];
 }
 
@@ -292,6 +295,8 @@ export function init(doc: Document, win: any): void {
     root = doc.documentElement;
   let map: any = null,
     shapes: Shape[] = [],
+    // the driver has moved the map (or a find, Near me or a trip has), so the opening view stays out of the way
+    moved = 0,
     last: { a: [number, number]; b: [number, number]; al: string; bl: string } | null = null,
     back: HTMLElement | null = null,
     hl: [string, number, number, number][] | null = null;
@@ -317,23 +322,6 @@ export function init(doc: Document, win: any): void {
     }
     if (count) count.textContent = `${fmt(n)} ${n === 1 ? "place" : "places"}${map ? " in view" : ""}`;
   };
-  const heads = Array.from(table.querySelectorAll("th[data-sort]"));
-  for (const th of heads) {
-    const b = doc.createElement("button");
-    b.type = "button";
-    b.className = "sortb";
-    b.textContent = th.textContent;
-    th.textContent = "";
-    th.appendChild(b);
-    b.addEventListener("click", () => {
-      const dir = th.getAttribute("aria-sort") === "ascending" ? -1 : 1;
-      for (const h of heads) h.removeAttribute("aria-sort");
-      th.setAttribute("aria-sort", dir === 1 ? "ascending" : "descending");
-      const frag = doc.createDocumentFragment();
-      for (const p of sortPts(pts, th.getAttribute("data-sort") as "n" | "t" | "st", dir)) frag.appendChild(p.tr as Node);
-      body.appendChild(frag);
-    });
-  }
 
   // ---- the legend's filters
   for (const cb of Array.from(doc.querySelectorAll<HTMLInputElement>("input[data-k]"))) {
@@ -372,10 +360,8 @@ export function init(doc: Document, win: any): void {
   const fs = form && form.querySelector("fieldset");
   if (fs) fs.disabled = false;
   const inA = form && (form.elements.namedItem("a") as HTMLInputElement),
-    inB = form && (form.elements.namedItem("b") as HTMLInputElement),
-    pick = form && (form.querySelector("[data-pick]") as HTMLButtonElement);
-  let step = 0,
-    drawn: any[] = [];
+    inB = form && (form.elements.namedItem("b") as HTMLInputElement);
+  let drawn: any[] = [];
   // a new line fits the map to its band; a rerun (a filter, the outlines arriving) leaves the view alone
   const run = (a: [number, number], b: [number, number], al: string, bl: string, refit?: boolean) => {
     last = { a, b, al, bl };
@@ -402,16 +388,17 @@ export function init(doc: Document, win: any): void {
         miss = !(a as P)?.lat ? inA : !(b as P)?.lat ? inB : null;
       if (miss) {
         const v = miss.value.trim(), f = miss === inA ? a : b;
-        say(f
-          ? `Which ${v}? Add the state, like ${f}.`
-          : v
-          ? `${v} isn't on the list. Pick one from it, type lat, lon, or use the map.`
-          : `Type a place for ${miss === inA ? "A" : "B"}, or use the map.`);
+        say(f ? `Which ${v}? Add the state, like ${f}.` : v ? `We can't find ${v}. Try a town and state, like Columbus, OH.` : `Type a town for ${miss === inA ? "From" : "To"}.`);
         return miss.focus();
       }
       const p = a as P, q = b as P;
-      if (p.lat === q.lat && p.lon === q.lon) return say("A and B are the same place.");
+      if (p.lat === q.lat && p.lon === q.lon) return say("From and To are the same place.");
       run([p.lat, p.lon], [q.lat, q.lon], p.label, q.label, true);
+      // the trip stays in the address, so a reload or a shared link brings it back
+      history.replaceState(null, "", "#" + encodeURIComponent(p.label + "|" + q.label));
+      // the keyboard goes away, and the map with its line comes into view over the prices
+      (doc.activeElement as HTMLElement).blur();
+      box.scrollIntoView();
     });
   if (form && inA && inB) {
     inA.addEventListener("focus", loadPlaces);
@@ -420,15 +407,6 @@ export function init(doc: Document, win: any): void {
       e.preventDefault();
       go();
     });
-    if (pick) {
-      pick.hidden = !L;
-      pick.addEventListener("click", () => {
-        step = step ? 0 : 1;
-        pick.setAttribute("aria-pressed", String(!!step));
-        box.classList.toggle("pick", !!step);
-        say(step ? "Tap the map for A." : "");
-      });
-    }
   }
 
   if (!L || !box) return list();
@@ -449,6 +427,8 @@ export function init(doc: Document, win: any): void {
     maxBoundsViscosity: 1,
     scrollWheelZoom: false,
     zoomControl: false,
+    // on a phone one finger scrolls the page, two move and zoom the map
+    dragging: !L.Browser.mobile,
   });
   // bottom right, where a popup, which opens above its marker, never lands on it
   L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -461,6 +441,7 @@ export function init(doc: Document, win: any): void {
   };
   map.fitBounds(cfg.l48, { animate: false });
   fit();
+  map.on("movestart", () => (moved = 1));
   L.tileLayer(cfg.tl).addTo(map);
   // Leaflet follows the window's size itself; the floor moves with it, so the lower 48 always fits
   map.on("resize", fit);
@@ -523,36 +504,57 @@ export function init(doc: Document, win: any): void {
   }
   grp.addTo(map);
 
-  // over the base map: the freight roads, on SVG so the page's CSS tokens colour them in both themes, and the
-  // outlines, which are not drawn (the base map has the borders) but tell the route strip which state it is in
-  Promise.all([get("states"), get("roads")]).then(([st, rd]) => {
-    const base: any[] = [];
-    if (rd) {
-      const I = decodeLines(rd.i, rd.p), O = decodeLines(rd.o, rd.p);
-      // A signed route is drawn with the rest, and named on hover or tap by an
-      // unseen twin on the markers' canvas, which is on top and takes every
-      // pointer: the twin sits under the markers, and the canvas's tolerance
-      // makes a thin road easy to tap.
-      for (const [t, w, l] of rd.r) {
-        const ll = decodeLines(l, rd.p);
-        (w ? I : O).push(...ll);
-        L.polyline(ll, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }).addTo(map).bringToBack();
-      }
-      base.push(L.polyline(O, { className: "ro", smoothFactor: 1.5 }));
-      base.push(L.polyline(I, { className: "ri", smoothFactor: 1.5 }));
-      // the labels wait for the map to reach zoom 6 (see list); data-z then shows interstates (h1) from 6, US routes (h2) from 7 and the rest from 8
-      hl = rd.l;
-      list();
-    }
-    if (st) {
-      shapes = decodeStates(st);
-    }
-    // behind whatever the route strip has drawn
-    for (const l of base.reverse()) {
-      l.addTo(map);
-      l.bringToBack();
-    }
+  // A state's outline box: for #oh, the saved state, and a state typed in
+  // the find box. It jumps rather than glides: Leaflet drops a new view asked
+  // for while a zoom is still gliding, so a town found or a trip drawn just
+  // as the opening view lands would be lost.
+  const toState = (c: string) => {
+    const x = shapes.find((y) => y.code == c.toUpperCase());
+    if (x) map.fitBounds([[x.bbox[1], x.bbox[0]], [x.bbox[3], x.bbox[2]]], { animate: false });
+    return x;
+  };
+  // The outlines, which are not drawn (the base map has the borders) but
+  // tell the find box and the route strip which state is which. They come on
+  // their own, so a state typed in the find box needn't wait for the roads.
+  const stP = get("states").then((st) => {
+    if (st) shapes = decodeStates(st);
+    // the address: a trip "A|B", a state "#oh", or one of the page's own anchors (#credits), which is neither
+    let c = "";
+    try {
+      c = decodeURIComponent(win.location.hash.slice(1));
+    } catch (e) {}
+    const ab = c.split("|");
+    if (ab[1] && inA) {
+      inA.value = ab[0];
+      inB.value = ab[1];
+      go();
+    } else if (!moved)
+      try {
+        // the state in the address, else the saved one
+        toState(c) || toState(win.localStorage.getItem("dailyfuel:state"));
+      } catch (e) {}
+    // a trip run before the outlines came knew no states
     if (last) run(last.a, last.b, last.al, last.bl);
+  });
+  // over the base map, the freight roads, on SVG so the page's CSS tokens colour them in both themes
+  get("roads").then((rd) => {
+    if (!rd) return;
+    const I = decodeLines(rd.i, rd.p), O = decodeLines(rd.o, rd.p);
+    // A signed route is drawn with the rest, and named on hover or tap by an
+    // unseen twin on the markers' canvas, which is on top and takes every
+    // pointer: the twin sits under the markers, and the canvas's tolerance
+    // makes a thin road easy to tap.
+    for (const [t, w, l] of rd.r) {
+      const ll = decodeLines(l, rd.p);
+      (w ? I : O).push(...ll);
+      L.polyline(ll, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }).addTo(map).bringToBack();
+    }
+    // behind whatever the route strip has drawn, the other roads under the interstates
+    L.polyline(I, { className: "ri", smoothFactor: 1.5 }).addTo(map).bringToBack();
+    L.polyline(O, { className: "ro", smoothFactor: 1.5 }).addTo(map).bringToBack();
+    // the labels wait for the map to reach zoom 6 (see list); data-z then shows interstates (h1) from 6, US routes (h2) from 7 and the rest from 8
+    hl = rd.l;
+    list();
   });
 
   // ---- popups
@@ -589,8 +591,23 @@ export function init(doc: Document, win: any): void {
   box.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && (e.target as Element).closest(".pp")) closeBack();
   });
+  // On a phone, far out, a tap zooms in on the spot. Close in it opens the
+  // dot nearest the finger, not just the one drawn on top. Leaflet gives a
+  // small marker's own spot as the event's point, so this measures from the
+  // pointer. The dot hit, which is the bigger, lettered one when two overlap,
+  // keeps a 1px lead: two dots within a pixel of each other can't be told
+  // apart by a tap, so the one that shows wins.
   grp.on("click", (e: any) => {
-    if (!step) show(e.layer.p, null);
+    const z = map.getZoom(),
+      at = map.mouseEventToLayerPoint(e.originalEvent),
+      far = (p: Pt) => (p.on ? p.m._point.distanceTo(at) : 1e9);
+    if (L.Browser.mobile && z < 6) return map.setView(e.latlng, z + 2);
+    let best: Pt = e.layer.p, bd = far(best) - 1;
+    for (const p of pts) {
+      const d = far(p);
+      if (d < bd) (bd = d), (best = p);
+    }
+    show(best, null);
   });
   const focusPt = (e: Event) => {
     const b = (e.target as Element).closest(".lk") as HTMLElement | null;
@@ -600,36 +617,45 @@ export function init(doc: Document, win: any): void {
     map.setView([p.lat, p.lon], Math.max(map.getZoom(), 8), { animate: false });
     show(p, b);
   };
-  body.addEventListener("click", focusPt);
   out.addEventListener("click", focusPt);
-  // each name in the list opens its marker; the buttons are made when the list is first opened
-  doc.getElementById("ls-d")?.addEventListener(
-    "toggle",
-    () => {
-      for (const p of pts) {
-        const td = p.tr && p.tr.children[0];
-        if (td) td.innerHTML = lk(p);
-      }
-    },
-    { once: true },
-  );
 
-  // ---- the map as the route strip's picker
-  map.on("click", (e: any) => {
-    if (!step || !inA || !inB || !pick) return;
-    const label = llText(e.latlng.lat, e.latlng.lng);
-    if (step === 1) {
-      inA.value = label;
-      step = 2;
-      say("Now tap the map for B.");
-    } else {
-      inB.value = label;
-      step = 0;
-      pick.setAttribute("aria-pressed", "false");
-      box.classList.remove("pick");
-      go();
-    }
-  });
+  // ---- the find row: a state, a town, or Near me
+  const fd = doc.getElementById("fd") as HTMLFormElement | null,
+    fst = doc.getElementById("fd-st") as HTMLElement;
+  if (fd) {
+    const fq = fd.elements.namedItem("q") as HTMLInputElement,
+      tell = (t: string) => (fst.textContent = t);
+    (fd.querySelector("fieldset") as HTMLFieldSetElement).disabled = false;
+    fq.addEventListener("focus", loadPlaces);
+    fd.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const v = fq.value.trim().toLowerCase(),
+        r = cfg.px.find((x) => x[0].toLowerCase() == v || x[1].toLowerCase() == v);
+      if (!v) return tell("Type a town or state.");
+      // what was asked for wins over the opening view, even if the outlines are still on their way
+      moved = 1;
+      tell("");
+      Promise.all([stP, loadPlaces()]).then(() => {
+        const p = findPlace(fq.value, places) as any;
+        if (!(r && toState(r[0]))) {
+          if (!p || !p.lat) return tell(p ? `Which ${fq.value}? Add the state, like ${p}.` : `We can't find ${fq.value}. Try a town and state, like Columbus, OH.`);
+          map.setView([p.lat, p.lon], 9);
+        }
+        fq.blur();
+        box.scrollIntoView();
+      });
+    });
+    (fd.querySelector("[data-near]") as HTMLElement).onclick = () => {
+      tell("");
+      map.locate({ setView: true, maxZoom: 9 });
+    };
+    // the map comes into view only once it is there; a refusal is said by the find box, kept in view
+    map.on("locationfound", () => box.scrollIntoView());
+    map.on("locationerror", () => {
+      tell("Your phone did not share where you are. Type a town instead.");
+      fst.scrollIntoView({ block: "nearest" });
+    });
+  }
 
   // ---- the theme: the canvas has no CSS, so a flip repaints the markers
   const repaint = () => {

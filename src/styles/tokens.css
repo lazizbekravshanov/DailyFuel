@@ -9,8 +9,8 @@
   system by default and can be forced with data-theme on <html>, which the
   DARK button sets and remembers per phone (src/scripts/theme.ts).
 
-  Contrast on white: --ink2 7.0:1, --up 6.5:1, --down 6.6:1, --edge 3.1:1 for
-  borders. On black: --ink2 8.4:1, --up 7.5:1, --down 9.4:1, --edge 3.7:1.
+  Contrast on white: --ink2 10.4:1, --up 6.9:1, --down 7.3:1, --edge 3.2:1 for
+  borders. On black: --ink2 11.8:1, --up 7.8:1, --down 9.3:1, --edge 3.9:1.
 */
 
 :root {
@@ -18,7 +18,7 @@
 
   --bg: #fff;
   --ink: #111;
-  --ink2: #595959;
+  --ink2: #404040;
   /* table lines, chart grid, the faint rule under a row */
   --hair: #d6d6d6;
   /* borders on controls and boxes, 3:1 on the page */
@@ -47,6 +47,8 @@
   --fs-name: 20px;
   /* the headline price */
   --fs-big: 46px;
+  /* the change in words under a headline price: "Down 15.4¢ from $6.680 last week." */
+  --fs-chg: 19px;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -60,10 +62,30 @@
   --gutter: 16px;
 }
 
+/* Phones: one step bigger (13, 14, 15, 16, 20 and 56px at the default
+   size), in rem so the phone's own text size reaches it, and capped by the
+   screen's width, so at the largest settings text grows about a third and
+   stops there: the price is never cut off and the page never scrolls
+   sideways. Pinch zoom still works past that. */
 @media (max-width: 479px) {
   :root {
-    --fs-big: 36px;
-    --fs-name: 16px;
+    --fs-xs: min(0.8125rem, 3.8vw);
+    --fs-s: min(0.875rem, 4.4vw);
+    --fs-t: min(0.9375rem, 4.6vw);
+    --fs-b: min(1rem, 5.4vw);
+    --fs-stat: min(1.25rem, 6vw);
+    --fs-name: min(1.25rem, 6vw);
+    --fs-big: min(3.5rem, 17vw);
+    --fs-chg: min(1.25rem, 6vw);
+  }
+}
+
+/* On an iPhone the root size follows Settings, Display, Text Size. */
+@supports (font: -apple-system-body) {
+  @media (max-width: 479px) {
+    html {
+      font: -apple-system-body;
+    }
   }
 }
 
@@ -72,7 +94,7 @@
     color-scheme: dark;
     --bg: #000;
     --ink: #ededed;
-    --ink2: #a1a1a1;
+    --ink2: #c2c2c2;
     --hair: #333;
     --edge: #6a6a6a;
     --rule: #ededed;
@@ -86,13 +108,31 @@
   color-scheme: dark;
   --bg: #000;
   --ink: #ededed;
-  --ink2: #a1a1a1;
+  --ink2: #c2c2c2;
   --hair: #333;
   --edge: #6a6a6a;
   --rule: #ededed;
   --mark: #1a1a1a;
   --up: #ff7070;
   --down: #7fadff;
+}
+
+/* Increase Contrast, the phone setting made for sunlight: grey text and edges go to full ink */
+@media (prefers-contrast: more) {
+  :root:root {
+    --ink2: var(--ink);
+    --edge: var(--ink);
+    --hair: #767676;
+  }
+  :root:root[data-theme="dark"] {
+    --hair: #8a8a8a;
+  }
+}
+
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root:root:not([data-theme="light"]) {
+    --hair: #8a8a8a;
+  }
 }
 
 @media print {

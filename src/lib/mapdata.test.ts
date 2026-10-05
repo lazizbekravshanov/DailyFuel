@@ -3,7 +3,7 @@
 // names, and the compact files the page ships. Each case builds its own
 // data folder in the system temp dir from the committed data/map files.
 
-import { copyFileSync, mkdtempSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -136,15 +136,36 @@ describe("loading the map data", () => {
     expect(joliet?.state).toBe("IL");
     const service = d.points.filter((p) => p.kind === "v");
     expect(service.map((p) => [p.name, p.type, p.state, p.chain])).toEqual([
-      ["Love's shop", "Truck service", "IL", "loves"],
-      ["Speedco", "Truck service", "IL", null],
+      ["Love's shop", "Repair and lube", "IL", "loves"],
+      ["Speedco", "Repair and lube", "IL", null],
     ]);
+    // none of them is within 2 km of the fixture's roads, so none names one
+    expect(service.every((p) => p.highway === undefined)).toBe(true);
     expect(d.counts.v).toBe(2);
     // the two sides of one scale stay two markers
     const both = d.points.filter((p) => p.kind === "w" && p.lat === 41.1 && p.lon === -91.0);
     expect(both.map((p) => p.dir).sort()).toEqual(["eastbound", "westbound"]);
     expect(both.every((p) => p.sources === "f")).toBe(true);
     expect(d.points.find((p) => p.name === "Port of entry")?.state).toBe("IL");
+  });
+
+  it("names the signed highway beside a truck stop and a repair shop, as it does for a scale, and nothing far from one", () => {
+    const sites = (JSON.parse(readFileSync(join(DATA, "stations.json"), "utf8")) as { sites: { lat: number; lon: number }[] }).sites;
+    const stop = sites[0];
+    const e4 = (n: number) => Math.round(n * 1e4);
+    // an I 55 drawn east and west through the first truck stop, and a repair shop and a scale on it
+    const roads = { schema: "dailyfuel/map-roads/1", precision: 4, lines: [{ sign: "I55", code: "1", pts: [e4(stop.lon) - 200, e4(stop.lat), 400, 0] }] };
+    const shop = { lat: stop.lat, lon: stop.lon + 0.01, category: "speedco", direction: null, state: "IL", label: "Speedco" };
+    const scale = { lat: stop.lat, lon: stop.lon - 0.01, category: "weigh", direction: "EB", state: "IL", label: "Weigh station, eastbound" };
+    const far = { lat: stop.lat + 0.5, lon: stop.lon, category: "speedco", direction: null, state: "IL", label: "Speedco" };
+    const d = loadMapData(folder({ "roads_nhfn.json": roads, "fleet_points.json": { ...FLEET, points: [shop, scale, far] } }), NO_SCHEMAS);
+    const at = (kind: string, lat: number, lon: number) => d.points.filter((p) => p.kind === kind && p.lat === lat && p.lon === lon);
+    expect(at("s", stop.lat, stop.lon).map((p) => p.highway)).toContain("I 55, interstate");
+    expect(at("v", shop.lat, shop.lon).map((p) => [p.type, p.highway])).toEqual([["Repair and lube", "I 55, interstate"]]);
+    expect(d.points.filter((p) => p.kind === "w" && p.highway === "I 55, interstate").map((p) => p.dir)).toContain("eastbound");
+    expect(at("v", far.lat, far.lon).map((p) => p.highway)).toEqual([undefined]);
+    // a stop with no road near it carries no highway at all, not an empty one
+    expect(d.points.filter((p) => p.kind === "s" && Math.abs(p.lat - stop.lat) > 1).every((p) => !("highway" in p))).toBe(true);
   });
 
   it("stops the build on a bad file, and says which", () => {
