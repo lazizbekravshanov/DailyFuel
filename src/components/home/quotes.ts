@@ -17,7 +17,7 @@ export function quotes(doc: Document): void {
     attr = (el: Element, name: string) => el.getAttribute("data-" + name) || "",
     find = doc.getElementById("find") as HTMLInputElement | null,
     count = doc.getElementById("count"),
-    all = rows().length;
+    total = count && count.textContent;
 
   // the saved state's row, marked so it reads bold with a marker before its code
   const slot = doc.querySelector("[data-ys]"),
@@ -26,20 +26,15 @@ export function quotes(doc: Document): void {
   if (row) row.classList.add("mine");
 
   // Each head becomes a button. Sorting keeps aria-sort in step and says the
-  // order out loud on the count line. Rows with no value for the column go
-  // last either way.
+  // order in words on the count line; there is no sort mark, since the
+  // design has no arrows. Rows with no value for the column go last either way.
   const sort = (th: Element) => {
     const k = attr(th, "k"),
       num = attr(th, "num") === "1",
-      cur = th.getAttribute("aria-sort"),
-      // numbers open highest first, words A to Z; a second press flips it
-      dir = cur === "ascending" ? -1 : cur === "descending" ? 1 : num ? -1 : 1;
-    for (const h of heads) {
-      h.removeAttribute("aria-sort");
-      (h.querySelector(".ar") as Element).textContent = "";
-    }
+      // every column opens lowest first, or A to Z; a second press flips it
+      dir = th.getAttribute("aria-sort") === "ascending" ? -1 : 1;
+    for (const h of heads) h.removeAttribute("aria-sort");
     th.setAttribute("aria-sort", dir === 1 ? "ascending" : "descending");
-    (th.querySelector(".ar") as Element).textContent = dir === 1 ? "\u25b2" : "\u25bc";
     const sorted = rows().sort((a, b) => {
       const x = attr(a, k),
         y = attr(b, k);
@@ -47,17 +42,13 @@ export function quotes(doc: Document): void {
       return (num ? Number(x) - Number(y) : x.localeCompare(y)) * dir;
     });
     for (const r of sorted) body.appendChild(r);
-    if (count) count.textContent = all + " states, sorted by " + th.getAttribute("aria-label") + (num ? (dir === 1 ? ", lowest first" : ", highest first") : dir === 1 ? ", A to Z" : ", Z to A");
+    if (count) count.textContent = "Sorted by " + attr(th, "w") + (num ? (dir === 1 ? ", lowest first" : ", highest first") : dir === 1 ? ", A to Z" : ", Z to A");
   };
-  // the mark's slot (.ar) is in the head from the build, so it moves into the button
   for (const th of heads) {
-    const b = doc.createElement("button"),
-      ar = th.querySelector(".ar") as Element;
+    const b = doc.createElement("button");
     b.type = "button";
     b.className = "sortb";
     b.textContent = th.textContent;
-    ar.textContent = th.getAttribute("aria-sort") ? "\u25b2" : "";
-    b.appendChild(ar);
     th.textContent = "";
     th.appendChild(b);
     b.addEventListener("click", () => sort(th));
@@ -79,7 +70,7 @@ export function quotes(doc: Document): void {
       r.hidden = !ok;
       if (ok) shown += 1;
     }
-    if (count) count.textContent = (q ? shown + " of " : "") + all + " states";
+    if (count) count.textContent = q ? shown + " found" : total;
   };
   find.addEventListener("input", filter);
   find.addEventListener("keydown", (e) => {

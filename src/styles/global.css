@@ -60,6 +60,11 @@ main:focus {
   outline: none;
 }
 
+/* a code link at the scroll box's left edge keeps all four sides of its ring */
+.scroll th[scope="row"] a:focus-visible {
+  outline-offset: -2px;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -127,9 +132,8 @@ main:focus {
   border-color: var(--ink);
 }
 
-/* a pressed control, and the DARK control while the page is dark, invert */
-.btn[aria-pressed="true"],
-.btn.on {
+/* a pressed control inverts */
+.btn[aria-pressed="true"] {
   background: var(--ink);
   color: var(--bg);
   border-color: var(--ink);
@@ -182,20 +186,64 @@ main:focus {
   gap: 10px;
 }
 
+/* "Link copied" floats under the button, so showing it and clearing it never
+   moves the header or the page under it */
+.share {
+  position: relative;
+}
+
 .share-status {
   overflow-wrap: anywhere;
 }
 
+.share-status:not(:empty) {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  margin-top: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--ink);
+  background: var(--bg);
+}
+
 @media (max-width: 479px) {
-  .top .tl {
-    order: 2;
-    flex-basis: 100%;
-  }
-  .top .right {
-    order: 1;
-  }
+  /* one row: the tagline and the week tag go, since the week is printed under every price */
+  .top .tl,
   .top .wk {
     display: none;
+  }
+  .top-in {
+    align-items: center;
+    gap: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  .top .right,
+  .share {
+    gap: 6px;
+  }
+  .brand {
+    font-size: min(var(--fs-brand), 4.4vw);
+    letter-spacing: 0.08em;
+  }
+  /* an empty share status takes no room, so it never pushes the controls to a second row */
+  [data-share-status]:empty {
+    display: none;
+  }
+}
+
+/* the smallest phones, and any phone with Display Zoom on */
+@media (max-width: 359px) {
+  .brand {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+  .top .btn {
+    padding-left: 8px;
+    padding-right: 8px;
   }
 }
 
@@ -235,6 +283,23 @@ main:focus {
   max-width: 64ch;
 }
 
+/* the change in words under a price, its ink only on the change itself:
+   "Down 15.4¢ from $6.680 last week." */
+.chw {
+  margin: 12px 0 0;
+  max-width: 64ch;
+}
+
+.chw b {
+  font-weight: 700;
+}
+
+/* whose number it is and which week: "Prices for the week of Sep 28. New prices Tue, Oct 6." */
+.pl,
+.wkl {
+  margin: 8px 0 0;
+}
+
 /* the small print */
 .fine {
   font-size: var(--fs-s);
@@ -242,40 +307,6 @@ main:focus {
   max-width: 82ch;
 }
 
-.hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
-  gap: 16px 36px;
-  padding: 22px 0 4px;
-  align-items: start;
-}
-
-/* a wide column and a narrow one of notes beside it */
-.cols {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 290px);
-  gap: 28px;
-  align-items: start;
-}
-
-.notes p {
-  margin: 0 0 10px;
-  font-size: var(--fs-s);
-  color: var(--ink2);
-  max-width: 46ch;
-}
-
-.notes b {
-  color: var(--ink);
-  font-weight: 700;
-}
-
-@media (max-width: 899px) {
-  .hero,
-  .cols {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
 
 /* ------------------------------------------------------- section heads --- */
 
@@ -338,14 +369,6 @@ table {
   text-align: left;
 }
 
-/* the quote table (every state) and the region board */
-.q table {
-  min-width: 740px;
-}
-
-.board table {
-  min-width: 620px;
-}
 
 th,
 td {
@@ -373,181 +396,22 @@ thead th {
   text-align: right;
 }
 
-/* a hairline every fifth row of the quote table keeps the eye on its line */
-.q tbody tr:nth-child(5n of :not([hidden])) th,
-.q tbody tr:nth-child(5n of :not([hidden])) td,
-.board tbody th,
-.board tbody td,
+
+/* the last row of a table closes it with a hairline */
 tbody tr:last-child th,
 tbody tr:last-child td {
   border-bottom: 1px solid var(--hair);
 }
 
-/* the first column stays put while the rest scrolls sideways */
-.q th[scope="row"],
-.board th[scope="row"] {
-  position: sticky;
-  left: 0;
-  background: var(--bg);
-  box-shadow: 1px 0 0 var(--hair);
-}
-
-tbody tr:hover th[scope="row"],
-tbody tr:hover td {
-  background: var(--mark);
-}
-
-/* a whole row of the quote table opens the state, so it reads as a link */
-.q tbody tr {
-  cursor: pointer;
-}
-
-/* the row that is your state, and the U.S. row on the board */
-tr.mine th,
-tr.mine td {
-  background: var(--mark);
-  font-weight: 700;
-}
-
-tr.us th,
-tr.us td {
-  font-weight: 700;
-}
-
-/* a column head that sorts: the script wraps the head's words in this */
-.sortb {
-  min-height: 24px;
-  padding: 2px 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-size: var(--fs-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.sortb:hover {
-  text-decoration: underline;
-}
-
-th[aria-sort] .sortb {
-  color: var(--ink);
-  font-weight: 700;
-}
-
-/* the sort direction after the words */
-.ar {
-  padding-left: 3px;
-}
-
-/* ---------------------------------------------------------- sparklines --- */
-
-/* one 52 week line in a table cell, drawn from the page's sprite */
-.spk {
-  display: block;
-  width: 72px;
-  height: 18px;
-  overflow: visible;
-  color: var(--ink);
-}
-
-.sprite {
-  position: absolute;
-  width: 0;
-  height: 0;
-}
-
-/* ------------------------------------------------------------ find box --- */
-
-/* the find box lives in a section head, so it is scoped to .sh */
-.sh .find {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 2px 8px;
-  border: 1px solid var(--edge);
-}
-
-.sh .find:focus-within {
-  outline: 2px solid var(--ink);
-  outline-offset: 1px;
-}
-
-.sh .find input {
-  width: 20ch;
-  min-width: 0;
-  padding: 2px 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-size: var(--fs-t);
-}
-
-.sh .find input:focus {
-  outline: none;
-}
-
-/* the datalist's own drop arrow would be the one arrow on the page; Chromium
-   draws it with an important rule of its own, so this one has to be too */
-.sh .find input::-webkit-calendar-picker-indicator {
-  display: none !important;
-}
-
-/* the key cap that says "/" focuses the box */
-.sh .find .k {
-  padding: 0 4px;
-  border: 1px solid var(--hair);
-  font-size: var(--fs-xs);
-  color: var(--ink2);
-}
-
-@media (max-width: 700px) {
-  .sh .find {
-    display: flex;
-  }
-  .sh .find .k {
-    display: none;
-  }
-  .sh .find input {
-    width: 100%;
+/* only where a pointer can hover: on a phone the shade would stay on the row
+   last tapped and look like your state's row */
+@media (hover: hover) {
+  tbody tr:hover th[scope="row"],
+  tbody tr:hover td {
+    background: var(--mark);
   }
 }
 
-/* --------------------------------------------------------- boxed strip --- */
-
-/* one boxed line: your state on the home page */
-.strip {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin-top: 22px;
-  padding: 9px 12px;
-  border: 1px solid var(--edge);
-}
-
-.strip .lbl {
-  margin: 0;
-}
-
-.strip .nm {
-  font-weight: 700;
-}
-
-.strip .px {
-  font-size: 17px;
-  font-weight: 700;
-}
-
-/* the controls at the right end of a strip or a page head */
-.acts {
-  display: flex;
-  gap: 8px;
-  margin-left: auto;
-}
 
 /* -------------------------------------------------------------- charts --- */
 
@@ -566,13 +430,22 @@ th[aria-sort] .sortb {
   color: var(--ink);
 }
 
-.rd-h {
+.rd-h,
+.rd-t {
   padding-left: 8px;
 }
 
-@media (max-width: 760px) {
+/* the hint that fits the pointer: a mouse and keys, or a finger */
+.rd-t {
+  display: none;
+}
+
+@media (hover: none) {
   .rd-h {
     display: none;
+  }
+  .rd-t {
+    display: inline;
   }
 }
 
@@ -590,6 +463,8 @@ th[aria-sort] .sortb {
 .pa {
   position: relative;
   height: var(--h, 220px);
+  /* a finger sliding sideways reads the weeks; up and down still scrolls the page, and two fingers still zoom */
+  touch-action: pan-y pinch-zoom;
 }
 
 .pa > svg {
@@ -754,6 +629,13 @@ th[aria-sort] .sortb {
 
 /* ------------------------------------------------------ state page head --- */
 
+/* the controls at the right end of a page head */
+.acts {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
 .head-row {
   display: flex;
   align-items: baseline;
@@ -846,6 +728,19 @@ th[aria-sort] .sortb {
   margin: 0 0 10px;
 }
 
+/* fine print folded under one button: "What the price and tax include" */
+.more {
+  margin-top: 14px;
+}
+
+.more > summary {
+  list-style: none;
+}
+
+.more > summary::-webkit-details-marker {
+  display: none;
+}
+
 /* a summary in the prose (the 404 page's Find your state) at a control's size */
 .prose summary {
   min-height: 24px;
@@ -888,13 +783,90 @@ th[aria-sort] .sortb {
   line-height: 24px;
 }
 
+/* -------------------------------------------------------------- phones --- */
+
+/* A phone in a cab: 44px targets for a gloved thumb, inputs at 16px so iOS
+   never zooms on focus, the words under a price a step bigger, the labels
+   that say what a number is in full ink, and a move bold as well as coloured. */
+@media (max-width: 479px) {
+  .btn {
+    padding: 10px 12px;
+    font-size: min(var(--fs-s), 4.2vw);
+    line-height: 22px;
+  }
+  .btn.wide {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  .rng label {
+    min-height: 44px;
+  }
+  .back a,
+  .foot a,
+  .prose a {
+    min-height: 44px;
+    line-height: 44px;
+  }
+  input,
+  select {
+    font-size: max(16px, 1rem);
+  }
+  .big {
+    gap: 4px 14px;
+  }
+  /* the words line says it, with the change in its ink */
+  .big .d {
+    display: none;
+  }
+  .chw {
+    margin-top: 6px;
+    font-size: var(--fs-chg);
+    line-height: 1.25;
+  }
+  .wkl {
+    font-size: var(--fs-s);
+  }
+  .lbl,
+  .pl,
+  .wkl,
+  .rdout,
+  .stats dt {
+    color: var(--ink);
+  }
+  .up,
+  .down {
+    font-weight: 700;
+  }
+  table {
+    font-size: clamp(13px, 4.4vw, var(--fs-t));
+  }
+  th,
+  td {
+    padding: 9px 6px;
+  }
+  .stats dd:not(.s) {
+    white-space: nowrap;
+  }
+  .yl,
+  .ytag,
+  .xl {
+    font-size: min(var(--fs-xs), 3.4vw);
+  }
+  /* a lane each side of a box that scrolls, for the thumb to scroll the page */
+  .numbers .scroll {
+    max-height: 45vh;
+    max-height: 45svh;
+    margin-inline: 12px;
+  }
+}
+
 /* --------------------------------------------------------------- modes --- */
 
 @media (forced-colors: active) {
-  /* every inverse fill that carries a state: a pressed control, the DARK
-     control while dark, the price tag, your state's row, the chosen range */
+  /* every inverse fill that carries a state: a pressed control, the price
+     tag, your state's row, the chosen range */
   .btn[aria-pressed="true"],
-  .btn.on,
   .ytag,
   tr.mine th,
   tr.mine td,

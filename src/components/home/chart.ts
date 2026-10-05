@@ -8,7 +8,7 @@
 // only chart code that runs there.
 
 import { addDays, daysBetween, formatDate } from "../../lib/dates.ts";
-import { formatPrice, formatQuote } from "../../lib/format.ts";
+import { formatPrice, formatQuote, formatTick } from "../../lib/format.ts";
 import { lastDays, present, type Point, type Valued } from "../../lib/stats.ts";
 
 /** The line box of the big chart. */
@@ -109,7 +109,7 @@ export function chart(series: Point[], opts: ChartOptions): Chart | null {
   // an axis label that would sit under the newest price tag is dropped
   const room = (18 / opts.mobileHeight) * H;
   const pct = (v: number) => r2((v / H) * 100);
-  const yLabels = t.filter((v) => Math.abs(y(v) - y(last.value)) > room).map((v) => ({ at: pct(y(v)), text: formatQuote(v) }));
+  const yLabels = t.filter((v) => Math.abs(y(v) - y(last.value)) > room).map((v) => ({ at: pct(y(v)), text: formatTick(v) }));
   const tag = { at: pct(y(last.value)), text: formatQuote(last.value) };
 
   // one label per year, at its first week; a stub first year that would run

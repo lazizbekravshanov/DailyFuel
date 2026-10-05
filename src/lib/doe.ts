@@ -8,8 +8,8 @@ import type { PeakKind } from "./stats.ts";
 export const RECORDS_START = "June 2022";
 
 export const DOE_LINE =
-  "This is the DOE weekly diesel average, published by EIA. On-road diesel, federal and state taxes included. " +
-  "Surcharge contracts use the national or a regional DOE number, so check which yours names.";
+  "This is the DOE weekly diesel price. The government's EIA runs the survey. " +
+  "Fuel surcharge contracts use either the U.S. or a regional DOE price, so check which one yours uses.";
 
 export const DYED_DIESEL_NOTE = "Dyed farm diesel is untaxed and usually costs less.";
 

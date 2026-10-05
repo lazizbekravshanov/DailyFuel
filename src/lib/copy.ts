@@ -64,23 +64,23 @@ export function regionMates(s: StateView, site: SiteData): StateView[] {
 }
 
 /**
- * The meta on the "Same price, other states" head: "15 states read $6.250
- * this week", counting the state itself and DC apart. Null with no price or
- * no region mates.
+ * How many states read one price: "Ohio and 14 other states show $6.250
+ * this week", counting DC apart. Null with no price or no region mates.
  */
 export function samePriceMeta(s: StateView, site: SiteData): string | null {
   const mates = regionMates(s, site);
   if (!s.primary || !mates.length) return null;
-  return `${countPlaces([s, ...mates], false)} read ${formatPrice(s.primary.price)} this week`;
+  return `${shortName(s)} and ${countPlaces(mates, s.code !== "DC")} show ${formatPrice(s.primary.price)} this week`;
 }
 
 /**
- * The caption under that table: "One EIA price covers the whole Midwest
- * region. The state tax on top of it is different in each one."
+ * Why states share a price, and that tax is already in it: "These states all
+ * share one Midwest average. Tax is already in that price. Each state taxes
+ * diesel differently, so real pump prices still differ from state to state."
  */
 export function samePriceCaption(s: StateView): string {
   const region = s.eia_series === "R5XCA" ? "West Coast outside California" : s.regionName ?? "";
-  return `One EIA price covers the whole ${region} region. The state tax on top of it is different in each one.`;
+  return `These states all share one ${region} average. Tax is already in that price. Each state taxes diesel differently, so real pump prices still differ from state to state.`;
 }
 
 /**
@@ -91,10 +91,10 @@ export function samePriceCaption(s: StateView): string {
  * figure (series R50), or null when the weekly file lacks it.
  */
 export function noSurveyNote(s: StateView, west: Move | null): string {
-  const lead = `EIA doesn't survey diesel in ${s.name}, so there is no weekly number for it.`;
-  if (!west) return `${lead} The nearest region EIA does survey is the West Coast.`;
-  const moved = west.change === null ? "" : `, ${formatSignedCents(west.change)} on the week`;
-  return `${lead} The nearest region EIA does survey is the West Coast, which read ${formatPrice(west.price)} this week${moved}.`;
+  const lead = `The government's weekly survey does not cover ${s.name}, so we have no ${s.name} price.`;
+  if (!west) return `${lead} The nearest region it does cover is the West Coast.`;
+  const moved = west.change === null ? "" : changeTenths(west.change) === 0 ? ", no change from last week" : `, ${spokenChange(west.change).replace(" cents", "¢")} from last week`;
+  return `${lead} For a rough guide only, the whole West Coast, California included, averaged ${formatPrice(west.price)} this week${moved}.`;
 }
 
 /** "That's the DOE Midwest average Ohio shares with 14 other states." */

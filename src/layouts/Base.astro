@@ -57,7 +57,7 @@ const eia = site.latest.eia ?? null;
 const next = eia
   ? nextEiaRelease(eia.period, eia.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork())
   : null;
-const LATE = "next update is late";
+const LATE = "new prices are late";
 ---
 <!doctype html>
 <html lang="en">
@@ -95,7 +95,7 @@ const LATE = "next update is late";
     <header class="top">
       <div class="wrap top-in">
         <a class="brand" href="/" aria-current={current === "/" ? "page" : undefined}>DailyFuel</a>
-        <span class="tag tl">U.S. on-highway diesel <span class="dot">·</span> {aaa ? "AAA daily, EIA weekly" : "EIA weekly"}</span>
+        <span class="tag tl">{aaa ? "Diesel prices by state, new every day" : "Diesel prices by state, new every week"}</span>
         <div class="right">
           {aaa ? (
             <span class="tag wk">
@@ -106,10 +106,12 @@ const LATE = "next update is late";
             <span class="tag wk">
               Week of {formatShortDate(eia.period)}
               {next && (
-                <> <span class="dot">·</span> <span data-next-release={next.date} data-late={LATE}>{next.late ? LATE : `next ${formatShortWeekdayDate(next.date)}`}</span></>
+                <> <span class="dot">·</span> <span data-next-release={next.date} data-late={LATE}>{next.late ? LATE : `new prices ${formatShortWeekdayDate(next.date)}`}</span></>
               )}
             </span>
           ) : null}
+          {/* pages with no number to share (the map, about, 404) get a way back to the prices */}
+          {!share && current !== "/" && <a class="btn" href="/">Prices</a>}
           <a class="btn" href="/map/" aria-current={current.startsWith("/map") ? "page" : undefined}>Map</a>
           {share && <ShareButton text={share} />}
           <ThemeToggle />

@@ -25,4 +25,9 @@
   // this script runs above the page content, so wait for the rest to parse
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", late);
   else late();
+  // a tab left open for hours (phones keep them for days) comes back with today's page
+  var t0 = Date.now();
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && Date.now() - t0 > 216e5) location.reload();
+  });
 })();

@@ -154,7 +154,7 @@ export const SOURCE_ORDER: SourceKey[] = ["o", "n", "i", "f"];
 export const DEDUPE_M = 600;
 const DIRECTION: Record<string, string> = { EB: "eastbound", WB: "westbound", NB: "northbound", SB: "southbound" };
 const WEIGH_TYPE = "Weigh station";
-const SERVICE_TYPE = "Truck service";
+const SERVICE_TYPE = "Repair and lube";
 
 function readJson(path: string): unknown {
   let text: string;
@@ -744,7 +744,7 @@ export function roadsPayload(roads: MapRoad[], p = 3): RoadsPayload {
 /** How far a weigh station may be from a signed freight highway for its popup to name it. The lines are good to about a kilometre. */
 export const NEAR_ROAD_KM = 2;
 
-/** The signed freight highway nearest a point, within NEAR_ROAD_KM, as its popup words it: "I 80, interstate". */
+/** The signed freight highway nearest a point, within NEAR_ROAD_KM, as its popup words it: "I 80, interstate". The list's name cell adds its short name: "Pilot, near I 80". */
 export function nearestRoute(roads: MapRoad[], lat: number, lon: number): string | null {
   const kx = 111.32 * Math.cos((lat * Math.PI) / 180), ky = 110.57;
   const padX = NEAR_ROAD_KM / kx, padY = NEAR_ROAD_KM / ky;
@@ -838,9 +838,11 @@ export function loadMapData(dirInput = process.env.DAILYFUEL_MAP_DIR ?? "data/ma
   for (const s of stations.sites) {
     const chain = CHAIN_BY_KEY[s.brand];
     fail(!chain, `stations.json has a site with the brand ${s.brand}, which the page does not know`);
+    const highway = nearestRoute(roads, s.lat, s.lon);
     points.push({
       kind: "s", filter: chain.key, lat: s.lat, lon: s.lon, name: cleanName(s.name) || chain.name, type: chain.name,
       state: stateOf(s.lat, s.lon, null), sources: "o", dir: null, chain: chain.key,
+      ...(highway && { highway }),
     });
   }
 
@@ -866,9 +868,11 @@ export function loadMapData(dirInput = process.env.DAILYFUEL_MAP_DIR ?? "data/ma
       for (const f of doc.points) {
         const service = SERVICES[f.category];
         if (service) {
+          const highway = nearestRoute(roads, f.lat, f.lon);
           points.push({
             kind: "v", filter: SERVICE_KEY, lat: f.lat, lon: f.lon, name: service.name, type: SERVICE_TYPE,
             state: stateOf(f.lat, f.lon, f.state), sources: "f", dir: null, chain: service.chain,
+            ...(highway && { highway }),
           });
         } else {
           // the list's labels come from a fixed table ("Port of entry"), so a named source may still name the marker

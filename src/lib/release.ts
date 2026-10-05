@@ -107,12 +107,12 @@ export function nextEiaRelease(
 }
 
 /**
- * The end of a state page's week line: "Next release Tue, Sep 22." The stale
- * script (src/scripts/stale.js) swaps in LATE_TEXT once that day has passed
- * with nothing new.
+ * The site's one phrase for when the next numbers land: "New prices Tue,
+ * Sep 22." The stale script (src/scripts/stale.js) swaps in LATE_TEXT once
+ * that day has passed with nothing new.
  */
-export const LATE_TEXT = "The next release is late.";
+export const LATE_TEXT = "New prices are late.";
 
 export function nextUpdateText(date: string): string {
-  return `Next release ${formatShortWeekdayDate(date)}.`;
+  return `New prices ${formatShortWeekdayDate(date)}.`;
 }

@@ -181,6 +181,23 @@ export function recordLine(us: PeakKind, regions: PeakKind[]): string | null {
 }
 
 /**
+ * The board's Record high note, naming the regions at their highest:
+ *   "Rocky Mountain is at its highest price in our records, which start June 2022."
+ *   "Rocky Mountain and Midwest are at their highest prices in our records, which start June 2022."
+ *   "6 of the 8 regions are at their highest prices in our records, which start June 2022."
+ * Null when no region is.
+ */
+export function recordNote(regions: { name: string; kind: PeakKind }[]): string | null {
+  const at = regions.filter((r) => r.kind === "record");
+  if (!at.length) return null;
+  const tail = `in our records, which start ${RECORDS_START}.`;
+  if (at.length === regions.length) return `Every region is at its highest price ${tail}`;
+  if (at.length === 1) return `${at[0].name} is at its highest price ${tail}`;
+  if (at.length <= 3) return `${list(at.map((r) => r.name))} are at their highest prices ${tail}`;
+  return `${at.length} of the ${regions.length} regions are at their highest prices ${tail}`;
+}
+
+/**
  * The ONE PRICE, MANY STATES note: why so many rows read the same, said with
  * the biggest region's real count and price.
  */
@@ -192,7 +209,7 @@ export function sharedNote(region: { name: string; codes: string[]; price: numbe
   const dc = region.codes.includes("DC");
   // "15 Midwest states", "5 Central Atlantic states and DC"
   const who = `${n} ${region.name} state${n === 1 ? "" : "s"}${dc ? " and DC" : ""}`;
-  return `EIA surveys regions, not every state, so all ${who} read ${formatPrice(region.price)} this week.`;
+  return `All ${who} show the same price, ${formatPrice(region.price)}, because the survey covers regions, not single states.`;
 }
 
 /** The browser tab and search result: "DailyFuel: U.S. diesel $6.285 a gallon, up 31.8¢". */

@@ -48,15 +48,28 @@ export function homeShareText(site: SiteData): string {
   return `${priceLine("U.S.", us, daily ? "since yesterday" : "this week")} ${sourceLine(null, daily)}`;
 }
 
-/** A state page's sentence. Alaska and Hawaii say why there's no DOE number, like their page. */
+/**
+ * A state page's sentence. While EIA is the source it says whose average the
+ * price is before the price, so in a group chat nobody takes it for the
+ * state's own measured price: "Diesel in Ohio's region, the Midwest, averaged
+ * $6.250 a gallon this week, up 30.4 cents. Weekly DOE price." Alaska and
+ * Hawaii say why there's no number, like their page, and give the U.S. one.
+ */
 export function stateShareText(s: StateView, site: SiteData): string {
   const name = shortName(s);
-  if (!s.primary) {
+  const m = s.primary;
+  if (!m) {
     if (site.mode === "eia_only" && s.eia_series === null) {
-      return `EIA doesn't survey diesel prices in ${name}, so there's no DOE weekly number. The closest region EIA surveys is the West Coast.`;
+      const us = site.eiaUs;
+      return `The government's weekly survey does not cover ${name}, so there is no ${name} price.${us ? ` U.S. diesel averaged ${formatPrice(us.price)} a gallon this week.` : ""}`;
     }
     return `${noPriceReason(s, site)} See the prices nearby.`;
   }
   const daily = s.cadence === "daily";
-  return `${priceLine(name, s.primary, stateSpan(site, daily))} ${sourceLine(s, daily)}`;
+  if (daily) return `${priceLine(name, m, stateSpan(site, daily))} ${sourceLine(s, daily)}`;
+  const moved = m.change === null ? "" : changeTenths(m.change) === 0 ? ", no change" : `, ${spokenChange(m.change)}`;
+  const who = s.eia_series === "SCA"
+    ? "California diesel"
+    : `Diesel in ${name}'s region, ${s.eia_series === "R5XCA" ? "the West Coast outside California" : `the ${s.regionName}`},`;
+  return `${who} averaged ${formatPrice(m.price)} a gallon this week${moved}. Weekly DOE price.`;
 }

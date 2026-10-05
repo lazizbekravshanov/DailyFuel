@@ -127,6 +127,30 @@ export function spokenChange(change: number): string {
   return `${t > 0 ? "up" : "down"} ${tenthsString(t)} cents`;
 }
 
+/**
+ * A change in words, for the line under a price and the stat boxes:
+ * "Down 15.4¢", "Up 6.7¢", "Up $2.795" from a dollar up, "No change".
+ * The words carry the direction, so it never rests on a minus sign or a colour.
+ */
+export function changeWords(change: number): string {
+  const t = changeTenths(change);
+  if (t === 0) return "No change";
+  const a = Math.abs(t);
+  return `${t > 0 ? "Up" : "Down"} ${a >= 1000 ? formatPrice(a / 1000) : `${tenthsString(a)}¢`}`;
+}
+
+/**
+ * One price against another, for comparing places: "57.3¢ less", "0.5¢
+ * more", "$1.536 more", "Same price". Not a change over time, so it never
+ * wears a change's colour.
+ */
+export function diffWords(price: number, against: number): string {
+  const d = toMills(price) - toMills(against);
+  if (d === 0) return "Same price";
+  const a = Math.abs(d);
+  return `${a >= 1000 ? formatPrice(a / 1000) : `${tenthsString(a)}¢`} ${d < 0 ? "less" : "more"}`;
+}
+
 /** "rose 31.8¢" style verb for sentences. */
 export function changeVerb(change: number): string {
   const t = changeTenths(change);

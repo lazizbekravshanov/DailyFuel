@@ -1,8 +1,10 @@
 ---
-// The footer: where the numbers come from, what they are, and what the page
-// keeps. Every date and name in it comes from the data, never typed by hand.
+// The footer: where the numbers come from, that tax is in them, what the page
+// keeps, and the ways on from the bottom of the page. Every date and name in it
+// comes from the data, never typed by hand. The page itself already says how
+// regions work and which states have no survey, so the footer doesn't repeat it.
 import { formatBadgeDate, formatDate, todayInNewYork } from "../lib/dates.ts";
-import { formatShortWeekdayDate, nextEiaRelease } from "../lib/release.ts";
+import { LATE_TEXT, nextEiaRelease, nextUpdateText } from "../lib/release.ts";
 import { REPO_URL, type SiteData } from "../lib/site.ts";
 interface Props {
   site: SiteData;
@@ -17,24 +19,18 @@ const release = eia?.release_date ?? site.weekly?.release_date ?? null;
 const next = eia
   ? nextEiaRelease(eia.period, eia.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork())
   : null;
-const LATE = "The next release is late.";
 const aaa = site.mode === "aaa+eia" ? site.latest.aaa : null;
 const tax = site.tax;
-// "Alaska and Hawaii": the states EIA leaves out, said from the data.
-const unsurveyed = site.mode === "eia_only" ? site.states.filter((s) => s.eia_series === null).map((s) => s.name) : [];
-const andList = (names: string[]) =>
-  names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 ---
 <footer class="foot">
   <div class="wrap">
     <p>
-      <b>Sources.</b>{" "}
       {site.weekly && (
         <>
-          Prices: U.S. Energy Information Administration, weekly retail on-highway diesel{release ? `, released ${formatDate(release)}` : ""}.
+          Prices: U.S. Energy Information Administration weekly survey{release ? `, released ${formatDate(release)}` : ""}.
           {next && (
             <>
-              {" "}<span data-next-release={next.date} data-late={LATE}>{next.late ? LATE : `Next release ${formatShortWeekdayDate(next.date)}.`}</span>
+              {" "}<span data-next-release={next.date} data-late={LATE_TEXT}>{next.late ? LATE_TEXT : nextUpdateText(next.date)}</span>
             </>
           )}
         </>
@@ -44,20 +40,16 @@ const andList = (names: string[]) =>
           {" "}Daily state averages: AAA (<a href="https://gasprices.aaa.com/">gasprices.aaa.com</a>), data by OPIS, as of {formatBadgeDate(aaa.as_of)}. DailyFuel is not affiliated with AAA or OPIS.
         </>
       )}
-      {tax && <>{" "}Taxes: Federal Highway Administration, Highway Statistics table MF-121T, {tax.reporting_period}.</>}
+      {tax && <>{" "}Tax: Federal Highway Administration, {tax.reporting_period}.</>}
     </p>
+    <p>Prices include federal and state tax.</p>
     <p>
-      Prices are what a driver pays at the pump, with federal and state taxes in them.
-      {aaa
-        ? " AAA's daily average is for one state. EIA's weekly number covers a region, so states in one region share it."
-        : " EIA surveys regions, not every state, so states in one region share a price."}
-      {unsurveyed.length > 0 && ` ${andList(unsurveyed)} ${unsurveyed.length === 1 ? "is" : "are"} not in the survey.`}
-    </p>
-    <p>
-      No ads, no cookies, no accounts. The only things this page keeps on your phone are the state you save and your light or dark choice.
+      No ads, no cookies, no accounts. This phone keeps only the state you save and your day or night choice.
       {compact && " Visits are counted with Vercel Web Analytics, which uses no cookies and keeps nothing that could identify you."}
     </p>
-    <p>
+    <p class="flinks">
+      <a href="/#states">All states</a> <span class="dot">·</span>{" "}
+      <a href="/map/">Truck stop map</a> <span class="dot">·</span>{" "}
       {!compact && (
         <>
           <a href="/about/">Where the numbers come from</a> <span class="dot">·</span>{" "}

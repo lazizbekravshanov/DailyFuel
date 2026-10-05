@@ -35,20 +35,27 @@ const taxYear = site.tax?.reporting_period ?? null;
 const title = "Truck stop and weigh station map | DailyFuel";
 const description =
   `${fmt(t.stops)} truck stops from seven chains and ${fmt(t.weigh)} weigh stations` +
-  (t.service ? `, plus ${fmt(t.service)} truck service points,` : "") +
-  " on one map from open data, with a route strip that lists the EIA diesel price and the state tax along a straight line.";
+  (t.service ? `, plus ${fmt(t.service)} truck repair and lube shops,` : "") +
+  " on one map from open data, with the weekly diesel price and the state tax along a trip.";
 ---
 <Base title={title} description={description} skipLabel="Skip to the page">
   <link slot="head" rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
   <link slot="head" rel="preconnect" href={bm.origin} />
   <div class="mp">
     <div class="mp-head">
-      <h1 class="lbl">Truck stops and weigh stations <span class="dot">·</span> open data, partial coverage</h1>
-      <p class="fine">
-        {fmt(t.stops)} truck stops, {fmt(t.weigh)} weigh stations{t.service ? ` and ${fmt(t.service)} truck service points` : ""}.
-        Pick a marker for the chain's own page.
-      </p>
+      <h1 class="mp-h">Truck stops and weigh stations</h1>
+      <p class="mp-in">Zoom in, then tap a dot to see what it is. Not every truck stop or scale is on the map.</p>
     </div>
+    {/* jump to a town or a state, or to where the phone is; the script enables it */}
+    <form id="fd" class="fd" autocomplete="off">
+      <fieldset disabled>
+        <legend class="sr-only">Find a place on the map</legend>
+        <label class="rt-f fd-q"><span class="sr-only">Town or state</span><input name="q" list="pl" placeholder="Town or state" spellcheck="false" /></label>
+        <button class="btn">Show</button>
+        <button class="btn" type="button" data-near>Near me</button>
+      </fieldset>
+    </form>
+    <p class="fine rt-st" id="fd-st" role="status"></p>
 
     <div class="mp-top">
       <div class="mp-mc">
@@ -60,19 +67,41 @@ const description =
         >
           <p class="mp-msg">The map needs JavaScript. Every place on it is in the list below.</p>
         </div>
+        <p class="fine mp-tip">Use two fingers to move the map, or tap + and −.</p>
+        {/* the credit the tiles need, next to the map; every source is named in Map credits at the end of the page */}
         <p class="fine mp-attr">
-          {bm.credit.name === "CARTO" ? <>Base map <a href={bm.credit.href}>© CARTO</a>, map data and stops </> : "Base map, map data and stops "}<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, ODbL</a>, extract of {osmDate}.
-          {" "}More weigh stations: U.S. DOT NTAD (public domain) and Iowa DOT (CC BY 4.0).
-          {data.present.fleet && " Weigh station and truck service points: DailyFuel, CC BY 4.0."}
-          {data.present.roads && " Roads: NTAD National Highway Freight Network, U.S. DOT BTS, public domain."}
-          {data.present.states && " State outlines: U.S. Census Bureau, public domain."}
-          {data.present.places && <> Place names: <a href="https://www.geonames.org">GeoNames</a>, CC BY 4.0.</>}
-          {" "}Drawn with Leaflet.
+          {bm.credit.name === "CARTO" && <><a href={bm.credit.href}>© CARTO</a> <span class="dot">·</span> </>}<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> <span class="dot">·</span> <a href="#credits">Map credits</a>
         </p>
+
+        <section class="mp-rt" id="trip" aria-labelledby="rt-h">
+          <div class="sh">
+            <h2 id="rt-h">Prices along a trip</h2>
+            <p class="meta">{cfg.wk}{taxYear && <> <span class="dot">·</span> {taxYear} state tax</>}</p>
+          </div>
+          <form id="rt" class="rt" autocomplete="off">
+            <fieldset disabled>
+              <legend class="sr-only">Where the trip starts and ends</legend>
+              <label class="rt-f"><span>From</span><input name="a" list="pl" placeholder="Town, like Chicago, IL" spellcheck="false" /></label>
+              <label class="rt-f"><span>To</span><input name="b" list="pl" placeholder="Town, like Denver, CO" spellcheck="false" /></label>
+              <button class="btn wide" type="submit">Show prices</button>
+            </fieldset>
+            <datalist id="pl"></datalist>
+          </form>
+          <noscript><p class="fine">Prices along a trip needs JavaScript.</p></noscript>
+          {/* the answer and any error come right under the button, where the keyboard can't cover them */}
+          <p class="fine rt-st" id="rt-st" role="status"></p>
+          <div id="rt-out"></div>
+          <p class="note">
+            This follows a straight line, not the roads you will drive. Each price is the region's weekly average, and pumps in one state can differ by more than a dollar, so check the chain's website for today's price.
+          </p>
+        </section>
       </div>
 
       <aside class="mp-lg" aria-labelledby="lg-h">
-        <div class="sh"><h2 id="lg-h">Legend</h2><p class="meta">Untick to hide</p></div>
+        <div class="sh"><h2 id="lg-h">What is on the map</h2><p class="meta">Tap to show or hide</p></div>
+        {/* on a phone the key and its filters wait behind one button */}
+        <input type="checkbox" id="lgt" class="sr-only" />
+        <label for="lgt" class="btn wide lgt-l"><span class="o1">Show the key and filters</span><span class="o2">Hide the key and filters</span></label>
         <fieldset class="lg">
           <legend class="sr-only">Show on the map and in the list</legend>
           <p class="lbl">Truck stops</p>
@@ -95,65 +124,57 @@ const description =
             <label class="lg-i">
               <input type="checkbox" data-k="v" checked disabled />
               <span class="key kv" aria-hidden="true"></span>
-              <span>Truck service</span>
+              <span>Repair and lube</span>
               <span class="n">{fmt(t.service)}</span>
             </label>
           )}
         </fieldset>
-        <p class="fine">
-          Share of each chain's own sites on the map: {cov.measured}.
-          {cov.unmeasured.length > 0 && ` ${andList(cov.unmeasured)} ${cov.unmeasured.length === 1 ? "has" : "have"} no public count to check against.`}
-        </p>
-        <p class="fine">
-          Weigh stations are partial. OpenStreetMap had {weigh.share === null ? "some" : `${Math.round(weigh.share * 100)}%`} of the official ones in the {checked} states we could check,
-          and FHWA counted about {fmt(ref.count)} in {ref.year}.
-          {data.present.fleet && ` The weigh layer includes DailyFuel's own list: ${fmt(fleetWeigh)} of the markers are on it, and ${fmt(fleetOnly)} of those are on no open source. Nobody has measured how many are still missing.`}
-          {" "}A missing marker doesn't mean there is no scale.
-        </p>
-        <p class="fine">Chain names only say whose stop it is. DailyFuel is not affiliated with or endorsed by any chain.</p>
+        <p class="fine">Not every truck stop or scale is on the map. A missing dot doesn't mean there is none.</p>
+        <details class="more">
+          <summary class="btn wide">How complete is this map?</summary>
+          <p class="fine">
+            How much of each chain's own list of stops is on the map: {cov.measured}.
+            {cov.unmeasured.length > 0 && ` ${andList(cov.unmeasured)} ${cov.unmeasured.length === 1 ? "publishes" : "publish"} no count to check against.`}
+          </p>
+          <p class="fine">
+            Some weigh stations are missing. OpenStreetMap had {weigh.share === null ? "some" : `${Math.round(weigh.share * 100)}%`} of the official ones in the {checked} states we could check.
+            {data.present.fleet && ` DailyFuel's own list adds more: ${fmt(fleetWeigh)} of the scales on the map are on it, and ${fmt(fleetOnly)} of those are on no open source.`}
+            {" "}If you don't see a scale, there may still be one.
+          </p>
+          <p class="fine">Chain names only say whose stop it is. DailyFuel is not affiliated with or endorsed by any chain.</p>
+        </details>
       </aside>
     </div>
-
-
-    <section class="mp-rt" aria-labelledby="rt-h">
-      <div class="sh">
-        <h2 id="rt-h">Route strip</h2>
-        <p class="meta">{cfg.wk}{taxYear && <> <span class="dot">·</span> FHWA {taxYear} state tax</>}</p>
-      </div>
-      <form id="rt" class="rt" autocomplete="off">
-        <fieldset disabled>
-          <legend class="sr-only">The two ends of a straight line</legend>
-          <label class="rt-f"><span>A<span class="sr-only">, from</span></span><input name="a" list="pl" placeholder="Chicago, IL" spellcheck="false" /></label>
-          <label class="rt-f"><span>B<span class="sr-only">, to</span></span><input name="b" list="pl" placeholder="Cheyenne, WY" spellcheck="false" /></label>
-          <button class="btn" type="submit">Go</button>
-          <button class="btn" type="button" data-pick aria-pressed="false">Use the map</button>
-        </fieldset>
-        <datalist id="pl"></datalist>
-      </form>
-      <noscript><p class="fine">The route strip needs JavaScript.</p></noscript>
-      <p class="note">
-        This is a straight line corridor, not a driving route. Prices are the EIA regional average from Monday; pumps in the same state can run more than a dollar apart. Check the chain's own page for today's price.
-      </p>
-      <p class="fine rt-st" id="rt-st" role="status"></p>
-      <div id="rt-out"></div>
-    </section>
 
     <section class="mp-ls" aria-labelledby="ls-h">
       <div class="sh"><h2 id="ls-h">List</h2><p class="meta" id="ls-n">{fmt(total)} places</p></div>
       <details id="ls-d">
       <summary class="btn"><span class="ls-o">Show</span><span class="ls-c">Hide</span> the list</summary>
-      <p class="fine">Every marker on the map. With the map on, the list keeps to what is in view, and a name opens its marker.</p>
+      <p class="fine">Every place on the map. With the map on, the list shows what is in view.</p>
       <a class="skip" href="#ls-end">Skip past the list</a>
       <div class="scroll mlist" tabindex="0" role="region" aria-label="List of every place on the map, scrolls">
         <table id="ls">
           <thead>
-            <tr><th scope="col" data-sort="n">Name</th><th scope="col" data-sort="t">Type</th><th scope="col" data-sort="st" aria-sort="ascending">St</th></tr>
+            <tr><th scope="col">Name</th><th scope="col">Type</th><th scope="col">State</th></tr>
           </thead>
           <tbody set:html={rowsHtml(data.points)} />
         </table>
       </div>
       <p class="fine" id="ls-end" tabindex="-1">End of the list.</p>
       </details>
+    </section>
+
+    <section class="mp-cr" aria-labelledby="credits">
+      <div class="sh"><h2 id="credits">Map credits</h2></div>
+      <p class="fine">
+        {bm.credit.name === "CARTO" ? <>Base map <a href={bm.credit.href}>© CARTO</a>, map data and stops </> : "Base map, map data and stops "}<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, ODbL</a>, extract of {osmDate}.
+        {" "}More weigh stations: U.S. DOT NTAD (public domain) and Iowa DOT (CC BY 4.0).
+        {data.present.fleet && " Weigh station and truck service points: DailyFuel, CC BY 4.0."}
+        {data.present.roads && " Roads: NTAD National Highway Freight Network, U.S. DOT BTS, public domain."}
+        {data.present.states && " State outlines: U.S. Census Bureau, public domain."}
+        {data.present.places && <> Place names: <a href="https://www.geonames.org">GeoNames</a>, CC BY 4.0.</>}
+        {" "}Drawn with Leaflet.
+      </p>
     </section>
   </div>
   <script is:inline type="application/json" id="mapcfg" set:html={jsonBlock(cfg)} />
@@ -180,8 +201,43 @@ const description =
   .mp-head {
     padding: 18px 0 2px;
   }
-  .mp-head .fine {
+  .mp-h {
+    margin: 0 0 4px;
+    font-size: var(--fs-b);
+    font-weight: 700;
+  }
+  .mp-in {
     margin: 0;
+  }
+  .fd {
+    max-width: 520px;
+    margin-top: 12px;
+  }
+  .fd fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .fd .rt-f {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+  .fd .btn {
+    flex: 1 1 auto;
+  }
+  .mp-tip {
+    display: none;
+    margin: 8px 0 0;
+    color: var(--ink);
+  }
+  @media (pointer: coarse) {
+    .mp-tip {
+      display: block;
+    }
   }
   .mp-mc {
     min-width: 0;
@@ -197,12 +253,22 @@ const description =
     position: relative;
     z-index: 0;
     height: 360px;
+    height: min(360px, 50vh);
+    height: min(360px, 50svh);
     border: 1px solid var(--edge);
     background: var(--bg);
   }
   @media (min-width: 600px) {
     .mp-map {
       height: 460px;
+    }
+  }
+  /* a phone on its side: the map never fills the screen, so a thumb can always scroll past it */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .mp-map {
+      height: calc(100vh - 120px);
+      height: calc(100svh - 120px);
+      min-height: 220px;
     }
   }
   @media (min-width: 900px) {
@@ -234,10 +300,6 @@ const description =
     .mp-msg {
       position: static;
     }
-  }
-  .mp-map.pick,
-  .mp-map.pick .leaflet-interactive {
-    cursor: crosshair;
   }
   .mp-lg .sh {
     margin-top: 0;
@@ -495,6 +557,7 @@ const description =
     flex: 1 1 200px;
     align-items: center;
     gap: 8px;
+    min-width: 0;
     max-width: 320px;
     min-height: 30px;
     padding: 1px 8px;
@@ -505,6 +568,7 @@ const description =
   }
   .rt-f input {
     flex: 1;
+    width: 0;
     min-width: 0;
     padding: 3px 0;
     border: 0;
@@ -539,11 +603,30 @@ const description =
   .rsum {
     margin: 14px 0 0;
   }
-  .rs {
-    margin-top: 12px;
+  /* the trip's prices, one state a line, then each state's places folded */
+  .rp {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
   }
-  .rs .strip {
-    margin: 0 0 4px;
+  .rp li {
+    padding: 4px 0;
+    border-bottom: 1px solid var(--hair);
+  }
+  .rs {
+    margin-top: 10px;
+  }
+  .rs > summary {
+    list-style: none;
+  }
+  .rs > summary::-webkit-details-marker {
+    display: none;
+  }
+  .rs summary {
+    min-height: 24px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
   }
   .rs table {
     width: auto;
@@ -554,6 +637,28 @@ const description =
     white-space: normal;
   }
 
+  /* the key and its filters, behind one button on a phone */
+  .lgt-l,
+  #lgt {
+    display: none;
+  }
+  #lgt:focus-visible + .lgt-l {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  #lgt:checked + .lgt-l .o1,
+  #lgt:not(:checked) + .lgt-l .o2 {
+    display: none;
+  }
+  .mp-cr p {
+    margin: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mp .leaflet-zoom-anim .leaflet-zoom-animated,
+    .mp .leaflet-fade-anim .leaflet-popup {
+      transition: none !important;
+    }
+  }
   /* the list starts closed: 2,400 rows cost a phone too much to lay out before anyone asks for them */
   #ls-d summary {
     display: inline-block;
@@ -601,9 +706,71 @@ const description =
   .lk:hover {
     text-decoration-color: currentColor;
   }
+  /* a phone: one column of thumb sized controls */
+  @media (max-width: 479px) {
+    .top .btn[aria-current="page"] {
+      display: none;
+    }
+    .rt fieldset {
+      display: block;
+    }
+    .rt-f {
+      display: flex;
+      max-width: none;
+      min-height: 48px;
+      margin-bottom: 8px;
+    }
+    .rt-f span {
+      min-width: 4ch;
+    }
+    .rt .btn,
+    .fd .btn {
+      min-height: 48px;
+    }
+    .fd .rt-f {
+      margin: 0;
+    }
+    .mp .leaflet-bar a,
+    .mp .leaflet-bar a:first-child,
+    .mp .leaflet-bar a:last-child {
+      width: 44px;
+      height: 44px;
+      font: 700 22px/42px var(--font);
+    }
+    #lgt,
+    .lgt-l {
+      display: block;
+    }
+    #lgt:not(:checked) ~ .lg {
+      display: none;
+    }
+    .lg-i {
+      min-height: 44px;
+    }
+    .lg-i input {
+      width: 22px;
+      height: 22px;
+    }
+    .rs summary,
+    .pp-in .btn {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+    #ls-d summary {
+      display: block;
+      text-align: center;
+    }
+    .mlist td:nth-child(2),
+    .mlist th:nth-child(2) {
+      display: none;
+    }
+  }
+
   @media print {
     .mp-map,
-    .mp-rt {
+    .mp-rt,
+    .fd {
       display: none;
     }
     .mlist {

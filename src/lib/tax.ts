@@ -127,9 +127,9 @@ export function inSentence(name: string): string {
   return name === "District of Columbia" ? `the ${name}` : name;
 }
 
-/** "Since July 2024": when this state's rate took effect, as FHWA has it. */
+/** "Rate set July 2024": when this state's rate took effect, as FHWA has it. */
 export function sinceLabel(view: TaxView): string | null {
-  return view.since ? `Since ${formatMonthYear(view.since)}` : null;
+  return view.since ? `Rate set ${formatMonthYear(view.since)}` : null;
 }
 
 /** The newest effective date in the table, which is how current the table really is. */

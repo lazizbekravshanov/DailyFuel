@@ -1,10 +1,12 @@
 ---
-// What tax is on a gallon of diesel in one state: four boxes in the hairline
-// grid the key stats use, then the scope note. Tax is a separate fact from the
-// prices DailyFuel measures, so it never wears the change colours. DC reads
-// "Not listed" (FHWA prints no rate), and Utah and Minnesota read "Out of
-// date" (FHWA still prints a rate the state has since replaced), with no
-// total and no rank for any of the three.
+// What tax is on a gallon of diesel in one state: the one fact a driver needs
+// first, in full ink (tax is already in the price), then four boxes in the
+// hairline grid the stats use, then the fine print folded under one button,
+// with whatever the page adds to it (the DOE line, the AAA link). Tax is a
+// separate fact from the prices DailyFuel measures, so it never wears the
+// change colours. DC reads "Not listed" (FHWA prints no rate), and Utah and
+// Minnesota read "Out of date" (FHWA still prints a rate the state has since
+// replaced), with no total and no rank for any of the three.
 import { formatCpg, rankLabel, sinceLabel, taxVintage } from "../lib/tax.ts";
 import type { SiteData, StateView } from "../lib/site.ts";
 
@@ -23,14 +25,15 @@ const since = sinceLabel(v);
 const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
 ---
 <section aria-labelledby="tax-title">
-  <div class="sh"><h2 id="tax-title">Tax</h2><p class="meta">FHWA table MF-121T, {tax.reporting_period}</p></div>
+  <div class="sh"><h2 id="tax-title">Tax</h2><p class="meta">Cents a gallon, {tax.reporting_period} federal table</p></div>
+  {priced && <p class="note tin">Tax is already in the pump price above.</p>}
   <dl class="stats">
     <div>
       <dt>{stateLabel}</dt>
       {v.outOfDate ? (
         <>
           <dd class="w">Out of date</dd>
-          <dd class="s">FHWA's rate is old</dd>
+          <dd class="s">Our source is out of date</dd>
         </>
       ) : v.state !== null ? (
         <>
@@ -40,14 +43,14 @@ const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
       ) : (
         <>
           <dd class="w">Not listed</dd>
-          <dd class="s">FHWA's table has no rate</dd>
+          <dd class="s">Not in our source</dd>
         </>
       )}
     </div>
     <div>
       <dt>Federal tax</dt>
       <dd>{formatCpg(v.federal)}</dd>
-      <dd class="s">Same everywhere</dd>
+      <dd class="s">Same in every state</dd>
     </div>
     <div>
       <dt>Total tax</dt>
@@ -58,8 +61,8 @@ const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
         </>
       ) : (
         <>
-          <dd class="w">n/a</dd>
-          <dd class="s">Needs a state rate</dd>
+          <dd class="w">Unknown</dd>
+          <dd class="s">State rate unknown</dd>
         </>
       )}
     </div>
@@ -68,7 +71,7 @@ const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
       {rank ? (
         <>
           <dd>{rank}</dd>
-          <dd class="s">of {v.ranked} with a current rate</dd>
+          <dd class="s">Out of {v.ranked} states ranked</dd>
         </>
       ) : (
         <>
@@ -78,6 +81,10 @@ const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
       )}
     </div>
   </dl>
-  {v.note && <p class="fine note">{v.note}</p>}
-  <p class="fine note">{tax.scope} {taxVintage(tax)}{priced && " Tax is already inside the pump price above."}</p>
+  <details class="more">
+    <summary class="btn wide">What the price and tax include</summary>
+    {v.note && <p class="fine note">{v.note}</p>}
+    <p class="fine note">{tax.scope} {taxVintage(tax)}</p>
+    <slot />
+  </details>
 </section>

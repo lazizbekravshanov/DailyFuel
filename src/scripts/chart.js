@@ -92,12 +92,15 @@
       }
       return target - pts[lo].d <= pts[hi].d - target ? lo : hi;
     }
-    plot.addEventListener("pointermove", function (e) {
+    // a tap or a slide reads a week, and a finger's week stays after it lifts
+    function at(e) {
       var r = pa.getBoundingClientRect();
       if (r.width) show(nearest((e.clientX - r.left) / r.width), true);
-    });
-    plot.addEventListener("pointerleave", function () {
-      if (document.activeElement !== plot) reset();
+    }
+    plot.addEventListener("pointermove", at);
+    plot.addEventListener("pointerdown", at);
+    plot.addEventListener("pointerleave", function (e) {
+      if (e.pointerType !== "touch" && document.activeElement !== plot) reset();
     });
     plot.addEventListener("blur", reset);
     plot.addEventListener("keydown", function (e) {

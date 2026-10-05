@@ -19,25 +19,30 @@ export function readout(doc: Document): void {
       day = fig && fig.querySelector(".rd-d"),
       price = fig && fig.querySelector(".rd-v");
     if (n < 2 || !box || !cross || !day || !price || !start) continue;
-    let at = n - 1;
+    let i = n - 1;
     const show = (k: number, mark: boolean) => {
-      at = Math.max(0, Math.min(n - 1, k));
-      day.textContent = new Date(start + at * 6048e5).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
-      price.textContent = values[at] ? "$" + values[at] : "no price";
+      i = Math.max(0, Math.min(n - 1, k));
+      day.textContent = new Date(start + i * 6048e5).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+      price.textContent = values[i] ? "$" + values[i] : "no price";
       cross.hidden = !mark;
-      cross.style.left = (at / (n - 1)) * 100 + "%";
+      cross.style.left = (i / (n - 1)) * 100 + "%";
     };
     const rest = () => show(n - 1, false);
-    plot.addEventListener("pointermove", (e) => {
+    // a tap or a slide reads a week, and a finger's week stays after it lifts
+    const at = (e: Event) => {
       const r = box.getBoundingClientRect();
       if (r.width) show(Math.round(((e as PointerEvent).clientX - r.left) / r.width * (n - 1)), true);
+    };
+    plot.addEventListener("pointermove", at);
+    plot.addEventListener("pointerdown", at);
+    plot.addEventListener("pointerleave", (e) => {
+      if ((e as PointerEvent).pointerType != "touch") rest();
     });
-    plot.addEventListener("pointerleave", rest);
-    plot.addEventListener("focus", () => show(at, true));
+    plot.addEventListener("focus", () => show(i, true));
     plot.addEventListener("blur", rest);
     plot.addEventListener("keydown", (e) => {
       const key = (e as KeyboardEvent).key,
-        k = key === "ArrowRight" ? at + 1 : key === "ArrowLeft" ? at - 1 : key === "Home" ? 0 : key === "End" ? n - 1 : -1;
+        k = key === "ArrowRight" ? i + 1 : key === "ArrowLeft" ? i - 1 : key === "Home" ? 0 : key === "End" ? n - 1 : -1;
       if (k < 0) return;
       show(k, true);
       e.preventDefault();
