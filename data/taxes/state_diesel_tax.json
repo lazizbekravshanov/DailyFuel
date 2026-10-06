@@ -118,11 +118,11 @@
   ],
   "notes": {
     "AZ": "Arizona's rate here is the truck rate. It applies to trucks with more than two axles or over 26,000 pounds. Lighter vehicles pay 18 cents.",
-    "DC": "FHWA's table has no diesel rate for the District of Columbia. That doesn't mean there's no tax on diesel there, only that this table doesn't show one.",
+    "DC": "The federal highway table has no diesel rate for the District of Columbia. That doesn't mean there's no tax on diesel there, only that this table doesn't show one.",
     "KY": "Motor carriers in Kentucky also pay a surtax on diesel of 4.7 percent of the average wholesale price.",
-    "MN": "Minnesota has adjusted its diesel tax every January since 2023, but FHWA's table still has Minnesota's rate from July 2012. That's out of date, so it isn't shown or ranked here. The Minnesota Department of Revenue posts the current rate.",
+    "MN": "Minnesota has adjusted its diesel tax every January since 2023, but the federal highway table still has Minnesota's rate from July 2012. That's out of date, so it isn't shown or ranked here. The Minnesota Department of Revenue posts the current rate.",
     "OR": "Trucks over 26,000 pounds pay Oregon's weight mile tax instead of this per gallon tax. It's for everyone else.",
-    "UT": "Utah resets its diesel tax every January, but FHWA's table still has Utah's rate from January 2021. That's out of date, so it isn't shown or ranked here. The Utah State Tax Commission posts the current rate."
+    "UT": "Utah resets its diesel tax every January, but the federal highway table still has Utah's rate from January 2021. That's out of date, so it isn't shown or ranked here. The Utah State Tax Commission posts the current rate."
   },
   "scope": "This counts state taxes charged by the gallon. Sales taxes, local fuel taxes and some other state taxes on fuel aren't in it, so what you pay can be more."
 }
