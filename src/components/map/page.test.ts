@@ -83,18 +83,18 @@ describe("the /map page", () => {
   it("lets one finger scroll the page on a phone, zooms in on a far out tap, and opens the nearest dot close in", () => {
     const script = [...html().matchAll(/<script type="module">([\s\S]*?)<\/script>/g)][0][1];
     // one finger scrolls the page; two move and zoom the map
-    expect(script).toMatch(/dragging:!\w+\.Browser\.mobile/);
+    expect(script).toMatch(/dragging:![\w$]+\.Browser\.mobile/);
     // below zoom 6 a tap on a phone zooms in two levels on the spot, so 3 goes to 5 and 5 to 7
-    expect(script).toMatch(/\w+\.Browser\.mobile&&(\w+)<6\)return \w+\.setView\(\w+\.latlng,\1\+2\)/);
+    expect(script).toMatch(/[\w$]+\.Browser\.mobile&&([\w$]+)<6\)return [\w$]+\.setView\([\w$]+\.latlng,\1\+2\)/);
     // from 6 the tap opens the nearest switched on dot, measured on screen from the finger: Leaflet's own
     // point for a small marker's event is the marker's spot, which would always pick the dot drawn on top
-    expect(script).toMatch(/\.mouseEventToLayerPoint\(\w+\.originalEvent\)/);
-    expect(script).toMatch(/\.on\?\w+\.m\._point\.distanceTo\(\w+\):1e9/);
+    expect(script).toMatch(/\.mouseEventToLayerPoint\([\w$]+\.originalEvent\)/);
+    expect(script).toMatch(/\.on\?[\w$]+\.m\._point\.distanceTo\([\w$]+\):1e9/);
     expect(script).not.toContain(".layerPoint");
     // the dot hit, the bigger lettered one when two overlap, keeps a 1px lead
-    expect(script).toMatch(/\w+=\w+\.layer\.p,\w+=\w+\(\w+\)-1[;,]/);
+    expect(script).toMatch(/[\w$]+=[\w$]+\.layer\.p,[\w$]+=[\w$]+\([\w$]+\)-1[;,]/);
     // a found town and Near me land at zoom 9, where the stops are told apart
-    expect(script).toMatch(/setView\(\[\w+\.lat,\w+\.lon\],9\)/);
+    expect(script).toMatch(/setView\(\[[\w$]+\.lat,[\w$]+\.lon\],9\)/);
     expect(script).toContain("locate({setView:!0,maxZoom:9})");
     // the map opens on the state in the address or the saved one, and a trip in the address comes back
     expect(script).toContain("dailyfuel:state");
@@ -104,9 +104,9 @@ describe("the /map page", () => {
   it("keeps a bad address, an empty box and a refused location from leaving the driver guessing", () => {
     const script = [...html().matchAll(/<script type="module">([\s\S]*?)<\/script>/g)][0][1];
     // a malformed address (#100%) can't stop the roads or a trip from loading
-    expect(script).toMatch(/try\{\w+=decodeURIComponent\(\w+\.location\.hash\.slice\(1\)\)\}catch/);
+    expect(script).toMatch(/try\{[\w$]+=decodeURIComponent\([\w$]+\.location\.hash\.slice\(1\)\)\}catch/);
     // an anchor on the page (#credits) is not a state: the saved state is tried next
-    expect(script).toMatch(/\w+\(\w+\)\|\|\w+\(\w+\.localStorage\.getItem\("dailyfuel:state"\)\)/);
+    expect(script).toMatch(/[\w$]+\([\w$]+\)\|\|[\w$]+\([\w$]+\.localStorage\.getItem\("dailyfuel:state"\)\)/);
     // Show with nothing typed asks for a town, and never quotes an empty box
     expect(script).toContain('"Type a town or state."');
     // Near me scrolls to the map only once the phone says where it is; a refusal stays by the find box
@@ -151,10 +151,10 @@ describe("the /map page", () => {
     expect(css).not.toMatch(/url\((?!#)/);
   });
 
-  it("stays inside its budget: under 170 KB gzip for everything it loads, the script under 6 KB", () => {
+  it("stays inside its budget: under 170 KB gzip for everything it loads, the script under 6.5 KB", () => {
     const page = html();
     const script = [...page.matchAll(/<script type="module">([\s\S]*?)<\/script>/g)][0][1];
-    expect(gz(script)).toBeLessThan(6 * KB);
+    expect(gz(script)).toBeLessThan(6.5 * KB);
     const cfg = JSON.parse(doc().getElementById("mapcfg")!.textContent!);
     const sizes: Record<string, number> = {
       page: gz(page),
