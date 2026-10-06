@@ -5,12 +5,15 @@ import { distMi } from "../components/map/geo.ts";
 
 type LL = [number, number];
 
+/** The fewest nodes a piece of the network needs for a town to step onto it: Hawaii's smallest island has 10. */
+const FEW = 10;
+
 /**
  * The shortest way from a to b along the freight highways, as [lat, lon]
  * points from a to b, or null when the roads nearest the two don't connect.
  * The lines are the map's freight roads plus the joins that make them one
  * graph (see roadJoins in src/lib/mapdata.ts); each end steps from its town
- * to the nearest point on them.
+ * to the nearest point on them that isn't on a scrap of a few points.
  */
 export function route(a: LL, b: LL, lines: LL[][]): LL[] | null {
   const adj = new Map<string, [string, number][]>(),
@@ -28,11 +31,23 @@ export function route(a: LL, b: LL, lines: LL[][]): LL[] | null {
       link(u, v, d);
       link(v, u, d);
     }
+  // each node's piece of the network by its size; a town steps only onto a
+  // piece of FEW nodes or more, never a scrap the build couldn't bridge
+  const size = new Map<string, number>();
+  for (const k of adj.keys())
+    if (!size.has(k)) {
+      const q = [k];
+      size.set(k, 0);
+      for (let i = 0; i < q.length; i++) for (const [v] of adj.get(q[i])!) if (!size.has(v)) size.set(v, 0), q.push(v);
+      for (const n of q) size.set(n, q.length);
+    }
+  const few = Math.min(FEW, Math.max(...size.values()));
   let s = "",
     t = "",
     ds = 1e9,
     dt = 1e9;
   for (const [n, q] of at) {
+    if (size.get(n)! < few) continue;
     const x = distMi(a[0], a[1], q[0], q[1]),
       y = distMi(b[0], b[1], q[0], q[1]);
     if (x < ds) ((ds = x), (s = n));

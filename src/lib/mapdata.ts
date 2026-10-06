@@ -670,6 +670,8 @@ export interface RoadsPayload {
 
 /** How far apart a road end and another road may be and still be joined for routing. */
 export const JOIN_KM = 4;
+/** How far apart two cut off pieces of the freight network may be and still be bridged for trips: about 10 miles. */
+export const BRIDGE_KM = 16;
 
 export type LabelKind = 0 | 1 | 2;
 
@@ -754,7 +756,9 @@ export function roadsPayload(roads: MapRoad[], p = 3): RoadsPayload {
 /**
  * The joins that make the coded lines one road graph: each line's two ends,
  * at the coded precision, to the nearest point within JOIN_KM that it is not
- * already next to along a line.
+ * already next to along a line, a join where two lines cross between their
+ * points, then a bridge from each piece still cut off to the nearest other
+ * piece within BRIDGE_KM.
  */
 export function roadJoins(lines: number[][], p: number): number[][] {
   const s = 10 ** p, key = (x: number, y: number) => `${x},${y}`;
@@ -785,6 +789,37 @@ export function roadJoins(lines: number[][], p: number): number[][] {
     });
   const kmOf = (a: [number, number], b: [number, number]) => km([a[0] / s, a[1] / s], [b[0] / s, b[1] / s]);
   const joins: number[][] = [], done = new Set<string>();
+  const link = (a: [number, number], b: [number, number]) => {
+    const ak = key(...a), bk = key(...b), id = [ak, bk].sort().join(" ");
+    if (ak === bk || done.has(id) || near.get(ak)!.has(bk)) return;
+    done.add(id);
+    joins.push([a[0], a[1], b[0] - a[0], b[1] - a[1]]);
+    near.get(ak)!.add(bk);
+    near.get(bk)!.add(ak);
+  };
+  // Two highways that cross between their points share no point, so each
+  // crossing of two lines joins the nearest two points of the crossing
+  // segments: an interchange, which is what the freight network crosses at.
+  const segs: [[number, number], [number, number], number][] = [], sgrid = new Map<string, number[]>();
+  decoded.forEach((pts, li) =>
+    pts.forEach((q, i) => {
+      if (!i) return;
+      const a = pts[i - 1], n = segs.push([a, q, li]) - 1;
+      for (let x = Math.floor(Math.min(a[0], q[0]) / cell); x <= Math.floor(Math.max(a[0], q[0]) / cell); x++)
+        for (let y = Math.floor(Math.min(a[1], q[1]) / cell); y <= Math.floor(Math.max(a[1], q[1]) / cell); y++)
+          (sgrid.get(key(x, y)) ?? sgrid.set(key(x, y), []).get(key(x, y))!).push(n);
+    }),
+  );
+  const side = (a: [number, number], b: [number, number], c: [number, number]) => Math.sign((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]));
+  for (const ids of sgrid.values())
+    for (let x = 0; x < ids.length; x++)
+      for (let y = x + 1; y < ids.length; y++) {
+        const [a, b, la] = segs[ids[x]], [c, d, lb] = segs[ids[y]];
+        if (la === lb || side(a, b, c) * side(a, b, d) >= 0 || side(c, d, a) * side(c, d, b) >= 0) continue;
+        let best: [[number, number], [number, number]] = [a, c];
+        for (const p of [a, b]) for (const q of [c, d]) if (kmOf(p, q) < kmOf(...best)) best = [p, q];
+        link(...best);
+      }
   for (const pts of decoded)
     for (const end of [pts[0], pts[pts.length - 1]]) {
       if (!end) continue;
@@ -802,13 +837,57 @@ export function roadJoins(lines: number[][], p: number): number[][] {
               bestKm = d;
             }
           }
-      if (!best) continue;
-      const id = [ek, key(...best)].sort().join(" ");
-      if (done.has(id)) continue;
-      done.add(id);
-      joins.push([end[0], end[1], best[0] - end[0], best[1] - end[1]]);
+      if (best) link(end, best);
     }
-  return joins;
+  // The data leaves some stretches cut off from the rest, like the roads
+  // through a city whose link is missing, and a town nearest one would get
+  // no route. Each piece but the largest is bridged, at its nearest pair of
+  // points, to another piece within BRIDGE_KM, the smallest first, until
+  // none is left that close; Alaska and Hawaii stay on their own. Bridging
+  // adds no points, so a piece with nothing near stays that way.
+  const at = new Map([...near.keys()].map((k) => [k, k.split(",").map(Number) as [number, number]])),
+    alone = new Set<string>();
+  for (;;) {
+    const of = new Map<string, number>(),
+      pieces: string[][] = [];
+    for (const k0 of near.keys()) {
+      if (of.has(k0)) continue;
+      const piece = [k0];
+      of.set(k0, pieces.length);
+      for (let n = 0; n < piece.length; n++)
+        for (const v of near.get(piece[n])!)
+          if (!of.has(v)) {
+            of.set(v, pieces.length);
+            piece.push(v);
+          }
+      pieces.push(piece);
+    }
+    const big = pieces.reduce((b, x, i) => (x.length > pieces[b].length ? i : b), 0);
+    let bridged = false;
+    for (const i of pieces.map((_, i) => i).sort((x, y) => pieces[x].length - pieces[y].length)) {
+      if (i === big || alone.has(pieces[i][0])) continue;
+      let best: [string, string] | null = null, bestKm = BRIDGE_KM;
+      for (const a of pieces[i]) {
+        const pa = at.get(a)!;
+        for (const [b, pb] of at) {
+          if (of.get(b) === i) continue;
+          const d = kmOf(pa, pb);
+          if (d < bestKm) {
+            best = [a, b];
+            bestKm = d;
+          }
+        }
+      }
+      if (!best) {
+        for (const k of pieces[i]) alone.add(k);
+        continue;
+      }
+      link(at.get(best[0])!, at.get(best[1])!);
+      bridged = true;
+      break;
+    }
+    if (!bridged) return joins;
+  }
 }
 
 /** How far a weigh station may be from a signed freight highway for its popup to name it. The lines are good to about a kilometre. */

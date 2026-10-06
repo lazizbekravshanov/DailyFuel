@@ -32,6 +32,8 @@ describe("the trip route", () => {
       [[41.88, -87.63], [39.1, -84.51], 260, 330], // Chicago to Cincinnati, about 295 by road
       [[34.05, -118.24], [33.45, -112.07], 350, 420], // Los Angeles to Phoenix, about 370
       [[40.71, -74.0], [42.36, -71.06], 200, 250], // New York to Boston, about 215
+      [[33.58, -101.86], [35.22, -101.83], 100, 150], // Lubbock to Amarillo up I 27, about 120: Lubbock's roads were cut off until the build bridged them
+      [[35.26, -81.19], [34.99, -80.55], 40, 80], // Gastonia to Monroe, NC, about 50: the highways that cross in Charlotte meet there
     ] as [LL, LL, number, number][]) {
       const p = route(a, b, net)!;
       expect(p, `${a} to ${b}`).not.toBeNull();
