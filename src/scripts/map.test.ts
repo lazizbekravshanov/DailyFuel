@@ -11,7 +11,6 @@ import { rowsHtml } from "../components/map/page.ts";
 import { placesPayload, statesPayload, type MapPoint, type MapStateShape } from "../lib/mapdata.ts";
 import {
   BAND_MI,
-  corridor,
   decodePlaces,
   decodeStates,
   esc,
@@ -24,7 +23,7 @@ import {
   type PriceRow,
   type Pt,
 } from "./map.ts";
-import { MPG, readMpg, stateMiles, stripHtml } from "./trip.ts";
+import { corridor, MPG, readMpg, stateMiles, stripHtml } from "./trip.ts";
 
 
 describe("the chains", () => {
