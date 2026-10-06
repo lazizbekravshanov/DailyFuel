@@ -287,7 +287,7 @@ describe("the /map page", () => {
     expect(cfg.wk).toMatch(/^Week of [A-Z][a-z]{2} \d{1,2}, \d{4} prices$/);
     const note = section.querySelector(".note")!;
     expect(text(note)).toBe(
-      "This follows a straight line, not the roads you will drive. Each price is the region's weekly average, and pumps in one state can differ by more than a dollar, so check the chain's website for today's price.",
+      "The line follows the main freight highways, not turn by turn directions, so check your own route for height and weight limits. Each price is the region's weekly average, and pumps in one state can differ by more than a dollar, so check the chain's website for today's price.",
     );
     // the status and the result sit under the button, where the keyboard can't cover them, and the warning follows at once, never folded
     const all = Array.from(section.children);

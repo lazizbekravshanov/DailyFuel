@@ -189,7 +189,7 @@ describe("the route strip", () => {
     // a line along a border, like Cincinnati to Louisville: in and out of the same states
     const run = (code: string, from: number, to: number) => ({ code, from, to, hits: [] });
     const res = {
-      miles: 100, line: [], ring: [], outside: false, hits: 0,
+      miles: 100, line: [], ring: [], outside: false, hits: 0, road: false,
       runs: [run("IL", 0, 20), run("IA", 25, 40), run("IL", 45, 60), run("IA", 65, 80), run("WY", 85, 100)],
     };
     const d = parseHTML(`<div>${stripHtml(res, "A", "B", CFG, false)}</div>`).document;
