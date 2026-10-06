@@ -15,7 +15,7 @@
 //
 // Pure functions are exported for src/scripts/map.test.ts.
 
-import { band, distMi, sample, shapeAt, track, undelta, type Shape } from "../components/map/geo.ts";
+import { band, distMi, inRing, sample, shapeAt, track, undelta, type Shape } from "../components/map/geo.ts";
 
 /** One chain: name, letter, locator. */
 export type ChainCfg = [string, string, string];
@@ -302,21 +302,15 @@ export function init(doc: Document, win: any): void {
     moved = 0,
     last: { a: [number, number]; b: [number, number]; al: string; bl: string } | null = null,
     back: HTMLElement | null = null,
-    hl: [string, number, number, number][] | null = null;
+    // the freight roads, by route: lines, name (empty for an unsigned one), 1 for an interstate; and their labels
+    roads: [[number, number][][], string, number][] = [],
+    labels: [string, number, number, number][] = [];
 
   // ---- the list: what is on screen, sortable, each name opening its marker
   const list = () => {
     const bounds = map && map.getBounds();
-    // the whole zoom, for the CSS that shows the route labels, which are made the first time the map reaches 6
-    if (map) {
-      const z = map.getZoom() | 0;
-      box.setAttribute("data-z", z as any); // the DOM makes it a string
-      if (z > 5 && hl) {
-        for (const [t, y, x, w] of hl)
-          L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }).addTo(map);
-        hl = null;
-      }
-    }
+    // the whole zoom, for the CSS that shows the route labels by zoom
+    if (map) box.setAttribute("data-z", (map.getZoom() | 0) as any); // the DOM makes it a string
     let n = 0;
     for (const p of pts) {
       const v = p.on && (!bounds || bounds.contains([p.lat, p.lon]));
@@ -381,7 +375,28 @@ export function init(doc: Document, win: any): void {
       ab(a, "A"),
       ab(b, "B"),
     ];
+    // The freight roads show only along the trip: every road line with a
+    // point in the band, under the line. A signed route is named on hover or
+    // tap by an unseen twin on the markers' canvas, which is on top and takes
+    // every pointer; the twin sits under the markers, and the canvas's
+    // tolerance makes a thin road easy to tap.
+    const inBand = (q: number[]) => inRing(q[0], q[1], res.ring),
+      I: [number, number][][] = [],
+      O: typeof I = [],
+      under: any[] = [];
+    for (const [ls, t, w] of roads) {
+      const k = ls.filter((l) => l.some(inBand));
+      if (!k.length) continue;
+      (w ? I : O).push(...k);
+      if (t) under.push(L.polyline(k, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }));
+    }
+    under.push(L.polyline(I, { className: "ri" }), L.polyline(O, { className: "ro" }));
+    // labels in the band; data-z shows interstates (h1) from zoom 6, US routes (h2) from 7 and the rest from 8
+    for (const [t, y, x, w] of labels)
+      if (inBand([y, x])) drawn.push(L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }));
     for (const l of drawn) l.addTo(map);
+    for (const l of under) l.addTo(map).bringToBack();
+    drawn.push(...under);
     if (refit) map.fitBounds(drawn[0].getBounds(), { padding: [12, 12] });
   };
   const go = () =>
@@ -539,25 +554,12 @@ export function init(doc: Document, win: any): void {
     // a trip run before the outlines came knew no states
     if (last) run(last.a, last.b, last.al, last.bl);
   });
-  // over the base map, the freight roads, on SVG so the page's CSS tokens colour them in both themes
+  // the freight roads, drawn on SVG along a trip only (see run), so the page's CSS tokens colour them in both themes
   get("roads").then((rd) => {
     if (!rd) return;
-    const I = decodeLines(rd.i, rd.p), O = decodeLines(rd.o, rd.p);
-    // A signed route is drawn with the rest, and named on hover or tap by an
-    // unseen twin on the markers' canvas, which is on top and takes every
-    // pointer: the twin sits under the markers, and the canvas's tolerance
-    // makes a thin road easy to tap.
-    for (const [t, w, l] of rd.r) {
-      const ll = decodeLines(l, rd.p);
-      (w ? I : O).push(...ll);
-      L.polyline(ll, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }).addTo(map).bringToBack();
-    }
-    // behind whatever the route strip has drawn, the other roads under the interstates
-    L.polyline(I, { className: "ri", smoothFactor: 1.5 }).addTo(map).bringToBack();
-    L.polyline(O, { className: "ro", smoothFactor: 1.5 }).addTo(map).bringToBack();
-    // the labels wait for the map to reach zoom 6 (see list); data-z then shows interstates (h1) from 6, US routes (h2) from 7 and the rest from 8
-    hl = rd.l;
-    list();
+    roads = [[decodeLines(rd.i, rd.p), "", 1], [decodeLines(rd.o, rd.p), "", 0], ...rd.r.map(([t, w, l]: any) => [decodeLines(l, rd.p), t, w])];
+    labels = rd.l;
+    if (last) run(last.a, last.b, last.al, last.bl);
   });
 
   // ---- popups
