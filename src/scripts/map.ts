@@ -15,7 +15,7 @@
 //
 // Pure functions are exported for src/scripts/map.test.ts.
 
-import { band, distMi, inRing, sample, shapeAt, track, undelta, type Shape } from "../components/map/geo.ts";
+import { band, distMi, inRing, sample, shapeAt, undelta, type Shape } from "../components/map/geo.ts";
 
 /** One chain: name, letter, locator. */
 export type ChainCfg = [string, string, string];
@@ -53,12 +53,18 @@ export interface Pt {
   d: string;
   c: string;
   on: boolean;
+  /** off the trip's route, so not drawn while a trip is shown */
+  x?: number;
   /** the Leaflet marker, once there is a map */
   m?: any;
   sel?: boolean;
 }
 
 export const BAND_MI = 25;
+/** How far off a highway route a stop may be and still be on it: an exit or two. */
+export const ROAD_MI = 5;
+/** The route finder, a file of its own so the map's first load doesn't pay for it (src/scripts/route.ts). */
+const ROUTE = "/map/route.js";
 export const STEP_MI = 5;
 const DIRS: Record<string, string> = { n: "north", s: "south", e: "east", w: "west" };
 
@@ -158,22 +164,41 @@ export interface Corridor {
   /** part of the line runs over water or another country */
   outside: boolean;
   hits: number;
+  /** the line follows the freight highways, not a straight line */
+  road: boolean;
 }
 
+type LL = [number, number];
+
 /**
- * The straight line from a to b: sampled every STEP_MI miles, the states it
- * crosses in order (by point in polygon on each sample), and the truck
- * stops and weigh stations switched on in the legend that sit within
- * BAND_MI miles of it, in order along it, each under the state the line is
- * in at that mile. With no outlines loaded it is one run with no state.
+ * The trip from a to b: along the freight highway route when there is one
+ * (see src/scripts/route.ts), else the straight line, sampled every mile on a
+ * route and every STEP_MI miles on a straight line; the states it crosses in
+ * order (by point in polygon on each sample); and the truck stops and weigh
+ * stations switched on in the legend that sit within ROAD_MI miles of a route
+ * (BAND_MI of a straight line), in order along it, each under the state the
+ * line is in at that mile. With no outlines loaded it is one run with no state.
  */
-export function corridor(a: [number, number], b: [number, number], pts: Pt[], shapes: Shape[]): Corridor {
-  const miles = distMi(a[0], a[1], b[0], b[1]),
-    line = sample(a[0], a[1], b[0], b[1], STEP_MI),
+export function corridor(a: LL, b: LL, pts: Pt[], shapes: Shape[], path?: LL[] | null): Corridor {
+  const road = !!path,
+    w = road ? ROAD_MI : BAND_MI,
+    line: LL[] = [],
+    ats: number[] = [],
     runs: Run[] = [];
+  let miles = 0;
+  (path || [a, b]).forEach((q, i, all) => {
+    if (!i) return;
+    const p = all[i - 1];
+    for (const s of sample(p[0], p[1], q[0], q[1], road ? 1 : STEP_MI).slice(line.length ? 1 : 0)) {
+      const last = line[line.length - 1];
+      if (last) miles += distMi(last[0], last[1], s[0], s[1]);
+      line.push(s);
+      ats.push(miles);
+    }
+  });
   let outside = false;
   line.forEach((q, i) => {
-    const at = Math.min(i * STEP_MI, miles),
+    const at = ats[i],
       code = shapes.length ? shapeAt(q[0], q[1], shapes) : null,
       r = runs[runs.length - 1];
     if (shapes.length && !code) outside = true;
@@ -183,10 +208,16 @@ export function corridor(a: [number, number], b: [number, number], pts: Pt[], sh
   let hits = 0;
   if (runs.length) {
     const inBand: { p: Pt; at: number }[] = [];
+    // the nearest sample, on a flat earth in miles, which is close enough within a few miles
     for (const p of pts) {
       if (!p.on || p.k === "v") continue;
-      const t = track(a[0], a[1], b[0], b[1], p.lat, p.lon);
-      if (Math.abs(t.xt) <= BAND_MI && t.at >= 0 && t.at <= miles) inBand.push({ p, at: t.at });
+      const k = Math.cos((p.lat * Math.PI) / 180);
+      let best = w * w, at = -1;
+      line.forEach((q, i) => {
+        const dy = (q[0] - p.lat) * 69.1, dx = (q[1] - p.lon) * 69.1 * k, d = dx * dx + dy * dy;
+        if (d <= best) (best = d), (at = ats[i]);
+      });
+      if (at >= 0) inBand.push({ p, at });
     }
     inBand.sort((x, y) => x.at - y.at);
     for (const h of inBand) {
@@ -203,7 +234,7 @@ export function corridor(a: [number, number], b: [number, number], pts: Pt[], sh
       hits++;
     }
   }
-  return { miles, line, ring: band(line, BAND_MI), runs, outside, hits };
+  return { miles, line, ring: band(line, w), runs, outside, hits, road };
 }
 
 /** "Miles 0 to 150", rounded to whole miles. */
@@ -226,9 +257,10 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     seen: PriceRow[] = [],
     num = (r: PriceRow) => +r[2]!.slice(1);
   for (const r of cfg.px) byCode[r[0]] = r;
-  let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles in a straight line</p>`,
+  let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}</p>`,
     rest = "";
   if (res.outside) h += `<p class="fine">Part of the line runs over water or outside the 50 states.</p>`;
+  if (withButtons) h += `<p><button class="btn" data-clr>Show every stop</button>`;
   h += `<ul class="rp">`;
   for (const r of res.runs) {
     const row = r.code ? byCode[r.code] : null,
@@ -304,6 +336,8 @@ export function init(doc: Document, win: any): void {
     back: HTMLElement | null = null,
     // the freight roads, by route: lines, name (empty for an unsigned one), 1 for an interstate; and their labels
     roads: [[number, number][][], string, number][] = [],
+    // every freight road line plus the joins, for routing a trip
+    net: LL[][] = [],
     labels: [string, number, number, number][] = [];
 
   // ---- the list: what is on screen, sortable, each name opening its marker
@@ -362,42 +396,51 @@ export function init(doc: Document, win: any): void {
   // a new line fits the map to its band; a rerun (a filter, the outlines arriving) leaves the view alone
   const run = (a: [number, number], b: [number, number], al: string, bl: string, refit?: boolean) => {
     last = { a, b, al, bl };
-    const res = corridor(a, b, pts, shapes);
-    out.innerHTML = stripHtml(res, al, bl, cfg, !!map);
-    say((out.querySelector(".rsum") as Element).textContent || "", true);
-    if (!map) return;
-    for (const l of drawn) map.removeLayer(l);
-    const ab = (ll: [number, number], t: string) =>
-      L.marker(ll, { icon: L.divIcon({ className: "rab", html: t, iconSize: [20, 20] }), keyboard: false, interactive: false });
-    drawn = [
-      L.polygon(res.ring, { className: "rb" }),
-      L.polyline(res.line, { className: "rl" }),
-      ab(a, "A"),
-      ab(b, "B"),
-    ];
-    // The freight roads show only along the trip: every road line with a
-    // point in the band, under the line. A signed route is named on hover or
-    // tap by an unseen twin on the markers' canvas, which is on top and takes
-    // every pointer; the twin sits under the markers, and the canvas's
-    // tolerance makes a thin road easy to tap.
-    const inBand = (q: number[]) => inRing(q[0], q[1], res.ring),
-      I: [number, number][][] = [],
-      O: typeof I = [],
-      under: any[] = [];
-    for (const [ls, t, w] of roads) {
-      const k = ls.filter((l) => l.some(inBand));
-      if (!k.length) continue;
-      (w ? I : O).push(...k);
-      if (t) under.push(L.polyline(k, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }));
-    }
-    under.push(L.polyline(I, { className: "ri" }), L.polyline(O, { className: "ro" }));
-    // labels in the band; data-z shows interstates (h1) from zoom 6, US routes (h2) from 7 and the rest from 8
-    for (const [t, y, x, w] of labels)
-      if (inBand([y, x])) drawn.push(L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }));
-    for (const l of drawn) l.addTo(map);
-    for (const l of under) l.addTo(map).bringToBack();
-    drawn.push(...under);
-    if (refit) map.fitBounds(drawn[0].getBounds(), { padding: [12, 12] });
+    // the route finder loads only when a trip is asked for, and a road the network can't connect falls back to the straight line
+    (net.length ? import(ROUTE).then((m) => m.route(a, b, net), () => null) : Promise.resolve(null)).then((path: LL[] | null) => {
+      // a newer trip, or Show every stop, came first
+      if (last?.a != a || last.b != b) return;
+      const res = corridor(a, b, pts, shapes, path);
+      out.innerHTML = stripHtml(res, al, bl, cfg, !!map);
+      say((out.querySelector(".rsum") as Element).textContent || "", true);
+      if (!map) return;
+      for (const l of drawn) map.removeLayer(l);
+      // only the stops along the trip stay on the map, until Show every stop
+      for (const p of pts) p.x = 1;
+      for (const r of res.runs) for (const h of r.hits) h.p.x = 0;
+      grp.eachLayer((m: any) => m.redraw());
+      const ab = (ll: [number, number], t: string) =>
+        L.marker(ll, { icon: L.divIcon({ className: "rab", html: t, iconSize: [20, 20] }), keyboard: false, interactive: false });
+      drawn = [
+        L.polygon(res.ring, { className: "rb" }),
+        L.polyline(res.line, { className: "rl" }),
+        ab(a, "A"),
+        ab(b, "B"),
+      ];
+      // The freight roads show only along the trip: every road line with a
+      // point in the band, under the line. A signed route is named on hover or
+      // tap by an unseen twin on the markers' canvas, which is on top and takes
+      // every pointer; the twin sits under the markers, and the canvas's
+      // tolerance makes a thin road easy to tap.
+      const inBand = (q: number[]) => inRing(q[0], q[1], res.ring),
+        I: [number, number][][] = [],
+        O: typeof I = [],
+        under: any[] = [];
+      for (const [ls, t, w] of roads) {
+        const k = ls.filter((l) => l.some(inBand));
+        if (!k.length) continue;
+        (w ? I : O).push(...k);
+        if (t) under.push(L.polyline(k, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }));
+      }
+      under.push(L.polyline(I, { className: "ri" }), L.polyline(O, { className: "ro" }));
+      // labels in the band; data-z shows interstates (h1) from zoom 6, US routes (h2) from 7 and the rest from 8
+      for (const [t, y, x, w] of labels)
+        if (inBand([y, x])) drawn.push(L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }));
+      for (const l of drawn) l.addTo(map);
+      for (const l of under) l.addTo(map).bringToBack();
+      drawn.push(...under);
+      if (refit) map.fitBounds(drawn[0].getBounds(), { padding: [12, 12] });
+    });
   };
   const go = () =>
     loadPlaces().then(() => {
@@ -480,11 +523,11 @@ export function init(doc: Document, win: any): void {
       L.CircleMarker.prototype._project.call(this);
     },
     _containsPoint(q: any) {
-      return this.p.on && L.CircleMarker.prototype._containsPoint.call(this, q);
+      return this.p.on && !this.p.x && L.CircleMarker.prototype._containsPoint.call(this, q);
     },
     _updatePath() {
       const r = this._renderer, p: Pt = this.p;
-      if (!r._drawing || this._empty() || !p.on) return;
+      if (!r._drawing || this._empty() || !p.on || p.x) return;
       const c = r._ctx, x = this._point.x, y = this._point.y, s = this._radius;
       c.beginPath();
       if (p.k === "v") c.rect(x - s, y - s, 2 * s, 2 * s);
@@ -559,6 +602,7 @@ export function init(doc: Document, win: any): void {
     if (!rd) return;
     roads = [[decodeLines(rd.i, rd.p), "", 1], [decodeLines(rd.o, rd.p), "", 0], ...rd.r.map(([t, w, l]: any) => [decodeLines(l, rd.p), t, w])];
     labels = rd.l;
+    net = [...roads.flatMap((r) => r[0]), ...decodeLines(rd.j || [], rd.p)];
     if (last) run(last.a, last.b, last.al, last.bl);
   });
 
@@ -623,6 +667,17 @@ export function init(doc: Document, win: any): void {
     show(p, b);
   };
   out.addEventListener("click", focusPt);
+  // Show every stop: the trip goes, and every stop comes back
+  out.addEventListener("click", (e) => {
+    if (!(e.target as Element).closest("[data-clr]")) return;
+    last = null;
+    out.innerHTML = "";
+    for (const l of drawn) map.removeLayer(l);
+    drawn = [];
+    for (const p of pts) p.x = 0;
+    grp.eachLayer((m: any) => m.redraw());
+    history.replaceState(null, "", location.pathname);
+  });
 
   // ---- the find row: a state, a town, or Near me
   const fd = doc.getElementById("fd") as HTMLFormElement | null,

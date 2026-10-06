@@ -659,7 +659,17 @@ export interface RoadsPayload {
   r: [string, 0 | 1, number[][]][];
   /** the labels drawn on the lines: text, lat, lon, and 1 for an interstate, 2 for a US route, 0 for the rest */
   l: [string, number, number, LabelKind][];
+  /**
+   * Joins for routing: two point lines, coded like the others, from each
+   * line's end to the nearest point within JOIN_KM it is not already next to,
+   * so the freight network routes as one graph where the source draws a road
+   * end short of the road it meets.
+   */
+  j: number[][];
 }
+
+/** How far apart a road end and another road may be and still be joined for routing. */
+export const JOIN_KM = 4;
 
 export type LabelKind = 0 | 1 | 2;
 
@@ -738,7 +748,67 @@ export function roadsPayload(roads: MapRoad[], p = 3): RoadsPayload {
     kept.push(c.at);
     l.push([c.t, Math.round(c.at[1] * 100) / 100, Math.round(c.at[0] * 100) / 100, c.w]);
   }
-  return { p, i, o, r, l };
+  return { p, i, o, r, l, j: roadJoins([...i, ...o, ...r.flatMap((x) => x[2])], p) };
+}
+
+/**
+ * The joins that make the coded lines one road graph: each line's two ends,
+ * at the coded precision, to the nearest point within JOIN_KM that it is not
+ * already next to along a line.
+ */
+export function roadJoins(lines: number[][], p: number): number[][] {
+  const s = 10 ** p, key = (x: number, y: number) => `${x},${y}`;
+  const decoded = lines.map((d) => {
+    const out: [number, number][] = [];
+    let x = 0, y = 0;
+    for (let k = 0; k + 1 < d.length; k += 2) out.push([(x += d[k]), (y += d[k + 1])]);
+    return out;
+  });
+  // every point once, its neighbours along the lines, and a coarse grid of the points for the search
+  const near = new Map<string, Set<string>>(), cell = Math.max(1, Math.round(s / 20)), grid = new Map<string, [number, number][]>();
+  const add = (q: [number, number]) => {
+    const k = key(...q);
+    if (near.has(k)) return k;
+    near.set(k, new Set());
+    const g = key(Math.floor(q[0] / cell), Math.floor(q[1] / cell));
+    (grid.get(g) ?? grid.set(g, []).get(g)!).push(q);
+    return k;
+  };
+  for (const pts of decoded)
+    pts.forEach((q, i) => {
+      const k = add(q);
+      if (i) {
+        const pk = key(...pts[i - 1]);
+        near.get(k)!.add(pk);
+        near.get(pk)!.add(k);
+      }
+    });
+  const kmOf = (a: [number, number], b: [number, number]) => km([a[0] / s, a[1] / s], [b[0] / s, b[1] / s]);
+  const joins: number[][] = [], done = new Set<string>();
+  for (const pts of decoded)
+    for (const end of [pts[0], pts[pts.length - 1]]) {
+      if (!end) continue;
+      const ek = key(...end), linked = near.get(ek)!;
+      let best: [number, number] | null = null, bestKm = JOIN_KM;
+      const gx = Math.floor(end[0] / cell), gy = Math.floor(end[1] / cell);
+      for (let dx = -2; dx <= 2; dx++)
+        for (let dy = -2; dy <= 2; dy++)
+          for (const q of grid.get(key(gx + dx, gy + dy)) ?? []) {
+            const qk = key(...q);
+            if (qk === ek || linked.has(qk)) continue;
+            const d = kmOf(end, q);
+            if (d <= bestKm) {
+              best = q;
+              bestKm = d;
+            }
+          }
+      if (!best) continue;
+      const id = [ek, key(...best)].sort().join(" ");
+      if (done.has(id)) continue;
+      done.add(id);
+      joins.push([end[0], end[1], best[0] - end[0], best[1] - end[1]]);
+    }
+  return joins;
 }
 
 /** How far a weigh station may be from a signed freight highway for its popup to name it. The lines are good to about a kilometre. */
