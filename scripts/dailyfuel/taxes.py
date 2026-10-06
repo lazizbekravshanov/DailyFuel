@@ -124,7 +124,7 @@ OUT_OF_DATE: dict[str, tuple[str, Decimal, str]] = {
     "UT": (
         "2021-01-01",
         Decimal("31"),
-        "Utah resets its diesel tax every January, but FHWA's table still has Utah's rate from "
+        "Utah resets its diesel tax every January, but the federal highway table still has Utah's rate from "
         "January 2021. That's out of date, so it isn't shown or ranked here. The Utah State Tax "
         "Commission posts the current rate.",
     ),
@@ -135,7 +135,7 @@ OUT_OF_DATE: dict[str, tuple[str, Decimal, str]] = {
     "MN": (
         "2012-07-01",
         Decimal("28.5"),
-        "Minnesota has adjusted its diesel tax every January since 2023, but FHWA's table still "
+        "Minnesota has adjusted its diesel tax every January since 2023, but the federal highway table still "
         "has Minnesota's rate from July 2012. That's out of date, so it isn't shown or ranked "
         "here. The Minnesota Department of Revenue posts the current rate.",
     ),
@@ -157,7 +157,7 @@ SCOPE_NOTE = (
 # In the 2024 sheet that is DC, whose diesel cell is 0 with no effective date.
 # DC does tax diesel, so the note must not read as "no tax".
 NO_RATE_NOTE = (
-    "FHWA's table has no diesel rate for {name}. That doesn't mean there's no tax on diesel "
+    "The federal highway table has no diesel rate for {name}. That doesn't mean there's no tax on diesel "
     "there, only that this table doesn't show one."
 )
 
