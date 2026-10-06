@@ -48,6 +48,9 @@ const box = (code: string, w: number, s: number, e: number, n: number): MapState
 const STATES = [box("IL", -91.5, 37, -87.5, 42.5), box("IA", -96.5, 40.4, -91.5, 43.5), box("NE", -104.05, 40, -96.5, 43), box("WY", -111, 41, -104.05, 45)];
 const shapes = decodeStates(statesPayload(STATES));
 
+// the state rows of a trip's table, read as text: its end tags are left out as HTML allows, which linkedom can't nest
+const groups = (html: string): string[] => Array.from(html.matchAll(/<tr class="rg"><th colspan="2">([^<]*)/g), (m) => m[1]);
+
 const CHICAGO: [number, number] = [41.878, -87.63];
 const CHEYENNE: [number, number] = [41.14, -104.82];
 
@@ -124,7 +127,7 @@ describe("the route strip", () => {
     expect(none.hits).toBe(4);
   });
 
-  it("prints the line, each state's weekly price and its move in words, the lowest, then each state's places folded, and no dash as punctuation", () => {
+  it("prints the line, each state's weekly price and its move in words, the lowest, then every place along the route, and no dash as punctuation", () => {
     const res = corridor(CHICAGO, CHEYENNE, pts, shapes);
     const html = stripHtml(res, "Chicago, IL", "Cheyenne, WY", CFG, true);
     const d = parseHTML(`<div>${html}</div>`).document;
@@ -140,15 +143,15 @@ describe("the route strip", () => {
     expect(d.querySelectorAll(".rp li [class]")).toHaveLength(4);
     // the lowest is named as a weekly average, never as a cheapest stop
     expect(t(d.querySelector("div"))).toContain("Lowest weekly average on this line: Wyoming, $6.066");
-    // then each state, folded, with its places, miles and tax
-    const folds = Array.from(d.querySelectorAll("details.rs"));
-    expect(folds).toHaveLength(4);
-    const sums = folds.map((f) => t(f.querySelector("summary")));
+    // then one table of every place along the line, in order, under a row for each state with its miles and tax
+    expect(t(d.querySelector("h3.rh"))).toBe("4 places along the route");
+    const sums = groups(html);
+    expect(sums).toHaveLength(4);
     expect(sums[0]).toMatch(/^Illinois: 1 place, miles 0 to \d+, state tax 54\.5¢$/);
     expect(sums[1]).toMatch(/^Iowa: 1 place, miles \d+ to \d+, state tax 32\.5¢$/);
     expect(sums[3]).toMatch(/^Wyoming: 1 place, miles \d+ to 8\d\d, state tax 24\.0¢$/);
     // a Mile and Name table, its end tags left out as HTML allows (which linkedom can't nest, so read as text)
-    expect(html.match(/<thead><tr><th class="num">Mile<th>Name<tbody>/g)).toHaveLength(4);
+    expect(html.match(/<table class="rs"><thead><tr><th class="num">Mile<th>Name<tbody>/g)).toHaveLength(1);
     expect(html).toMatch(/<tr><td class="num">\d+<td><button class="lk" data-i="0">Pilot Joliet<\/button>/);
     const text = d.querySelector("div")!.textContent!;
     expect(text).toContain("Illinois");
@@ -185,7 +188,7 @@ describe("the route strip", () => {
     expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: null, NE: null, WY: null }), false)).not.toContain("Lowest");
   });
 
-  it("prices a state once however often the line crosses back into it, and folds each stretch", () => {
+  it("prices a state once however often the line crosses back into it, and lists each stretch", () => {
     // a line along a border, like Cincinnati to Louisville: in and out of the same states
     const run = (code: string, from: number, to: number) => ({ code, from, to, hits: [] });
     const res = {
@@ -196,14 +199,14 @@ describe("the route strip", () => {
     const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
     expect(Array.from(d.querySelectorAll(".rp li")).map(t)).toEqual(["Illinois $6.250 up 30.4¢", "Iowa $6.250 up 30.4¢", "Wyoming $6.066 down 2.0¢"]);
     expect(t(d.querySelector("div"))).toContain("Lowest weekly average on this line: Wyoming, $6.066");
-    // the places still fold stretch by stretch, in order along the line
-    expect(Array.from(d.querySelectorAll("details.rs summary")).map((s) => t(s).split(":")[0])).toEqual(["Illinois", "Iowa", "Illinois", "Iowa", "Wyoming"]);
+    // the places still sit stretch by stretch, in order along the line
+    expect(groups(stripHtml(res, "A", "B", CFG, false)).map((s) => s.split(":")[0])).toEqual(["Illinois", "Iowa", "Illinois", "Iowa", "Wyoming"]);
     // two states on one average, crossed five times: still no lowest
     const two = { ...res, runs: res.runs.slice(0, 4) };
     expect(stripHtml(two, "A", "B", CFG, false)).not.toContain("Lowest");
   });
 
-  it("says No weekly price where the survey has none, and folds a stretch with nothing in it as 0 places", () => {
+  it("says No weekly price where the survey has none, and lists a stretch with nothing in it as 0 places", () => {
     const res = corridor([61.2, -149.9], [64.8, -147.7], [], [box("AK", -170, 51, -130, 71.5)]);
     const html = stripHtml(res, "Anchorage, AK", "Fairbanks, AK", CFG, true);
     const d = parseHTML(`<div>${html}</div>`).document;
@@ -213,11 +216,13 @@ describe("the route strip", () => {
     expect(d.querySelectorAll(".rp li span")).toHaveLength(0);
     expect(html).not.toContain("$");
     expect(html).not.toContain("Lowest");
-    expect(t(d.querySelector("details.rs summary"))).toMatch(/^Alaska: 0 places, miles 0 to 2\d\d, state tax 8\.95¢$/);
-    expect(d.querySelector("details.rs table")).toBeNull();
-    // with no outlines the places still fold, under a state not known, and no price is guessed
+    expect(groups(html)).toHaveLength(1);
+    expect(groups(html)[0]).toMatch(/^Alaska: 0 places, miles 0 to 2\d\d, state tax 8\.95¢$/);
+    expect(t(d.querySelector("h3.rh"))).toBe("0 places along the route");
+    expect(html).not.toContain('<td class="num">');
+    // with no outlines the places still list, under a state not known, and no price is guessed
     const none = stripHtml(corridor(CHICAGO, CHEYENNE, pts, []), "A", "B", CFG, false);
-    expect(none).toContain("<summary>State not known: 4 places, miles 0 to");
+    expect(none).toContain('<tr class="rg"><th colspan="2">State not known: 4 places, miles 0 to');
     expect(none).not.toContain("$");
   });
 
@@ -358,7 +363,7 @@ describe("the list's rows and the popups", () => {
     expect(popupHtml(got[1], CFG)).toContain("<b>Weigh station, near I 71</b>");
     expect(popupHtml(got[1], CFG)).toContain("For southbound traffic");
     expect(popupHtml(got[3], CFG)).toContain("<b>TA</b>");
-    // and the trip's folded rows print the same name
+    // and the trip's table print the same name
     const trip = stripHtml(corridor([39.95, -83.5], [39.95, -82.3], got, []), "A", "B", CFG, false);
     expect(trip).toContain("<td>Pilot, near I 70");
     for (const p of got) expect(p.n).not.toMatch(/[–—]|\s-\s|,$/);
