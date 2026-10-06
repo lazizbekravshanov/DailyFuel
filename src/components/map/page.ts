@@ -120,6 +120,8 @@ export function mapConfig(site: SiteData, data: MapData): Cfg {
     l48: LOWER48,
     ly: (["states", "roads", "places"] as const).filter((k) => data.present[k]),
     tl: baseMap().url,
+    // a pin only, never directions: phone routing ignores truck height and weight limits
+    gm: "https://www.google.com/maps/search/?api=1&query=",
   };
 }
 

@@ -201,10 +201,12 @@ describe("built pages", () => {
       expect(page).toContain("-webkit-text-size-adjust:100%");
     });
 
-    it(`registers no offline copy and links no outside map app on ${name}`, () => {
+    it(`registers the offline copy and puts no maps app link in the page itself on ${name}`, () => {
       const page = html(file);
-      expect(page).not.toMatch(/serviceWorker|\/sw\.js/);
-      expect(page).not.toMatch(/Open in Maps/i);
+      // the owner approved a copy of each page opened, for no signal; the footer says so
+      expect(page).toContain('navigator.serviceWorker.register("/sw.js")');
+      expect(page).toContain("a copy of the pages you open, for when there is no signal");
+      // Open in Maps lives only in the map's popups, built by the script, never as a link in the page
       expect(page).not.toMatch(/href="[^"]*(google\.[a-z.]+\/maps|maps\.google|maps\.apple|waze\.com)/);
     });
 
@@ -243,7 +245,7 @@ describe("built pages", () => {
       }
       if (site.tax) expect(text(ps[0])).toMatch(new RegExp(String.raw` Tax: Federal Highway Administration, ${site.tax.reporting_period}\.$`));
       expect(text(ps[1])).toBe("Prices include federal and state tax.");
-      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This phone keeps only the state you save and your day or night choice.")).toBe(true);
+      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This phone keeps only the state you save, your day or night choice, and a copy of the pages you open, for when there is no signal.")).toBe(true);
       // the next step is at the bottom of every page
       const row = ps[3];
       expect(row.getAttribute("class")).toBe("flinks");

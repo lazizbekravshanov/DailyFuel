@@ -73,7 +73,11 @@ describe("the /map page", () => {
     expect(modules[0][1]).toContain("maxZoom:16");
     // the one thing the browser is asked for besides the page's own files is the phone's place, and only on Near me
     expect(modules[0][1].match(/\.locate\(/g)).toHaveLength(1);
-    expect(page).not.toMatch(/aaa\.com|serviceWorker|sw\.js/);
+    expect(page).not.toMatch(/aaa\.com/);
+    // the popup's Open in Maps link is a pin search, never directions, and comes from the config
+    expect(cfg.gm).toBe("https://www.google.com/maps/search/?api=1&query=");
+    expect(modules[0][1]).toContain("Open in Maps");
+    expect(modules[0][1]).not.toMatch(/maps\/dir|google\.com/);
   });
 
   it("lets one finger scroll the page on a phone, zooms in on a far out tap, and opens the nearest dot close in", () => {

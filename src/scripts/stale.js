@@ -25,6 +25,8 @@
   // this script runs above the page content, so wait for the rest to parse
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", late);
   else late();
+  // keeps a copy of each page opened, for when there is no signal (public/sw.js)
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
   // a tab left open for hours (phones keep them for days) comes back with today's page
   var t0 = Date.now();
   document.addEventListener("visibilitychange", function () {
