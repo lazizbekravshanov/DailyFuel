@@ -20,11 +20,11 @@ import {
   radius,
   readRow,
   sortPts,
-  stripHtml,
   type Cfg,
   type PriceRow,
   type Pt,
 } from "./map.ts";
+import { MPG, readMpg, stateMiles, stripHtml } from "./trip.ts";
 
 
 describe("the chains", () => {
@@ -144,7 +144,7 @@ describe("the route strip", () => {
     // the lowest is named as a weekly average, never as a cheapest stop
     expect(t(d.querySelector("div"))).toContain("Lowest weekly average on this line: Wyoming, $6.066");
     // then one table of every place along the line, in order, under a row for each state with its miles and tax
-    expect(t(d.querySelector("h3.rh"))).toBe("4 places along the route");
+    expect(Array.from(d.querySelectorAll("h3.rh")).map(t)).toEqual(["Miles and fuel by state", "4 places along the route"]);
     const sums = groups(html);
     expect(sums).toHaveLength(4);
     expect(sums[0]).toMatch(/^Illinois: 1 place, miles 0 to \d+, state tax 54\.5¢$/);
@@ -218,12 +218,51 @@ describe("the route strip", () => {
     expect(html).not.toContain("Lowest");
     expect(groups(html)).toHaveLength(1);
     expect(groups(html)[0]).toMatch(/^Alaska: 0 places, miles 0 to 2\d\d, state tax 8\.95¢$/);
-    expect(t(d.querySelector("h3.rh"))).toBe("0 places along the route");
-    expect(html).not.toContain('<td class="num">');
+    expect(t(d.querySelectorAll("h3.rh")[1])).toBe("0 places along the route");
+    expect(html).not.toContain('<tr><td class="num">');
     // with no outlines the places still list, under a state not known, and no price is guessed
     const none = stripHtml(corridor(CHICAGO, CHEYENNE, pts, []), "A", "B", CFG, false);
     expect(none).toContain('<tr class="rg"><th colspan="2">State not known: 4 places, miles 0 to');
     expect(none).not.toContain("$");
+  });
+
+  it("adds up each state's miles to the whole trip, a state crossed back into counting once, and prices the fuel at each state's weekly average", () => {
+    const run = (code: string, from: number, to: number) => ({ code, from, to, hits: [] });
+    const res = {
+      miles: 100, line: [], ring: [], outside: false, hits: 0, road: true,
+      runs: [run("IL", 0, 20), run("IA", 25, 40), run("IL", 45, 60), run("IA", 65, 80), run("WY", 85, 100)],
+    };
+    // each border sits halfway between the two states' samples; IL and WY tie on the leftover mile and the first takes it
+    expect(stateMiles(res)).toEqual([["IL", 43], ["IA", 40], ["WY", 17]]);
+    const html = stripHtml(res, "A", "B", CFG, false, 10);
+    const d = parseHTML(`<div>${html}</div>`).document;
+    const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
+    // 4.3 gallons at $6.250, 4.0 at $6.250 and 1.7 at $6.066
+    expect(t(d.querySelector(".rfuel"))).toBe("About 10.0 gallons of diesel, about $62 at 10 miles per gallon");
+    expect(html).toContain('<tr><td>Illinois<td class="num">43<td class="num">4.3<td class="num">$27');
+    expect(html).toContain('<tr><td>Wyoming<td class="num">17<td class="num">1.7<td class="num">$10');
+    expect(html).toContain('<tr class="tot"><th>Total<td class="num">100<td class="num">10.0<td class="num">$62</table>');
+    // never a stop's price
+    expect(t(d.querySelector("div"))).toContain("At 10 miles per gallon and each state's weekly average, not any one stop's price.");
+    // the default is a loaded truck's
+    expect(MPG).toBe(6.5);
+    expect(stripHtml(res, "A", "B", CFG, false)).toContain("at 6.5 miles per gallon");
+  });
+
+  it("leaves a state with no weekly price out of the fuel dollars and says so", () => {
+    const run = (code: string, from: number, to: number) => ({ code, from, to, hits: [] });
+    const ak = { miles: 200, line: [], ring: [], outside: false, hits: 0, road: false, runs: [run("AK", 0, 200)] };
+    const html = stripHtml(ak, "A", "B", CFG, false);
+    expect(html).not.toContain("rfuel");
+    expect(html).toContain('<tr><td>Alaska<td class="num">200<td class="num">30.8<td class="num">No price');
+    expect(html).toContain('<tr class="tot"><th>Total<td class="num">200<td class="num">30.8<td class="num">No price</table>');
+    const mixed = { ...ak, runs: [run("IL", 0, 100), run("AK", 105, 200)] };
+    expect(stripHtml(mixed, "A", "B", CFG, false, 10)).toContain("about <b>$64</b> at 10 miles per gallon, not counting 97 miles with no weekly price");
+  });
+
+  it("takes a truck's miles per gallon, 2 to 20, and nothing else", () => {
+    expect(["6.5", " 7 ", "2", "20"].map(readMpg)).toEqual([6.5, 7, 2, 20]);
+    expect(["", "0", "1.9", "21", "abc", "6,5"].map(readMpg)).toEqual([null, null, null, null, null, null]);
   });
 
   it("keeps the band at 25 miles", () => {

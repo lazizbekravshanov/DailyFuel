@@ -16,6 +16,9 @@
 // Pure functions are exported for src/scripts/map.test.ts.
 
 import { band, distMi, inRing, sample, shapeAt, undelta, type Shape } from "../components/map/geo.ts";
+import { esc, fmt } from "./text.ts";
+
+export { esc, fmt };
 
 /** One chain: name, letter, locator. */
 export type ChainCfg = [string, string, string];
@@ -63,15 +66,10 @@ export interface Pt {
 export const BAND_MI = 25;
 /** How far off a highway route a stop may be and still be on it: an exit or two. */
 export const ROAD_MI = 5;
-/** The route finder, a file of its own so the map's first load doesn't pay for it (src/scripts/route.ts). */
-const ROUTE = "/map/route.js";
+/** The trip's route finder and result, a file of its own so the map's first load doesn't pay for it (src/scripts/trip.ts). */
+const TRIP = "/map/trip.js";
 export const STEP_MI = 5;
 const DIRS: Record<string, string> = { n: "north", s: "south", e: "east", w: "west" };
-
-export const esc = (s: string): string =>
-  s.replace(/[&<>"]/g, (ch) => (ch === "&" ? "&amp;" : ch === "<" ? "&lt;" : ch === ">" ? "&gt;" : "&quot;"));
-
-export const fmt = (n: number): string => n.toLocaleString("en-US");
 
 /** A row of the list, read back into a point. */
 export function readRow(tr: HTMLTableRowElement, i: number): Pt {
@@ -237,52 +235,6 @@ export function corridor(a: LL, b: LL, pts: Pt[], shapes: Shape[], path?: LL[] |
   return { miles, line, ring: band(line, w), runs, outside, hits, road };
 }
 
-/** "Miles 0 to 150", rounded to whole miles. */
-export const milesText = (r: Run, last: number): string =>
-  `Miles ${Math.round(r.from)} to ${Math.round(r.to === r.from ? Math.min(r.to + STEP_MI, last) : r.to)}`;
-
-/** The name cell's button: it opens the point's popup on the map. */
-// no form holds the list, the route strip's result or a popup, so a button there is a plain button
-const lk = (p: Pt) => `<button class="lk" data-i="${p.i}">${esc(p.n)}</button>`;
-
-/**
- * The trip's result: the line, the price in each state it crosses (once,
- * where the line first enters it, however often it crosses back), the
- * lowest of them, then one table of the places along the line in order, a
- * row for each stretch's state with its miles and tax.
- * Many states share one regional average, so the lowest is named only when
- * some state on the line is above it, and a tie names every state in it.
- */
-export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, withButtons: boolean): string {
-  const byCode: Record<string, PriceRow> = {},
-    seen: PriceRow[] = [],
-    num = (r: PriceRow) => +r[2]!.slice(1);
-  for (const r of cfg.px) byCode[r[0]] = r;
-  let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}</p>`,
-    rest = "";
-  if (res.outside) h += `<p class="fine">Part of the line runs over water or outside the 50 states.</p>`;
-  if (withButtons) h += `<p><button class="btn" data-clr>Show every stop</button>`;
-  h += `<ul class="rp">`;
-  for (const r of res.runs) {
-    const row = r.code ? byCode[r.code] : null,
-      k = r.hits.length;
-    if (row && !seen.includes(row)) {
-      seen.push(row);
-      h += `<li><b>${esc(row[1])}</b> ${row[2] ? `${row[2]} <span class="${row[4]}">${row[3] || ""}</span>` : "No weekly price"}`;
-    }
-    rest += `<tr class="rg"><th colspan="2">${row ? esc(row[1]) : "State not known"}: ${k} ${k == 1 ? "place" : "places"}, ${milesText(r, res.miles).toLowerCase()}${row ? `, state tax ${row[6]}` : ""}`;
-    for (const x of r.hits) rest += `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p) : esc(x.p.n)}`;
-  }
-  h += `</ul>`;
-  // "$10.100" sorts before "$9.900" as text, so the numbers are compared
-  const priced = seen.filter((r) => r[2]),
-    lo = Math.min(...priced.map(num)),
-    low = priced.filter((r) => num(r) == lo);
-  if (low.length < priced.length)
-    h += `<p>Lowest weekly average on this line: <b>${esc(low.map((r) => r[1]).join(", ").replace(/, ([^,]*)$/, " and $1"))}, ${low[0][2]}</b></p>`;
-  return h + `<h3 class="rh">${fmt(res.hits)} ${res.hits == 1 ? "place" : "places"} along the route</h3><table class="rs"><thead><tr><th class="num">Mile<th>Name<tbody>${rest}</table>`;
-}
-
 /** A point's popup: its name, what it is and where, the road it is near, a scale's direction, and the chain's own website. */
 export function popupHtml(p: Pt, cfg: Cfg): string {
   const ch = p.c ? cfg.c[p.c] : null,
@@ -387,17 +339,22 @@ export function init(doc: Document, win: any): void {
   const fs = form && form.querySelector("fieldset");
   if (fs) fs.disabled = false;
   const inA = form && (form.elements.namedItem("a") as HTMLInputElement),
-    inB = form && (form.elements.namedItem("b") as HTMLInputElement);
+    inB = form && (form.elements.namedItem("b") as HTMLInputElement),
+    inM = form && (form.elements.namedItem("m") as HTMLInputElement);
+  // the truck's miles per gallon is kept on this phone for the next trip; storage can be blocked, and then 6.5 stays
+  try {
+    if (inM) inM.value = localStorage.getItem("dailyfuel:mpg") || inM.value;
+  } catch {}
   let drawn: any[] = [];
   // a new line fits the map to its band; a rerun (a filter, the outlines arriving) leaves the view alone
   const run = (a: [number, number], b: [number, number], al: string, bl: string, refit?: boolean) => {
     last = { a, b, al, bl };
-    // the route finder loads only when a trip is asked for, and a road the network can't connect falls back to the straight line
-    (net.length ? import(ROUTE).then((m) => m.route(a, b, net), () => null) : Promise.resolve(null)).then((path: LL[] | null) => {
+    // the trip module loads only when a trip is asked for, and a road the network can't connect falls back to the straight line
+    import(TRIP).then((m) => {
       // a newer trip, or Show every stop, came first
       if (last?.a != a || last.b != b) return;
-      const res = corridor(a, b, pts, shapes, path);
-      out.innerHTML = stripHtml(res, al, bl, cfg, !!map);
+      const res = corridor(a, b, pts, shapes, net.length ? m.route(a, b, net) : null);
+      out.innerHTML = m.stripHtml(res, al, bl, cfg, !!map, m.readMpg(inM.value) || m.MPG);
       say((out.querySelector(".rsum") as Element).textContent || "", true);
       if (!map) return;
       for (const l of drawn) map.removeLayer(l);
@@ -436,7 +393,7 @@ export function init(doc: Document, win: any): void {
       for (const l of under) l.addTo(map).bringToBack();
       drawn.push(...under);
       if (refit) map.fitBounds(drawn[0].getBounds(), { padding: [12, 12] });
-    });
+    }, () => say("The trip didn't load. Check your signal and try again."));
   };
   const go = () =>
     loadPlaces().then(() => {
@@ -450,6 +407,13 @@ export function init(doc: Document, win: any): void {
       }
       const p = a as P, q = b as P;
       if (p.lat === q.lat && p.lon === q.lon) return say("From and To are the same place.");
+      if (!(+inM.value >= 2 && +inM.value <= 20)) {
+        say("Type miles per gallon from 2 to 20, like 6.5.");
+        return inM.focus();
+      }
+      try {
+        localStorage.setItem("dailyfuel:mpg", inM.value.trim());
+      } catch {}
       run([p.lat, p.lon], [q.lat, q.lon], p.label, q.label, true);
       // the trip stays in the address, so a reload or a shared link brings it back
       history.replaceState(null, "", "#" + encodeURIComponent(p.label + "|" + q.label));

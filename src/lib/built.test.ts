@@ -245,7 +245,7 @@ describe("built pages", () => {
       }
       if (site.tax) expect(text(ps[0])).toMatch(new RegExp(String.raw` Tax: Federal Highway Administration, ${site.tax.reporting_period}\.$`));
       expect(text(ps[1])).toBe("Prices include federal and state tax.");
-      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This phone keeps only the state you save, your day or night choice, and a copy of the pages you open, for when there is no signal.")).toBe(true);
+      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This phone keeps only the state you save, your day or night choice, your truck's miles per gallon, and a copy of the pages you open, for when there is no signal.")).toBe(true);
       // the next step is at the bottom of every page
       const row = ps[3];
       expect(row.getAttribute("class")).toBe("flinks");

@@ -80,9 +80,10 @@ const description =
           </div>
           <form id="rt" class="rt" autocomplete="off">
             <fieldset disabled>
-              <legend class="sr-only">Where the trip starts and ends</legend>
+              <legend class="sr-only">Where the trip starts and ends, and the truck's miles per gallon</legend>
               <label class="rt-f"><span>From</span><input name="a" list="pl" placeholder="Town, like Chicago, IL" spellcheck="false" /></label>
               <label class="rt-f"><span>To</span><input name="b" list="pl" placeholder="Town, like Denver, CO" spellcheck="false" /></label>
+              <label class="rt-f rt-m"><span>MPG<span class="sr-only">, miles per gallon</span></span><input name="m" value="6.5" inputmode="decimal" spellcheck="false" /></label>
               <button class="btn wide" type="submit">Show prices</button>
             </fieldset>
             <datalist id="pl"></datalist>
@@ -588,6 +589,9 @@ const description =
   .rt-f input::-webkit-calendar-picker-indicator {
     display: none !important;
   }
+  .rt-m {
+    flex: 0 1 130px;
+  }
   .rt .btn {
     min-height: 30px;
   }
@@ -618,6 +622,17 @@ const description =
   .rh {
     margin: 22px 0 6px;
     font-size: var(--fs-t);
+  }
+  .rfuel {
+    margin: 6px 0 0;
+  }
+  .rf {
+    width: auto;
+    min-width: 0;
+  }
+  .rf .tot > * {
+    border-top: 1px solid var(--rule);
+    font-weight: 700;
   }
   .rs {
     width: auto;
