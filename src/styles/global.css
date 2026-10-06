@@ -886,3 +886,22 @@ tbody tr:last-child td {
     display: none;
   }
 }
+
+/* Phones read labels in sentence case: small capitals with wide spacing are
+   the slowest to read and the first to blur in glare. The copy is already
+   in sentence case; desktop keeps the capitals. */
+@media (max-width: 479px) {
+  .lbl,
+  .btn,
+  .sh h2,
+  thead th,
+  .rng label,
+  .stats dt,
+  .nmbig,
+  .back,
+  .prose summary,
+  .sortb {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+}

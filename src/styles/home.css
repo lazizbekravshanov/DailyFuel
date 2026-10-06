@@ -281,7 +281,6 @@ th[aria-sort] .sortb {
   color: var(--ink);
   font: inherit;
   font-weight: 700;
-  appearance: none;
 }
 
 .go select:focus-visible {

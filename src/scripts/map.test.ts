@@ -70,6 +70,7 @@ const CFG: Cfg = {
   l48: [[24.4, -124.8], [49.4, -66.9]],
   ly: ["states"],
   tl: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  gm: "https://www.google.com/maps/search/?api=1&query=",
 };
 
 /** A point `off` miles to the left (south, going west) of the Chicago to Cheyenne line, `at` miles along it. */
@@ -306,17 +307,21 @@ describe("the list's rows and the popups", () => {
     expect(stop).toContain(`<a href="/state/il/">Illinois's region averages $6.250</a> this week, not this stop's price.`);
     expect(stop).toContain(`<a class="btn" href="${CHAINS.find((c) => c.key === "ta")!.locator}">TA website</a>`);
     expect(stop).toContain(`<button class="btn" data-close>Close</button>`);
+    // every popup opens its pin in the phone's maps app, a search, never directions
+    expect(stop).toContain(`<a class="btn" href="https://www.google.com/maps/search/?api=1&query=${pts[0].lat},${pts[0].lon}">Open in Maps</a>`);
     // the source and licence line lives in Map credits now
     expect(stop).not.toMatch(/Sources?:/);
     const scale = popupHtml(pts[1], CFG);
     expect(scale).toContain("Weigh station in IA");
     expect(scale).toContain("<p>For westbound traffic");
-    expect(scale).not.toContain("href=");
+    // a scale links only to its pin in a maps app
+    expect(scale.match(/href="([^"]+)"/g)).toEqual([`href="https://www.google.com/maps/search/?api=1&query=${pts[1].lat},${pts[1].lon}"`]);
+    expect(scale).toContain(">Open in Maps</a>");
     expect(scale).not.toContain("averages");
     // a scale with no direction says nothing about one, and one with no state names none
     const bare = popupHtml(pts[3], CFG);
     expect(bare).not.toMatch(/bound|Direction/);
-    expect(bare).not.toContain(" in ");
+    expect(bare).not.toMatch(/ in [A-Z]{2}\b/);
     // a repair shop links its chain's website but quotes no fuel price
     const shop = popupHtml(pts[2], CFG);
     expect(shop).toContain("Repair and lube in IL");

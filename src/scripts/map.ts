@@ -34,6 +34,8 @@ export interface Cfg {
   ly: string[];
   /** the base map's tile URL (see baseMap in src/components/map/page.ts) */
   tl: string;
+  /** a maps search link the popup ends with lat,lon, so the phone's maps app opens the pin */
+  gm: string;
 }
 
 export interface Pt {
@@ -262,6 +264,7 @@ export function popupHtml(p: Pt, cfg: Cfg): string {
   const r = p.k == "s" && cfg.px.find((x) => x[0] == p.st);
   if (r && r[2]) h += `<p><a href="/state/${p.st.toLowerCase()}/">${esc(r[1])}'s region averages ${r[2]}</a> this week, not this stop's price.`;
   if (ch) h += `<p><a class="btn" href="${esc(ch[2])}">${esc(ch[0])} website</a>`;
+  h += `<p><a class="btn" href="${cfg.gm}${p.lat},${p.lon}">Open in Maps</a>`;
   return h + `<p><button class="btn" data-close>Close</button></div>`;
 }
 

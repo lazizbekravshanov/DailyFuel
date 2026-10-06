@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] }
+  ],
   "redirects": [
     { "source": "/go", "has": [{ "type": "query", "key": "s", "value": "(?<s>[a-z]{2})" }], "destination": "/state/:s/", "permanent": false },
     { "source": "/go", "destination": "/#find-your-state", "permanent": false },
