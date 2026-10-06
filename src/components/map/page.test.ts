@@ -295,8 +295,11 @@ describe("the /map page", () => {
     expect(all.indexOf(d.getElementById("rt-st")!)).toBeLessThan(all.indexOf(out));
     expect(all.indexOf(note)).toBe(all.indexOf(out) + 1);
     expect(note.closest("details")).toBeNull();
-    expect(Array.from(section.querySelectorAll("#rt label span")).map(text)).toEqual(["From", "To"]);
-    expect(Array.from(section.querySelectorAll("#rt input")).map((i) => i.getAttribute("placeholder"))).toEqual(["Town, like Chicago, IL", "Town, like Denver, CO"]);
+    expect(Array.from(section.querySelectorAll("#rt label > span")).map(text)).toEqual(["From", "To", "MPG, miles per gallon"]);
+    // miles per gallon starts at a loaded truck's, and a phone shows its number pad
+    const mpg = section.querySelector('#rt input[name="m"]')!;
+    expect([mpg.getAttribute("value"), mpg.getAttribute("inputmode")]).toEqual(["6.5", "decimal"]);
+    expect(Array.from(section.querySelectorAll("#rt input[list]")).map((i) => i.getAttribute("placeholder"))).toEqual(["Town, like Chicago, IL", "Town, like Denver, CO"]);
     expect(text(section.querySelector('#rt button[type="submit"]'))).toBe("Show prices");
     expect(html()).not.toMatch(/cheapest|truck route/i);
   });
