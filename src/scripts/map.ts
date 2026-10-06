@@ -1,5 +1,6 @@
 // The map page's one script: the Leaflet map, the legend's filters, the
-// popups, the list twin of what is on screen, and the route strip's maths.
+// popups, the list twin of what is on screen, and the route strip, whose maths
+// and result load with the trip module (src/scripts/trip.ts).
 // map.astro bundles it with esbuild into one inline module that runs after
 // the deferred Leaflet script, so `L` is there when init runs, or missing
 // if Leaflet failed to load, in which case the list and the filters still
@@ -15,7 +16,7 @@
 //
 // Pure functions are exported for src/scripts/map.test.ts.
 
-import { band, distMi, inRing, sample, shapeAt, undelta, type Shape } from "../components/map/geo.ts";
+import { undelta, type Shape } from "../components/map/geo.ts";
 import { esc, fmt } from "./text.ts";
 
 export { esc, fmt };
@@ -168,73 +169,6 @@ export interface Corridor {
 
 type LL = [number, number];
 
-/**
- * The trip from a to b: along the freight highway route when there is one
- * (see src/scripts/route.ts), else the straight line, sampled every mile on a
- * route and every STEP_MI miles on a straight line; the states it crosses in
- * order (by point in polygon on each sample); and the truck stops and weigh
- * stations switched on in the legend that sit within ROAD_MI miles of a route
- * (BAND_MI of a straight line), in order along it, each under the state the
- * line is in at that mile. With no outlines loaded it is one run with no state.
- */
-export function corridor(a: LL, b: LL, pts: Pt[], shapes: Shape[], path?: LL[] | null): Corridor {
-  const road = !!path,
-    w = road ? ROAD_MI : BAND_MI,
-    line: LL[] = [],
-    ats: number[] = [],
-    runs: Run[] = [];
-  let miles = 0;
-  (path || [a, b]).forEach((q, i, all) => {
-    if (!i) return;
-    const p = all[i - 1];
-    for (const s of sample(p[0], p[1], q[0], q[1], road ? 1 : STEP_MI).slice(line.length ? 1 : 0)) {
-      const last = line[line.length - 1];
-      if (last) miles += distMi(last[0], last[1], s[0], s[1]);
-      line.push(s);
-      ats.push(miles);
-    }
-  });
-  let outside = false;
-  line.forEach((q, i) => {
-    const at = ats[i],
-      code = shapes.length ? shapeAt(q[0], q[1], shapes) : null,
-      r = runs[runs.length - 1];
-    if (shapes.length && !code) outside = true;
-    else if (r && r.code === code) r.to = at;
-    else runs.push({ code, from: at, to: at, hits: [] });
-  });
-  let hits = 0;
-  if (runs.length) {
-    const inBand: { p: Pt; at: number }[] = [];
-    // the nearest sample, on a flat earth in miles, which is close enough within a few miles
-    for (const p of pts) {
-      if (!p.on || p.k === "v") continue;
-      const k = Math.cos((p.lat * Math.PI) / 180);
-      let best = w * w, at = -1;
-      line.forEach((q, i) => {
-        const dy = (q[0] - p.lat) * 69.1, dx = (q[1] - p.lon) * 69.1 * k, d = dx * dx + dy * dy;
-        if (d <= best) (best = d), (at = ats[i]);
-      });
-      if (at >= 0) inBand.push({ p, at });
-    }
-    inBand.sort((x, y) => x.at - y.at);
-    for (const h of inBand) {
-      // the run the line is in at that mile, or the nearest one across a border or a stretch of water
-      let best = runs[0], gap = Infinity;
-      for (const r of runs) {
-        const g = h.at < r.from ? r.from - h.at : h.at > r.to ? h.at - r.to : 0;
-        if (g < gap) {
-          gap = g;
-          best = r;
-        }
-      }
-      best.hits.push(h);
-      hits++;
-    }
-  }
-  return { miles, line, ring: band(line, w), runs, outside, hits, road };
-}
-
 /** A point's popup: its name, what it is and where, the road it is near, a scale's direction, and the chain's own website. */
 export function popupHtml(p: Pt, cfg: Cfg): string {
   const ch = p.c ? cfg.c[p.c] : null,
@@ -270,6 +204,7 @@ export function init(doc: Document, win: any): void {
     body = table.tBodies[0],
     pts = Array.from(body.rows).map(readRow),
     count = doc.getElementById("ls-n"),
+    fold = doc.getElementById("ls-d") as HTMLDetailsElement | null,
     L = win.L,
     box = doc.getElementById("map") as HTMLElement,
     out = doc.getElementById("rt-out") as HTMLElement,
@@ -293,14 +228,17 @@ export function init(doc: Document, win: any): void {
     const bounds = map && map.getBounds();
     // the whole zoom, for the CSS that shows the route labels by zoom
     if (map) box.setAttribute("data-z", (map.getZoom() | 0) as any); // the DOM makes it a string
+    // the rows change only while the list is open, so a move of the map isn't held up by 2,500 rows nobody sees
+    const rows = !fold || fold.open;
     let n = 0;
     for (const p of pts) {
       const v = p.on && (!bounds || bounds.contains([p.lat, p.lon]));
-      if (p.tr && p.tr.hidden === v) p.tr.hidden = !v;
+      if (rows && p.tr && p.tr.hidden === v) p.tr.hidden = !v;
       if (v) n++;
     }
     if (count) count.textContent = `${fmt(n)} ${n === 1 ? "place" : "places"}${map ? " in view" : ""}`;
   };
+  if (fold) fold.addEventListener("toggle", () => fold.open && list());
 
   // ---- the legend's filters
   for (const cb of Array.from(doc.querySelectorAll<HTMLInputElement>("input[data-k]"))) {
@@ -350,18 +288,34 @@ export function init(doc: Document, win: any): void {
   const run = (a: [number, number], b: [number, number], al: string, bl: string, refit?: boolean) => {
     last = { a, b, al, bl };
     // the trip module loads only when a trip is asked for, and a road the network can't connect falls back to the straight line
-    import(TRIP).then((m) => {
-      // a newer trip, or Show every stop, came first
-      if (last?.a != a || last.b != b) return;
-      const res = corridor(a, b, pts, shapes, net.length ? m.route(a, b, net) : null);
+    import(TRIP).then(async (m) => {
+      // The work comes in steps, each its own task so the page can answer a
+      // tap between them: the road graph (built once), the route, the
+      // result, then the map. A newer trip, or Show every stop, ends it.
+      const next = () => new Promise((r) => setTimeout(r)).then(() => last?.a == a && last.b == b);
+      if (net.length) m.graph(net);
+      if (!(await next())) return;
+      const path = net.length ? m.route(a, b, net) : null;
+      if (!(await next())) return;
+      const res = m.corridor(a, b, pts, shapes, path);
       out.innerHTML = m.stripHtml(res, al, bl, cfg, !!map, m.readMpg(inM.value) || m.MPG);
       say((out.querySelector(".rsum") as Element).textContent || "", true);
-      if (!map) return;
+      // the map with its line comes into view over the prices
+      if (refit && box) box.scrollIntoView();
+      if (!map || !(await next())) return;
       for (const l of drawn) map.removeLayer(l);
       // only the stops along the trip stay on the map, until Show every stop
       for (const p of pts) p.x = 1;
       for (const r of res.runs) for (const h of r.hits) h.p.x = 0;
-      grp.eachLayer((m: any) => m.redraw());
+      // The view goes to the trip first, with no zoom animation, which
+      // redraws every stop and road on each frame; a new view redraws the
+      // stops, and the trip's layers are then drawn once, at that view.
+      const view = () => map.getCenter() + "" + map.getZoom(),
+        was = view();
+      if (refit) map.fitBounds(L.latLngBounds(res.ring), { padding: [12, 12], animate: false });
+      if (was == view()) grp.eachLayer((m: any) => m.redraw());
+      drawn = [];
+      if (!(await next())) return;
       const ab = (ll: [number, number], t: string) =>
         L.marker(ll, { icon: L.divIcon({ className: "rab", html: t, iconSize: [20, 20] }), keyboard: false, interactive: false });
       drawn = [
@@ -370,12 +324,14 @@ export function init(doc: Document, win: any): void {
         ab(a, "A"),
         ab(b, "B"),
       ];
+      for (const l of drawn) l.addTo(map);
+      if (!(await next())) return;
       // The freight roads show only along the trip: every road line with a
       // point in the band, under the line. A signed route is named on hover or
       // tap by an unseen twin on the markers' canvas, which is on top and takes
       // every pointer; the twin sits under the markers, and the canvas's
       // tolerance makes a thin road easy to tap.
-      const inBand = (q: number[]) => inRing(q[0], q[1], res.ring),
+      const inBand = m.nearLine(res.line, res.road ? ROAD_MI : BAND_MI),
         I: [number, number][][] = [],
         O: typeof I = [],
         under: any[] = [];
@@ -388,11 +344,9 @@ export function init(doc: Document, win: any): void {
       under.push(L.polyline(I, { className: "ri" }), L.polyline(O, { className: "ro" }));
       // labels in the band; data-z shows interstates (h1) from zoom 6, US routes (h2) from 7 and the rest from 8
       for (const [t, y, x, w] of labels)
-        if (inBand([y, x])) drawn.push(L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }));
-      for (const l of drawn) l.addTo(map);
-      for (const l of under) l.addTo(map).bringToBack();
+        if (inBand([y, x])) under.push(L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }).addTo(map));
+      for (const l of under) if (l.bringToBack) l.addTo(map).bringToBack();
       drawn.push(...under);
-      if (refit) map.fitBounds(drawn[0].getBounds(), { padding: [12, 12] });
     }, () => say("The trip didn't load. Check your signal and try again."));
   };
   const go = () =>
@@ -417,9 +371,8 @@ export function init(doc: Document, win: any): void {
       run([p.lat, p.lon], [q.lat, q.lon], p.label, q.label, true);
       // the trip stays in the address, so a reload or a shared link brings it back
       history.replaceState(null, "", "#" + encodeURIComponent(p.label + "|" + q.label));
-      // the keyboard goes away, and the map with its line comes into view over the prices
+      // the keyboard goes away; the map comes into view once the result is in, so nothing moves under the driver
       (doc.activeElement as HTMLElement).blur();
-      box.scrollIntoView();
     });
   if (form && inA && inB) {
     inA.addEventListener("focus", loadPlaces);
@@ -479,6 +432,8 @@ export function init(doc: Document, win: any): void {
   map.createPane("pts").style.zIndex = "450";
   const Dot = L.CircleMarker.extend({
     _project() {
+      // a stop off the trip isn't drawn, so it isn't placed again until it is shown
+      if (this.p.x && this._point) return;
       this._radius = radius(this.p.k, map.getZoom());
       L.CircleMarker.prototype._project.call(this);
     },
@@ -548,7 +503,8 @@ export function init(doc: Document, win: any): void {
     if (ab[1] && inA) {
       inA.value = ab[0];
       inB.value = ab[1];
-      go();
+      // a trip in the address waits for the roads, so it is drawn once, along them
+      rdP.then(go, go);
     } else if (!moved)
       try {
         // the state in the address, else the saved one
@@ -558,7 +514,7 @@ export function init(doc: Document, win: any): void {
     if (last) run(last.a, last.b, last.al, last.bl);
   });
   // the freight roads, drawn on SVG along a trip only (see run), so the page's CSS tokens colour them in both themes
-  get("roads").then((rd) => {
+  const rdP = get("roads").then((rd) => {
     if (!rd) return;
     roads = [[decodeLines(rd.i, rd.p), "", 1], [decodeLines(rd.o, rd.p), "", 0], ...rd.r.map(([t, w, l]: any) => [decodeLines(l, rd.p), t, w])];
     labels = rd.l;

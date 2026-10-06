@@ -1,11 +1,122 @@
-// The trip's route and its result, loaded by the map only when a trip is
-// asked for, so the map's own inline script and its first load don't carry
-// them: served as /map/trip.js by src/pages/map/trip.js.ts.
+// The trip's route, its maths and its result, loaded by the map only when a
+// trip is asked for, so the map's own inline script and its first load don't
+// carry them: served as /map/trip.js by src/pages/map/trip.js.ts.
 
-import { STEP_MI, type Cfg, type Corridor, type PriceRow, type Pt, type Run } from "./map.ts";
+import { band, distMi, sample, shapeAt, type Shape } from "../components/map/geo.ts";
+import { BAND_MI, ROAD_MI, STEP_MI, type Cfg, type Corridor, type PriceRow, type Pt, type Run } from "./map.ts";
 import { esc, fmt } from "./text.ts";
 
-export { route } from "./route.ts";
+type LL = [number, number];
+
+export { graph, route } from "./route.ts";
+
+/**
+ * A test for "within w miles of the line", for the thousands of road points a
+ * trip checks: the line's samples on a half degree grid, and only the cells
+ * around a point measured, on a flat earth in miles like the stops. The
+ * band's polygon gives the same answer far slower.
+ */
+export function nearLine(line: LL[], w: number): (q: number[]) => boolean {
+  const g = new Map<string, LL[]>(),
+    k = (y: number, x: number) => y + "," + x;
+  for (const q of line) {
+    const c = k(Math.floor(q[0] * 2), Math.floor(q[1] * 2));
+    (g.get(c) || g.set(c, []).get(c)!).push(q);
+  }
+  return ([lat, lon]) => {
+    const kx = Math.cos((lat * Math.PI) / 180),
+      ry = Math.ceil(w / 34),
+      rx = Math.ceil(w / (34 * kx)),
+      cy = Math.floor(lat * 2),
+      cx = Math.floor(lon * 2);
+    for (let y = cy - ry; y <= cy + ry; y++)
+      for (let x = cx - rx; x <= cx + rx; x++)
+        for (const q of g.get(k(y, x)) || []) {
+          const dy = (q[0] - lat) * 69.1, dx = (q[1] - lon) * 69.1 * kx;
+          if (dx * dx + dy * dy <= w * w) return true;
+        }
+    return false;
+  };
+}
+
+/**
+ * The trip from a to b: along the freight highway route when there is one
+ * (see src/scripts/route.ts), else the straight line, sampled every mile on a
+ * route and every STEP_MI miles on a straight line; the states it crosses in
+ * order (by point in polygon on each sample); and the truck stops and weigh
+ * stations switched on in the legend that sit within ROAD_MI miles of a route
+ * (BAND_MI of a straight line), in order along it, each under the state the
+ * line is in at that mile. With no outlines loaded it is one run with no state.
+ */
+export function corridor(a: LL, b: LL, pts: Pt[], shapes: Shape[], path?: LL[] | null): Corridor {
+  const road = !!path,
+    w = road ? ROAD_MI : BAND_MI,
+    line: LL[] = [],
+    ats: number[] = [],
+    runs: Run[] = [];
+  let miles = 0;
+  (path || [a, b]).forEach((q, i, all) => {
+    if (!i) return;
+    const p = all[i - 1];
+    for (const s of sample(p[0], p[1], q[0], q[1], road ? 1 : STEP_MI).slice(line.length ? 1 : 0)) {
+      const last = line[line.length - 1];
+      if (last) miles += distMi(last[0], last[1], s[0], s[1]);
+      line.push(s);
+      ats.push(miles);
+    }
+  });
+  let outside = false,
+    was: Shape | undefined;
+  line.forEach((q, i) => {
+    // the state the line was just in is the likeliest, so it is tried before the rest
+    const code = !shapes.length ? null : was && shapeAt(q[0], q[1], [was]) ? was.code : shapeAt(q[0], q[1], shapes),
+      at = ats[i],
+      r = runs[runs.length - 1];
+    was = shapes.find((s) => s.code === code);
+    if (shapes.length && !code) outside = true;
+    else if (r && r.code === code) r.to = at;
+    else runs.push({ code, from: at, to: at, hits: [] });
+  });
+  let hits = 0;
+  if (runs.length) {
+    const inBand: { p: Pt; at: number }[] = [];
+    // the nearest sample, on a flat earth in miles, which is close enough within a few miles
+    // the line's box, w miles wider, keeps the far stops from being measured at all
+    const lat = line.map((q) => q[0]),
+      lon = line.map((q) => q[1]),
+      dy = w / 69,
+      dx = w / (69.1 * Math.cos((Math.min(80, Math.max(...lat.map(Math.abs)) + dy) * Math.PI) / 180)),
+      s0 = Math.min(...lat) - dy,
+      n0 = Math.max(...lat) + dy,
+      w0 = Math.min(...lon) - dx,
+      e0 = Math.max(...lon) + dx;
+    for (const p of pts) {
+      if (!p.on || p.k === "v" || p.lat < s0 || p.lat > n0 || p.lon < w0 || p.lon > e0) continue;
+      const k = Math.cos((p.lat * Math.PI) / 180);
+      let best = w * w, at = -1;
+      line.forEach((q, i) => {
+        const dy = (q[0] - p.lat) * 69.1, dx = (q[1] - p.lon) * 69.1 * k, d = dx * dx + dy * dy;
+        if (d <= best) (best = d), (at = ats[i]);
+      });
+      if (at >= 0) inBand.push({ p, at });
+    }
+    inBand.sort((x, y) => x.at - y.at);
+    for (const h of inBand) {
+      // the run the line is in at that mile, or the nearest one across a border or a stretch of water
+      let best = runs[0], gap = Infinity;
+      for (const r of runs) {
+        const g = h.at < r.from ? r.from - h.at : h.at > r.to ? h.at - r.to : 0;
+        if (g < gap) {
+          gap = g;
+          best = r;
+        }
+      }
+      best.hits.push(h);
+      hits++;
+    }
+  }
+  return { miles, line, ring: band(line, w), runs, outside, hits, road };
+}
 
 /** Miles per gallon when the driver hasn't said: a loaded tractor trailer gets about this. */
 export const MPG = 6.5;
