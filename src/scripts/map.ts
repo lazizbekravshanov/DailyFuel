@@ -248,7 +248,8 @@ const lk = (p: Pt) => `<button class="lk" data-i="${p.i}">${esc(p.n)}</button>`;
 /**
  * The trip's result: the line, the price in each state it crosses (once,
  * where the line first enters it, however often it crosses back), the
- * lowest of them, then each stretch's places, folded, with its miles and tax.
+ * lowest of them, then one table of the places along the line in order, a
+ * row for each stretch's state with its miles and tax.
  * Many states share one regional average, so the lowest is named only when
  * some state on the line is above it, and a tie names every state in it.
  */
@@ -269,13 +270,8 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
       seen.push(row);
       h += `<li><b>${esc(row[1])}</b> ${row[2] ? `${row[2]} <span class="${row[4]}">${row[3] || ""}</span>` : "No weekly price"}`;
     }
-    rest += `<details class="rs"><summary>${row ? esc(row[1]) : "State not known"}: ${k} ${k == 1 ? "place" : "places"}, ${milesText(r, res.miles).toLowerCase()}${row ? `, state tax ${row[6]}` : ""}</summary>`;
-    if (k) {
-      rest += `<table><thead><tr><th class="num">Mile<th>Name<tbody>`;
-      for (const x of r.hits) rest += `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p) : esc(x.p.n)}`;
-      rest += `</table>`;
-    }
-    rest += `</details>`;
+    rest += `<tr class="rg"><th colspan="2">${row ? esc(row[1]) : "State not known"}: ${k} ${k == 1 ? "place" : "places"}, ${milesText(r, res.miles).toLowerCase()}${row ? `, state tax ${row[6]}` : ""}`;
+    for (const x of r.hits) rest += `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p) : esc(x.p.n)}`;
   }
   h += `</ul>`;
   // "$10.100" sorts before "$9.900" as text, so the numbers are compared
@@ -284,7 +280,7 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     low = priced.filter((r) => num(r) == lo);
   if (low.length < priced.length)
     h += `<p>Lowest weekly average on this line: <b>${esc(low.map((r) => r[1]).join(", ").replace(/, ([^,]*)$/, " and $1"))}, ${low[0][2]}</b></p>`;
-  return h + rest;
+  return h + `<h3 class="rh">${fmt(res.hits)} ${res.hits == 1 ? "place" : "places"} along the route</h3><table class="rs"><thead><tr><th class="num">Mile<th>Name<tbody>${rest}</table>`;
 }
 
 /** A point's popup: its name, what it is and where, the road it is near, a scale's direction, and the chain's own website. */
