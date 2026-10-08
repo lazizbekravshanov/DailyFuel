@@ -17,7 +17,9 @@ There's no server and no database. A scheduled GitHub Actions job fetches prices
 * The job lives in `.github/workflows/update-data.yml`. It runs three times a day, at 12:17, 15:47 and 20:17 UTC, and you can also start it by hand.
 * `scripts/update_data.py` checks each source and validates every file against the JSON Schemas in `schemas/` before writing it. It only writes when the numbers actually changed, so a run with nothing new leaves the repo alone and makes no commit.
 * It then rebuilds `data/latest.json`, the snapshot the site renders.
-* `scripts/health.py` fails the job when a source errored or the data is stale: EIA's newest week is more than 10 days old, or, while AAA is on, AAA's newest day is 2 or more days old. A failed scheduled run opens an issue labeled `data-failure`, or comments on the one that's already open.
+* Before anything is committed, `scripts/health.py --before-commit` checks the new data the way the site build will, and fails the run if the build would refuse it, for example a week where EIA left one region's price blank. Nothing is committed then, so the site keeps the week it already shows.
+* After the commit, `scripts/health.py` fails the job when a source errored or the data is stale: EIA's newest week is more than 10 days old, or, while AAA is on, AAA's newest day is 2 or more days old. It also fails when the newest EIA week came from the USDA backup copy on an earlier day, New York time, and EIA's workbook hasn't loaded on any run since. The first run where the workbook loads puts EIA's own copy back, even when the workbook itself hasn't changed. One failed workbook run on its own, like an EIA maintenance page, is not a failure, and neither is a backup copy that only revises an older week.
+* A failed scheduled run opens an issue labeled `data-failure` with what the checks found, or comments on the one that's already open.
 * The site checks the data again at build time, so bad data fails the deploy instead of going live.
 
 EIA's weekly prices are as of Monday morning and come out on Tuesday, or Wednesday after a Monday holiday.
@@ -38,7 +40,7 @@ The switch is the repo variable `AAA_ENABLED`. Only the exact string `true` turn
 | What | Where it comes from | License |
 |---|---|---|
 | Weekly diesel prices | U.S. Energy Information Administration, [Gasoline and Diesel Fuel Update](https://www.eia.gov/petroleum/gasdiesel/) | Public domain. EIA asks for credit with the release date, and the site shows it. |
-| Backup copy of the same EIA prices, only used when EIA's workbook fails | USDA Agricultural Marketing Service, [agtransport.usda.gov](https://agtransport.usda.gov/) | U.S. government data |
+| Backup copy of the same EIA prices, only used when EIA's workbook fails | USDA Agricultural Marketing Service, [agtransport.usda.gov](https://agtransport.usda.gov/) | U.S. government data. The copy has no release dates, so a week it supplies shows none until the workbook loads again. |
 | State diesel tax rates | Federal Highway Administration, Highway Statistics [table MF-121T](https://www.fhwa.dot.gov/policyinformation/statistics/2024/mf121t.cfm) | U.S. government work, public domain. The site credits FHWA with the reporting period. |
 | Daily state prices (off for now) | AAA, [gasprices.aaa.com](https://gasprices.aaa.com/), data by OPIS | Not covered by this repo's license. See [data/aaa/README.md](data/aaa/README.md). |
 | Share image font | [Red Hat Mono](https://github.com/RedHatOfficial/RedHatFont) by the Red Hat Project Authors, in `src/assets/fonts/`, drawn into the `/og/` PNGs at build time only. The pages load no font. | SIL Open Font License 1.1 |
@@ -131,7 +133,7 @@ data/
 schemas/                   JSON Schemas for the data files, the contract
 scripts/
   update_data.py           the data job
-  health.py                fails the job on errors or stale data
+  health.py                fails the job on errors, stale data, or data the site build would refuse
   update_taxes.py          refreshes the tax file from FHWA, run by hand, not by the job
   update_map_data.py       builds data/map/stations.json, the weigh station files and coverage.json from a local cache of OpenStreetMap, NTAD and Iowa DOT and the us-atlas 3 boundary files; run by hand
   update_map_roads.py      builds data/map/roads_nhfn.json, states.json and places.json from a local cache; run by hand

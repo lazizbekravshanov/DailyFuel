@@ -3,7 +3,7 @@
 Primary source is EIA's workbook psw18vwall.xls, fetched with a conditional GET
 (If-Modified-Since only, EIA ignores ETags). When the workbook fails to download
 or parse, the USDA AgTransport mirror of the same series fills in the 2 newest
-weeks.
+weeks. The file's source names whichever supplied the newest week.
 """
 
 from __future__ import annotations
@@ -306,7 +306,11 @@ def update(data_dir: Path, http: HttpClient, now: datetime, v: store.Validators 
     existing = load(data_dir, v)
 
     headers = {"Accept": "application/vnd.ms-excel, */*"}
-    if existing and existing.get("last_modified"):
+    # Only while the newest week is the workbook's. After the backup supplied
+    # it, a 304 would keep the backup's copy and the health check would take
+    # the workbook for still broken, so the first run that reaches the
+    # workbook again fetches it whole and puts EIA's own values back.
+    if existing and existing.get("last_modified") and existing.get("source") == "eia_xls":
         headers["If-Modified-Since"] = existing["last_modified"]
 
     failure = None
@@ -329,15 +333,28 @@ def update(data_dir: Path, http: HttpClient, now: datetime, v: store.Validators 
             else:
                 # A renamed Contents sheet or a reworded label reads as None.
                 # Keep what we already know rather than blanking the dated EIA
-                # acknowledgment the site is required to show, and say so.
+                # acknowledgment the site is required to show, and say so. But a
+                # release date only ever goes with the week it came with, or the
+                # footer would date this week to another week's release. The
+                # workbook's dates count when its newest week is our newest, the
+                # stored ones while their week is still the newest.
                 warnings: list[str] = []
-                release = book.release_date or (existing.get("release_date") if existing else None)
-                next_release = book.next_release_date or (existing.get("next_release_date") if existing else None)
+                weeks = merge_weeks(existing["weeks"] if existing else [], book.weeks)
+                newest = weeks[-1]["period"]
+                kept_release, kept_next = _release_dates(existing, newest)
+                current = book.weeks[-1]["period"] == newest
+                release = (book.release_date if current else None) or kept_release
+                next_release = (book.next_release_date if current else None) or kept_next
                 if book.release_date is None and release is not None:
                     warnings.append(f"eia_release_date_missing: Contents gave no Release Date, keeping {release}")
                 if book.next_release_date is None and next_release is not None:
                     warnings.append(
                         f"eia_next_release_date_missing: Contents gave no Next Release Date, keeping {next_release}"
+                    )
+                if release is None and existing and existing.get("release_date"):
+                    warnings.append(
+                        f"eia_release_date_cleared: the workbook gave no release date for the newest week {newest}, "
+                        f"so the stored {existing['release_date']} was cleared"
                     )
                 doc = {
                     "schema": SCHEMA_ID,
@@ -347,9 +364,8 @@ def update(data_dir: Path, http: HttpClient, now: datetime, v: store.Validators 
                     "last_modified": resp.headers.get("Last-Modified"),
                     "release_date": release,
                     "next_release_date": next_release,
-                    "weeks": merge_weeks(existing["weeks"] if existing else [], book.weeks),
+                    "weeks": weeks,
                 }
-                newest = doc["weeks"][-1]["period"]
                 if existing is not None and _content(doc) == _content(existing):
                     return EiaResult("unchanged", newest_period=newest, warnings=warnings)
                 try:
@@ -381,15 +397,34 @@ def _fallback(path: Path, existing: dict | None, http: HttpClient, now: datetime
     merged = merge_weeks(existing["weeks"] if existing else [], weeks)
     if existing is not None and merged == existing["weeks"]:
         return EiaResult("fallback", changed=False, newest_period=merged[-1]["period"], warnings=warnings)
+    newest = merged[-1]["period"]
+    # The health check reads usda_socrata as "the backup is carrying the
+    # newest week", so a copy that only revises older weeks leaves the file
+    # marked as whatever supplied the newest one.
+    if existing is not None and merged[-1] == existing["weeks"][-1]:
+        source, source_url = existing["source"], existing["source_url"]
+    else:
+        source, source_url = "usda_socrata", USDA_URL
+    # The mirror has no release dates. The stored ones came with the workbook's
+    # newest week, so they stay only while that is still the newest week. Past
+    # it they would date this week to an older release, so the site shows no
+    # release date until the workbook loads again.
+    release, next_release = _release_dates(existing, newest)
+    if release is None and existing and existing.get("release_date"):
+        warnings.append(
+            f"eia_release_date_cleared: the USDA mirror moved the newest week to {newest}, "
+            f"past the workbook's release of {existing['release_date']}, so the site shows no release date"
+        )
     doc = {
         "schema": SCHEMA_ID,
-        "source": "usda_socrata",
-        "source_url": USDA_URL,
+        "source": source,
+        "source_url": source_url,
         "fetched_at": iso_utc(now),
-        # Keep the workbook's Last-Modified so the next conditional GET still works.
+        # Keep the workbook's Last-Modified. The next conditional GET needs it
+        # while the newest week is still the workbook's.
         "last_modified": existing.get("last_modified") if existing else None,
-        "release_date": existing.get("release_date") if existing else None,
-        "next_release_date": existing.get("next_release_date") if existing else None,
+        "release_date": release,
+        "next_release_date": next_release,
         "weeks": merged,
     }
     try:
@@ -404,3 +439,10 @@ def _newest(doc: dict | None) -> str | None:
     if not doc or not doc.get("weeks"):
         return None
     return doc["weeks"][-1]["period"]
+
+
+def _release_dates(existing: dict | None, newest: str) -> tuple[str | None, str | None]:
+    """The stored release dates, or none once the newest week has moved past theirs."""
+    if _newest(existing) != newest:
+        return None, None
+    return existing.get("release_date"), existing.get("next_release_date")
