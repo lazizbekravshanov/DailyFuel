@@ -21,9 +21,10 @@ import {
   sortPts,
   type Cfg,
   type PriceRow,
+  type Places,
   type Pt,
 } from "./map.ts";
-import { corridor, MPG, readMpg, stateMiles, stripHtml } from "./trip.ts";
+import { corridor, END_MI, LONG_MI, LONG_X, MPG, readMpg, stateMiles, stripHtml } from "./trip.ts";
 
 
 describe("the chains", () => {
@@ -320,6 +321,104 @@ describe("finding A and B", () => {
     // a state with no such town finds nothing rather than another state's
     expect(findPlace("cheyenne il", places)).toBeNull();
     expect(findPlace("normal zz", places)).toBeNull();
+  });
+});
+
+describe("a route that goes the long way", () => {
+  const run = (code: string, from: number, to: number) => ({ code, from, to, hits: [] });
+  const trip = (miles: number, direct: number, ends: [number, number], road = true) => ({
+    miles, line: [], ring: [], outside: false, hits: 0, road, direct, ends, runs: [run("IL", 0, miles)],
+  });
+  const t = (h: string) => parseHTML(`<div>${h}</div>`).document.querySelector("div")!.textContent!.replace(/\s+/g, " ");
+
+  it("says so when the freight highways run far past the straight line", () => {
+    expect([LONG_X, LONG_MI, END_MI]).toEqual([1.6, 30, 25]);
+    // Las Vegas to Phoenix along the freight network: 543 miles for a 256 mile line
+    expect(t(stripHtml(trip(543, 256, [2, 3]), "Las Vegas, NV", "Phoenix, AZ", CFG, false))).toContain(
+      "The freight highways go the long way here: 543 miles, against 256 in a straight line. The roads you take may be shorter, and their miles by state may differ.",
+    );
+    // an ordinary route, and a straight line, say nothing
+    expect(stripHtml(trip(295, 250, [2, 3]), "A", "B", CFG, false)).not.toContain("long way");
+    // the edge: 1.6 times 256, plus 30, is 439.6
+    expect(stripHtml(trip(439, 256, [2, 3]), "A", "B", CFG, false)).not.toContain("long way");
+    expect(stripHtml(trip(440, 256, [2, 3]), "A", "B", CFG, false)).toContain("long way");
+    expect(stripHtml(trip(543, 256, [0, 0], false), "A", "B", CFG, false)).not.toContain("long way");
+  });
+
+  it("says so when a town is far from the nearest freight highway", () => {
+    const h = t(stripHtml(trip(400, 380, [107, 3]), "Roswell, NM", "Dallas, TX", CFG, false));
+    expect(h).toContain("Roswell, NM is 107 miles from the nearest freight highway, so the line runs straight for that stretch.");
+    expect(h).not.toContain("Dallas, TX is");
+    expect(stripHtml(trip(400, 380, [25, 25]), "A", "B", CFG, false)).not.toContain("nearest freight highway");
+    expect(t(stripHtml(trip(400, 380, [3, 40]), "A", "B <x>", CFG, false))).toContain("B <x> is 40 miles from");
+    expect(stripHtml(trip(400, 380, [3, 40]), "A", "B <x>", CFG, false)).toContain("B &lt;x&gt; is 40 miles");
+  });
+
+  it("measures the straight line and each town's stretch to the network", () => {
+    const a: [number, number] = [41.88, -87.63], b: [number, number] = [39.1, -84.51];
+    const res = corridor(a, b, [], [], [a, [41.6, -87.4], [39.3, -84.6], b]);
+    expect(res.direct).toBeGreaterThan(240);
+    expect(res.direct).toBeLessThan(260);
+    expect(res.ends![0]).toBeGreaterThan(15);
+    expect(res.ends![0]).toBeLessThan(25);
+    expect(res.ends![1]).toBeLessThan(15);
+    // a straight line has no stretches to a network
+    expect(corridor(a, b, [], []).ends).toEqual([0, 0]);
+  });
+});
+
+describe("reading a town the way drivers type it", () => {
+  const list = (labels: string[]): Places => ({ label: labels, lat: labels.map((_, i) => 30 + i), lon: labels.map((_, i) => -90 - i) });
+  const pl = list([
+    "St. Louis, MO", "Saint Louis Park, MN", "Saint Paul, MN", "Saint Cloud, MN", "Fort Worth, TX", "Dallas, TX", "New York City, NY", "Missouri City, TX",
+    "Texas City, TX", "Iowa City, IA", "Delaware, OH", "Washington, DC", "Columbus, GA", "Columbus, OH", "Charleston, WV", "Charleston, SC",
+    "St. Charles, MD", "Saint Charles, MD", "Kansas City, KS", "Kansas City, MO", "Mount Vernon, NY", "Virginia Beach, VA",
+  ]);
+  const ST = [["MO", "Missouri"], ["MN", "Minnesota"], ["TX", "Texas"], ["NY", "New York"], ["IA", "Iowa"], ["OH", "Ohio"], ["DC", "District of Columbia"],
+    ["GA", "Georgia"], ["WV", "West Virginia"], ["VA", "Virginia"], ["SC", "South Carolina"], ["MD", "Maryland"], ["KS", "Kansas"], ["DE", "Delaware"]];
+  const got = (q: string) => {
+    const r = findPlace(q, pl, ST);
+    return r && typeof r == "object" ? r.label : r;
+  };
+
+  it("reads St and Saint, Ft and Fort, Mt and Mount, with or without a period, both ways", () => {
+    for (const q of ["St Louis, MO", "St. Louis MO", "saint louis", "st louis", "Saint Louis, Missouri"]) expect(got(q), q).toBe("St. Louis, MO");
+    expect(got("St Paul, MN")).toBe("Saint Paul, MN");
+    expect(got("Ft Worth, TX")).toBe("Fort Worth, TX");
+    expect(got("Mt Vernon NY")).toBe("Mount Vernon, NY");
+    // a town the list has longer is its own place, not St. Louis
+    expect(got("Saint Louis Park")).toBe("Saint Louis Park, MN");
+    // one town listed twice is one place
+    expect(got("St Charles, MD")).toBe("St. Charles, MD");
+  });
+
+  it("reads a state written out, the longest name first", () => {
+    expect(got("Dallas, Texas")).toBe("Dallas, TX");
+    expect(got("dallas texas")).toBe("Dallas, TX");
+    expect(got("Charleston West Virginia")).toBe("Charleston, WV");
+    expect(got("Charleston, South Carolina")).toBe("Charleston, SC");
+    expect(got("kansas city missouri")).toBe("Kansas City, MO");
+    expect(got("Virginia Beach")).toBe("Virginia Beach, VA");
+  });
+
+  it("finds New York City as New York, and never turns a state's name into a town", () => {
+    expect(got("New York, NY")).toBe("New York City, NY");
+    expect(got("new york")).toBe("New York City, NY");
+    // these silently became the wrong town, with a confident fuel cost
+    for (const q of ["Missouri", "Texas", "Iowa", "Kansas", "west virginia"]) expect(got(q), q).toBeNull();
+    // unless a town is called just that, in one state
+    expect(got("Delaware")).toBe("Delaware, OH");
+    expect(got("Washington")).toBe("Washington, DC");
+  });
+
+  it("asks which when a name or a start fits several places, and never picks one silently", () => {
+    expect(got("Columbus")).toBe("Columbus, GA");
+    expect(got("kansas city")).toBe("Kansas City, KS");
+    expect(got("Charleston")).toBe("Charleston, WV");
+    // a start that fits one place is that place; several with a state given find nothing rather than the first
+    expect(findPlace("fort w", pl, ST)).toMatchObject({ label: "Fort Worth, TX" });
+    expect(got("saint, mn")).toBeNull();
+    expect(got("saint")).toBe("St. Louis, MO");
   });
 });
 
