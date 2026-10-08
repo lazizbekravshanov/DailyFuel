@@ -1,0 +1,14 @@
+{
+  "schema": "dailyfuel/eia-diesel-weekly/1",
+  "source": "eia_xls",
+  "source_url": "https://www.eia.gov/petroleum/gasdiesel/xls/psw18vwall.xls",
+  "fetched_at": "2026-10-06T18:23:02Z",
+  "last_modified": "Tue, 06 Oct 2026 13:27:36 GMT",
+  "release_date": "2026-10-06",
+  "next_release_date": "2026-10-14",
+  "weeks": [
+    {"period": "2026-09-21", "values": {"NUS": 5.6, "R10": 5.67, "R1X": 5.74, "R1Y": 5.81, "R1Z": 5.88, "R20": 5.95, "R30": 6.02, "R40": 6.09, "R50": 6.16, "SCA": 6.23, "R5XCA": 6.3}},
+    {"period": "2026-09-28", "values": {"NUS": 5.631, "R10": 5.701, "R1X": 5.771, "R1Y": 5.841, "R1Z": 5.911, "R20": 5.981, "R30": 6.051, "R40": null, "R50": 6.191, "SCA": 6.261, "R5XCA": 6.331}},
+    {"period": "2026-10-05", "values": {"NUS": 5.662, "R10": 5.732, "R1X": 5.802, "R1Y": 5.872, "R1Z": 5.942, "R20": 6.012, "R30": 6.082, "R40": 6.152, "R50": 6.222, "SCA": 6.292, "R5XCA": 6.362}}
+  ]
+}

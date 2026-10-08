@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 import synth
-from dailyfuel import eia, health, pipeline, store
+from dailyfuel import derive, eia, health, pipeline, store
 from dailyfuel.states import EIA_KEYS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,6 +97,8 @@ def seed_eia(data_dir, newest: date, validators):
     doc["weeks"][0]["period"] = (newest - timedelta(days=7)).isoformat()
     doc["weeks"][1]["period"] = newest.isoformat()
     store.write_doc("eia-diesel-weekly", data_dir / "eia" / "diesel_weekly.json", doc, validators)
+    # latest.json too, as the job writes it, for the check of what the site build would refuse.
+    derive.rebuild(data_dir, synth.STATES, False, NOW, validators)
 
 
 def seed_aaa(data_dir, as_of: date):
@@ -176,6 +178,134 @@ def test_health_cli(tmp_path, validators, capsys):
     rt.mkdir()
     (rt / "run_status.json").write_text(json.dumps(GOOD))
     assert health_cli.main(["--data-dir", str(tmp_path / "data")], env={"RUNNER_TEMP": str(rt)}, now=NOW) == 0
+
+
+def test_health_cli_report_file(tmp_path, validators):
+    import health as health_cli
+
+    seed_eia(tmp_path / "data", date(2026, 9, 14), validators)
+    status = tmp_path / "run_status.json"
+    report = tmp_path / "rt" / "health.md"
+    args = ["--data-dir", str(tmp_path / "data"), "--status", str(status), "--report", str(report)]
+    status.write_text(json.dumps(GOOD))
+    assert health_cli.main(args, env={}, now=NOW) == 0
+    assert not report.exists(), "a passing check leaves no report for the issue"
+    status.write_text(json.dumps(dict(GOOD, aaa="blocked")))
+    assert health_cli.main(args, env={}, now=NOW) == 1
+    assert report.read_text() == "* AAA status is blocked\n"
+
+
+# ---------------------------------------------------------------- what the site build would refuse
+
+BLANK_CELL = ROOT / "tests" / "fixtures" / "blank_cell"
+R40_BLANK = (
+    "EIA left the Rocky Mountain price (R40) blank for the week of 2026-10-05, so CO, ID, MT, UT and WY "
+    "would have no price and the site build would refuse the data"
+)
+
+
+def test_blank_region_in_the_newest_week_is_refused_like_the_site_build_does(states):
+    # src/lib/data.test.ts loads the same folder and expects the build to throw
+    # "CO has no EIA price for 2026-10-05, but EIA surveys it as part of R40".
+    assert health.build_problems(BLANK_CELL / "newest", states) == [R40_BLANK]
+
+
+def test_blank_region_in_an_older_week_passes_like_the_site_build_does(states):
+    # The newest week is whole, so every surveyed state has a price and only
+    # the change from the week before is missing. data.ts accepts that too.
+    latest = json.loads((BLANK_CELL / "older" / "latest.json").read_text())
+    colorado = next(r for r in latest["states"] if r["code"] == "CO")
+    assert colorado["eia"]["price"] is not None and colorado["eia"]["prev"] is None
+    assert health.build_problems(BLANK_CELL / "older", states) == []
+
+
+def test_committed_data_passes_the_build_check(states):
+    assert health.build_problems(ROOT / "data", states) == []
+
+
+def test_aaa_mode_does_not_need_eia_for_every_state(tmp_path, states):
+    # There the state price is AAA's and EIA only a benchmark, so data.ts skips the rule.
+    latest = json.loads((BLANK_CELL / "newest" / "latest.json").read_text())
+    latest["mode"] = "aaa+eia"
+    (tmp_path / "latest.json").write_text(json.dumps(latest))
+    assert health.build_problems(tmp_path, states) == []
+
+
+def test_build_check_needs_latest_json(tmp_path, states):
+    missing = f"{tmp_path / 'latest.json'} is missing, so the site can't build"
+    assert health.build_problems(tmp_path, states) == [missing]
+    (tmp_path / "latest.json").write_text("{")
+    assert health.build_problems(tmp_path, states)[0].startswith("couldn't read")
+
+
+def test_blank_cell_fixtures_are_what_the_pipeline_writes(tmp_path, validators):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("build_blank_cell", BLANK_CELL.parent / "build_blank_cell.py")
+    builder = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(builder)
+    builder.build(tmp_path, validators)
+    assert hashes(tmp_path) == hashes(BLANK_CELL), "regenerate with tests/fixtures/build_blank_cell.py"
+
+
+def test_job_stops_before_commit_on_a_blank_region_in_the_newest_week(
+    tmp_path, now, states, validators, monkeypatch, capsys
+):
+    import health as health_cli
+
+    mondays = [date(2026, 8, 31), date(2026, 9, 7), date(2026, 9, 14)]
+
+    def value(period, key):
+        return None if (period == mondays[-1] and key == "R40") else round(5.0 + EIA_KEYS.index(key) * 0.1, 3)
+
+    book = synth.eia_book(mondays, value=value)
+    monkeypatch.setattr(eia, "parse_workbook", lambda body: eia.parse_book(book))
+    data = tmp_path / "data"
+    http = synth.FakeHttp().set(eia.XLS_URL, synth.xls_server())
+    result = pipeline.run(data_dir=data, env={}, http=http, now=now, states=states, validators=validators)
+    # The workbook parser only insists on the U.S. price, so the job takes the week.
+    assert result.eia.status == "ok"
+
+    report = tmp_path / "rt" / "health.md"
+    args = ["--data-dir", str(data), "--before-commit", "--report", str(report)]
+    assert health_cli.main(args, env={}, now=now) == 1
+    text = report.read_text()
+    assert text == (
+        "* EIA left the Rocky Mountain price (R40) blank for the week of 2026-09-14, so CO, ID, MT, UT and WY "
+        "would have no price and the site build would refuse the data\n\n" + health_cli.NOT_COMMITTED + "\n"
+    )
+    assert capsys.readouterr().out == text
+    for dash in ("—", "–", " - "):
+        assert dash not in text
+
+
+def test_check_before_commit_passes_a_whole_week(tmp_path, now, states, validators, capsys):
+    import health as health_cli
+
+    # The synthetic workbook has one blank cell, in a week from 2023, which is fine.
+    data = tmp_path / "data"
+    http = synth.FakeHttp().set(eia.XLS_URL, synth.xls_server())
+    pipeline.run(data_dir=data, env={}, http=http, now=now, states=states, validators=validators)
+    report = tmp_path / "health.md"
+    summary = tmp_path / "summary.md"
+    args = ["--data-dir", str(data), "--before-commit", "--report", str(report)]
+    assert health_cli.main(args, env={"GITHUB_STEP_SUMMARY": str(summary)}, now=now) == 0
+    assert capsys.readouterr().out == "All good.\n"
+    assert not report.exists()
+    assert summary.read_text() == "### DailyFuel check before commit\n\nAll good.\n"
+
+
+def test_the_job_checks_what_the_site_would_refuse_before_it_commits():
+    workflow = (ROOT / ".github" / "workflows" / "update-data.yml").read_text(encoding="utf-8")
+    fetch = workflow.index("python scripts/update_data.py")
+    gate = workflow.index("python scripts/health.py --before-commit")
+    commit = workflow.index("git commit")
+    health_step = workflow.index('python scripts/health.py --report "$RUNNER_TEMP/health.md"')
+    report = workflow.index("- name: Report a failed scheduled run")
+    assert fetch < gate < commit < health_step < report
+    # The issue carries whatever either check found.
+    assert '--report "$RUNNER_TEMP/health.md"' in workflow[gate:commit]
+    assert '"$RUNNER_TEMP/health.md"' in workflow[report:]
 
 
 # ---------------------------------------------------------------- make_fixtures

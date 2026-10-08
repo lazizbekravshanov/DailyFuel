@@ -1,7 +1,8 @@
 name: update-data
 
-# Fetches new diesel prices, commits changed JSON under data/, and checks the
-# result. Every data commit on main triggers a Vercel production deploy.
+# Fetches new diesel prices, checks the site will build with them, commits
+# changed JSON under data/, and checks the result. Every data commit on main
+# triggers a Vercel production deploy.
 # AAA stays off unless the repo variable AAA_ENABLED is exactly "true".
 
 on:
@@ -53,6 +54,14 @@ jobs:
           FORCE_AAA: ${{ inputs.force_aaa && 'true' || 'false' }}
         run: python scripts/update_data.py
 
+      - name: Check the site will build
+        # The site build checks the data again and throws on a week it can't
+        # show, like one where EIA left a region blank. Vercel then keeps the
+        # old deploy and nothing says why, since this push doesn't run ci.yml.
+        # Failing here skips the commit, so the site keeps the week it has and
+        # the issue below names the region and week.
+        run: python scripts/health.py --before-commit --report "$RUNNER_TEMP/health.md"
+
       - name: Commit and push data
         env:
           COMMIT_MESSAGE: ${{ steps.update.outputs.commit_message }}
@@ -69,7 +78,7 @@ jobs:
           git push
 
       - name: Health check
-        run: python scripts/health.py
+        run: python scripts/health.py --report "$RUNNER_TEMP/health.md"
 
       - name: Report a failed scheduled run
         if: failure() && github.event_name == 'schedule'
@@ -78,16 +87,25 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           repo="$GITHUB_REPOSITORY"
+          # What the check before commit or the health check found, if either failed.
+          found=""
+          if [ -s "$RUNNER_TEMP/health.md" ]; then
+            found=$(cat "$RUNNER_TEMP/health.md")
+          fi
           if ! gh label list --repo "$repo" --search data-failure --json name --jq '.[].name' | grep -qx data-failure; then
             gh label create data-failure --repo "$repo" --color B42F2F --description "The scheduled data update failed"
           fi
           open_issue=$(gh issue list --repo "$repo" --label data-failure --state open --limit 1 --json number --jq '.[0].number // empty')
           if [ -n "$open_issue" ]; then
-            gh issue comment "$open_issue" --repo "$repo" --body "It failed again. Run: $RUN_URL"
+            gh issue comment "$open_issue" --repo "$repo" --body "It failed again. Run: $RUN_URL
+
+          $found"
           else
             gh issue create --repo "$repo" --label data-failure \
               --title "Scheduled data update failed" \
               --body "The scheduled data update failed. Check the run log and the health check output: $RUN_URL
+
+          $found
 
           Close this issue once a run passes again. Later failures add a comment here while it stays open."
           fi

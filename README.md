@@ -17,7 +17,9 @@ There's no server and no database. A scheduled GitHub Actions job fetches prices
 * The job lives in `.github/workflows/update-data.yml`. It runs three times a day, at 12:17, 15:47 and 20:17 UTC, and you can also start it by hand.
 * `scripts/update_data.py` checks each source and validates every file against the JSON Schemas in `schemas/` before writing it. It only writes when the numbers actually changed, so a run with nothing new leaves the repo alone and makes no commit.
 * It then rebuilds `data/latest.json`, the snapshot the site renders.
-* `scripts/health.py` fails the job when a source errored or the data is stale: EIA's newest week is more than 10 days old, or, while AAA is on, AAA's newest day is 2 or more days old. A failed scheduled run opens an issue labeled `data-failure`, or comments on the one that's already open.
+* Before anything is committed, `scripts/health.py --before-commit` checks the new data the way the site build will, and fails the run if the build would refuse it, for example a week where EIA left one region's price blank. Nothing is committed then, so the site keeps the week it already shows.
+* After the commit, `scripts/health.py` fails the job when a source errored or the data is stale: EIA's newest week is more than 10 days old, or, while AAA is on, AAA's newest day is 2 or more days old.
+* A failed scheduled run opens an issue labeled `data-failure` with what the checks found, or comments on the one that's already open.
 * The site checks the data again at build time, so bad data fails the deploy instead of going live.
 
 EIA's weekly prices are as of Monday morning and come out on Tuesday, or Wednesday after a Monday holiday.
@@ -131,7 +133,7 @@ data/
 schemas/                   JSON Schemas for the data files, the contract
 scripts/
   update_data.py           the data job
-  health.py                fails the job on errors or stale data
+  health.py                fails the job on errors, stale data, or data the site build would refuse
   update_taxes.py          refreshes the tax file from FHWA, run by hand, not by the job
   update_map_data.py       builds data/map/stations.json, the weigh station files and coverage.json from a local cache of OpenStreetMap, NTAD and Iowa DOT and the us-atlas 3 boundary files; run by hand
   update_map_roads.py      builds data/map/roads_nhfn.json, states.json and places.json from a local cache; run by hand
