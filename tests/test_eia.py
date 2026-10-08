@@ -257,6 +257,73 @@ def test_xls_failure_falls_back_to_usda(tmp_path, now, fake_http, validators, xl
     assert doc["weeks"][:-2] == stored["weeks"][:-2]
 
 
+def _mirror_of(doc, **changes):
+    """USDA rows for the 2 newest stored weeks, with the U.S. price of the named weeks changed."""
+    weeks = {}
+    for w in doc["weeks"][-2:]:
+        values = {k: repr(v) for k, v in w["values"].items()}
+        if w["period"] in changes:
+            values["NUS"] = changes[w["period"]]
+        weeks[date.fromisoformat(w["period"])] = values
+    return synth.usda_response(synth.usda_rows(weeks))
+
+
+def test_fallback_that_only_revises_an_older_week_keeps_the_newest_weeks_source(tmp_path, now, fake_http, validators):
+    """usda_socrata means the backup is carrying the newest week, and here it isn't."""
+    path = _seed(tmp_path, now, fake_http, validators)
+    stored = json.loads(path.read_text())
+    fake_http.set(eia.XLS_URL, Response.make(200, b"<html>down for maintenance</html>", url=eia.XLS_URL))
+    fake_http.set(eia.USDA_URL, _mirror_of(stored, **{"2026-09-07": "4.999"}))
+    result = eia.update(tmp_path, fake_http, now + timedelta(days=1), validators)
+    assert (result.status, result.changed) == ("fallback", True)
+    doc = json.loads(path.read_text())
+    assert doc["weeks"][-2]["values"]["NUS"] == 4.999
+    assert doc["weeks"][-1] == stored["weeks"][-1]
+    assert (doc["source"], doc["source_url"]) == ("eia_xls", eia.XLS_URL)
+    assert (doc["release_date"], doc["last_modified"]) == (stored["release_date"], stored["last_modified"])
+
+    # The workbook hasn't changed, so the conditional GET still applies.
+    fake_http.set(eia.XLS_URL, synth.xls_server())
+    fake_http.calls.clear()
+    assert eia.update(tmp_path, fake_http, now + timedelta(days=2), validators).status == "not_modified"
+    assert fake_http.calls[0][1]["If-Modified-Since"] == synth.XLS_LAST_MODIFIED
+
+    # Once the backup carries the newest week, a revision of the older one keeps it marked as the backup's.
+    fake_http.set(eia.XLS_URL, synth.network_error())
+    fake_http.set(eia.USDA_URL, _mirror_of(doc, **{"2026-09-14": "6.111"}))
+    assert eia.update(tmp_path, fake_http, now + timedelta(days=3), validators).status == "fallback"
+    doc = json.loads(path.read_text())
+    fake_http.set(eia.USDA_URL, _mirror_of(doc, **{"2026-09-07": "5.111"}))
+    result = eia.update(tmp_path, fake_http, now + timedelta(days=3, hours=3), validators)
+    assert (result.status, result.changed) == ("fallback", True)
+    assert json.loads(path.read_text())["source"] == "usda_socrata"
+
+
+def test_workbook_is_fetched_whole_while_the_backup_has_the_newest_week(tmp_path, now, fake_http, validators):
+    """A 304 would leave the backup's copy in place and the file marked as the backup's."""
+    path = _seed(tmp_path, now, fake_http, validators)
+    workbook = json.loads(path.read_text())
+    fake_http.set(eia.XLS_URL, Response.make(200, b"<html>down for maintenance</html>", url=eia.XLS_URL))
+    fake_http.set(eia.USDA_URL, synth.usda_response(_usda_two_weeks()))
+    assert eia.update(tmp_path, fake_http, now + timedelta(hours=3), validators).status == "fallback"
+    assert json.loads(path.read_text())["source"] == "usda_socrata"
+
+    # Same workbook, same Last-Modified: it would have answered 304.
+    fake_http.set(eia.XLS_URL, synth.xls_server())
+    fake_http.calls.clear()
+    result = eia.update(tmp_path, fake_http, now + timedelta(hours=6), validators)
+    assert "If-Modified-Since" not in fake_http.calls[0][1]
+    assert (result.status, result.changed) == ("ok", True)
+    doc = json.loads(path.read_text())
+    assert (doc["source"], doc["weeks"], doc["release_date"]) == ("eia_xls", workbook["weeks"], "2026-09-15")
+    assert doc["last_modified"] == synth.XLS_LAST_MODIFIED
+
+    # Back on the workbook, the conditional GET is too.
+    fake_http.calls.clear()
+    assert eia.update(tmp_path, fake_http, now + timedelta(hours=9), validators).status == "not_modified"
+    assert fake_http.calls[0][1]["If-Modified-Since"] == synth.XLS_LAST_MODIFIED
+
+
 def test_fallback_that_moves_the_week_forward_clears_the_release_dates(tmp_path, now, fake_http, validators):
     """The stored dates are the 9/14 week's. Kept with the 9/21 week, the footer would say it came out 9/15."""
     path = _seed(tmp_path, now, fake_http, validators)
@@ -270,7 +337,7 @@ def test_fallback_that_moves_the_week_forward_clears_the_release_dates(tmp_path,
     doc = json.loads(path.read_text())
     assert doc["weeks"][-1]["period"] == "2026-09-21"
     assert (doc["release_date"], doc["next_release_date"]) == (None, None)
-    assert doc["last_modified"] == stored["last_modified"], "the next conditional GET still needs it"
+    assert doc["last_modified"] == stored["last_modified"]
     cleared = "eia_release_date_cleared: the USDA mirror moved the newest week to 2026-09-21"
     assert any(w.startswith(cleared) for w in result.warnings)
 

@@ -3,7 +3,7 @@
 Primary source is EIA's workbook psw18vwall.xls, fetched with a conditional GET
 (If-Modified-Since only, EIA ignores ETags). When the workbook fails to download
 or parse, the USDA AgTransport mirror of the same series fills in the 2 newest
-weeks.
+weeks. The file's source names whichever supplied the newest week.
 """
 
 from __future__ import annotations
@@ -306,7 +306,11 @@ def update(data_dir: Path, http: HttpClient, now: datetime, v: store.Validators 
     existing = load(data_dir, v)
 
     headers = {"Accept": "application/vnd.ms-excel, */*"}
-    if existing and existing.get("last_modified"):
+    # Only while the newest week is the workbook's. After the backup supplied
+    # it, a 304 would keep the backup's copy and the health check would take
+    # the workbook for still broken, so the first run that reaches the
+    # workbook again fetches it whole and puts EIA's own values back.
+    if existing and existing.get("last_modified") and existing.get("source") == "eia_xls":
         headers["If-Modified-Since"] = existing["last_modified"]
 
     failure = None
@@ -394,6 +398,13 @@ def _fallback(path: Path, existing: dict | None, http: HttpClient, now: datetime
     if existing is not None and merged == existing["weeks"]:
         return EiaResult("fallback", changed=False, newest_period=merged[-1]["period"], warnings=warnings)
     newest = merged[-1]["period"]
+    # The health check reads usda_socrata as "the backup is carrying the
+    # newest week", so a copy that only revises older weeks leaves the file
+    # marked as whatever supplied the newest one.
+    if existing is not None and merged[-1] == existing["weeks"][-1]:
+        source, source_url = existing["source"], existing["source_url"]
+    else:
+        source, source_url = "usda_socrata", USDA_URL
     # The mirror has no release dates. The stored ones came with the workbook's
     # newest week, so they stay only while that is still the newest week. Past
     # it they would date this week to an older release, so the site shows no
@@ -406,10 +417,11 @@ def _fallback(path: Path, existing: dict | None, http: HttpClient, now: datetime
         )
     doc = {
         "schema": SCHEMA_ID,
-        "source": "usda_socrata",
-        "source_url": USDA_URL,
+        "source": source,
+        "source_url": source_url,
         "fetched_at": iso_utc(now),
-        # Keep the workbook's Last-Modified so the next conditional GET still works.
+        # Keep the workbook's Last-Modified. The next conditional GET needs it
+        # while the newest week is still the workbook's.
         "last_modified": existing.get("last_modified") if existing else None,
         "release_date": release,
         "next_release_date": next_release,

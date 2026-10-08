@@ -59,10 +59,12 @@ def problems(
         # failed run is normal and the USDA copy covers for it. What must not go
         # unnoticed is the workbook staying broken while the backup keeps the
         # newest week fresh, because the staleness check above never fires then.
-        # Any run where the workbook parses writes the file back as eia_xls, so
-        # a file still marked usda_socrata on a later New York day than the
-        # backup wrote it, on a run where the workbook failed again, means it
-        # hasn't loaded on any run in between.
+        # The file is marked usda_socrata only while the backup's copy of the
+        # newest week is the one stored, and a run then fetches the workbook
+        # without If-Modified-Since, so any run where it parses writes the file
+        # back as eia_xls. A file still marked usda_socrata on a later New York
+        # day than the backup wrote it, on a run where the workbook failed
+        # again, means it hasn't loaded on any run in between.
         if status is not None and status.get("eia") in EIA_FAILED and doc.get("source") == "usda_socrata":
             since = today_et(datetime.fromisoformat(doc["fetched_at"].replace("Z", "+00:00")))
             if since < today:
