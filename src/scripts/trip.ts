@@ -4,7 +4,7 @@
 
 import { band, distMi, sample, shapeAt, type Shape } from "../components/map/geo.ts";
 import { BAND_MI, ROAD_MI, STEP_MI, type Cfg, type Corridor, type PriceRow, type Pt, type Run } from "./map.ts";
-import { esc, fmt } from "./text.ts";
+import { esc, fmt, lk } from "./text.ts";
 
 type LL = [number, number];
 
@@ -115,8 +115,17 @@ export function corridor(a: LL, b: LL, pts: Pt[], shapes: Shape[], path?: LL[] |
       hits++;
     }
   }
-  return { miles, line, ring: band(line, w), runs, outside, hits, road };
+  const p = path || [],
+    n = p.length,
+    ends: [number, number] = n > 2 ? [distMi(...p[0], ...p[1]), distMi(...p[n - 2], ...p[n - 1])] : [0, 0];
+  return { miles, line, ring: band(line, w), runs, outside, hits, road, direct: distMi(...a, ...b), ends };
 }
+
+/** A route this many times the straight line, plus LONG_MI, goes the long way, and the result says so. */
+export const LONG_X = 1.6;
+export const LONG_MI = 30;
+/** A town this far from the nearest freight highway has a straight stretch to it, and the result says so. */
+export const END_MI = 25;
 
 /** Miles per gallon when the driver hasn't said: a loaded tractor trailer gets about this. */
 export const MPG = 6.5;
@@ -158,9 +167,6 @@ export function stateMiles(res: Corridor): [string | null, number][] {
 const usd = (n: number) => "$" + fmt(Math.round(n));
 const gal = (n: number) => (n < 100 ? n.toFixed(1) : fmt(Math.round(n)));
 
-/** The name cell's button: it opens the point's popup on the map. */
-// no form holds the list, the route strip's result or a popup, so a button there is a plain button
-const lk = (p: Pt) => `<button class="lk" data-i="${p.i}">${esc(p.n)}</button>`;
 
 /**
  * The trip's result: the line and the fuel it takes; the price in each state
@@ -193,6 +199,13 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
   let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}</p>`,
     rest = "";
   if (cost) h += `<p class="rfuel">About ${gal(gals)} gallons of diesel, about <b>${usd(cost)}</b> at ${mpg} miles per gallon${unpriced ? `, not counting ${fmt(unpriced)} miles with no weekly price` : ""}</p>`;
+  // The freight network has no road on some lanes, and a town can sit far
+  // from it; the miles and the states are then rough, and the result says so.
+  if (res.road && res.direct && res.miles > LONG_X * res.direct + LONG_MI)
+    h += `<p>The freight highways go the long way here: ${fmt(Math.round(res.miles))} miles, against ${fmt(Math.round(res.direct))} in a straight line. The roads you take may be shorter, and their miles by state may differ.</p>`;
+  (res.ends || []).forEach((m, i) => {
+    if (m > END_MI) h += `<p>${esc(i ? bLabel : aLabel)} is ${fmt(Math.round(m))} miles from the nearest freight highway, so the line runs straight for that stretch.</p>`;
+  });
   if (res.outside) h += `<p class="fine">Part of the line runs over water or outside the 50 states.</p>`;
   if (withButtons) h += `<p><button class="btn" data-clr>Show every stop</button>`;
   h += `<ul class="rp">`;
@@ -204,7 +217,7 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
       h += `<li><b>${esc(row[1])}</b> ${row[2] ? `${row[2]} <span class="${row[4]}">${row[3] || ""}</span>` : "No weekly price"}`;
     }
     rest += `<tr class="rg"><th colspan="2">${row ? esc(row[1]) : "State not known"}: ${k} ${k == 1 ? "place" : "places"}, ${milesText(r, res.miles).toLowerCase()}${row ? `, state tax ${row[6]}` : ""}`;
-    for (const x of r.hits) rest += `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p) : esc(x.p.n)}`;
+    for (const x of r.hits) rest += `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p.i, x.p.n) : esc(x.p.n)}`;
   }
   h += `</ul>`;
   // "$10.100" sorts before "$9.900" as text, so the numbers are compared
