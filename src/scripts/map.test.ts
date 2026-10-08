@@ -373,9 +373,13 @@ describe("reading a town the way drivers type it", () => {
     "St. Louis, MO", "Saint Louis Park, MN", "Saint Paul, MN", "Saint Cloud, MN", "Fort Worth, TX", "Dallas, TX", "New York City, NY", "Missouri City, TX",
     "Texas City, TX", "Iowa City, IA", "Delaware, OH", "Washington, DC", "Columbus, GA", "Columbus, OH", "Charleston, WV", "Charleston, SC",
     "St. Charles, MD", "Saint Charles, MD", "Kansas City, KS", "Kansas City, MO", "Mount Vernon, NY", "Virginia Beach, VA",
+    "Rocky Mount, NC", "West New York, NJ", "Santa Fe, NM", "Sioux City, IA", "Sioux Falls, SD", "Akron, OH", "Wyoming, MI",
+    "O'Fallon, MO", "Winston-Salem, NC", "Denver, CO",
   ]);
   const ST = [["MO", "Missouri"], ["MN", "Minnesota"], ["TX", "Texas"], ["NY", "New York"], ["IA", "Iowa"], ["OH", "Ohio"], ["DC", "District of Columbia"],
-    ["GA", "Georgia"], ["WV", "West Virginia"], ["VA", "Virginia"], ["SC", "South Carolina"], ["MD", "Maryland"], ["KS", "Kansas"], ["DE", "Delaware"]];
+    ["GA", "Georgia"], ["WV", "West Virginia"], ["VA", "Virginia"], ["SC", "South Carolina"], ["MD", "Maryland"], ["KS", "Kansas"], ["DE", "Delaware"],
+    ["NC", "North Carolina"], ["NJ", "New Jersey"], ["NM", "New Mexico"], ["SD", "South Dakota"], ["AK", "Alaska"], ["WY", "Wyoming"], ["MT", "Montana"],
+    ["CO", "Colorado"], ["WA", "Washington"]];
   const got = (q: string) => {
     const r = findPlace(q, pl, ST);
     return r && typeof r == "object" ? r.label : r;
@@ -404,11 +408,16 @@ describe("reading a town the way drivers type it", () => {
   it("finds New York City as New York, and never turns a state's name into a town", () => {
     expect(got("New York, NY")).toBe("New York City, NY");
     expect(got("new york")).toBe("New York City, NY");
-    // these silently became the wrong town, with a confident fuel cost
-    for (const q of ["Missouri", "Texas", "Iowa", "Kansas", "west virginia"]) expect(got(q), q).toBeNull();
-    // unless a town is called just that, in one state
+    // these silently became the wrong town, with a confident fuel cost; a state's code alone too ("AK" was Akron, OH)
+    for (const q of ["Missouri", "Texas", "Iowa", "Kansas", "west virginia", "AK", "ak", "TX"]) expect(got(q), q).toBeNull();
+    // a town called just that asks, as the driver may mean the state
     expect(got("Delaware")).toBe("Delaware, OH");
-    expect(got("Washington")).toBe("Washington, DC");
+    expect(typeof findPlace("Delaware", pl, ST)).toBe("string");
+    expect(typeof findPlace("Wyoming", pl, ST)).toBe("string");
+    expect(typeof findPlace("Washington", pl, ST)).toBe("string");
+    // and the town itself is still found by its own name and state
+    expect(findPlace("Akron", pl, ST)).toMatchObject({ label: "Akron, OH" });
+    expect(findPlace("Wyoming, MI", pl, ST)).toMatchObject({ label: "Wyoming, MI" });
   });
 
   it("asks which when a name or a start fits several places, and never picks one silently", () => {
@@ -419,6 +428,25 @@ describe("reading a town the way drivers type it", () => {
     expect(findPlace("fort w", pl, ST)).toMatchObject({ label: "Fort Worth, TX" });
     expect(got("saint, mn")).toBeNull();
     expect(got("saint")).toBe("St. Louis, MO");
+    // a start that fits an X City and another place asks too
+    expect(typeof findPlace("Sioux", pl, ST)).toBe("string");
+  });
+
+  it("reads a whole town name that ends like a state as the town", () => {
+    // "Rocky Mount" isn't Rocky in Montana, nor "West New York" West in New York, nor "Santa Fe" a town Santa in a state FE
+    expect(findPlace("Rocky Mount", pl, ST)).toMatchObject({ label: "Rocky Mount, NC" });
+    expect(findPlace("rocky mount nc", pl, ST)).toMatchObject({ label: "Rocky Mount, NC" });
+    expect(findPlace("West New York", pl, ST)).toMatchObject({ label: "West New York, NJ" });
+    expect(findPlace("West New York, New Jersey", pl, ST)).toMatchObject({ label: "West New York, NJ" });
+    expect(findPlace("Santa Fe", pl, ST)).toMatchObject({ label: "Santa Fe, NM" });
+  });
+
+  it("reads a trailing comma, a curly apostrophe and a hyphen typed as a space", () => {
+    expect(findPlace("Denver,", pl, ST)).toMatchObject({ label: "Denver, CO" });
+    expect(findPlace("Denver, ", pl, ST)).toMatchObject({ label: "Denver, CO" });
+    expect(typeof findPlace("Columbus,", pl, ST)).toBe("string");
+    expect(findPlace("O’Fallon, MO", pl, ST)).toMatchObject({ label: "O'Fallon, MO" });
+    expect(findPlace("Winston Salem", pl, ST)).toMatchObject({ label: "Winston-Salem, NC" });
   });
 });
 

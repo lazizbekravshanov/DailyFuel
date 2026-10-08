@@ -3,8 +3,8 @@
 // and result load with the trip module (src/scripts/trip.ts).
 // map.astro bundles it with esbuild into one inline module that runs after
 // the deferred Leaflet script, so `L` is there when init runs, or missing
-// if Leaflet failed to load, in which case the list and the filters still
-// work and the map box keeps its "needs JavaScript" line.
+// if Leaflet failed to load, in which case the list, the filters and the
+// route strip still work and the map box says the map didn't load.
 //
 // Everything the markers need is in the list's rows, which the build
 // writes and which are the whole list with JS off: data-f the filter key,
@@ -62,6 +62,8 @@ export interface Pt {
   /** the Leaflet marker, once there is a map */
   m?: any;
   sel?: boolean;
+  /** its name in the list is a button now */
+  b?: number;
 }
 
 export const BAND_MI = 25;
@@ -125,32 +127,55 @@ export function decodePlaces(doc: { p: number; s: Record<string, [string, number
 
 type P = { label: string; lat: number; lon: number };
 
-/** A town as typed or as listed, read one way: lowercase, no periods, single spaces, "dallas,tx" as "dallas, tx", and Saint, Fort and Mount as St, Ft and Mt. */
+/**
+ * A town as typed or as listed, read one way: lowercase; no periods or
+ * apostrophes (a phone types ’ for '); a hyphen as a space; single spaces;
+ * "dallas,tx" as "dallas, tx" and "denver," as "denver"; and Saint, Fort and
+ * Mount as St, Ft and Mt.
+ */
 const fold = (s: string) =>
   s
     .toLowerCase()
-    .replace(/\./g, "")
+    .replace(/[.'’‘ʼʻ]/g, "")
+    .replace(/-/g, " ")
     .replace(/\s*,\s*/g, ", ")
     .replace(/\s+/g, " ")
     .trim()
+    .replace(/,$/, "")
     .replace(/\b(saint|fort|mount)\b/g, (w) => (w == "saint" ? "st" : w == "fort" ? "ft" : "mt"));
 
 /**
  * What the driver typed, as a place on the list. A state at the end, by code
- * or name, reads the list's way ("dallas texas" is "dallas, tx"). Then the
- * town itself, or "X City" ("New York, NY" is New York City); a bare name in
- * one state only; then the one place whose name starts with it. A bare name
- * in more than one state, or a start that fits several places, gives the
- * first of them as a string, to ask which. A state's name alone is not a
- * town, so "Missouri" is never Missouri City, TX, nor "Texas" Texas City,
- * unless a town on the list has just that name in one state (Delaware, OH).
- * Null when nothing fits.
+ * or name, reads the list's way ("dallas texas" is "dallas, tx"), unless the
+ * whole text is a listed town's name ("West New York", "Rocky Mount") or the
+ * state reading finds nothing. Then the town itself; New York is New York
+ * City; a bare name in one state only; then the one place whose name starts
+ * with it. A bare name in more than one state, or a start that fits several
+ * places, gives the first of them as a string, to ask which. A state's name
+ * or code alone is not a town: "Missouri" and "AK" find nothing, and
+ * "Wyoming" asks, though Wyoming, MI is on the list. Null when nothing fits.
  */
 export function findPlace(q: string, pl: Places | null, states: (string | null)[][] = []): P | string | null {
-  let t = fold(q);
-  if (!t || !pl) return null;
+  const t0 = fold(q);
+  if (!t0 || !pl) return null;
   const names = states.map((r) => [r[0]!.toLowerCase(), r[1]!.toLowerCase()]).sort((x, y) => y[1].length - x[1].length),
-    state = names.some((r) => r[1] == t);
+    state = names.some((r) => r[1] == t0 || r[0] == t0),
+    L = pl.label.map(fold),
+    at = (i: number) => ({ label: pl.label[i], lat: pl.lat[i], lon: pl.lon[i] }),
+    look = (t: string): P | string | null => {
+      const [nm, st] = t.split(", "),
+        fits = (f: (s: string) => boolean) => L.map((s, i) => [s, i] as [string, number]).filter(([s]) => f(s.split(", ")[0]) && (!st || s.split(", ")[1] == st));
+      let hit = fits((s) => s == nm),
+        start = 0;
+      if (!hit.length && nm == "new york") hit = fits((s) => s == "new york city");
+      if (!hit.length && !state) (hit = fits((s) => s.startsWith(nm))), (start = 1);
+      if (!hit.length) return null;
+      if (state && nm != "new york") return pl.label[hit[0][1]];
+      // one town and state listed twice (St. Charles and Saint Charles, MD) is one place
+      if (!hit[1] || (st && !start)) return at(hit[0][1]);
+      return st ? null : pl.label[hit[0][1]];
+    };
+  let t = t0;
   // the longest name first, so "charleston west virginia" isn't read as a town called "charleston west"
   for (const [c, n] of state ? [] : names) {
     const m = t.match(new RegExp(`^(.+?),? ${n}$`));
@@ -160,19 +185,8 @@ export function findPlace(q: string, pl: Places | null, states: (string | null)[
     }
   }
   t = t.replace(/,? ([a-z]{2})$/, ", $1");
-  const L = pl.label.map(fold),
-    [nm, st] = t.split(", "),
-    fits = (f: (s: string) => boolean) => L.map((s, i) => [s, i] as [string, number]).filter(([s]) => f(s.split(", ")[0]) && (!st || s.split(", ")[1] == st)),
-    at = (i: number) => ({ label: pl.label[i], lat: pl.lat[i], lon: pl.lon[i] });
-  let hit = fits((s) => s == nm),
-    start = 0;
-  // a state's name is a town only when one is called just that, but New York is New York City
-  if (!hit.length && (!state || nm == "new york")) hit = fits((s) => s == nm + " city");
-  if (!hit.length && !state) (hit = fits((s) => s.startsWith(nm))), (start = 1);
-  if (!hit.length || (state && hit[1])) return null;
-  // one town and state listed twice (St. Charles and Saint Charles, MD) is one place
-  if (!hit[1] || (st && !start)) return at(hit[0][1]);
-  return st ? null : pl.label[hit[0][1]];
+  if (t == t0 || t0.includes(",")) return look(t);
+  return L.some((s) => s.split(", ")[0] == t0) ? look(t0) : (look(t) ?? look(t0));
 }
 
 /** "41.878, −87.630": a point typed or tapped, with a real minus sign. */
@@ -249,7 +263,8 @@ export function init(doc: Document, win: any): void {
     shapes: Shape[] = [],
     // the driver has moved the map (or a find, Near me or a trip has), so the opening view stays out of the way
     moved = 0,
-    last: { a: [number, number]; b: [number, number]; al: string; bl: string } | null = null,
+    // the trip shown; fit while its view is still to come, so a rerun from a filter tapped as it loads keeps it
+    last: { a: [number, number]; b: [number, number]; al: string; bl: string; fit?: boolean } | null = null,
     back: HTMLElement | null = null,
     // the freight roads, by route: lines, name (empty for an unsigned one), 1 for an interstate; and their labels
     roads: [[number, number][][], string, number][] = [],
@@ -262,12 +277,16 @@ export function init(doc: Document, win: any): void {
     const bounds = map && map.getBounds();
     // the whole zoom, for the CSS that shows the route labels by zoom
     if (map) box.setAttribute("data-z", (map.getZoom() | 0) as any); // the DOM makes it a string
-    // the rows change only while the list is open, so a move of the map isn't held up by 2,500 rows nobody sees
+    // The rows change only while the list is open, so a move of the map isn't
+    // held up by 2,500 rows nobody sees. A row's name becomes a button that
+    // opens its stop the first time it shows; a stop a trip hides is left
+    // out, as it is from the map.
     const rows = !fold || fold.open;
     let n = 0;
     for (const p of pts) {
-      const v = p.on && (!bounds || bounds.contains([p.lat, p.lon]));
+      const v = p.on && !p.x && (!bounds || bounds.contains([p.lat, p.lon]));
       if (rows && p.tr && p.tr.hidden === v) p.tr.hidden = !v;
+      if (rows && v && map && p.tr && !p.b) (p.tr.cells[0].innerHTML = lk(p.i, p.n)), (p.b = 1);
       if (v) n++;
     }
     if (count) count.textContent = `${fmt(n)} ${n === 1 ? "place" : "places"}${map ? " in view" : ""}`;
@@ -286,14 +305,16 @@ export function init(doc: Document, win: any): void {
       }
       if (map && !pts.some((p) => p.sel && p.on)) map.closePopup();
       list();
-      if (last) run(last.a, last.b, last.al, last.bl);
+      if (last) run(last.a, last.b, last.al, last.bl, last.fit);
     });
   }
   // ---- the route strip
-  // A file of /map/, kept once it has come. One lost on a bad signal is asked
-  // for again the next time it is wanted, so one dropped request never breaks
-  // the strip for good. A layer the build didn't ship counts as come: the
-  // strip works without it, along straight lines.
+  // A file of /map/, kept once it has come. One lost on a bad signal, or one
+  // that can't be read, is asked for again the next time it is wanted, so one
+  // dropped request never breaks the strip for good. A layer the build didn't
+  // ship counts as come: without the outlines or the roads a trip is a
+  // straight line with no state prices, and without the places no town is
+  // found.
   const want = (f: string, use: (d: any) => void) => {
     let p: Promise<boolean> | null = null;
     return () =>
@@ -304,9 +325,11 @@ export function init(doc: Document, win: any): void {
               .then((r) => (r.ok ? r.json() : null))
               .catch(() => null)
               .then((d) => {
-                if (d) use(d);
-                else p = null;
-                return !!d;
+                try {
+                  if (d) return use(d), true;
+                } catch {}
+                p = null;
+                return false;
               })
           : Promise.resolve(true)));
   };
@@ -328,7 +351,9 @@ export function init(doc: Document, win: any): void {
     net = [...roads.flatMap((r) => r[0]), ...decodeLines(rd.j || [], rd.p)];
   });
   // a prompt or an error shows; a result's summary is only read out, the strip above says it already
+  let wait: any;
   const say = (s: string, quiet?: boolean) => {
+    clearTimeout(wait);
     status.textContent = s;
     status.classList.toggle("sr-only", !!quiet);
   };
@@ -345,8 +370,8 @@ export function init(doc: Document, win: any): void {
     runs = 0,
     tries = 0;
   // a new line fits the map to its band; a rerun (a filter) leaves the view alone
-  const run = (a: [number, number], b: [number, number], al: string, bl: string, refit?: boolean) => {
-    last = { a, b, al, bl };
+  const run = (a: [number, number], b: [number, number], al: string, bl: string, fit?: boolean) => {
+    last = { a, b, al, bl, fit };
     const id = ++runs;
     // The trip module loads only when a trip is asked for, and a road the
     // network can't connect falls back to the straight line. A browser keeps
@@ -365,7 +390,7 @@ export function init(doc: Document, win: any): void {
       out.innerHTML = m.stripHtml(res, al, bl, cfg, !!map, m.readMpg(inM.value) || m.MPG);
       say((out.querySelector(".rsum") as Element).textContent || "", true);
       // the map with its line comes into view over the prices
-      if (refit && box) box.scrollIntoView();
+      if (fit && map) box.scrollIntoView();
       if (!map || !(await next())) return;
       for (const l of drawn) map.removeLayer(l);
       // only the stops along the trip stay on the map, until Show every stop
@@ -376,8 +401,8 @@ export function init(doc: Document, win: any): void {
       // stops, and the trip's layers are then drawn once, at that view.
       const view = () => map.getCenter() + "" + map.getZoom(),
         was = view();
-      if (refit) map.fitBounds(L.latLngBounds(res.ring), { padding: [12, 12], animate: false });
-      if (was == view()) grp.eachLayer((m: any) => m.redraw());
+      if (fit) map.fitBounds(L.latLngBounds(res.ring), { padding: [12, 12], animate: false }), (last!.fit = false);
+      if (was == view()) grp.eachLayer((m: any) => m.redraw()), list();
       drawn = [];
       if (!(await next())) return;
       const ab = (ll: [number, number], t: string) =>
@@ -417,8 +442,10 @@ export function init(doc: Document, win: any): void {
     });
   };
   // the towns, the outlines and the roads come first, so a trip is drawn once, along the roads and priced by state
-  const go = () =>
-    Promise.all([loadPlaces(), loadStates(), loadRoads()]).then((ok) => {
+  const go = () => {
+    // on a slow signal the strip says it is at work, until the answer or a message takes its place
+    wait = setTimeout(() => say("Getting the towns and roads for this trip."), 400);
+    return Promise.all([loadPlaces(), loadStates(), loadRoads()]).then((ok) => {
       if (!ok.every(Boolean)) return say(ok[0] ? "The map's files didn't load. Check your signal and try again." : "The town list didn't load. Check your signal and try again.");
       const a = findPlace(inA.value, places, cfg.px),
         b = findPlace(inB.value, places, cfg.px),
@@ -443,6 +470,7 @@ export function init(doc: Document, win: any): void {
       // the keyboard goes away; the map comes into view once the result is in, so nothing moves under the driver
       (doc.activeElement as HTMLElement).blur();
     });
+  };
   if (form && inA && inB) {
     inA.addEventListener("focus", loadPlaces);
     inB.addEventListener("focus", loadPlaces);
@@ -467,9 +495,11 @@ export function init(doc: Document, win: any): void {
   }
 
   if (!L || !box) {
-    // the page's own script ran, so it was the map's file that didn't come
-    const msg = box && box.querySelector(".mp-msg");
+    // the page's own script ran, so it was the map's file that didn't come; the tip on moving it goes too
+    const msg = box && box.querySelector(".mp-msg"),
+      tip = doc.querySelector(".mp-tip") as HTMLElement | null;
     if (msg) msg.textContent = "The map didn't load. Check your signal and reload the page. Every place on it is in the list below.";
+    if (tip) tip.hidden = true;
     return list();
   }
 
@@ -646,16 +676,8 @@ export function init(doc: Document, win: any): void {
     show(p, b);
   };
   out.addEventListener("click", focusPt);
-  // each name in the list opens its stop; the buttons are made when the list is first opened
+  // each name in the list opens its stop (list() makes the buttons)
   body.addEventListener("click", focusPt);
-  if (fold)
-    fold.addEventListener(
-      "toggle",
-      () => {
-        for (const p of pts) if (p.tr) p.tr.cells[0].innerHTML = lk(p.i, p.n);
-      },
-      { once: true },
-    );
   // Show every stop: the trip goes, and every stop comes back
   out.addEventListener("click", (e) => {
     if (!(e.target as Element).closest("[data-clr]")) return;
@@ -665,6 +687,7 @@ export function init(doc: Document, win: any): void {
     drawn = [];
     for (const p of pts) p.x = 0;
     grp.eachLayer((m: any) => m.redraw());
+    list();
     history.replaceState(null, "", location.pathname);
   });
 
@@ -684,8 +707,9 @@ export function init(doc: Document, win: any): void {
       // what was asked for wins over the opening view, even if the outlines are still on their way
       moved = 1;
       tell("");
-      Promise.all([loadStates(), loadPlaces()]).then(([, ok]) => {
+      Promise.all([loadStates(), loadPlaces()]).then(([sOk, ok]) => {
         const p = findPlace(fq.value, places, cfg.px) as any;
+        if (r && !sOk) return tell("The map's files didn't load. Check your signal and try again.");
         if (!(r && toState(r[0]))) {
           if (!ok) return tell("The town list didn't load. Check your signal and try again.");
           if (!p || !p.lat) return tell(p ? `Which ${fq.value}? Add the state, like ${p}.` : `We can't find ${fq.value}. Try a town and state, like Columbus, OH.`);
