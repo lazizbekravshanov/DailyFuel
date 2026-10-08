@@ -10,8 +10,8 @@ from pathlib import Path
 import pytest
 
 import synth
-from dailyfuel import aaa, eia, pipeline
-from dailyfuel.http import AaaDisabledError, RequestsClient, is_aaa_host
+from dailyfuel import aaa, eia, health, pipeline
+from dailyfuel.http import AaaDisabledError, RequestsClient, Response, is_aaa_host
 
 
 def tree_hashes(root: Path) -> dict[str, str]:
@@ -279,6 +279,77 @@ def test_divergence_warning(tmp_path, sleeps, now, states, validators):
     http = aaa_http().set(aaa.ALL_STATES_URL, synth.html_response(synth.all_states_html(prices)))
     result, _ = run(tmp_path, {"AAA_ENABLED": "true"}, http, sleeps, now, states, validators)
     assert any(w.startswith("eia_divergence: CA") for w in result.warnings)
+
+
+# ---------------------------------------------------------------- EIA's workbook down for days
+
+
+def test_workbook_down_for_days_raises_the_alarm_once_the_backup_carries_the_newest_week(
+    tmp_path, sleeps, now, states, validators, monkeypatch
+):
+    """The workbook stops parsing and the USDA copy carries the site, run after run."""
+    status_file = tmp_path / "runner" / "run_status.json"
+    maintenance = Response.make(200, b"<html>EIA is down for maintenance</html>", url=eia.XLS_URL)
+
+    def check(at):
+        return health.problems(health.read_status(status_file), tmp_path / "data", {}, at, states)
+
+    def backup(data, newer=None):
+        """Workbook down, and the mirror has the 2 newest stored weeks, plus a newer one if given."""
+        stored = json.loads((data / "eia" / "diesel_weekly.json").read_text())["weeks"][-2:]
+        weeks = {date.fromisoformat(w["period"]): {k: repr(v) for k, v in w["values"].items()} for w in stored}
+        weeks.update(newer or {})
+        usda = synth.usda_response(synth.usda_rows(weeks))
+        return synth.FakeHttp().set(eia.XLS_URL, maintenance).set(eia.USDA_URL, usda)
+
+    # Thursday 9/17: a normal run. Newest week 9/14, released 9/15.
+    result, data = run(tmp_path, {}, eia_only_http(), sleeps, now, states, validators)
+    assert result.eia.status == "ok"
+    assert check(now) == []
+
+    # Friday: one maintenance page, and the backup has nothing newer. No alarm.
+    at = now + timedelta(days=1)
+    result, _ = run(tmp_path, {}, backup(data), sleeps, at, states, validators)
+    assert (result.eia.status, result.eia.changed) == ("fallback", False)
+    assert check(at) == []
+
+    # Tuesday 9/22, 11:47 in New York: EIA has posted 9/21, the workbook still
+    # fails, and the backup moves the site on to 9/21. The stored release dates
+    # were the 9/14 week's, so they go.
+    at = datetime(2026, 9, 22, 15, 47, tzinfo=timezone.utc)
+    http = backup(data, {date(2026, 9, 21): synth.usda_values("6.30")})
+    result, _ = run(tmp_path, {}, http, sleeps, at, states, validators)
+    assert (result.eia.status, result.eia.newest_period) == ("fallback", "2026-09-21")
+    latest = json.loads((data / "latest.json").read_text())
+    assert latest["eia"]["period"] == "2026-09-21"
+    assert (latest["eia"]["release_date"], latest["eia"]["next_release_date"]) == (None, None)
+    # The next run may well load the workbook, so not yet.
+    assert check(at) == []
+    at = datetime(2026, 9, 22, 20, 17, tzinfo=timezone.utc)
+    result, _ = run(tmp_path, {}, backup(data), sleeps, at, states, validators)
+    assert (result.eia.status, result.eia.changed) == ("fallback", False)
+    assert check(at) == []
+
+    # Wednesday morning, still down: the backup has carried the newest week
+    # across two New York days.
+    at = datetime(2026, 9, 23, 12, 17, tzinfo=timezone.utc)
+    run(tmp_path, {}, backup(data), sleeps, at, states, validators)
+    assert check(at) == [
+        "the newest EIA week, 2026-09-21, came from the USDA backup on 2026-09-22 and EIA's workbook "
+        "still doesn't load, so check that it still downloads and parses"
+    ]
+
+    # The workbook loads again, with 9/21 and its own dates. All clear.
+    at = datetime(2026, 9, 23, 15, 47, tzinfo=timezone.utc)
+    mondays = [date(2026, 9, 7), date(2026, 9, 14), date(2026, 9, 21)]
+    book = synth.eia_book(mondays, release="9/22/2026", next_release="9/29/2026")
+    monkeypatch.setattr(eia, "parse_workbook", lambda body: eia.parse_book(book))
+    http = synth.FakeHttp().set(eia.XLS_URL, synth.xls_server(last_modified="Tue, 22 Sep 2026 14:05:00 GMT"))
+    result, _ = run(tmp_path, {}, http, sleeps, at, states, validators)
+    assert result.eia.status == "ok"
+    latest = json.loads((data / "latest.json").read_text())
+    assert (latest["eia"]["period"], latest["eia"]["release_date"]) == ("2026-09-21", "2026-09-22")
+    assert check(at) == []
 
 
 # ---------------------------------------------------------------- CLI wiring

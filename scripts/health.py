@@ -9,6 +9,8 @@ Exits 1 when any of these is true:
     AAA is on and the newest AAA snapshot is 2 or more days old (New York date)
     EIA status is error
     the newest EIA week is more than 10 days old
+    the newest EIA week came from the USDA backup on an earlier New York day,
+        and EIA's workbook failed again on this run
     the site build would refuse the data, like a week where EIA left a region blank
 
 --before-commit runs only the last check. The scheduled job runs it between

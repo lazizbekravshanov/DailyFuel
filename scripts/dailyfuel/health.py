@@ -14,6 +14,8 @@ from .states import StateTable, load_states
 BAD_AAA = ("blocked", "invalid", "error")
 AAA_STALE_DAYS = 2
 EIA_STALE_DAYS = 10
+# EIA statuses of a run where the workbook didn't load.
+EIA_FAILED = ("fallback", "error")
 
 
 def problems(
@@ -53,6 +55,21 @@ def problems(
         age = (today - newest).days
         if age > EIA_STALE_DAYS:
             out.append(f"newest EIA week is {newest}, {age} days old")
+        # A maintenance page comes back as a 200 that doesn't parse, so one
+        # failed run is normal and the USDA copy covers for it. What must not go
+        # unnoticed is the workbook staying broken while the backup keeps the
+        # newest week fresh, because the staleness check above never fires then.
+        # Any run where the workbook parses writes the file back as eia_xls, so
+        # a file still marked usda_socrata on a later New York day than the
+        # backup wrote it, on a run where the workbook failed again, means it
+        # hasn't loaded on any run in between.
+        if status is not None and status.get("eia") in EIA_FAILED and doc.get("source") == "usda_socrata":
+            since = today_et(datetime.fromisoformat(doc["fetched_at"].replace("Z", "+00:00")))
+            if since < today:
+                out.append(
+                    f"the newest EIA week, {newest}, came from the USDA backup on {since} and EIA's workbook "
+                    "still doesn't load, so check that it still downloads and parses"
+                )
 
     out.extend(build_problems(data_dir, states))
     return out

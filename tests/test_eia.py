@@ -257,6 +257,65 @@ def test_xls_failure_falls_back_to_usda(tmp_path, now, fake_http, validators, xl
     assert doc["weeks"][:-2] == stored["weeks"][:-2]
 
 
+def test_fallback_that_moves_the_week_forward_clears_the_release_dates(tmp_path, now, fake_http, validators):
+    """The stored dates are the 9/14 week's. Kept with the 9/21 week, the footer would say it came out 9/15."""
+    path = _seed(tmp_path, now, fake_http, validators)
+    stored = json.loads(path.read_text())
+    assert (stored["release_date"], stored["next_release_date"]) == ("2026-09-15", "2026-09-22")
+    rows = synth.usda_rows({date(2026, 9, 21): synth.usda_values("6.30"), date(2026, 9, 14): synth.usda_values("6.20")})
+    fake_http.set(eia.XLS_URL, Response.make(200, b"<html>down for maintenance</html>", url=eia.XLS_URL))
+    fake_http.set(eia.USDA_URL, synth.usda_response(rows))
+    result = eia.update(tmp_path, fake_http, now + timedelta(days=5), validators)
+    assert (result.status, result.changed, result.newest_period) == ("fallback", True, "2026-09-21")
+    doc = json.loads(path.read_text())
+    assert doc["weeks"][-1]["period"] == "2026-09-21"
+    assert (doc["release_date"], doc["next_release_date"]) == (None, None)
+    assert doc["last_modified"] == stored["last_modified"], "the next conditional GET still needs it"
+    cleared = "eia_release_date_cleared: the USDA mirror moved the newest week to 2026-09-21"
+    assert any(w.startswith(cleared) for w in result.warnings)
+
+
+def test_workbook_without_release_date_for_a_new_week_clears_the_stored_one(
+    tmp_path, now, fake_http, validators, monkeypatch
+):
+    path = _seed(tmp_path, now, fake_http, validators)
+    book = synth.eia_book(MONDAYS + [date(2026, 9, 21)], release=None, next_release=None)
+    monkeypatch.setattr(eia, "parse_workbook", lambda body: eia.parse_book(book))
+    fake_http.set(eia.XLS_URL, synth.xls_server(last_modified="Tue, 22 Sep 2026 15:00:00 GMT"))
+    result = eia.update(tmp_path, fake_http, now + timedelta(days=5), validators)
+    assert result.status == "ok"
+    doc = json.loads(path.read_text())
+    assert doc["weeks"][-1]["period"] == "2026-09-21"
+    assert (doc["release_date"], doc["next_release_date"]) == (None, None)
+    assert not any("keeping" in w for w in result.warnings)
+    assert any(w.startswith("eia_release_date_cleared: the workbook gave no release date") for w in result.warnings)
+
+
+def test_workbook_behind_the_stored_week_lends_it_no_release_date(tmp_path, now, fake_http, validators, monkeypatch):
+    """The backup already has 9/21. A workbook that stops at 9/14 dates the 9/14 week, not this one."""
+    path = _seed(tmp_path, now, fake_http, validators)
+    rows = synth.usda_rows({date(2026, 9, 21): synth.usda_values("6.30"), date(2026, 9, 14): synth.usda_values("6.20")})
+    fake_http.set(eia.XLS_URL, synth.network_error())
+    fake_http.set(eia.USDA_URL, synth.usda_response(rows))
+    assert eia.update(tmp_path, fake_http, now + timedelta(days=5), validators).status == "fallback"
+
+    fake_http.set(eia.XLS_URL, synth.xls_server(last_modified="Tue, 22 Sep 2026 15:00:00 GMT"))
+    result = eia.update(tmp_path, fake_http, now + timedelta(days=5, hours=3), validators)
+    assert result.status == "ok"
+    doc = json.loads(path.read_text())
+    assert doc["source"] == "eia_xls"
+    assert doc["weeks"][-1]["period"] == "2026-09-21"
+    assert (doc["release_date"], doc["next_release_date"]) == (None, None)
+
+    # Once the workbook has the week too, its dates are the week's dates.
+    book = synth.eia_book(MONDAYS + [date(2026, 9, 21)], release="9/22/2026", next_release="9/29/2026")
+    monkeypatch.setattr(eia, "parse_workbook", lambda body: eia.parse_book(book))
+    fake_http.set(eia.XLS_URL, synth.xls_server(last_modified="Tue, 22 Sep 2026 18:00:00 GMT"))
+    assert eia.update(tmp_path, fake_http, now + timedelta(days=5, hours=6), validators).status == "ok"
+    doc = json.loads(path.read_text())
+    assert (doc["release_date"], doc["next_release_date"]) == ("2026-09-22", "2026-09-29")
+
+
 def test_fallback_on_empty_store(tmp_path, now, fake_http, validators):
     fake_http.set(eia.XLS_URL, Response.make(404, b"", url=eia.XLS_URL))
     fake_http.set(eia.USDA_URL, synth.usda_response(_usda_two_weeks()))

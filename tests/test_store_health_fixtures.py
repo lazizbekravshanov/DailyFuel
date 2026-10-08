@@ -92,8 +92,9 @@ def test_num_and_dec():
 NOW = datetime(2026, 9, 17, 12, 17, tzinfo=timezone.utc)
 
 
-def seed_eia(data_dir, newest: date, validators):
+def seed_eia(data_dir, newest: date, validators, **fields):
     doc = weekly_doc(2)
+    doc.update(fields)
     doc["weeks"][0]["period"] = (newest - timedelta(days=7)).isoformat()
     doc["weeks"][1]["period"] = newest.isoformat()
     store.write_doc("eia-diesel-weekly", data_dir / "eia" / "diesel_weekly.json", doc, validators)
@@ -193,6 +194,60 @@ def test_health_cli_report_file(tmp_path, validators):
     status.write_text(json.dumps(dict(GOOD, aaa="blocked")))
     assert health_cli.main(args, env={}, now=NOW) == 1
     assert report.read_text() == "* AAA status is blocked\n"
+
+
+# ---------------------------------------------------------------- EIA's workbook failing while the backup covers
+
+FALLBACK = dict(GOOD, eia="fallback")
+BACKUP_ALARM = (
+    "the newest EIA week, 2026-09-14, came from the USDA backup on 2026-09-16 and EIA's workbook "
+    "still doesn't load, so check that it still downloads and parses"
+)
+
+
+def seed_backup(data_dir, validators, fetched_at: str):
+    seed_eia(
+        data_dir,
+        date(2026, 9, 14),
+        validators,
+        source="usda_socrata",
+        source_url=eia.USDA_URL,
+        fetched_at=fetched_at,
+    )
+
+
+def test_one_failed_workbook_run_is_not_an_alarm(tmp_path, validators):
+    # A maintenance page parses as an error and the backup had nothing newer,
+    # so the stored file is still the workbook's.
+    seed_eia(tmp_path, date(2026, 9, 14), validators)
+    assert health.problems(FALLBACK, tmp_path, {}, NOW) == []
+
+
+def test_backup_week_the_same_day_is_not_an_alarm(tmp_path, validators):
+    # The next run may well load the workbook and write the file back as eia_xls.
+    seed_backup(tmp_path, validators, "2026-09-17T12:17:00Z")
+    assert health.problems(FALLBACK, tmp_path, {}, NOW) == []
+
+
+@pytest.mark.parametrize("eia_status", ["fallback", "error"])
+def test_backup_week_with_the_workbook_still_failing_a_day_later_is_an_alarm(tmp_path, validators, eia_status):
+    seed_backup(tmp_path, validators, "2026-09-16T19:47:00Z")
+    found = health.problems(dict(GOOD, eia=eia_status), tmp_path, {}, NOW)
+    assert BACKUP_ALARM in found
+
+
+@pytest.mark.parametrize("eia_status", ["ok", "not_modified", "unchanged"])
+def test_backup_week_is_no_alarm_on_a_run_where_the_workbook_loads(tmp_path, validators, eia_status):
+    seed_backup(tmp_path, validators, "2026-09-16T19:47:00Z")
+    assert health.problems(dict(GOOD, eia=eia_status), tmp_path, {}, NOW) == []
+
+
+def test_backup_alarm_counts_days_in_new_york(tmp_path, validators):
+    # 03:00 UTC on 9/17 is still 9/16 in New York, 04:30 UTC is 9/17.
+    seed_backup(tmp_path, validators, "2026-09-17T03:00:00Z")
+    assert health.problems(FALLBACK, tmp_path, {}, NOW) == [BACKUP_ALARM]
+    seed_backup(tmp_path, validators, "2026-09-17T04:30:00Z")
+    assert health.problems(FALLBACK, tmp_path, {}, NOW) == []
 
 
 # ---------------------------------------------------------------- what the site build would refuse
