@@ -426,7 +426,8 @@ describe("reading a town the way drivers type it", () => {
     expect(got("Charleston")).toBe("Charleston, WV");
     // a start that fits one place is that place; several with a state given find nothing rather than the first
     expect(findPlace("fort w", pl, ST)).toMatchObject({ label: "Fort Worth, TX" });
-    expect(got("saint, mn")).toBeNull();
+    // a state given, and several places in it starting with the text, asks too
+    expect(got("saint, mn")).toBe("Saint Louis Park, MN");
     expect(got("saint")).toBe("St. Louis, MO");
     // a start that fits an X City and another place asks too
     expect(typeof findPlace("Sioux", pl, ST)).toBe("string");
@@ -447,6 +448,8 @@ describe("reading a town the way drivers type it", () => {
     expect(typeof findPlace("Columbus,", pl, ST)).toBe("string");
     expect(findPlace("O’Fallon, MO", pl, ST)).toMatchObject({ label: "O'Fallon, MO" });
     expect(findPlace("Winston Salem", pl, ST)).toMatchObject({ label: "Winston-Salem, NC" });
+    // a start with a state, as the question asks for, finds or asks rather than nothing
+    expect(findPlace("Sioux, IA", pl, ST)).toMatchObject({ label: "Sioux City, IA" });
   });
 });
 

@@ -151,7 +151,8 @@ const fold = (s: string) =>
  * state reading finds nothing. Then the town itself; New York is New York
  * City; a bare name in one state only; then the one place whose name starts
  * with it. A bare name in more than one state, or a start that fits several
- * places, gives the first of them as a string, to ask which. A state's name
+ * places ("Plant, FL": Plant City and Plantation), gives the first of them as
+ * a string, to ask which. A state's name
  * or code alone is not a town: "Missouri" and "AK" find nothing, and
  * "Wyoming" asks, though Wyoming, MI is on the list. Null when nothing fits.
  */
@@ -173,7 +174,7 @@ export function findPlace(q: string, pl: Places | null, states: (string | null)[
       if (state && nm != "new york") return pl.label[hit[0][1]];
       // one town and state listed twice (St. Charles and Saint Charles, MD) is one place
       if (!hit[1] || (st && !start)) return at(hit[0][1]);
-      return st ? null : pl.label[hit[0][1]];
+      return pl.label[hit[0][1]];
     };
   let t = t0;
   // the longest name first, so "charleston west virginia" isn't read as a town called "charleston west"
@@ -273,6 +274,14 @@ export function init(doc: Document, win: any): void {
     labels: [string, number, number, number][] = [];
 
   // ---- the list: what is on screen, sortable, each name opening its marker
+  // Names become buttons 200 rows a task, the top of the list first, so the
+  // list opens at once even with every row of the lower 48 in view.
+  const todo: Pt[] = [];
+  let batch: any = 0;
+  const buttons = () => {
+    for (const p of todo.splice(0, 200)) p.tr!.cells[0].innerHTML = lk(p.i, p.n);
+    batch = todo.length ? setTimeout(buttons) : 0;
+  };
   const list = () => {
     const bounds = map && map.getBounds();
     // the whole zoom, for the CSS that shows the route labels by zoom
@@ -286,9 +295,10 @@ export function init(doc: Document, win: any): void {
     for (const p of pts) {
       const v = p.on && !p.x && (!bounds || bounds.contains([p.lat, p.lon]));
       if (rows && p.tr && p.tr.hidden === v) p.tr.hidden = !v;
-      if (rows && v && map && p.tr && !p.b) (p.tr.cells[0].innerHTML = lk(p.i, p.n)), (p.b = 1);
+      if (rows && v && map && p.tr && !p.b) todo.push(p), (p.b = 1);
       if (v) n++;
     }
+    if (todo.length && !batch) batch = setTimeout(buttons);
     if (count) count.textContent = `${fmt(n)} ${n === 1 ? "place" : "places"}${map ? " in view" : ""}`;
   };
   if (fold) fold.addEventListener("toggle", () => fold.open && list());
@@ -327,7 +337,9 @@ export function init(doc: Document, win: any): void {
               .then((d) => {
                 try {
                   if (d) return use(d), true;
-                } catch {}
+                } catch (e) {
+                  console.error(e);
+                }
                 p = null;
                 return false;
               })
@@ -335,7 +347,10 @@ export function init(doc: Document, win: any): void {
   };
   let places: Places | null = null;
   const loadPlaces = want("places", (d) => {
-    places = decodePlaces(d);
+    const pl = decodePlaces(d);
+    // a file that came but holds no towns counts as lost, and is asked for again
+    if (!pl.label.length) throw new Error("places.json has no towns");
+    places = pl;
     const dl = doc.getElementById("pl");
     if (dl) dl.innerHTML = places.label.map((s) => `<option value="${esc(s)}">`).join("");
   });
@@ -390,7 +405,7 @@ export function init(doc: Document, win: any): void {
       out.innerHTML = m.stripHtml(res, al, bl, cfg, !!map, m.readMpg(inM.value) || m.MPG);
       say((out.querySelector(".rsum") as Element).textContent || "", true);
       // the map with its line comes into view over the prices
-      if (fit && map) box.scrollIntoView();
+      if (fit) map ? box.scrollIntoView() : out.scrollIntoView({ block: "nearest" });
       if (!map || !(await next())) return;
       for (const l of drawn) map.removeLayer(l);
       // only the stops along the trip stay on the map, until Show every stop
@@ -444,6 +459,7 @@ export function init(doc: Document, win: any): void {
   // the towns, the outlines and the roads come first, so a trip is drawn once, along the roads and priced by state
   const go = () => {
     // on a slow signal the strip says it is at work, until the answer or a message takes its place
+    clearTimeout(wait);
     wait = setTimeout(() => say("Getting the towns and roads for this trip."), 400);
     return Promise.all([loadPlaces(), loadStates(), loadRoads()]).then((ok) => {
       if (!ok.every(Boolean)) return say(ok[0] ? "The map's files didn't load. Check your signal and try again." : "The town list didn't load. Check your signal and try again.");
@@ -451,8 +467,8 @@ export function init(doc: Document, win: any): void {
         b = findPlace(inB.value, places, cfg.px),
         miss = !(a as P)?.lat ? inA : !(b as P)?.lat ? inB : null;
       if (miss) {
-        const v = miss.value.trim(), f = miss === inA ? a : b;
-        say(f ? `Which ${v}? Add the state, like ${f}.` : v ? `We can't find ${v}. Try a town and state, like Columbus, OH.` : `Type a town for ${miss === inA ? "From" : "To"}.`);
+        const v = miss.value.trim().replace(/[\s,]+$/, ""), f = miss === inA ? a : b;
+        say(f ? `Which ${v}? Type the town and state, like ${f}.` : v ? `We can't find ${v}. Try a town and state, like Columbus, OH.` : `Type a town for ${miss === inA ? "From" : "To"}.`);
         return miss.focus();
       }
       const p = a as P, q = b as P;
@@ -681,6 +697,7 @@ export function init(doc: Document, win: any): void {
   // Show every stop: the trip goes, and every stop comes back
   out.addEventListener("click", (e) => {
     if (!(e.target as Element).closest("[data-clr]")) return;
+    clearTimeout(wait);
     last = null;
     out.innerHTML = "";
     for (const l of drawn) map.removeLayer(l);
@@ -712,7 +729,8 @@ export function init(doc: Document, win: any): void {
         if (r && !sOk) return tell("The map's files didn't load. Check your signal and try again.");
         if (!(r && toState(r[0]))) {
           if (!ok) return tell("The town list didn't load. Check your signal and try again.");
-          if (!p || !p.lat) return tell(p ? `Which ${fq.value}? Add the state, like ${p}.` : `We can't find ${fq.value}. Try a town and state, like Columbus, OH.`);
+          const q = fq.value.trim().replace(/[\s,]+$/, "");
+          if (!p || !p.lat) return tell(p ? `Which ${q}? Type the town and state, like ${p}.` : `We can't find ${q}. Try a town and state, like Columbus, OH.`);
           map.setView([p.lat, p.lon], 9);
         }
         fq.blur();
