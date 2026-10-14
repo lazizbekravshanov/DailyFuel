@@ -295,7 +295,7 @@ describe("the /map page", () => {
     expect(all.indexOf(d.getElementById("rt-st")!)).toBeLessThan(all.indexOf(out));
     expect(all.indexOf(note)).toBe(all.indexOf(out) + 1);
     expect(note.closest("details")).toBeNull();
-    expect(Array.from(section.querySelectorAll("#rt label > span")).map(text)).toEqual(["From", "To", "MPG, miles per gallon"]);
+    expect(Array.from(section.querySelectorAll("#rt label > span")).map(text)).toEqual(["From", "To", "MPG, miles per gallon", "MPH, average miles per hour"]);
     // miles per gallon starts at a loaded truck's, and a phone shows its number pad
     const mpg = section.querySelector('#rt input[name="m"]')!;
     expect([mpg.getAttribute("value"), mpg.getAttribute("inputmode")]).toEqual(["6.5", "decimal"]);

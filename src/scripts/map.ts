@@ -372,14 +372,39 @@ export function init(doc: Document, win: any): void {
     status.textContent = s;
     status.classList.toggle("sr-only", !!quiet);
   };
-  const fs = form && form.querySelector("fieldset");
+  // The last trip worked out, kept on this phone and shown when a trip can't
+  // be worked out for want of signal, with the week its prices are from.
+  const kept = () => {
+    try {
+      const [wk, h] = JSON.parse(localStorage.getItem("dailyfuel:trip")!);
+      out.innerHTML = `<p class="fine">Your last trip, kept on this phone with the ${esc(wk.replace(/^Week/, "week"))}. Prices may have changed since.</p>${h}`;
+      root.classList.add("trip");
+    } catch {}
+  };
+  // Share this trip sends its link and one sentence, or copies them where the phone can't share; Print trip sheet prints it
+  out.addEventListener("click", (e) => {
+    const t = e.target as Element,
+      s = t.closest("[data-share]") as HTMLElement | null,
+      n = win.navigator;
+    if (t.closest("[data-print]")) win.print();
+    if (!s) return;
+    const text = s.dataset.share!,
+      url = win.location.href.split("#")[0] + s.dataset.u;
+    Promise.resolve()
+      .then(() => (n.share ? n.share({ text, url }) : n.clipboard.writeText(`${text} ${url}`).then(() => say("Copied the trip and its link."))))
+      .catch((x: any) => x.name != "AbortError" && say(`Copy the trip's link: ${url}`));
+  });
+  const title = doc.title,
+    fs = form && form.querySelector("fieldset");
   if (fs) fs.disabled = false;
   const inA = form && (form.elements.namedItem("a") as HTMLInputElement),
     inB = form && (form.elements.namedItem("b") as HTMLInputElement),
-    inM = form && (form.elements.namedItem("m") as HTMLInputElement);
-  // the truck's miles per gallon is kept on this phone for the next trip; storage can be blocked, and then 6.5 stays
+    inM = form && (form.elements.namedItem("m") as HTMLInputElement),
+    inS = form && (form.elements.namedItem("s") as HTMLInputElement);
+  // the truck's miles per gallon and average speed are kept on this phone for the next trip; storage can be blocked, and then 6.5 and 55 stay
   try {
     if (inM) inM.value = localStorage.getItem("dailyfuel:mpg") || inM.value;
+    if (inS) inS.value = localStorage.getItem("dailyfuel:mph") || inS.value;
   } catch {}
   let drawn: any[] = [],
     runs = 0,
@@ -402,7 +427,15 @@ export function init(doc: Document, win: any): void {
       const path = net.length ? m.route(a, b, net) : null;
       if (!(await next())) return;
       const res = m.corridor(a, b, pts, shapes, path);
-      out.innerHTML = m.stripHtml(res, al, bl, cfg, !!map, m.readMpg(inM.value) || m.MPG);
+      const sheet = (w: boolean) => m.stripHtml(res, al, bl, cfg, w, m.readMpg(inM.value) || m.MPG, m.readMph(inS.value) || m.MPH);
+      out.innerHTML = sheet(!!map);
+      // a trip shown: the page prints as its trip sheet (see map.astro)
+      root.classList.add("trip");
+      // the tab is the trip's now, and the trip is kept for a look back with no signal
+      doc.title = `${al} to ${bl} | DailyFuel`;
+      try {
+        localStorage.setItem("dailyfuel:trip", JSON.stringify([cfg.wk, sheet(false)]));
+      } catch {}
       say((out.querySelector(".rsum") as Element).textContent || "", true);
       // the map with its line comes into view over the prices
       if (fit) map ? box.scrollIntoView() : out.scrollIntoView({ block: "nearest" });
@@ -454,6 +487,7 @@ export function init(doc: Document, win: any): void {
     }, () => {
       tries++;
       say("The trip didn't load. Check your signal and try again.");
+      kept();
     });
   };
   // the towns, the outlines and the roads come first, so a trip is drawn once, along the roads and priced by state
@@ -462,7 +496,7 @@ export function init(doc: Document, win: any): void {
     clearTimeout(wait);
     wait = setTimeout(() => say("Getting the towns and roads for this trip."), 400);
     return Promise.all([loadPlaces(), loadStates(), loadRoads()]).then((ok) => {
-      if (!ok.every(Boolean)) return say(ok[0] ? "The map's files didn't load. Check your signal and try again." : "The town list didn't load. Check your signal and try again.");
+      if (!ok.every(Boolean)) return say(ok[0] ? "The map's files didn't load. Check your signal and try again." : "The town list didn't load. Check your signal and try again."), kept();
       const a = findPlace(inA.value, places, cfg.px),
         b = findPlace(inB.value, places, cfg.px),
         miss = !(a as P)?.lat ? inA : !(b as P)?.lat ? inB : null;
@@ -477,8 +511,13 @@ export function init(doc: Document, win: any): void {
         say("Type miles per gallon from 2 to 20, like 6.5.");
         return inM.focus();
       }
+      if (!(+inS.value >= 20 && +inS.value <= 80)) {
+        say("Type an average speed from 20 to 80 miles per hour, like 55.");
+        return inS.focus();
+      }
       try {
         localStorage.setItem("dailyfuel:mpg", inM.value.trim());
+        localStorage.setItem("dailyfuel:mph", inS.value.trim());
       } catch {}
       run([p.lat, p.lon], [q.lat, q.lon], p.label, q.label, true);
       // the trip stays in the address, so a reload or a shared link brings it back
@@ -705,6 +744,8 @@ export function init(doc: Document, win: any): void {
     for (const p of pts) p.x = 0;
     grp.eachLayer((m: any) => m.redraw());
     list();
+    doc.title = title;
+    root.classList.remove("trip");
     history.replaceState(null, "", location.pathname);
   });
 

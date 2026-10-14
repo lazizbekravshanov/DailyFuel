@@ -130,6 +130,25 @@ export const END_MI = 25;
 /** Miles per gallon when the driver hasn't said: a loaded tractor trailer gets about this. */
 export const MPG = 6.5;
 
+/** Average miles per hour when the driver hasn't said: about a loaded truck's over a day, stops for fuel aside. */
+export const MPH = 55;
+/** The hours of driving where a trip is marked: the 30 minute break due after 8, and the 11 hour limit (FMCSA hours of service). */
+export const HOURS = [8, 11];
+
+/** The average speed a driver typed, or null when it isn't one: 20 to 80. */
+export const readMph = (v: string): number | null => {
+  const n = +v.trim();
+  return n >= 20 && n <= 80 ? n : null;
+};
+
+/** "5 hours 20 minutes", to the nearest 5 minutes, and never less than 5. */
+export const hoursText = (h: number): string => {
+  const m = Math.max(5, Math.round((h * 60) / 5) * 5),
+    hh = Math.floor(m / 60),
+    mm = m % 60;
+  return [hh ? `${hh} ${hh == 1 ? "hour" : "hours"}` : "", mm ? `${mm} minutes` : ""].filter(Boolean).join(" ");
+};
+
 /** The miles per gallon a driver typed, or null when it isn't a truck's: 2 to 20. */
 export const readMpg = (v: string): number | null => {
   const n = +v.trim();
@@ -178,24 +197,34 @@ const gal = (n: number) => (n < 100 ? n.toFixed(1) : fmt(Math.round(n)));
  * Many states share one regional average, so the lowest is named only when
  * some state on the line is above it, and a tie names every state in it.
  */
-export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, withButtons: boolean, mpg = MPG): string {
+export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, withButtons: boolean, mpg = MPG, mph = MPH): string {
   const byCode: Record<string, PriceRow> = {},
     seen: PriceRow[] = [],
     num = (r: PriceRow) => +r[2]!.slice(1);
   for (const r of cfg.px) byCode[r[0]] = r;
+  // the miles where the hours marks fall on this trip, and the stretch each falls in, nearest as for a stop
+  // (none on a straight line, which can't be driven mile for mile)
+  const marks = res.road ? HOURS.map((hr): [number, number] => [hr, hr * mph]).filter(([, at]) => at < res.miles) : [],
+    runOf = (at: number) => res.runs.reduce((b, r) => (gap(r, at) < gap(b, at) ? r : b), res.runs[0]),
+    gap = (r: Run, at: number) => (at < r.from ? r.from - at : at > r.to ? at - r.to : 0);
   // the fuel at each state's weekly average; a state with no weekly price adds miles but no dollars
   let gals = 0,
     cost = 0,
     unpriced = 0,
     fuel = "";
+  // a column to fill in on the printed sheet, for a driver's IFTA record; the screen doesn't show it
+  const blank = `<td class="pr">`;
   for (const [code, m] of stateMiles(res)) {
     const row = code ? byCode[code] : null,
       g = m / mpg;
     gals += g;
     if (row && row[2]) cost += g * num(row);
     else unpriced += m;
-    fuel += `<tr><td>${row ? esc(row[1]) : "State not known"}<td class="num">${fmt(m)}<td class="num">${gal(g)}<td class="num">${row && row[2] ? usd(g * num(row)) : "No price"}`;
+    fuel += `<tr><td>${row ? esc(row[1]) : "State not known"}<td class="num">${fmt(m)}<td class="num">${gal(g)}<td class="num">${row && row[2] ? usd(g * num(row)) : "No price"}${blank}`;
   }
+  // The share sends the link and one sentence; the week names whose averages the fuel is at
+  const wk = cfg.wk.replace(/^Week/, "week").replace(/ prices$/, ""),
+    say = `${aLabel} to ${bLabel}: ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}${cost ? `, about ${gal(gals)} gallons of diesel, about ${usd(cost)} at ${mpg} miles per gallon and each state's weekly average for the ${wk}${unpriced ? `, not counting ${fmt(unpriced)} miles with no weekly price` : ""}` : ""}.`;
   let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}</p>`,
     rest = "";
   if (cost) h += `<p class="rfuel">About ${gal(gals)} gallons of diesel, about <b>${usd(cost)}</b> at ${mpg} miles per gallon${unpriced ? `, not counting ${fmt(unpriced)} miles with no weekly price` : ""}</p>`;
@@ -207,7 +236,8 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     if (m > END_MI) h += `<p>${esc(i ? bLabel : aLabel)} is ${fmt(Math.round(m))} miles from the nearest freight highway, so the line runs straight for that stretch.</p>`;
   });
   if (res.outside) h += `<p class="fine">Part of the line runs over water or outside the 50 states.</p>`;
-  if (withButtons) h += `<p><button class="btn" data-clr>Show every stop</button>`;
+  h += `<p class="racts"><button class="btn" data-share="${esc(say)}" data-u="#${encodeURIComponent(aLabel + "|" + bLabel)}">Share this trip</button> <button class="btn" data-print>Print trip sheet</button>`;
+  if (withButtons) h += ` <button class="btn" data-clr>Show every stop</button>`;
   h += `<ul class="rp">`;
   for (const r of res.runs) {
     const row = r.code ? byCode[r.code] : null,
@@ -217,7 +247,10 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
       h += `<li><b>${esc(row[1])}</b> ${row[2] ? `${row[2]} <span class="${row[4]}">${row[3] || ""}</span>` : "No weekly price"}`;
     }
     rest += `<tr class="rg"><th colspan="2">${row ? esc(row[1]) : "State not known"}: ${k} ${k == 1 ? "place" : "places"}, ${milesText(r, res.miles).toLowerCase()}${row ? `, state tax ${row[6]}` : ""}`;
-    for (const x of r.hits) rest += `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p.i, x.p.n) : esc(x.p.n)}`;
+    // the stretch's stops and the hours marks that fall in it, in mile order
+    const rows: [number, string][] = r.hits.map((x) => [x.at, `<tr><td class="num">${Math.round(x.at)}<td>${withButtons ? lk(x.p.i, x.p.n) : esc(x.p.n)}`]);
+    for (const [hr, at] of marks) if (runOf(at) == r) rows.push([at, `<tr class="hm"><td class="num">${Math.round(at)}<td>${hr} hours of driving`]);
+    for (const [, t] of rows.sort((x, y) => x[0] - y[0])) rest += t;
   }
   h += `</ul>`;
   // "$10.100" sorts before "$9.900" as text, so the numbers are compared
@@ -227,7 +260,30 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
   if (low.length < priced.length)
     h += `<p>Lowest weekly average on this line: <b>${esc(low.map((r) => r[1]).join(", ").replace(/, ([^,]*)$/, " and $1"))}, ${low[0][2]}</b></p>`;
   h += `<h3 class="rh">Miles and fuel by state</h3><p class="fine">At ${mpg} miles per gallon and each state's weekly average, not any one stop's price.</p>`;
-  h += `<table class="rf"><thead><tr><th>State<th class="num">Miles<th class="num">Gallons<th class="num">Fuel<tbody>${fuel}`;
-  h += `<tr class="tot"><th>Total<td class="num">${fmt(Math.round(res.miles))}<td class="num">${gal(gals)}<td class="num">${cost ? usd(cost) : "No price"}</table>`;
+  h += `<table class="rf"><thead><tr><th>State<th class="num">Miles<th class="num">Gallons<th class="num">Fuel<th class="pr">Fuel bought, gallons<tbody>${fuel}`;
+  h += `<tr class="tot"><th>Total<td class="num">${fmt(Math.round(res.miles))}<td class="num">${gal(gals)}<td class="num">${cost ? usd(cost) : "No price"}${blank}</table>`;
+  // The odometer at the start, at every state line in road order (a state
+  // crossed back into is crossed again) and at the end: the sheet's other
+  // column to fill in, for IFTA. Paper only.
+  h += `<h3 class="rh po">State lines</h3><table class="rf po"><thead><tr><th>Where<th class="num">About mile<th class="pr">Odometer<tbody><tr><td>Start, ${esc(aLabel)}<td class="num">0${blank}`;
+  res.runs.forEach((r, i) => {
+    const was = res.runs[i - 1],
+      name = (x: Run) => (x.code && byCode[x.code] ? esc(byCode[x.code][1]) : "State not known");
+    if (was) h += `<tr><td>${name(was)} to ${name(r)}<td class="num">${fmt(Math.round((was.to + r.from) / 2))}${blank}`;
+  });
+  h += `<tr><td>End, ${esc(bLabel)}<td class="num">${fmt(Math.round(res.miles))}${blank}</table>`;
+  // The hours of driving at the driver's average speed, and where the 8 and
+  // 11 hour marks fall, with the last truck stop before each: a rough guide
+  // for planning, never the driver's log.
+  h += `<h3 class="rh">Hours of driving</h3><p>About ${hoursText(res.miles / mph)} of driving at ${mph} miles per hour${res.road ? "" : ", from the straight line, so longer on the road"}.</p>`;
+  if (marks.length) {
+    h += `<ul class="hrs">`;
+    for (const [hr, at] of marks) {
+      const stop = res.runs.flatMap((r) => r.hits).filter((x) => x.p.k == "s" && x.at <= at).pop();
+      h += `<li><b>${hr} hours</b> at mile ${fmt(Math.round(at))}. ${stop ? `Last truck stop on the map before it: ${withButtons ? lk(stop.p.i, stop.p.n) : esc(stop.p.n)}, mile ${fmt(Math.round(stop.at))}.` : "No truck stop on the map before it."}`;
+    }
+    h += `</ul>`;
+  }
+  h += `<p class="fine">A rough guide from your average speed, not your log. Plan your own breaks and stops.</p>`;
   return h + `<h3 class="rh">${fmt(res.hits)} ${res.hits == 1 ? "place" : "places"} along the route</h3><table class="rs"><thead><tr><th class="num">Mile<th>Name<tbody>${rest}</table>`;
 }
