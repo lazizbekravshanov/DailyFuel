@@ -378,6 +378,7 @@ export function init(doc: Document, win: any): void {
     try {
       const [wk, h] = JSON.parse(localStorage.getItem("dailyfuel:trip")!);
       out.innerHTML = `<p class="fine">Your last trip, kept on this phone with the ${esc(wk.replace(/^Week/, "week"))}. Prices may have changed since.</p>${h}`;
+      root.classList.add("trip");
     } catch {}
   };
   // Share this trip sends its link and one sentence, or copies them where the phone can't share; Print trip sheet prints it
@@ -428,6 +429,8 @@ export function init(doc: Document, win: any): void {
       const res = m.corridor(a, b, pts, shapes, path);
       const sheet = (w: boolean) => m.stripHtml(res, al, bl, cfg, w, m.readMpg(inM.value) || m.MPG, m.readMph(inS.value) || m.MPH);
       out.innerHTML = sheet(!!map);
+      // a trip shown: the page prints as its trip sheet (see map.astro)
+      root.classList.add("trip");
       // the tab is the trip's now, and the trip is kept for a look back with no signal
       doc.title = `${al} to ${bl} | DailyFuel`;
       try {
@@ -742,6 +745,7 @@ export function init(doc: Document, win: any): void {
     grp.eachLayer((m: any) => m.redraw());
     list();
     doc.title = title;
+    root.classList.remove("trip");
     history.replaceState(null, "", location.pathname);
   });
 

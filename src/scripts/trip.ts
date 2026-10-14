@@ -211,8 +211,8 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     cost = 0,
     unpriced = 0,
     fuel = "";
-  // two columns to fill in on the printed sheet, for a driver's IFTA record; the screen doesn't show them
-  const blank = `<td class="pr"><td class="pr">`;
+  // a column to fill in on the printed sheet, for a driver's IFTA record; the screen doesn't show it
+  const blank = `<td class="pr">`;
   for (const [code, m] of stateMiles(res)) {
     const row = code ? byCode[code] : null,
       g = m / mpg;
@@ -223,7 +223,7 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
   }
   // The share sends the link and one sentence; the week names whose averages the fuel is at
   const wk = cfg.wk.replace(/^Week/, "week").replace(/ prices$/, ""),
-    say = `${aLabel} to ${bLabel}: ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}${cost ? `, about ${gal(gals)} gallons of diesel, about ${usd(cost)} at ${mpg} miles per gallon and each state's weekly average for the ${wk}` : ""}.`;
+    say = `${aLabel} to ${bLabel}: ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}${cost ? `, about ${gal(gals)} gallons of diesel, about ${usd(cost)} at ${mpg} miles per gallon and each state's weekly average for the ${wk}${unpriced ? `, not counting ${fmt(unpriced)} miles with no weekly price` : ""}` : ""}.`;
   let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}</p>`,
     rest = "";
   if (cost) h += `<p class="rfuel">About ${gal(gals)} gallons of diesel, about <b>${usd(cost)}</b> at ${mpg} miles per gallon${unpriced ? `, not counting ${fmt(unpriced)} miles with no weekly price` : ""}</p>`;
@@ -259,12 +259,22 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
   if (low.length < priced.length)
     h += `<p>Lowest weekly average on this line: <b>${esc(low.map((r) => r[1]).join(", ").replace(/, ([^,]*)$/, " and $1"))}, ${low[0][2]}</b></p>`;
   h += `<h3 class="rh">Miles and fuel by state</h3><p class="fine">At ${mpg} miles per gallon and each state's weekly average, not any one stop's price.</p>`;
-  h += `<table class="rf"><thead><tr><th>State<th class="num">Miles<th class="num">Gallons<th class="num">Fuel<th class="pr">Odometer at state line<th class="pr">Fuel bought, gallons<tbody>${fuel}`;
+  h += `<table class="rf"><thead><tr><th>State<th class="num">Miles<th class="num">Gallons<th class="num">Fuel<th class="pr">Fuel bought, gallons<tbody>${fuel}`;
   h += `<tr class="tot"><th>Total<td class="num">${fmt(Math.round(res.miles))}<td class="num">${gal(gals)}<td class="num">${cost ? usd(cost) : "No price"}${blank}</table>`;
+  // The odometer at the start, at every state line in road order (a state
+  // crossed back into is crossed again) and at the end: the sheet's other
+  // column to fill in, for IFTA. Paper only.
+  h += `<h3 class="rh po">State lines</h3><table class="rf po"><thead><tr><th>Where<th class="num">About mile<th class="pr">Odometer<tbody><tr><td>Start, ${esc(aLabel)}<td class="num">0${blank}`;
+  res.runs.forEach((r, i) => {
+    const was = res.runs[i - 1],
+      name = (x: Run) => (x.code && byCode[x.code] ? esc(byCode[x.code][1]) : "State not known");
+    if (was) h += `<tr><td>${name(was)} to ${name(r)}<td class="num">${fmt(Math.round((was.to + r.from) / 2))}${blank}`;
+  });
+  h += `<tr><td>End, ${esc(bLabel)}<td class="num">${fmt(Math.round(res.miles))}${blank}</table>`;
   // The hours of driving at the driver's average speed, and where the 8 and
   // 11 hour marks fall, with the last truck stop before each: a rough guide
   // for planning, never the driver's log.
-  h += `<h3 class="rh">Hours of driving</h3><p>About ${hoursText(res.miles / mph)} of driving at ${mph} miles per hour.</p>`;
+  h += `<h3 class="rh">Hours of driving</h3><p>About ${hoursText(res.miles / mph)} of driving at ${mph} miles per hour${res.road ? "" : ", from the straight line, so longer on the road"}.</p>`;
   if (marks.length) {
     h += `<ul class="hrs">`;
     for (const [hr, at] of marks) {

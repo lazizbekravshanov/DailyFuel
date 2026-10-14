@@ -135,8 +135,13 @@
   }
 }
 
+/* Paper is white whatever the screen's theme: the night theme and a phone
+   set to dark must not print grey ink, so these win over both by weight. */
 @media print {
-  :root {
+  :root:root:root:root {
+    color-scheme: light;
+    --up: #b3151b;
+    --down: #0f4fbf;
     --bg: #fff;
     --ink: #000;
     --ink2: #444;

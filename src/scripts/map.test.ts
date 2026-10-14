@@ -144,7 +144,7 @@ describe("the route strip", () => {
     // the lowest is named as a weekly average, never as a cheapest stop
     expect(t(d.querySelector("div"))).toContain("Lowest weekly average on this line: Wyoming, $6.066");
     // then one table of every place along the line, in order, under a row for each state with its miles and tax
-    expect(Array.from(d.querySelectorAll("h3.rh")).map(t)).toEqual(["Miles and fuel by state", "Hours of driving", "4 places along the route"]);
+    expect(Array.from(d.querySelectorAll("h3.rh")).map(t)).toEqual(["Miles and fuel by state", "State lines", "Hours of driving", "4 places along the route"]);
     const sums = groups(html);
     expect(sums).toHaveLength(4);
     expect(sums[0]).toMatch(/^Illinois: 1 place, miles 0 to \d+, state tax 54\.5¢$/);
@@ -220,7 +220,7 @@ describe("the route strip", () => {
     expect(html).not.toContain("Lowest");
     expect(groups(html)).toHaveLength(1);
     expect(groups(html)[0]).toMatch(/^Alaska: 0 places, miles 0 to 2\d\d, state tax 8\.95¢$/);
-    expect(t(d.querySelectorAll("h3.rh")[2])).toBe("0 places along the route");
+    expect(t(d.querySelectorAll("h3.rh")[3])).toBe("0 places along the route");
     expect(html).not.toContain('<tr><td class="num">');
     // with no outlines the places still list, under a state not known, and no price is guessed
     const none = stripHtml(corridor(CHICAGO, CHEYENNE, pts, []), "A", "B", CFG, false);
@@ -243,7 +243,7 @@ describe("the route strip", () => {
     expect(t(d.querySelector(".rfuel"))).toBe("About 10.0 gallons of diesel, about $62 at 10 miles per gallon");
     expect(html).toContain('<tr><td>Illinois<td class="num">43<td class="num">4.3<td class="num">$27');
     expect(html).toContain('<tr><td>Wyoming<td class="num">17<td class="num">1.7<td class="num">$10');
-    expect(html).toContain('<tr class="tot"><th>Total<td class="num">100<td class="num">10.0<td class="num">$62<td class="pr"><td class="pr"></table>');
+    expect(html).toContain('<tr class="tot"><th>Total<td class="num">100<td class="num">10.0<td class="num">$62<td class="pr"></table>');
     // never a stop's price
     expect(t(d.querySelector("div"))).toContain("At 10 miles per gallon and each state's weekly average, not any one stop's price.");
     // the default is a loaded truck's
@@ -257,7 +257,7 @@ describe("the route strip", () => {
     const html = stripHtml(ak, "A", "B", CFG, false);
     expect(html).not.toContain("rfuel");
     expect(html).toContain('<tr><td>Alaska<td class="num">200<td class="num">30.8<td class="num">No price');
-    expect(html).toContain('<tr class="tot"><th>Total<td class="num">200<td class="num">30.8<td class="num">No price<td class="pr"><td class="pr"></table>');
+    expect(html).toContain('<tr class="tot"><th>Total<td class="num">200<td class="num">30.8<td class="num">No price<td class="pr"></table>');
     const mixed = { ...ak, runs: [run("IL", 0, 100), run("AK", 105, 200)] };
     expect(stripHtml(mixed, "A", "B", CFG, false, 10)).toContain("about <b>$64</b> at 10 miles per gallon, not counting 97 miles with no weekly price");
   });
@@ -428,7 +428,25 @@ describe("the trip sheet: hours marks, share and print", () => {
     expect(stripHtml(res, "A", "B", CFG, false)).toContain("at 55 miles per hour");
   });
 
-  it("shares the trip as a link and one sentence, and prints two blank columns to fill in", () => {
+  it("gives the odometer a line for every state line, a state crossed back into included", () => {
+    // Nashville to Chattanooga on I 24 dips into Georgia and comes back
+    const back = { ...res, miles: 130, runs: [run("TN", 0, 118, []), run("GA", 119, 122, []), run("TN", 123, 130, [])] };
+    const lines = stripHtml(back, "Nashville, TN", "Chattanooga, TN", { ...CFG, px: [...CFG.px, ["TN", "Tennessee", "$6.000", null, "", "", "27.0¢"], ["GA", "Georgia", "$6.000", null, "", "", "33.1¢"]] }, false)
+      .split('<table class="rf po">')[1];
+    expect(lines.match(/<tr><td>[^<]*/g)!.map((x) => x.slice(8))).toEqual(["Start, Nashville, TN", "Tennessee to Georgia", "Georgia to Tennessee", "End, Chattanooga, TN"]);
+  });
+
+  it("shares no fuel cost without saying which miles it leaves out", () => {
+    const run2 = (code: string, from: number, to: number) => ({ code, from, to, hits: [] });
+    const mixed = { miles: 200, line: [], ring: [], outside: false, hits: 0, road: false, runs: [run2("IL", 0, 100), run2("AK", 105, 200)] };
+    const d = doc(stripHtml(mixed, "A", "B", CFG, false, 10));
+    expect(d.querySelector("[data-share]")!.getAttribute("data-share")).toMatch(/at 10 miles per gallon and each state's weekly average for the week of [^,]+, \d{4}, not counting 97 miles with no weekly price\.$/);
+    // a straight line's hours say they are from the straight line
+    expect(t(d.querySelector("div"))).toContain("of driving at 55 miles per hour, from the straight line, so longer on the road.");
+    expect(t(doc(stripHtml(res, "A", "B", CFG, false)).querySelector("div"))).not.toContain("from the straight line");
+  });
+
+  it("shares the trip as a link and one sentence, and prints blank columns to fill in", () => {
     const d = doc(stripHtml(res, 'St. Louis, MO', 'Fort "Worth", TX', CFG, true, 10, 50));
     const s = d.querySelector("[data-share]")!;
     expect(t(s)).toBe("Share this trip");
@@ -440,8 +458,17 @@ describe("the trip sheet: hours marks, share and print", () => {
     // the sheet's columns: a heading each and a blank cell for every state and the total
     // (read from the markup: its end tags are left out as HTML allows, which linkedom can't nest)
     const sheet = stripHtml(res, "A", "B", CFG, true, 10, 50);
-    expect(sheet).toContain('<th class="num">Fuel<th class="pr">Odometer at state line<th class="pr">Fuel bought, gallons<tbody>');
-    expect(sheet.match(/<td class="pr"><td class="pr"><(tr|\/table)/g)).toHaveLength(3);
+    expect(sheet).toContain('<th class="num">Fuel<th class="pr">Fuel bought, gallons<tbody>');
+    // a fuel bought blank for each state and the total
+    expect(sheet.split('<table class="rf po">')[0].match(/<td class="pr"><(tr|\/table)/g)).toHaveLength(3);
+    // and the odometer at the start, at each state line in road order, and at the end
+    const lines = sheet.split('<table class="rf po">')[1].split("</table>")[0];
+    expect(lines.match(/<tr><td>[^<]*<td class="num">\d+<td class="pr">/g)).toEqual([
+      '<tr><td>Start, A<td class="num">0<td class="pr">',
+      '<tr><td>Illinois to Iowa<td class="num">301<td class="pr">',
+      '<tr><td>End, B<td class="num">700<td class="pr">',
+    ]);
+    expect(sheet).toContain('<h3 class="rh po">State lines</h3>');
     // with no map, share and print stay, Show every stop goes
     const noMap = doc(stripHtml(res, "A", "B", CFG, false));
     expect(noMap.querySelectorAll("[data-share], [data-print]")).toHaveLength(2);

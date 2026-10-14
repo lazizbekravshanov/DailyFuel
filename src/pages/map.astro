@@ -644,8 +644,9 @@ const description =
     border-top: 1px solid var(--rule);
     font-weight: 700;
   }
-  /* the sheet's two columns to fill in by hand: paper only */
-  .rf .pr {
+  /* the sheet's columns to fill in by hand, and its state lines: paper only */
+  .rf .pr,
+  .po {
     display: none;
   }
   .rf .tot > * {
@@ -806,18 +807,27 @@ const description =
       max-height: none;
       overflow: visible;
     }
-    /* With a trip worked out the page prints as its trip sheet: the trip's
-       heading and week, its result with two columns to fill in on the road,
-       and the warning. The rest of the page stays off the paper. */
-    .mp:has(#rt-out .rsum) > :not(.mp-top),
-    .mp-top:has(#rt-out .rsum) > :not(.mp-mc),
-    .mp-mc:has(#rt-out .rsum) > :not(.mp-rt),
-    .mp-rt #rt,
-    .mp-rt #rt-st {
+    /* With a trip shown (the script sets .trip) the page prints as its trip
+       sheet: the trip's heading and week, its result with the odometer at
+       each state line and the fuel bought in each state to fill in on the
+       road, and the warning. The rest of the page stays off the paper. */
+    .trip .mp > :not(.mp-top),
+    .trip .mp-top > :not(.mp-mc),
+    .trip .mp-mc > :not(.mp-rt),
+    .trip #rt,
+    .trip #rt-st {
       display: none;
     }
-    .mp-rt:has(#rt-out .rsum) {
+    .trip .mp-rt,
+    h3.po {
       display: block;
+    }
+    table.po {
+      display: table;
+    }
+    /* a state's row stays with its first stops */
+    .rs .rg {
+      break-after: avoid;
     }
     .rf .pr {
       display: table-cell;
