@@ -141,12 +141,12 @@ export const readMph = (v: string): number | null => {
   return n >= 20 && n <= 80 ? n : null;
 };
 
-/** "5 hours 20 minutes", to the nearest 5 minutes. */
+/** "5 hours 20 minutes", to the nearest 5 minutes, and never less than 5. */
 export const hoursText = (h: number): string => {
-  const m = Math.round((h * 60) / 5) * 5,
+  const m = Math.max(5, Math.round((h * 60) / 5) * 5),
     hh = Math.floor(m / 60),
     mm = m % 60;
-  return [hh ? `${hh} ${hh == 1 ? "hour" : "hours"}` : "", mm ? `${mm} minutes` : ""].filter(Boolean).join(" ") || "under 5 minutes";
+  return [hh ? `${hh} ${hh == 1 ? "hour" : "hours"}` : "", mm ? `${mm} minutes` : ""].filter(Boolean).join(" ");
 };
 
 /** The miles per gallon a driver typed, or null when it isn't a truck's: 2 to 20. */
@@ -203,7 +203,8 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     num = (r: PriceRow) => +r[2]!.slice(1);
   for (const r of cfg.px) byCode[r[0]] = r;
   // the miles where the hours marks fall on this trip, and the stretch each falls in, nearest as for a stop
-  const marks = HOURS.map((hr): [number, number] => [hr, hr * mph]).filter(([, at]) => at < res.miles),
+  // (none on a straight line, which can't be driven mile for mile)
+  const marks = res.road ? HOURS.map((hr): [number, number] => [hr, hr * mph]).filter(([, at]) => at < res.miles) : [],
     runOf = (at: number) => res.runs.reduce((b, r) => (gap(r, at) < gap(b, at) ? r : b), res.runs[0]),
     gap = (r: Run, at: number) => (at < r.from ? r.from - at : at > r.to ? at - r.to : 0);
   // the fuel at each state's weekly average; a state with no weekly price adds miles but no dollars
@@ -279,7 +280,7 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     h += `<ul class="hrs">`;
     for (const [hr, at] of marks) {
       const stop = res.runs.flatMap((r) => r.hits).filter((x) => x.p.k == "s" && x.at <= at).pop();
-      h += `<li><b>${hr} hours</b> at mile ${fmt(Math.round(at))}. ${stop ? `Last truck stop before it: ${withButtons ? lk(stop.p.i, stop.p.n) : esc(stop.p.n)}, mile ${fmt(Math.round(stop.at))}.` : "No truck stop on the map before it."}`;
+      h += `<li><b>${hr} hours</b> at mile ${fmt(Math.round(at))}. ${stop ? `Last truck stop on the map before it: ${withButtons ? lk(stop.p.i, stop.p.n) : esc(stop.p.n)}, mile ${fmt(Math.round(stop.at))}.` : "No truck stop on the map before it."}`;
     }
     h += `</ul>`;
   }

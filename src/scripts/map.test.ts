@@ -162,8 +162,8 @@ describe("the route strip", () => {
     expect(text).not.toMatch(/[+−]\d/);
     // each name opens its marker
     expect(d.querySelectorAll(".rs .lk[data-i]")).toHaveLength(4);
-    // and the last truck stop before each hours mark opens its marker too
-    expect(d.querySelectorAll(".hrs .lk[data-i]")).toHaveLength(2);
+    // a straight line has no hours marks (the marks' stops open their markers too, see the trip sheet's tests)
+    expect(d.querySelectorAll(".hrs")).toHaveLength(0);
     expect(stripHtml(res, "A", "B", CFG, false)).not.toContain("class=\"lk\"");
   });
 
@@ -385,7 +385,7 @@ describe("the trip sheet: hours marks, share and print", () => {
 
   it("reads the hours and a truck's average speed", () => {
     expect([MPH, HOURS]).toEqual([55, [8, 11]]);
-    expect([5 + 1 / 3, 1.83, 2, 0.5, 0.02].map(hoursText)).toEqual(["5 hours 20 minutes", "1 hour 50 minutes", "2 hours", "30 minutes", "under 5 minutes"]);
+    expect([5 + 1 / 3, 1.83, 2, 0.5, 0.02].map(hoursText)).toEqual(["5 hours 20 minutes", "1 hour 50 minutes", "2 hours", "30 minutes", "5 minutes"]);
     expect(["55", " 62 ", "20", "80"].map(readMph)).toEqual([55, 62, 20, 80]);
     expect(["", "19", "81", "fast", "5,5"].map(readMph)).toEqual([null, null, null, null, null]);
   });
@@ -393,11 +393,12 @@ describe("the trip sheet: hours marks, share and print", () => {
   it("marks where 8 and 11 hours of driving fall, with the last truck stop before each", () => {
     const d = doc(stripHtml(res, "Chicago, IL", "Omaha, NE", CFG, false, 6.5, 50));
     const all = t(d.querySelector("div"));
+    expect(doc(stripHtml(res, "A", "B", CFG, true, 6.5, 50)).querySelectorAll(".hrs .lk[data-i]")).toHaveLength(2);
     expect(all).toContain("About 14 hours of driving at 50 miles per hour.");
     expect(Array.from(d.querySelectorAll(".hrs li")).map(t)).toEqual([
-      "8 hours at mile 400. Last truck stop before it: Love's, near I 80, mile 390.",
+      "8 hours at mile 400. Last truck stop on the map before it: Love's, near I 80, mile 390.",
       // the scale at 545 is not a truck stop
-      "11 hours at mile 550. Last truck stop before it: TA, near I 80, mile 520.",
+      "11 hours at mile 550. Last truck stop on the map before it: TA, near I 80, mile 520.",
     ]);
     expect(all).toContain("A rough guide from your average speed, not your log. Plan your own breaks and stops.");
   });
@@ -441,8 +442,11 @@ describe("the trip sheet: hours marks, share and print", () => {
     const mixed = { miles: 200, line: [], ring: [], outside: false, hits: 0, road: false, runs: [run2("IL", 0, 100), run2("AK", 105, 200)] };
     const d = doc(stripHtml(mixed, "A", "B", CFG, false, 10));
     expect(d.querySelector("[data-share]")!.getAttribute("data-share")).toMatch(/at 10 miles per gallon and each state's weekly average for the week of [^,]+, \d{4}, not counting 97 miles with no weekly price\.$/);
-    // a straight line's hours say they are from the straight line
+    // a straight line's hours say they are from the straight line, and it has no marks, as it can't be driven mile for mile
     expect(t(d.querySelector("div"))).toContain("of driving at 55 miles per hour, from the straight line, so longer on the road.");
+    const line = stripHtml({ ...res, road: false }, "A", "B", CFG, false, 6.5, 50);
+    expect(line).not.toContain('class="hrs"');
+    expect(line).not.toContain('class="hm"');
     expect(t(doc(stripHtml(res, "A", "B", CFG, false)).querySelector("div"))).not.toContain("from the straight line");
   });
 
