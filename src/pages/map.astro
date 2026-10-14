@@ -80,10 +80,11 @@ const description =
           </div>
           <form id="rt" class="rt" autocomplete="off">
             <fieldset disabled>
-              <legend class="sr-only">Where the trip starts and ends, and the truck's miles per gallon</legend>
+              <legend class="sr-only">Where the trip starts and ends, the truck's miles per gallon and its average speed</legend>
               <label class="rt-f"><span>From</span><input name="a" list="pl" placeholder="Town, like Chicago, IL" spellcheck="false" /></label>
               <label class="rt-f"><span>To</span><input name="b" list="pl" placeholder="Town, like Denver, CO" spellcheck="false" /></label>
               <label class="rt-f rt-m"><span>MPG<span class="sr-only">, miles per gallon</span></span><input name="m" value="6.5" inputmode="decimal" spellcheck="false" /></label>
+              <label class="rt-f rt-m"><span>MPH<span class="sr-only">, average miles per hour</span></span><input name="s" value="55" inputmode="decimal" spellcheck="false" /></label>
               <button class="btn wide" type="submit">Show prices</button>
             </fieldset>
             <datalist id="pl"></datalist>
@@ -609,12 +610,14 @@ const description =
     margin: 14px 0 0;
   }
   /* the trip's prices, one state a line */
-  .rp {
+  .rp,
+  .hrs {
     margin: 10px 0 0;
     padding: 0;
     list-style: none;
   }
-  .rp li {
+  .rp li,
+  .hrs li {
     padding: 4px 0;
     border-bottom: 1px solid var(--hair);
   }
@@ -629,6 +632,21 @@ const description =
   .rf {
     width: auto;
     min-width: 0;
+  }
+  /* the result's buttons, which wrap on a phone */
+  .racts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  /* an hours mark among the stops: a hairline over it, so it reads as a point on the road and not a stop */
+  .rs .hm > * {
+    border-top: 1px solid var(--rule);
+    font-weight: 700;
+  }
+  /* the sheet's two columns to fill in by hand: paper only */
+  .rf .pr {
+    display: none;
   }
   .rf .tot > * {
     border-top: 1px solid var(--rule);
@@ -787,6 +805,31 @@ const description =
     .mlist {
       max-height: none;
       overflow: visible;
+    }
+    /* With a trip worked out the page prints as its trip sheet: the trip's
+       heading and week, its result with two columns to fill in on the road,
+       and the warning. The rest of the page stays off the paper. */
+    .mp:has(#rt-out .rsum) > :not(.mp-top),
+    .mp-top:has(#rt-out .rsum) > :not(.mp-mc),
+    .mp-mc:has(#rt-out .rsum) > :not(.mp-rt),
+    .mp-rt #rt,
+    .mp-rt #rt-st {
+      display: none;
+    }
+    .mp-rt:has(#rt-out .rsum) {
+      display: block;
+    }
+    .rf .pr {
+      display: table-cell;
+      min-width: 13ch;
+      border-bottom: 1px solid var(--ink);
+    }
+    .rf th.pr {
+      white-space: normal;
+      border-bottom: 1px solid var(--rule);
+    }
+    .lk {
+      text-decoration: none;
     }
   }
 </style>
