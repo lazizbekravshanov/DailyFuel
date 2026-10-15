@@ -188,6 +188,32 @@ const gal = (n: number) => (n < 100 ? n.toFixed(1) : fmt(Math.round(n)));
 
 
 /**
+ * Which buttons the result has: 2 with the map, every stop's name opening it
+ * and Show every stop; 1 with no map, Share this trip and Print trip sheet
+ * only; 0 for the copy kept on the phone, which may be shown with no signal,
+ * when the script behind those buttons (acts) may not have come.
+ */
+export type Btns = 0 | 1 | 2;
+
+/**
+ * Share this trip sends its link and one sentence, or copies them where the
+ * phone can't share; Print trip sheet prints it. The map sets this as the
+ * result's click handler each time it shows a trip.
+ */
+export const acts = (win: any, say: (s: string) => void) => (e: Event) => {
+  const t = e.target as Element,
+    s = t.closest("[data-share]") as HTMLElement | null,
+    n = win.navigator;
+  if (t.closest("[data-print]")) win.print();
+  if (!s) return;
+  const text = s.dataset.share!,
+    url = win.location.href.split("#")[0] + s.dataset.u;
+  return Promise.resolve()
+    .then(() => (n.share ? n.share({ text, url }) : n.clipboard.writeText(`${text} ${url}`).then(() => say("Copied the trip and its link."))))
+    .catch((x: any) => x.name != "AbortError" && say(`Copy the trip's link: ${url}`));
+};
+
+/**
  * The trip's result: the line and the fuel it takes; the price in each state
  * it crosses (once, where the line first enters it, however often it
  * crosses back) and the lowest of them; the miles, gallons and fuel in each
@@ -197,7 +223,9 @@ const gal = (n: number) => (n < 100 ? n.toFixed(1) : fmt(Math.round(n)));
  * Many states share one regional average, so the lowest is named only when
  * some state on the line is above it, and a tie names every state in it.
  */
-export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, withButtons: boolean, mpg = MPG, mph = MPH): string {
+export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, btns: Btns, mpg = MPG, mph = MPH): string {
+  // a map page from before Btns passes true here, and keeps its Show every stop
+  const withButtons = btns == 2 || (btns as unknown) === true;
   const byCode: Record<string, PriceRow> = {},
     seen: PriceRow[] = [],
     num = (r: PriceRow) => +r[2]!.slice(1);
@@ -225,7 +253,7 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
   // The share sends the link and one sentence; the week names whose averages the fuel is at
   const wk = cfg.wk.replace(/^Week/, "week").replace(/ prices$/, ""),
     say = `${aLabel} to ${bLabel}: ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}${cost ? `, about ${gal(gals)} gallons of diesel, about ${usd(cost)} at ${mpg} miles per gallon and each state's weekly average for the ${wk}${unpriced ? `, not counting ${fmt(unpriced)} miles with no weekly price` : ""}` : ""}.`;
-  let h = `<p class="rsum"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}</p>`,
+  let h = `<p class="rsum" tabindex="-1"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}</p>`,
     rest = "";
   if (cost) h += `<p class="rfuel">About ${gal(gals)} gallons of diesel, about <b>${usd(cost)}</b> at ${mpg} miles per gallon${unpriced ? `, not counting ${fmt(unpriced)} miles with no weekly price` : ""}</p>`;
   // The freight network has no road on some lanes, and a town can sit far
@@ -236,7 +264,7 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     if (m > END_MI) h += `<p>${esc(i ? bLabel : aLabel)} is ${fmt(Math.round(m))} miles from the nearest freight highway, so the line runs straight for that stretch.</p>`;
   });
   if (res.outside) h += `<p class="fine">Part of the line runs over water or outside the 50 states.</p>`;
-  h += `<p class="racts"><button class="btn" data-share="${esc(say)}" data-u="#${encodeURIComponent(aLabel + "|" + bLabel)}">Share this trip</button> <button class="btn" data-print>Print trip sheet</button>`;
+  if (btns) h += `<p class="racts"><button class="btn" data-share="${esc(say)}" data-u="#${encodeURIComponent(aLabel + "|" + bLabel)}">Share this trip</button> <button class="btn" data-print>Print trip sheet</button>`;
   if (withButtons) h += ` <button class="btn" data-clr>Show every stop</button>`;
   h += `<ul class="rp">`;
   for (const r of res.runs) {

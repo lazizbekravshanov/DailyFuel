@@ -50,7 +50,7 @@ const description =
     <form id="fd" class="fd" autocomplete="off">
       <fieldset disabled>
         <legend class="sr-only">Find a place on the map</legend>
-        <label class="rt-f fd-q"><span class="sr-only">Town or state</span><input name="q" list="pl" placeholder="Town or state" spellcheck="false" /></label>
+        <label class="rt-f fd-q"><span class="sr-only">Town or state</span><input name="q" list="pl" placeholder="Town or state" spellcheck="false" aria-describedby="fd-st" /></label>
         <button class="btn">Show</button>
         <button class="btn" type="button" data-near>Near me</button>
       </fieldset>
@@ -603,8 +603,9 @@ const description =
   .mp-rt .note {
     margin-top: 12px;
   }
+  /* an empty message takes no room but stays on the page, so a screen reader hears the next one */
   .rt-st:empty {
-    display: none;
+    margin: 0;
   }
   .rsum {
     margin: 14px 0 0;

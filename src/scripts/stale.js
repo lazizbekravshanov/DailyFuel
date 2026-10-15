@@ -27,9 +27,14 @@
   else late();
   // keeps a copy of each page opened, for when there is no signal (public/sw.js)
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
-  // a tab left open for hours (phones keep them for days) comes back with today's page
+  // a tab left open for hours (phones keep them for days) comes back with
+  // today's page, but only once the site answers: with no signal a reload
+  // would swap the open page, and any trip on it, for the last copy kept
   var t0 = Date.now();
   document.addEventListener("visibilitychange", function () {
-    if (!document.hidden && Date.now() - t0 > 216e5) location.reload();
+    if (document.hidden || Date.now() - t0 < 216e5 || !window.fetch) return;
+    fetch(location.pathname, { method: "HEAD", cache: "no-store" }).then(function (r) {
+      if (r.ok && !document.hidden) location.reload();
+    }, function () {});
   });
 })();

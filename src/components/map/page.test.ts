@@ -7,14 +7,15 @@
 // tmp/dist-map-test once; DAILYFUEL_MAP_BUILT_DIR names an existing build.
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 import { parseHTML } from "linkedom";
 import { beforeAll, describe, expect, it } from "vitest";
 import { loadMapData } from "../../lib/mapdata.ts";
 import { getSite } from "../../lib/site.ts";
+import { decodeLines, decodeStates, readRow } from "../../scripts/map.ts";
 import { CHAINS } from "./chains.ts";
 import { baseMap } from "./page.ts";
 
@@ -89,7 +90,7 @@ describe("the /map page", () => {
     // from 6 the tap opens the nearest switched on dot, measured on screen from the finger: Leaflet's own
     // point for a small marker's event is the marker's spot, which would always pick the dot drawn on top
     expect(script).toMatch(/\.mouseEventToLayerPoint\([\w$]+\.originalEvent\)/);
-    expect(script).toMatch(/\.on\?[\w$]+\.m\._point\.distanceTo\([\w$]+\):1e9/);
+    expect(script).toMatch(/\.on&&([\w$]+)\.m\?\1\.m\._point\.distanceTo\([\w$]+\):1e9/);
     expect(script).not.toContain(".layerPoint");
     // the dot hit, the bigger lettered one when two overlap, keeps a 1px lead
     expect(script).toMatch(/[\w$]+=[\w$]+\.layer\.p,[\w$]+=[\w$]+\([\w$]+\)-1[;,]/);
@@ -111,8 +112,13 @@ describe("the /map page", () => {
     expect(script).toContain('"Type a town or state."');
     // Near me scrolls to the map only once the phone says where it is; a refusal stays by the find box
     expect(script).toMatch(/locate\(\{setView:!0,maxZoom:9\}\)\}/);
-    expect(script).toMatch(/on\("locationfound",\(\)=>\w+\.scrollIntoView\(\)\)/);
-    expect(script).toMatch(/on\("locationerror",\(\)=>\{\w+\("Your phone did not share where you are\. Type a town instead\."\),\w+\.scrollIntoView\(/);
+    expect(script).toMatch(/on\("locationfound",\(\)=>[\w$]+\.scrollIntoView\(\)\)/);
+    // a new MPG or MPH reprices the trip shown once it is typed (the box left), never on half a number
+    expect(script).toMatch(/\.onchange=\(\)=>[\w$]+&&[\w$]+\(\)&&\(/);
+    expect(script).not.toContain(".oninput=");
+    // a copy kept by an older page loses the Share and Print its script can't answer
+    expect(script).toContain('.querySelector(".racts")?.remove()');
+    expect(script).toMatch(/on\("locationerror",\(\)=>\{[\w$]+\("Your phone did not share where you are\. Type a town instead\."\),[\w$]+\.scrollIntoView\(/);
   });
 
   it("finds a town or a state from a row above the map, with Near me, and nothing to press until the script runs", () => {
@@ -170,6 +176,39 @@ describe("the /map page", () => {
     if (sizes.places) expect(sizes.places).toBeLessThan(15 * KB);
     if (sizes.roads) expect(sizes.roads).toBeLessThan(45 * KB);
     if (sizes.states) expect(sizes.states).toBeLessThan(32 * KB);
+  });
+
+  it("serves /map/trip.js with everything the map calls on it, works out a known trip, and stays small", async () => {
+    // the map reads the module as m inside its trip run: every name it calls there must be in the built file
+    const src = readFileSync(resolve(ROOT, "src/scripts/map.ts"), "utf8");
+    const block = src.slice(src.indexOf("import(tries"), src.indexOf("tries++"));
+    const calls = new Set([...block.matchAll(/\bm\.(\w+)/g)].map((x) => x[1]).filter((n) => n !== "redraw"));
+    expect([...calls].sort()).toEqual(["MPG", "MPH", "acts", "corridor", "graph", "nearLine", "readMpg", "readMph", "route", "stripHtml"]);
+    const js = file("map/trip.js");
+    expect(gz(js)).toBeLessThan(6 * KB);
+    const tmp = resolve(ROOT, "tmp/trip-contract");
+    mkdirSync(tmp, { recursive: true });
+    writeFileSync(resolve(tmp, "trip.mjs"), js);
+    const m = await import(pathToFileURL(resolve(tmp, "trip.mjs")).href);
+    for (const n of calls) expect(m[n], n).toBeDefined();
+    // Chicago to Denver over the built roads, outlines and stops, as the page does it
+    const cfg = JSON.parse(doc().getElementById("mapcfg")!.textContent!);
+    if (!cfg.ly.includes("roads") || !cfg.ly.includes("states")) return;
+    const rd = JSON.parse(file("map/roads.json").toString("utf8"));
+    const net = [...[rd.i, rd.o, ...rd.r.map((r: any) => r[2])].flatMap((l) => decodeLines(l, rd.p)), ...decodeLines(rd.j || [], rd.p)];
+    const shapes = decodeStates(JSON.parse(file("map/states.json").toString("utf8")));
+    const pts = (Array.from(doc().querySelectorAll("#ls tbody tr")) as unknown as HTMLTableRowElement[]).map(readRow);
+    const a: [number, number] = [41.878, -87.63], b: [number, number] = [39.739, -104.99];
+    m.graph(net);
+    const res = m.corridor(a, b, pts, shapes, m.route(a, b, net));
+    expect(res.road).toBe(true);
+    expect(res.miles).toBeGreaterThan(950);
+    expect(res.miles).toBeLessThan(1100);
+    expect(res.runs.map((r: any) => r.code).filter((c: string, i: number, all: string[]) => c !== all[i - 1])).toEqual(["IL", "IA", "NE", "CO"]);
+    expect(res.hits).toBeGreaterThan(20);
+    const sheet = m.stripHtml(res, "Chicago, IL", "Denver, CO", cfg, 2, m.readMpg("6.5"), m.readMph("55"));
+    expect(sheet).toMatch(/^<p class="rsum"[^>]*><b>Chicago, IL<\/b> to <b>Denver, CO<\/b>, (9[5-9]\d|1,0\d\d) miles on freight highways/);
+    expect(sheet).toContain("data-share=");
   });
 
   it("writes only the base layers whose source files are there, and tells the script which", () => {

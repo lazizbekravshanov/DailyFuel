@@ -742,9 +742,15 @@ describe("the state page", () => {
       } else {
         expect(codes, code).toBeNull();
       }
-      const stops = nd.querySelector("a.btn.wide[href^='/map/']")!;
-      expect(stops.getAttribute("href")).toBe(`/map/#${s.slug}`);
-      expect(text(stops)).toBe(`Truck stops in ${short}`);
+      // DC has nothing on the map, so it gets a line, not a button to an empty map
+      const stops = nd.querySelector("a.btn.wide[href^='/map/']");
+      if (code === "DC") {
+        expect(stops).toBeNull();
+        expect(Array.from(nd.querySelectorAll("p.note")).map(text)).toContain("The map has no truck stops or weigh stations in DC yet.");
+      } else {
+        expect(stops!.getAttribute("href")).toBe(`/map/#${s.slug}`);
+        expect(text(stops)).toBe(`Truck stops in ${short}`);
+      }
     }
     const oh = doc(PAGES.ohio);
     expect(text(oh.querySelector(".nd-l li .n"))).toBe("West Virginia");
@@ -868,9 +874,13 @@ describe("the state page", () => {
     expect(text(notes[0])).toMatch(/^The government's weekly survey does not cover Alaska, so we have no Alaska price\. (For a rough guide only, the whole West Coast, California included, averaged \$\d\.\d{3} this week(, (up|down) \d+\.\d¢ from last week|, no change from last week)?\.|The nearest region it does cover is the West Coast\.)$/);
     const us = d.querySelector("main > .note a[href='/']")!;
     expect(text(us)).toBe(`U.S. average ${formatPrice(site.eiaUs!.price)} this week`);
+    // the map has Alaska's weigh stations but no truck stop there, and nothing at all in Hawaii
     const stops = d.querySelector("main > .note a.btn.wide")!;
     expect(stops.getAttribute("href")).toBe("/map/#ak");
-    expect(text(stops)).toBe("Truck stops in Alaska");
+    expect(text(stops)).toBe("Weigh stations in Alaska");
+    const hi = doc("state/hi/index.html");
+    expect(hi.querySelector("main a.btn.wide[href^='/map/']")).toBeNull();
+    expect(Array.from(hi.querySelectorAll("main > .note")).map(text)).toContain("The map has no truck stops or weigh stations in Hawaii yet.");
     // no release line for a state with no weekly number
     expect(d.querySelector("main [data-next-release]")).toBeNull();
     expect(d.querySelector(".plot, .numbers, section.peers, section.nd")).toBeNull();
