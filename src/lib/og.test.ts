@@ -66,6 +66,7 @@ function fakeSite(opts: { aaa?: boolean; period?: string; prev?: string } = {}):
     },
     states,
     byCode: new Map(states.map((s) => [s.code, s])),
+    eiaUs: us,
     national: aaa
       ? { cadence: "daily", move: move(6.4, 6.39), date: "2026-09-17", prevDate: "2026-09-16" }
       : { cadence: "weekly", move: us, date: period, prevDate: prev },
@@ -109,6 +110,23 @@ describe("share card URLs", () => {
     expect(cardKeyFor("/about/", site)).toBe("us");
     expect(cardKeyFor("/404", site)).toBe("us");
     expect(cardKeyFor("/state/zz/", site)).toBe("us");
+  });
+
+  it("gives the surcharge page the DOE weekly U.S. card, its own one only when the U.S. card is AAA's", () => {
+    // with EIA's prices alone the U.S. card is the DOE price already
+    expect(cardKeyFor("/surcharge/", site)).toBe("us");
+    expect(cardKeys(site)).not.toContain("doe");
+    const aaa = fakeSite({ aaa: true });
+    expect(cardKeyFor("/surcharge/", aaa)).toBe("doe");
+    expect(cardKeyFor("/", aaa)).toBe("us");
+    expect(cardKeys(aaa).at(-1)).toBe("doe");
+    const doe = cardFor(aaa, "doe");
+    expect(doe.price).toBe("$6.285");
+    expect(doe.label).toBe("DOE weekly average, published by EIA");
+    expect(doe.kicker).toBe("U.S. on-highway diesel · EIA weekly");
+    expect(doe.dateLine).toBe("Week of Sep 14, 2026");
+    expect(cardAlt(doe)).not.toMatch(/AAA|yesterday/);
+    expect(cardAlt(cardFor(aaa, "us"))).toMatch(/^U\.S\. diesel average: \$6\.400 .*AAA daily/);
   });
 
   it("builds an absolute image URL and alt text for the page head", () => {

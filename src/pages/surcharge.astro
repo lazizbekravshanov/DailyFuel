@@ -83,7 +83,8 @@ const description =
           <div class="sc-f">
             <label class="lbl" for="sc-s">DOE price</label>
             <select id="sc-s" name="s">
-              {SURCHARGE_SERIES.map((k) => <option value={k} selected={k === "NUS"}>{names[k]}</option>)}
+              {/* a closed list on a 320px phone fits about 25 letters, so the longest name shows short there; the answer says it in full */}
+              {SURCHARGE_SERIES.map((k) => <option value={k} selected={k === "NUS"} label={k === "R5XCA" ? "West Coast outside CA" : undefined}>{names[k]}</option>)}
             </select>
           </div>
           <div class="sc-f">
@@ -104,10 +105,11 @@ const description =
           </div>
         </fieldset>
       </form>
-      {/* the answer, read out when it changes; it keeps its place while a field needs fixing */}
+      {/* the answer, which keeps its place while a field needs fixing; sc-say reads it out once it settles */}
       <div class="sc-res">
-        <p id="sc-out" class="sc-out" role="status" aria-live="polite">{first.answer}</p>
+        <p id="sc-out" class="sc-out">{first.answer}</p>
         <p id="sc-used" class="sc-used">{first.used}</p>
+        <p id="sc-say" class="sr-only" role="status"></p>
       </div>
       <noscript><p class="fine">Changing the numbers needs JavaScript.</p></noscript>
       <p class="note">

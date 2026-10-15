@@ -17,10 +17,14 @@ describe("reading what a driver types", () => {
     expect(readBase("0")).toBe(0);
     expect(readBase("10")).toBe(10);
     expect(readBase(DEFAULT_BASE)).toBe(1.25);
+    // a phone set to a region that writes 1,25 has only a comma on its number pad
+    expect(readBase("1,25")).toBe(1.25);
+    expect(readBase("$1,250")).toBe(1.25);
+    expect(readBase("1.255")).toBe(1.255);
   });
 
   it("refuses a base that isn't a plain number from 0 to 10", () => {
-    for (const v of ["", " ", "$", ".", "-1", "−1", "10.01", "12", "1,25", "1.2.5", "abc", "1e0", "0x1", "Infinity", "NaN", "1 25", "$$1"]) {
+    for (const v of ["", " ", "$", ".", "-1", "−1", "10.01", "12", "1,2,5", "1.2345", "1.2.5", "abc", "1e0", "0x1", "Infinity", "NaN", "1 25", "$$1"]) {
       expect(readBase(v), v).toBeNull();
     }
   });
@@ -32,6 +36,7 @@ describe("reading what a driver types", () => {
     expect(readMpg("2")).toBe(2);
     expect(readMpg("20")).toBe(20);
     expect(readMpg(DEFAULT_MPG)).toBe(6);
+    expect(readMpg("6,5")).toBe(6.5);
     for (const v of ["", "0", "1.99", "20.5", "-6", "$6", "6 mpg", "six", "6e0", "Infinity"]) expect(readMpg(v), v).toBeNull();
   });
 });
@@ -98,7 +103,7 @@ describe("the answer and its line", () => {
   });
 
   it("says so plainly when the price is at or under the base", () => {
-    const none = "No surcharge this week, since the price is at or under your base.";
+    const none = "No surcharge, since the price is at or under your base.";
     expect(surcharge({ ...week, price: 3.5, base: 3.5, mpg: 6 }).answer).toBe(none);
     expect(surcharge({ ...week, price: 3.499, base: 4, mpg: 6 })).toEqual({
       answer: none,

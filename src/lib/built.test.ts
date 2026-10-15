@@ -1004,8 +1004,11 @@ describe("the surcharge page", () => {
     expect(first().answer).toMatch(/^\d+\.\d¢ a mile, \$[\d,]+ on 1,000 miles\.$/);
     const out = d.getElementById("sc-out")!;
     expect(text(out)).toBe(first().answer);
-    expect(out.getAttribute("role")).toBe("status");
-    expect(out.getAttribute("aria-live")).toBe("polite");
+    // the answer changes as a number is typed; a screen reader hears it from sc-say once it settles
+    expect(out.hasAttribute("role")).toBe(false);
+    expect(out.hasAttribute("aria-live")).toBe(false);
+    expect(d.getElementById("sc-say")!.getAttribute("role")).toBe("status");
+    expect(text(d.getElementById("sc-say"))).toBe("");
     expect(text(d.getElementById("sc-used"))).toBe(first().used);
     expect(first().used).toBe(`U.S. DOE price ${formatPrice(latest.values.NUS!)}, week of ${formatDate(latest.period)}. Base $1.250, 6 MPG.`);
     // the fields wait for the script, showing what the answer used
@@ -1023,6 +1026,8 @@ describe("the surcharge page", () => {
     expect([agg.NUS.label, agg.R10.label, agg.R50.label]).toEqual(["U.S.", "East Coast", "West Coast"]);
     const series = Array.from(d.querySelectorAll("#sc-s option")).map((o) => [o.getAttribute("value"), text(o), o.hasAttribute("selected")]);
     expect(series).toEqual(SURCHARGE_SERIES.map((k) => [k, names[k], k === "NUS"]));
+    // the one name too long for a closed list on a 320px phone shows short there
+    expect(Array.from(d.querySelectorAll("#sc-s option[label]")).map((o) => [o.getAttribute("value"), o.getAttribute("label")])).toEqual([["R5XCA", "West Coast outside CA"]]);
     const options = Array.from(d.querySelectorAll("#sc-w option"));
     expect(options).toHaveLength(Math.min(SURCHARGE_WEEKS, site.weekly!.weeks.length));
     expect(options.map((o) => o.getAttribute("value"))).toEqual(weeks.map((w) => w.period));
@@ -1082,9 +1087,9 @@ describe("the surcharge page", () => {
       p.pick("sc-s", k);
       for (const w of some) {
         p.pick("sc-w", w.period);
-        for (const base of ["1.25", "$2.5", "0", "6.2", "10", " 3.999 ", "1.2345"]) {
+        for (const base of ["1.25", "$2.5", "0", "6.2", "10", " 3.999 ", "1.2345", "1,3", "1.24949"]) {
           p.type("sc-b", base);
-          for (const mpg of ["6", "6.5", "2", "20", "5.3"]) {
+          for (const mpg of ["6", "6.5", "2", "20", "5.3", "6,5"]) {
             p.type("sc-m", mpg);
             const exp = want(k, w.period, w.values[k], base, mpg);
             expect(p.out(), `${k} ${w.period} ${base} ${mpg}`).toBe(exp.answer);
@@ -1130,7 +1135,7 @@ describe("the surcharge page", () => {
     expect(p.out()).toBe(want("NUS", latest.period, latest.values.NUS, "1.25", "12").answer);
     p.type("sc-m", "6");
     expect(p.out()).toBe(first().answer);
-    for (const bad of ["", "abc", "12", "-1", "1,25"]) {
+    for (const bad of ["", "abc", "12", "-1", "1.2345", "1,2,5"]) {
       p.type("sc-b", bad, true);
       expect(p.error("sc-b"), bad).toBe(BASE_ERROR);
       expect(p.field("sc-b").getAttribute("aria-invalid")).toBe("true");
@@ -1146,8 +1151,22 @@ describe("the surcharge page", () => {
   it("says plainly when the price is at or under the base", () => {
     const p = live();
     p.type("sc-b", "10");
-    expect(p.out()).toBe("No surcharge this week, since the price is at or under your base.");
+    expect(p.out()).toBe("No surcharge, since the price is at or under your base.");
     expect(p.used()).toMatch(/^U\.S\. DOE price \$\d\.\d{3}, week of [A-Z][a-z]{2} \d{1,2}, \d{4}\. Base \$10\.000, 6 MPG\.$/);
+  });
+
+  it("reads the answer out once it settles, not once for every key", () => {
+    const p = live();
+    const said = () => text(p.d.getElementById("sc-say"));
+    expect(said()).toBe("");
+    p.type("sc-b", "1");
+    p.type("sc-b", "1.3");
+    expect(said()).toBe("");
+    p.type("sc-b", "1.35", true);
+    expect(said()).toBe(p.out());
+    expect(said()).toBe(want("NUS", latest.period, latest.values.NUS, "1.35", "6").answer);
+    p.pick("sc-s", "R20");
+    expect(said()).toBe(want("R20", latest.period, latest.values.R20, "1.35", "6").answer);
   });
 
   it("keeps the base and the MPG on this phone, and nothing else", () => {

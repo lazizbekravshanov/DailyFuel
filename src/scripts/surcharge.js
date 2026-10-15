@@ -21,8 +21,10 @@
     mpg = $("sc-m"),
     out = $("sc-out"),
     used = $("sc-used"),
+    tell = $("sc-say"),
     KEY = "dailyfuel:surcharge",
-    NUMBER = /^(\d+\.?\d*|\.\d+)$/;
+    NUMBER = /^(\d+\.?\d*|\.\d+)$/,
+    BASE = /^(\d+\.?\d{0,3}|\.\d{1,3})$/;
 
   // thousandths of a dollar, which are tenths of a cent, rounded half up like toMills
   function mills(v) {
@@ -33,12 +35,14 @@
     var m = mills(v);
     return "$" + Math.floor(m / 1e3) + "." + String(m % 1e3).padStart(3, "0");
   }
-  // a typed number, or null: the base from 0 to 10 with a $ in front allowed, the MPG from 2 to 20
+  // a typed number, or null: the base from 0 to 10 with a $ in front allowed
+  // and three decimals at most, the MPG from 2 to 20; one comma counts as the point
   function read(el) {
     var b = el === base,
       t = el.value.trim();
     if (b) t = t.replace(/^\$\s*/, "");
-    if (!NUMBER.test(t)) return null;
+    t = t.replace(",", ".");
+    if (!(b ? BASE : NUMBER).test(t)) return null;
     var n = +t;
     return (b ? n <= 10 : n >= 2 && n <= 20) ? n : null;
   }
@@ -79,12 +83,15 @@
           t = over > 0 ? Math.floor(over / m + 0.5 + 1e-9) : 0;
         a = over > 0
           ? Math.floor(t / 10) + "." + (t % 10) + "¢ a mile, $" + t.toLocaleString("en-US") + " on 1,000 miles."
-          : "No surcharge this week, since the price is at or under your base.";
+          : "No surcharge, since the price is at or under your base.";
         u = name + " DOE price " + price(p) + ", week of " + wk + ". Base " + price(b) + ", " + m + " MPG.";
       }
     }
     put(out, a);
     put(used, u);
+    // a screen reader hears the answer once it settles (a pick, or a number
+    // typed and left), not one for every key on the way
+    if (show) put(tell, a);
     return b !== null && m !== null;
   }
 

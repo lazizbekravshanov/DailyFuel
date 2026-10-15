@@ -25,20 +25,26 @@ export const DEFAULT_MPG = "6";
 export const BASE_ERROR = "Type a base price from $0 to $10 a gallon, like 1.25.";
 export const MPG_ERROR = "Type miles per gallon from 2 to 20, like 6.5.";
 
-/** A plain number as typed: "6", "6.5", ".5", "6." and nothing else. */
+/**
+ * A plain number as typed: "6", "6.5", ".5", "6." and nothing else. A phone
+ * set to a region that writes 6,5 has only a comma on its number pad, so one
+ * comma counts as the point.
+ */
 const NUMBER = /^(\d+\.?\d*|\.\d+)$/;
+/** A base price has at most three decimals, like the DOE price, so it is never rounded twice. */
+const BASE = /^(\d+\.?\d{0,3}|\.\d{1,3})$/;
 
 /** The base price a driver typed, in dollars a gallon, or null when it isn't one: 0 to 10, a $ in front is fine. */
 export function readBase(v: string): number | null {
-  const t = v.trim().replace(/^\$\s*/, "");
-  if (!NUMBER.test(t)) return null;
+  const t = v.trim().replace(/^\$\s*/, "").replace(",", ".");
+  if (!BASE.test(t)) return null;
   const n = Number(t);
   return n <= 10 ? n : null;
 }
 
 /** The contract's miles per gallon, or null when it isn't a truck's: 2 to 20, the same as the map's. */
 export function readMpg(v: string): number | null {
-  const t = v.trim();
+  const t = v.trim().replace(",", ".");
   if (!NUMBER.test(t)) return null;
   const n = Number(t);
   return n >= 2 && n <= 20 ? n : null;
@@ -95,7 +101,7 @@ export function surcharge(input: SurchargeInput): SurchargeAnswer {
   if (!usable(price)) return { answer: `There's no ${name} DOE price for the week of ${week}. Pick another week.`, used: "" };
   const tenths = perMileTenths(price, base, mpg)!;
   const answer = toMills(price) <= toMills(base)
-    ? "No surcharge this week, since the price is at or under your base."
+    ? "No surcharge, since the price is at or under your base."
     : `${centsText(tenths)} a mile, $${tenths.toLocaleString("en-US")} on 1,000 miles.`;
   return { answer, used: `${name} DOE price ${formatPrice(price)}, week of ${week}. Base ${formatPrice(base)}, ${mpg} MPG.` };
 }
