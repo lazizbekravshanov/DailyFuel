@@ -1,0 +1,286 @@
+---
+// /surcharge: a fuel surcharge from the weekly DOE diesel price. Pick the
+// price the contract names (the U.S. or a region) and the week, type the
+// contract's base price and miles per gallon, and one sentence says the
+// surcharge a mile. The first answer is worked out here, with the U.S. price,
+// the newest week, a $1.25 base and 6 MPG, so the page reads right before its
+// script runs, or with none; the script (src/scripts/surcharge.js) works out
+// the rest and keeps the base and the MPG on this phone. Under it, a few lines
+// on what a surcharge is, then the DOE prices for the last four weeks: every
+// price a row, so the table fits a phone, which shows two of the weeks.
+import Base from "../layouts/Base.astro";
+import surchargeScript from "../scripts/surcharge.js?raw";
+import { moveClass } from "../lib/bins.ts";
+import { formatDate, formatShortDate, todayInNewYork } from "../lib/dates.ts";
+import { formatPrice, formatQuote, signedCents } from "../lib/format.ts";
+import { LATE_TEXT, nextEiaRelease, nextUpdateText } from "../lib/release.ts";
+import { getSite, REGION_NAMES } from "../lib/site.ts";
+import {
+  BASE_ERROR, centsText, DEFAULT_BASE, DEFAULT_MPG, MPG_ERROR, perMileTenths, readBase, readMpg,
+  surcharge, SURCHARGE_SERIES, SURCHARGE_WEEKS,
+} from "../lib/surcharge.ts";
+import type { SeriesKey } from "../lib/data.ts";
+
+const site = getSite();
+const weekly = site.weekly;
+// the names the rest of the site uses: the U.S., East Coast and West Coast
+// from src/data/states.json, the eight regions from site.ts
+const agg = site.raw.states.aggregates;
+const names: Record<SeriesKey, string> = { NUS: agg.NUS.label, R10: agg.R10.label, R50: agg.R50.label, ...REGION_NAMES };
+
+// a year of weeks, newest first, for the week list and the script
+const weeks = weekly ? weekly.weeks.slice(-SURCHARGE_WEEKS).reverse() : [];
+const latest = weeks[0] ?? null;
+const base = readBase(DEFAULT_BASE);
+const mpg = readMpg(DEFAULT_MPG);
+const first = latest ? surcharge({ name: names.NUS, period: latest.period, price: latest.values.NUS, base, mpg }) : null;
+const data = JSON.stringify({
+  w: weeks.map((w) => w.period),
+  p: Object.fromEntries(SURCHARGE_SERIES.map((k) => [k, weeks.map((w) => w.values[k])])),
+}).replace(/</g, "\\u003c");
+
+// the table: the newest four weeks, newest first, and the change into the newest
+const cols = weeks.slice(0, 4);
+const prev = weeks[1] ?? null;
+const rows = SURCHARGE_SERIES.map((key) => {
+  const now = latest?.values[key] ?? null;
+  const was = prev?.values[key] ?? null;
+  return { key, name: names[key], prices: cols.map((w) => w.values[key]), change: now !== null && was !== null ? now - was : null };
+});
+
+// which week, and when the next one lands; the stale script says late once that day has passed
+const eia = site.latest.eia;
+const release = latest && eia?.period === latest.period
+  ? nextEiaRelease(latest.period, eia.next_release_date ?? weekly?.next_release_date ?? null, todayInNewYork())
+  : null;
+
+const title = "Fuel surcharge calculator from the DOE diesel price | DailyFuel";
+const us = latest?.values.NUS ?? null;
+const usTenths = perMileTenths(us, base, mpg);
+const description =
+  "Work out a fuel surcharge from the weekly DOE diesel price, the U.S. or a region." +
+  (latest && us !== null && usTenths !== null
+    ? ` The U.S. price for the week of ${formatDate(latest.period)} is ${formatPrice(us)} a gallon, so a $${DEFAULT_BASE} base at ${DEFAULT_MPG} MPG ${usTenths > 0 ? `comes to ${centsText(usTenths)} a mile` : "pays no surcharge"}.`
+    : "");
+---
+<Base title={title} description={description} skipLabel="Skip to main content">
+  <div class="sc-head">
+    <h1 class="nmbig">Fuel surcharge</h1>
+    <p class="note">Work out a fuel surcharge from the weekly DOE diesel price.</p>
+    {latest && (
+      <p class="wkl">
+        Prices for the week of {formatDate(latest.period)}.{release && <> <span data-next-release={release.date} data-late={LATE_TEXT}>{release.late ? LATE_TEXT : nextUpdateText(release.date)}</span></>}
+      </p>
+    )}
+  </div>
+
+  {latest && first ? (
+    <>
+      <form id="sc" class="sc" autocomplete="off" novalidate>
+        {/* the script turns the fields on; with JS off they show what the answer below used */}
+        <fieldset disabled>
+          <legend class="sr-only">Which DOE price and week, and your contract's base price and miles per gallon</legend>
+          <div class="sc-f">
+            <label class="lbl" for="sc-s">DOE price</label>
+            <select id="sc-s" name="s">
+              {/* a closed list on a 320px phone fits about 25 letters, so the longest name shows short there; the answer says it in full */}
+              {SURCHARGE_SERIES.map((k) => <option value={k} selected={k === "NUS"} label={k === "R5XCA" ? "West Coast outside CA" : undefined}>{names[k]}</option>)}
+            </select>
+          </div>
+          <div class="sc-f">
+            <label class="lbl" for="sc-w">Week of</label>
+            <select id="sc-w" name="w">
+              {weeks.map((w, i) => <option value={w.period} selected={i === 0}>{formatDate(w.period)}</option>)}
+            </select>
+          </div>
+          <div class="sc-f">
+            <label class="lbl" for="sc-b">Base price, $ a gallon</label>
+            <input id="sc-b" name="b" value={DEFAULT_BASE} inputmode="decimal" spellcheck="false" aria-describedby="sc-b-e" data-err={BASE_ERROR} />
+            <p class="sc-e" id="sc-b-e" aria-live="polite"></p>
+          </div>
+          <div class="sc-f">
+            <label class="lbl" for="sc-m">Contract MPG<span class="sr-only">, miles per gallon</span></label>
+            <input id="sc-m" name="m" value={DEFAULT_MPG} inputmode="decimal" spellcheck="false" aria-describedby="sc-m-e" data-err={MPG_ERROR} />
+            <p class="sc-e" id="sc-m-e" aria-live="polite"></p>
+          </div>
+        </fieldset>
+      </form>
+      {/* the answer, which keeps its place while a field needs fixing; sc-say reads it out once it settles */}
+      <div class="sc-res">
+        <p id="sc-out" class="sc-out">{first.answer}</p>
+        <p id="sc-used" class="sc-used">{first.used}</p>
+        <p id="sc-say" class="sr-only" role="status"></p>
+      </div>
+      <noscript><p class="fine">Changing the numbers needs JavaScript.</p></noscript>
+      <p class="note">
+        A fuel surcharge pays you for what diesel costs over your contract's base price, worked out by the mile. Your
+        contract says which DOE price it follows, the U.S. or one region, and which week, often the Monday price used for
+        the week after. The base price and the MPG come from your contract too, so use its numbers, not your truck's.
+      </p>
+
+      <section aria-labelledby="sc-t-h">
+        <div class="sh"><h2 id="sc-t-h">DOE prices by week</h2><p class="meta">Dollars a gallon</p></div>
+        <table class="sc-t" aria-describedby="sc-t-cap">
+          <thead>
+            <tr>
+              <th scope="col">Price</th>
+              {cols.map((w, i) => (
+                <th scope="col" class:list={["num", i === 0 && "lt", i > 1 && "old"]} aria-label={`Week of ${formatDate(w.period)}`}>{formatShortDate(w.period)}</th>
+              ))}
+              {prev && <th scope="col" class="num chg" aria-label={`Change in cents from the week of ${formatDate(prev.period)}`}>Change ¢</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr class:list={[r.key === "NUS" && "us"]}>
+                <th scope="row">{r.name}</th>
+                {r.prices.map((p, i) => (
+                  <td class:list={["num", i === 0 && "lt", i > 1 && "old", p === null && "muted"]}>{p === null ? "n/a" : formatQuote(p)}</td>
+                ))}
+                {prev && (r.change === null
+                  ? <td class="num muted">n/a</td>
+                  : <td class:list={["num", moveClass(r.change, "weekly")]}>{signedCents(r.change)}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="cap" id="sc-t-cap">
+          The newest week is in bold.{prev && ` Change is in cents from the week of ${formatShortDate(prev.period)}.`}
+          {" "}East Coast is New England, Central Atlantic and Lower Atlantic together, and West Coast is California and the
+          rest of the West Coast together.
+        </p>
+      </section>
+      <script is:inline type="application/json" id="sc-data" set:html={data} />
+    </>
+  ) : (
+    <p class="note">There are no DOE prices to work from right now.</p>
+  )}
+
+  <Fragment slot="scripts">
+    {latest && <script is:inline set:html={surchargeScript}></script>}
+  </Fragment>
+</Base>
+
+<style is:global>
+  .sc-head {
+    padding: 18px 0 2px;
+  }
+  .sc-head h1 {
+    margin: 0;
+  }
+  .sc-head .note {
+    margin-top: 6px;
+  }
+  /* the four fields: two a row, one a row on a phone */
+  .sc {
+    max-width: 640px;
+    margin-top: 18px;
+  }
+  .sc fieldset {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .sc-f {
+    min-width: 0;
+  }
+  .sc-f .lbl {
+    display: block;
+  }
+  .sc select,
+  .sc input {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 10px;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    /* 16px at least, or iOS zooms the page when a field takes focus */
+    font-size: max(16px, var(--fs-b));
+  }
+  .sc select:focus-visible,
+  .sc input:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  /* a number that needs fixing: a heavier edge, and the words under it */
+  .sc input[aria-invalid="true"] {
+    box-shadow: inset 0 0 0 1px var(--ink);
+  }
+  .sc-e {
+    margin: 6px 0 0;
+    font-size: var(--fs-s);
+    font-weight: 700;
+  }
+  .sc-e:empty {
+    margin: 0;
+  }
+  .sc fieldset:disabled .sc-f {
+    opacity: 0.5;
+  }
+  /* the answer: a sentence at the size of the words under a price, its line held while it's empty */
+  .sc-res {
+    max-width: 640px;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+  }
+  .sc-out {
+    min-height: 1.3em;
+    margin: 0;
+    font-size: var(--fs-chg);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .sc-used {
+    margin: 6px 0 0;
+    font-size: var(--fs-s);
+  }
+  /* the DOE prices: a row a price, the newest week in bold */
+  .sc-t {
+    width: auto;
+    min-width: min(100%, 560px);
+  }
+  .sc-t th[scope="row"] {
+    white-space: normal;
+  }
+  .sc-t .lt {
+    font-weight: 700;
+  }
+  .sc-t tr.us > * {
+    font-weight: 700;
+    border-bottom: 1px solid var(--hair);
+  }
+  @media (max-width: 479px) {
+    .sc fieldset {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    /* a phone shows the newest two weeks and the change, so the table fits without scrolling sideways */
+    .sc-t {
+      width: 100%;
+      min-width: 0;
+    }
+    .sc-t .old {
+      display: none;
+    }
+    /* the dates stay on one line; the change's head wraps under its unit */
+    .sc-t th.chg {
+      white-space: normal;
+    }
+  }
+  /* on paper the answer and its line say everything the fields do */
+  @media print {
+    .sc {
+      display: none;
+    }
+  }
+</style>

@@ -24,6 +24,12 @@ export const CARD_HEIGHT = 630;
 
 /** The key for the U.S. card, which also stands in for pages without a state. */
 export const US_KEY = "us";
+/**
+ * The DOE weekly U.S. card, for the fuel surcharge page, which works from
+ * the DOE price. Drawn only when the U.S. card is AAA's daily price; with
+ * EIA's prices alone the U.S. card is already the DOE one.
+ */
+export const DOE_KEY = "doe";
 
 export interface Card {
   /** "us" or a lowercase state code. */
@@ -59,10 +65,13 @@ export function cardDate(site: SiteData): string {
   return site.latest.eia?.period ?? site.national.date;
 }
 
-/** Every card the build draws: the U.S. first, then each state. */
+/** Every card the build draws: the U.S. first, then each state, and the DOE card when the U.S. one is AAA's. */
 export function cardKeys(site: SiteData): string[] {
-  return [US_KEY, ...site.states.map((s) => s.slug)];
+  return [US_KEY, ...site.states.map((s) => s.slug), ...(doeCard(site) ? [DOE_KEY] : [])];
 }
+
+/** The U.S. card is AAA's daily price, so the surcharge page needs its own DOE weekly card. */
+const doeCard = (site: SiteData) => site.national.cadence === "daily" && !!site.eiaUs;
 
 /**
  * The card's drawing. Chat apps cache a preview by its URL, so change this
@@ -81,10 +90,11 @@ export function cardPath(key: string, date: string): string {
   return `/og/${cardName(key, date)}.png`;
 }
 
-/** Which card a page shares: its own state, or the U.S. card for everything else. */
+/** Which card a page shares: its own state, the DOE card for the surcharge page, or the U.S. card for everything else. */
 export function cardKeyFor(pathname: string, site: SiteData): string {
   const m = /^\/state\/([a-z]{2})\/?$/.exec(pathname);
   if (m && site.byCode.has(m[1].toUpperCase())) return m[1];
+  if (/^\/surcharge\/?$/.test(pathname) && doeCard(site)) return DOE_KEY;
   return US_KEY;
 }
 
@@ -145,11 +155,12 @@ function kickerFor(site: SiteData): string {
 export function cardFor(site: SiteData, key: string): Card {
   const aaaMode = site.mode === "aaa+eia";
   const kicker = kickerFor(site);
-  if (key === US_KEY) {
-    const daily = site.national.cadence === "daily";
-    const move = site.national.move;
+  if (key === US_KEY || key === DOE_KEY) {
+    // the DOE card is the U.S. card drawn from EIA's weekly price, as it is with EIA's prices alone
+    const daily = key === US_KEY && site.national.cadence === "daily";
+    const move = key === DOE_KEY ? site.eiaUs : site.national.move;
     const t = timing(site, daily);
-    const parts = moveParts(move, site.national.cadence);
+    const parts = moveParts(move, daily ? "daily" : "weekly");
     // AAA's national change is its own today minus yesterday, even after a
     // missed day, so it's always "since yesterday".
     const compareLine = daily ? "Since yesterday" : t.compareLine;
@@ -158,7 +169,7 @@ export function cardFor(site: SiteData, key: string): Card {
       shield: null,
       head: "U.S. diesel average",
       legend: "U.S. diesel average",
-      kicker,
+      kicker: key === DOE_KEY ? "U.S. on-highway diesel · EIA weekly" : kicker,
       price: move ? formatPrice(move.price) : null,
       noPrice: "No national price",
       ...parts,

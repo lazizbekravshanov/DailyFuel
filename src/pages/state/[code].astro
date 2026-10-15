@@ -378,6 +378,7 @@ const save = inlineCall(myState, "document", JSON.stringify(s.code), "function()
   {site.tax && s.tax && (
     <TaxPanel site={site} state={s} priced={Boolean(move)}>
       {move && <p class="note fine">{!aaaMode && `${DOE_LINE} `}{DYED_DIESEL_HERE}</p>}
+      {move && !aaaMode && <p class="note fine"><a href="/surcharge/">Work out a fuel surcharge</a></p>}
       <p class="note fine"><a href={aaaLink}>Check today's {name} average on AAA's website</a></p>
     </TaxPanel>
   )}
