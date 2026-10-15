@@ -31,7 +31,10 @@ import { pctOf, regionMates } from "./copy.ts";
 import { DOE_LINE } from "./doe.ts";
 import { LATE_TEXT } from "./release.ts";
 import { NEIGHBORS } from "./neighbors.ts";
-import { REPO_URL, getSite } from "./site.ts";
+import { REGION_NAMES, REPO_URL, getSite } from "./site.ts";
+import { BASE_ERROR, MPG_ERROR, readBase, readMpg, surcharge, SURCHARGE_SERIES, SURCHARGE_WEEKS } from "./surcharge.ts";
+import { formatDate, formatShortDate } from "./dates.ts";
+import { moveClass } from "./bins.ts";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 let dist = process.env.DAILYFUEL_BUILT_DIR ? resolve(ROOT, process.env.DAILYFUEL_BUILT_DIR) : "";
@@ -66,6 +69,7 @@ const PAGES = {
   tennessee: "state/tn/index.html",
   alaska: "state/ak/index.html",
   about: "about/index.html",
+  surcharge: "surcharge/index.html",
   missing: "404.html",
 } as const;
 
@@ -245,7 +249,7 @@ describe("built pages", () => {
       }
       if (site.tax) expect(text(ps[0])).toMatch(new RegExp(String.raw` Tax: Federal Highway Administration, ${site.tax.reporting_period}\.$`));
       expect(text(ps[1])).toBe("Prices include federal and state tax.");
-      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This phone keeps only the state you save, your day or night choice, your truck's miles per gallon and average speed, your last trip, and a copy of the pages you open, for when there is no signal.")).toBe(true);
+      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This phone keeps only the state you save, your day or night choice, your truck's miles per gallon and average speed, your last trip, your fuel surcharge base price and miles per gallon, and a copy of the pages you open, for when there is no signal.")).toBe(true);
       // the next step is at the bottom of every page
       const row = ps[3];
       expect(row.getAttribute("class")).toBe("flinks");
@@ -254,6 +258,7 @@ describe("built pages", () => {
       expect(links).toEqual([
         ["All states", "/#states"],
         ["Truck stop map", "/map/"],
+        ["Fuel surcharge", "/surcharge/"],
         ...(compact ? [] : [["Where the numbers come from", "/about/"]]),
         ["Code on GitHub", REPO_URL],
       ]);
@@ -615,7 +620,7 @@ describe("the production build, the one Vercel ships", () => {
     expect(gz(page)).toBeLessThan(20 * 1024);
     // the analytics tag has no body; what it adds to the inline scripts is nothing
     expect(gz(inlineScripts(page).join("\n"))).toBeLessThan(3 * 1024);
-    for (const file of [PAGES.ohio, PAGES.tennessee, PAGES.alaska]) {
+    for (const file of [PAGES.ohio, PAGES.tennessee, PAGES.alaska, PAGES.surcharge]) {
       const state = readFileSync(resolve(prod, file), "utf8");
       expect(gz(state), file).toBeLessThan(12 * 1024);
       expect(gz([...state.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n")), file).toBeLessThan(3 * 1024);
@@ -937,5 +942,269 @@ describe("the about page", () => {
     expect(text(back)).toBe("All states");
     expect(back.getAttribute("href")).toBe("/#states");
     expect(text(d.querySelector("main"))).toMatch(/Both are already in the pump price\./);
+  });
+});
+
+describe("the surcharge page", () => {
+  const site = getSite();
+  const weeks = site.weekly!.weeks.slice(-SURCHARGE_WEEKS).reverse();
+  const latest = weeks[0];
+  const names: Record<string, string> = { NUS: "U.S.", R10: "East Coast", R50: "West Coast", ...REGION_NAMES };
+  /** The page's own script, the one that works out the surcharge. */
+  const script = (d: Document) =>
+    Array.from(d.querySelectorAll("script:not([type])")).find((s) => (s.textContent ?? "").includes('"dailyfuel:surcharge"'))!.textContent!;
+  /** The page with its script run against a fake phone, and ways to change a field the way a driver does. */
+  function live(store: unknown = fakeStore().store, edit?: (d: Document) => void) {
+    const { document: d, Event } = parseHTML(html(PAGES.surcharge)) as unknown as { document: Document; Event: typeof globalThis.Event };
+    edit?.(d);
+    new Function("document", "window", script(d))(d, { localStorage: store });
+    const field = (id: string) => d.getElementById(id) as HTMLInputElement;
+    const fire = (el: Element, type: string) => el.dispatchEvent(new Event(type, { bubbles: true }));
+    return {
+      d,
+      field,
+      out: () => text(d.getElementById("sc-out")),
+      used: () => text(d.getElementById("sc-used")),
+      error: (id: string) => text(d.getElementById(`${id}-e`)),
+      /** a pick from a list: the selected mark moves, which is what select.value reads here */
+      pick(id: string, value: string) {
+        for (const o of Array.from(field(id).querySelectorAll("option"))) {
+          if (o.getAttribute("value") === value) o.setAttribute("selected", "");
+          else o.removeAttribute("selected");
+        }
+        fire(field(id), "input");
+        fire(field(id), "change");
+      },
+      /** typing, and leaving the field when `leave` is set */
+      type(id: string, value: string, leave = false) {
+        field(id).value = value;
+        fire(field(id), "input");
+        if (leave) fire(field(id), "change");
+      },
+    };
+  }
+  const want = (key: string, period: string, price: number | null, base: string, mpg: string) =>
+    surcharge({ name: names[key], period, price, base: readBase(base), mpg: readMpg(mpg) });
+  const first = () => want("NUS", latest.period, latest.values.NUS, "1.25", "6");
+
+  it("names itself, and is in the sitemap", () => {
+    const d = doc(PAGES.surcharge);
+    expect(text(d.querySelector("title"))).toBe("Fuel surcharge calculator from the DOE diesel price | DailyFuel");
+    expect(d.querySelector('link[rel="canonical"]')!.getAttribute("href")).toBe("https://dailydiesel.vercel.app/surcharge/");
+    const meta = d.querySelector('meta[name="description"]')!.getAttribute("content")!;
+    expect(meta).toMatch(
+      /^Work out a fuel surcharge from the weekly DOE diesel price, the U\.S\. or a region\. The U\.S\. price for the week of [A-Z][a-z]{2} \d{1,2}, \d{4} is \$\d\.\d{3} a gallon, so a \$1\.25 base at 6 MPG (comes to \d+\.\d¢ a mile|pays no surcharge)\.$/,
+    );
+    expect(text(d.querySelector("h1"))).toBe("Fuel surcharge");
+    expect(readFileSync(resolve(dist, "sitemap-0.xml"), "utf8")).toContain("<loc>https://dailydiesel.vercel.app/surcharge/</loc>");
+  });
+
+  it("works out the U.S. price for the newest week, a $1.25 base and 6 MPG before any script runs", () => {
+    const d = doc(PAGES.surcharge);
+    expect(first().answer).toMatch(/^\d+\.\d¢ a mile, \$[\d,]+ on 1,000 miles\.$/);
+    const out = d.getElementById("sc-out")!;
+    expect(text(out)).toBe(first().answer);
+    expect(out.getAttribute("role")).toBe("status");
+    expect(out.getAttribute("aria-live")).toBe("polite");
+    expect(text(d.getElementById("sc-used"))).toBe(first().used);
+    expect(first().used).toBe(`U.S. DOE price ${formatPrice(latest.values.NUS!)}, week of ${formatDate(latest.period)}. Base $1.250, 6 MPG.`);
+    // the fields wait for the script, showing what the answer used
+    expect(d.querySelector("#sc fieldset")!.hasAttribute("disabled")).toBe(true);
+    expect(d.getElementById("sc-b")!.getAttribute("value")).toBe("1.25");
+    expect(d.getElementById("sc-m")!.getAttribute("value")).toBe("6");
+    expect(text(d.querySelector("main .wkl"))).toMatch(
+      new RegExp(String.raw`^Prices for the week of ${formatDate(latest.period)}\. (New prices ${WEEKDAY_DATE}\.|New prices are late\.)$`),
+    );
+  });
+
+  it("offers the U.S. and every region by the site's names, and a year of weeks, newest first", () => {
+    const d = doc(PAGES.surcharge);
+    const agg = site.raw.states.aggregates;
+    expect([agg.NUS.label, agg.R10.label, agg.R50.label]).toEqual(["U.S.", "East Coast", "West Coast"]);
+    const series = Array.from(d.querySelectorAll("#sc-s option")).map((o) => [o.getAttribute("value"), text(o), o.hasAttribute("selected")]);
+    expect(series).toEqual(SURCHARGE_SERIES.map((k) => [k, names[k], k === "NUS"]));
+    const options = Array.from(d.querySelectorAll("#sc-w option"));
+    expect(options).toHaveLength(Math.min(SURCHARGE_WEEKS, site.weekly!.weeks.length));
+    expect(options.map((o) => o.getAttribute("value"))).toEqual(weeks.map((w) => w.period));
+    expect(options.map(text)).toEqual(weeks.map((w) => formatDate(w.period)));
+    expect(options.filter((o) => o.hasAttribute("selected")).map((o) => o.getAttribute("value"))).toEqual([latest.period]);
+  });
+
+  it("gives every field a label you can see, and ties each typed number to its error", () => {
+    const d = doc(PAGES.surcharge);
+    const labels = ["sc-s", "sc-w", "sc-b", "sc-m"].map((id) => text(d.querySelector(`label[for="${id}"]`)));
+    expect(labels).toEqual(["DOE price", "Week of", "Base price, $ a gallon", "Contract MPG, miles per gallon"]);
+    for (const [id, err] of [["sc-b", BASE_ERROR], ["sc-m", MPG_ERROR]]) {
+      const input = d.getElementById(id)!;
+      expect(input.getAttribute("inputmode")).toBe("decimal");
+      expect(input.getAttribute("data-err")).toBe(err);
+      expect(input.hasAttribute("aria-invalid")).toBe(false);
+      const box = d.getElementById(input.getAttribute("aria-describedby")!)!;
+      expect(box.tagName).toBe("P");
+      expect(text(box)).toBe("");
+      expect(box.getAttribute("aria-live")).toBe("polite");
+    }
+  });
+
+  it("prints the DOE prices for the last four weeks, a row a price, the newest in bold and only the change in colour", () => {
+    const d = doc(PAGES.surcharge);
+    const cols = weeks.slice(0, 4);
+    const heads = Array.from(d.querySelectorAll(".sc-t thead th"));
+    expect(heads.map(text)).toEqual(["Price", ...cols.map((w) => formatShortDate(w.period)), "Change ¢"]);
+    expect(heads.slice(1, 5).map((h) => h.getAttribute("aria-label"))).toEqual(cols.map((w) => `Week of ${formatDate(w.period)}`));
+    expect(heads[1].classList.contains("lt")).toBe(true);
+    // a phone shows the newest two weeks and the change, so the table never scrolls sideways
+    expect(heads.map((h) => h.classList.contains("old"))).toEqual([false, false, false, true, true, false]);
+    const rows = Array.from(d.querySelectorAll(".sc-t tbody tr"));
+    expect(rows.map((r) => text(r.querySelector("th")))).toEqual(SURCHARGE_SERIES.map((k) => names[k]));
+    SURCHARGE_SERIES.forEach((k, i) => {
+      const cells = Array.from(rows[i].querySelectorAll("td"));
+      expect(cells.slice(0, 4).map(text), k).toEqual(cols.map((w) => (w.values[k] === null ? "n/a" : formatQuote(w.values[k]!))));
+      expect(cells[0].classList.contains("lt")).toBe(true);
+      for (const c of cells.slice(0, 4)) expect(c.matches(".up, .down"), k).toBe(false);
+      const [now, was] = [cols[0].values[k], cols[1].values[k]];
+      if (now === null || was === null) expect(text(cells[4])).toBe("n/a");
+      else {
+        expect(text(cells[4]), k).toBe(signedCents(now - was));
+        expect(cells[4].getAttribute("class"), k).toBe(`num ${moveClass(now - was, "weekly")}`);
+      }
+    });
+    expect(text(d.getElementById("sc-t-cap"))).toContain(`Change is in cents from the week of ${formatShortDate(cols[1].period)}.`);
+  });
+
+  it("works out the same answer in the browser as the page did, for every price, week and number a driver types", () => {
+    const p = live();
+    expect(p.d.querySelector("#sc fieldset")!.hasAttribute("disabled")).toBe(false);
+    expect(p.out()).toBe(first().answer);
+    expect(p.used()).toBe(first().used);
+    const some = [0, 1, 7, weeks.length - 1].map((i) => weeks[i]);
+    for (const k of SURCHARGE_SERIES) {
+      p.pick("sc-s", k);
+      for (const w of some) {
+        p.pick("sc-w", w.period);
+        for (const base of ["1.25", "$2.5", "0", "6.2", "10", " 3.999 ", "1.2345"]) {
+          p.type("sc-b", base);
+          for (const mpg of ["6", "6.5", "2", "20", "5.3"]) {
+            p.type("sc-m", mpg);
+            const exp = want(k, w.period, w.values[k], base, mpg);
+            expect(p.out(), `${k} ${w.period} ${base} ${mpg}`).toBe(exp.answer);
+            expect(p.used(), `${k} ${w.period} ${base} ${mpg}`).toBe(exp.used);
+          }
+        }
+      }
+    }
+  });
+
+  it("says when EIA has no price for a week, the way the page would", () => {
+    const old = weeks[3];
+    const p = live(fakeStore().store, (d) => {
+      const block = d.getElementById("sc-data")!;
+      const data = JSON.parse(block.textContent!);
+      data.p.R20[3] = null;
+      block.textContent = JSON.stringify(data);
+    });
+    p.pick("sc-s", "R20");
+    p.pick("sc-w", old.period);
+    const exp = want("R20", old.period, null, "1.25", "6");
+    expect(exp.answer).toBe(`There's no Midwest DOE price for the week of ${formatDate(old.period)}. Pick another week.`);
+    expect(p.out()).toBe(exp.answer);
+    expect(p.used()).toBe("");
+  });
+
+  it("shows a typed number's error once the field is left, takes it away once it's right, and keeps the answer's place", () => {
+    const p = live();
+    // half typed: no error yet, and no answer from a number that isn't one
+    p.type("sc-m", "1");
+    expect(p.error("sc-m")).toBe("");
+    expect(p.field("sc-m").hasAttribute("aria-invalid")).toBe(false);
+    expect(p.out()).toBe("");
+    expect(p.d.getElementById("sc-out")).not.toBeNull();
+    // left like that: the error says what to type, and the field says it's wrong
+    p.type("sc-m", "1", true);
+    expect(p.error("sc-m")).toBe(MPG_ERROR);
+    expect(p.field("sc-m").getAttribute("aria-invalid")).toBe("true");
+    // fixed: gone as soon as the number is right
+    p.type("sc-m", "12");
+    expect(p.error("sc-m")).toBe("");
+    expect(p.field("sc-m").hasAttribute("aria-invalid")).toBe(false);
+    expect(p.out()).toBe(want("NUS", latest.period, latest.values.NUS, "1.25", "12").answer);
+    p.type("sc-m", "6");
+    expect(p.out()).toBe(first().answer);
+    for (const bad of ["", "abc", "12", "-1", "1,25"]) {
+      p.type("sc-b", bad, true);
+      expect(p.error("sc-b"), bad).toBe(BASE_ERROR);
+      expect(p.field("sc-b").getAttribute("aria-invalid")).toBe("true");
+      expect(p.out()).toBe("");
+      expect(p.used()).toBe("");
+    }
+    p.type("sc-b", "$1.25");
+    expect(p.error("sc-b")).toBe("");
+    expect(p.field("sc-b").hasAttribute("aria-invalid")).toBe(false);
+    expect(p.out()).toBe(first().answer);
+  });
+
+  it("says plainly when the price is at or under the base", () => {
+    const p = live();
+    p.type("sc-b", "10");
+    expect(p.out()).toBe("No surcharge this week, since the price is at or under your base.");
+    expect(p.used()).toMatch(/^U\.S\. DOE price \$\d\.\d{3}, week of [A-Z][a-z]{2} \d{1,2}, \d{4}\. Base \$10\.000, 6 MPG\.$/);
+  });
+
+  it("keeps the base and the MPG on this phone, and nothing else", () => {
+    const phone = fakeStore();
+    const p = live(phone.store);
+    expect(phone.writes).toEqual([]);
+    p.type("sc-b", "1.3");
+    p.type("sc-m", "6.5");
+    p.pick("sc-s", "R20");
+    expect(phone.writes.length).toBeGreaterThan(0);
+    expect(phone.writes.every((w) => w.startsWith("dailyfuel:surcharge="))).toBe(true);
+    expect(JSON.parse(phone.data.get("dailyfuel:surcharge")!)).toEqual({ base: "1.3", mpg: "6.5" });
+    // a half typed number is not kept
+    const n = phone.writes.length;
+    p.type("sc-m", "1");
+    expect(phone.writes).toHaveLength(n);
+    // the next visit starts from them
+    const again = live(fakeStore({ "dailyfuel:surcharge": JSON.stringify({ base: "1.3", mpg: "6.5" }) }).store);
+    expect(again.field("sc-b").value).toBe("1.3");
+    expect(again.field("sc-m").value).toBe("6.5");
+    expect(again.out()).toBe(want("NUS", latest.period, latest.values.NUS, "1.3", "6.5").answer);
+  });
+
+  it("keeps the page's own numbers when what's kept is junk or storage is blocked", () => {
+    for (const kept of ["{", "null", "5", JSON.stringify({ base: "abc", mpg: 99 }), JSON.stringify({ base: "99", mpg: "1" })]) {
+      const p = live(fakeStore({ "dailyfuel:surcharge": kept }).store);
+      expect(p.field("sc-b").value, kept).toBe("1.25");
+      expect(p.field("sc-m").value, kept).toBe("6");
+      expect(p.out(), kept).toBe(first().answer);
+      expect(p.error("sc-b") + p.error("sc-m"), kept).toBe("");
+    }
+    const blocked = {
+      getItem() {
+        throw new Error("blocked");
+      },
+      setItem() {
+        throw new Error("blocked");
+      },
+    };
+    const p = live(blocked);
+    expect(p.out()).toBe(first().answer);
+    p.type("sc-m", "6.5");
+    expect(p.out()).toBe(want("NUS", latest.period, latest.values.NUS, "1.25", "6.5").answer);
+  });
+
+  it("is linked from where the site explains the DOE price", () => {
+    const fold = doc(PAGES.ohio).querySelector("section[aria-labelledby=tax-title] details.more")!;
+    expect(text(fold.querySelector("a[href='/surcharge/']"))).toBe("Work out a fuel surcharge");
+    const about = doc(PAGES.about).querySelector("section[aria-labelledby=weekly] a[href='/surcharge/']")!;
+    expect(text(about)).toBe("Work out a fuel surcharge");
+    expect(text(about.parentElement)).toContain(DOE_LINE);
+  });
+
+  it("stays inside its budget: under 12 KB gzipped, its own script under 1.5 KB", () => {
+    const page = html(PAGES.surcharge);
+    expect(gz(page)).toBeLessThan(12 * 1024);
+    expect(gz(inlineScripts(page).join("\n"))).toBeLessThan(3 * 1024);
+    expect(gz(script(doc(PAGES.surcharge)))).toBeLessThan(1.5 * 1024);
   });
 });
