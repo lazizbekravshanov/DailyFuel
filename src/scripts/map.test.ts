@@ -18,13 +18,12 @@ import {
   popupHtml,
   radius,
   readRow,
-  sortPts,
   type Cfg,
   type PriceRow,
   type Places,
   type Pt,
 } from "./map.ts";
-import { corridor, END_MI, HOURS, hoursText, LONG_MI, LONG_X, MPG, MPH, readMph, readMpg, stateMiles, stripHtml } from "./trip.ts";
+import { acts, corridor, END_MI, HOURS, hoursText, LONG_MI, LONG_X, MPG, MPH, readMph, readMpg, stateMiles, stripHtml } from "./trip.ts";
 
 
 describe("the chains", () => {
@@ -129,7 +128,7 @@ describe("the route strip", () => {
 
   it("prints the line, each state's weekly price and its move in words, the lowest, then every place along the route, and no dash as punctuation", () => {
     const res = corridor(CHICAGO, CHEYENNE, pts, shapes);
-    const html = stripHtml(res, "Chicago, IL", "Cheyenne, WY", CFG, true);
+    const html = stripHtml(res, "Chicago, IL", "Cheyenne, WY", CFG, 2);
     const d = parseHTML(`<div>${html}</div>`).document;
     const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
     expect(t(d.querySelector(".rsum"))).toMatch(/^Chicago, IL to Cheyenne, WY, 8\d\d miles in a straight line$/);
@@ -164,7 +163,7 @@ describe("the route strip", () => {
     expect(d.querySelectorAll(".rs .lk[data-i]")).toHaveLength(4);
     // a straight line has no hours marks (the marks' stops open their markers too, see the trip sheet's tests)
     expect(d.querySelectorAll(".hrs")).toHaveLength(0);
-    expect(stripHtml(res, "A", "B", CFG, false)).not.toContain("class=\"lk\"");
+    expect(stripHtml(res, "A", "B", CFG, 1)).not.toContain("class=\"lk\"");
   });
 
   it("finds the lowest weekly average by number, names every state in a tie, and names none when nothing on the line is higher", () => {
@@ -174,20 +173,20 @@ describe("the route strip", () => {
       px: CFG.px.map((r): PriceRow => (r[0] in by ? [r[0], r[1], by[r[0]], r[3], r[4], r[5], r[6]] : r)),
     });
     // "$10.100" sorts before "$9.900" as text; the line compares the numbers
-    expect(stripHtml(res, "A", "B", prices({ IL: "$10.100", IA: "$9.900", NE: "$10.000", WY: "$11.000" }), false)).toContain(
+    expect(stripHtml(res, "A", "B", prices({ IL: "$10.100", IA: "$9.900", NE: "$10.000", WY: "$11.000" }), 1)).toContain(
       "Lowest weekly average on this line: <b>Iowa, $9.900</b>",
     );
     // states that share the lowest regional average are named together, never the first of them alone
-    expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: "$6.000", NE: "$6.500", WY: "$6.500" }), false)).toContain(
+    expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: "$6.000", NE: "$6.500", WY: "$6.500" }), 1)).toContain(
       "Lowest weekly average on this line: <b>Illinois and Iowa, $6.000</b>",
     );
-    expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: "$6.000", NE: "$6.000", WY: "$6.500" }), false)).toContain(
+    expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: "$6.000", NE: "$6.000", WY: "$6.500" }), 1)).toContain(
       "<b>Illinois, Iowa and Nebraska, $6.000</b>",
     );
     // one region's average all along the line: no state is lower than another
-    expect(stripHtml(res, "A", "B", prices({ IL: "$6.526", IA: "$6.526", NE: "$6.526", WY: "$6.526" }), false)).not.toContain("Lowest");
+    expect(stripHtml(res, "A", "B", prices({ IL: "$6.526", IA: "$6.526", NE: "$6.526", WY: "$6.526" }), 1)).not.toContain("Lowest");
     // one state with a price has nothing to compare
-    expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: null, NE: null, WY: null }), false)).not.toContain("Lowest");
+    expect(stripHtml(res, "A", "B", prices({ IL: "$6.000", IA: null, NE: null, WY: null }), 1)).not.toContain("Lowest");
   });
 
   it("prices a state once however often the line crosses back into it, and lists each stretch", () => {
@@ -197,20 +196,20 @@ describe("the route strip", () => {
       miles: 100, line: [], ring: [], outside: false, hits: 0, road: false,
       runs: [run("IL", 0, 20), run("IA", 25, 40), run("IL", 45, 60), run("IA", 65, 80), run("WY", 85, 100)],
     };
-    const d = parseHTML(`<div>${stripHtml(res, "A", "B", CFG, false)}</div>`).document;
+    const d = parseHTML(`<div>${stripHtml(res, "A", "B", CFG, 1)}</div>`).document;
     const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
     expect(Array.from(d.querySelectorAll(".rp li")).map(t)).toEqual(["Illinois $6.250 up 30.4¢", "Iowa $6.250 up 30.4¢", "Wyoming $6.066 down 2.0¢"]);
     expect(t(d.querySelector("div"))).toContain("Lowest weekly average on this line: Wyoming, $6.066");
     // the places still sit stretch by stretch, in order along the line
-    expect(groups(stripHtml(res, "A", "B", CFG, false)).map((s) => s.split(":")[0])).toEqual(["Illinois", "Iowa", "Illinois", "Iowa", "Wyoming"]);
+    expect(groups(stripHtml(res, "A", "B", CFG, 1)).map((s) => s.split(":")[0])).toEqual(["Illinois", "Iowa", "Illinois", "Iowa", "Wyoming"]);
     // two states on one average, crossed five times: still no lowest
     const two = { ...res, runs: res.runs.slice(0, 4) };
-    expect(stripHtml(two, "A", "B", CFG, false)).not.toContain("Lowest");
+    expect(stripHtml(two, "A", "B", CFG, 1)).not.toContain("Lowest");
   });
 
   it("says No weekly price where the survey has none, and lists a stretch with nothing in it as 0 places", () => {
     const res = corridor([61.2, -149.9], [64.8, -147.7], [], [box("AK", -170, 51, -130, 71.5)]);
-    const html = stripHtml(res, "Anchorage, AK", "Fairbanks, AK", CFG, true);
+    const html = stripHtml(res, "Anchorage, AK", "Fairbanks, AK", CFG, 2);
     const d = parseHTML(`<div>${html}</div>`).document;
     const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
     expect(Array.from(d.querySelectorAll(".rp li")).map(t)).toEqual(["Alaska No weekly price"]);
@@ -223,7 +222,7 @@ describe("the route strip", () => {
     expect(t(d.querySelectorAll("h3.rh")[3])).toBe("0 places along the route");
     expect(html).not.toContain('<tr><td class="num">');
     // with no outlines the places still list, under a state not known, and no price is guessed
-    const none = stripHtml(corridor(CHICAGO, CHEYENNE, pts, []), "A", "B", CFG, false);
+    const none = stripHtml(corridor(CHICAGO, CHEYENNE, pts, []), "A", "B", CFG, 1);
     expect(none).toContain('<tr class="rg"><th colspan="2">State not known: 4 places, miles 0 to');
     expect(none).not.toContain("$");
   });
@@ -236,7 +235,7 @@ describe("the route strip", () => {
     };
     // each border sits halfway between the two states' samples; IL and WY tie on the leftover mile and the first takes it
     expect(stateMiles(res)).toEqual([["IL", 43], ["IA", 40], ["WY", 17]]);
-    const html = stripHtml(res, "A", "B", CFG, false, 10);
+    const html = stripHtml(res, "A", "B", CFG, 1, 10);
     const d = parseHTML(`<div>${html}</div>`).document;
     const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
     // 4.3 gallons at $6.250, 4.0 at $6.250 and 1.7 at $6.066
@@ -248,18 +247,18 @@ describe("the route strip", () => {
     expect(t(d.querySelector("div"))).toContain("At 10 miles per gallon and each state's weekly average, not any one stop's price.");
     // the default is a loaded truck's
     expect(MPG).toBe(6.5);
-    expect(stripHtml(res, "A", "B", CFG, false)).toContain("at 6.5 miles per gallon");
+    expect(stripHtml(res, "A", "B", CFG, 1)).toContain("at 6.5 miles per gallon");
   });
 
   it("leaves a state with no weekly price out of the fuel dollars and says so", () => {
     const run = (code: string, from: number, to: number) => ({ code, from, to, hits: [] });
     const ak = { miles: 200, line: [], ring: [], outside: false, hits: 0, road: false, runs: [run("AK", 0, 200)] };
-    const html = stripHtml(ak, "A", "B", CFG, false);
+    const html = stripHtml(ak, "A", "B", CFG, 1);
     expect(html).not.toContain("rfuel");
     expect(html).toContain('<tr><td>Alaska<td class="num">200<td class="num">30.8<td class="num">No price');
     expect(html).toContain('<tr class="tot"><th>Total<td class="num">200<td class="num">30.8<td class="num">No price<td class="pr"></table>');
     const mixed = { ...ak, runs: [run("IL", 0, 100), run("AK", 105, 200)] };
-    expect(stripHtml(mixed, "A", "B", CFG, false, 10)).toContain("about <b>$64</b> at 10 miles per gallon, not counting 97 miles with no weekly price");
+    expect(stripHtml(mixed, "A", "B", CFG, 1, 10)).toContain("about <b>$64</b> at 10 miles per gallon, not counting 97 miles with no weekly price");
   });
 
   it("takes a truck's miles per gallon, 2 to 20, and nothing else", () => {
@@ -336,24 +335,24 @@ describe("a route that goes the long way", () => {
   it("says so when the freight highways run far past the straight line", () => {
     expect([LONG_X, LONG_MI, END_MI]).toEqual([1.6, 30, 25]);
     // Las Vegas to Phoenix along the freight network: 543 miles for a 256 mile line
-    expect(t(stripHtml(trip(543, 256, [2, 3]), "Las Vegas, NV", "Phoenix, AZ", CFG, false))).toContain(
+    expect(t(stripHtml(trip(543, 256, [2, 3]), "Las Vegas, NV", "Phoenix, AZ", CFG, 1))).toContain(
       "The freight highways go the long way here: 543 miles, against 256 in a straight line. The roads you take may be shorter, and their miles by state may differ.",
     );
     // an ordinary route, and a straight line, say nothing
-    expect(stripHtml(trip(295, 250, [2, 3]), "A", "B", CFG, false)).not.toContain("long way");
+    expect(stripHtml(trip(295, 250, [2, 3]), "A", "B", CFG, 1)).not.toContain("long way");
     // the edge: 1.6 times 256, plus 30, is 439.6
-    expect(stripHtml(trip(439, 256, [2, 3]), "A", "B", CFG, false)).not.toContain("long way");
-    expect(stripHtml(trip(440, 256, [2, 3]), "A", "B", CFG, false)).toContain("long way");
-    expect(stripHtml(trip(543, 256, [0, 0], false), "A", "B", CFG, false)).not.toContain("long way");
+    expect(stripHtml(trip(439, 256, [2, 3]), "A", "B", CFG, 1)).not.toContain("long way");
+    expect(stripHtml(trip(440, 256, [2, 3]), "A", "B", CFG, 1)).toContain("long way");
+    expect(stripHtml(trip(543, 256, [0, 0], false), "A", "B", CFG, 1)).not.toContain("long way");
   });
 
   it("says so when a town is far from the nearest freight highway", () => {
-    const h = t(stripHtml(trip(400, 380, [107, 3]), "Roswell, NM", "Dallas, TX", CFG, false));
+    const h = t(stripHtml(trip(400, 380, [107, 3]), "Roswell, NM", "Dallas, TX", CFG, 1));
     expect(h).toContain("Roswell, NM is 107 miles from the nearest freight highway, so the line runs straight for that stretch.");
     expect(h).not.toContain("Dallas, TX is");
-    expect(stripHtml(trip(400, 380, [25, 25]), "A", "B", CFG, false)).not.toContain("nearest freight highway");
-    expect(t(stripHtml(trip(400, 380, [3, 40]), "A", "B <x>", CFG, false))).toContain("B <x> is 40 miles from");
-    expect(stripHtml(trip(400, 380, [3, 40]), "A", "B <x>", CFG, false)).toContain("B &lt;x&gt; is 40 miles");
+    expect(stripHtml(trip(400, 380, [25, 25]), "A", "B", CFG, 1)).not.toContain("nearest freight highway");
+    expect(t(stripHtml(trip(400, 380, [3, 40]), "A", "B <x>", CFG, 1))).toContain("B <x> is 40 miles from");
+    expect(stripHtml(trip(400, 380, [3, 40]), "A", "B <x>", CFG, 1)).toContain("B &lt;x&gt; is 40 miles");
   });
 
   it("measures the straight line and each town's stretch to the network", () => {
@@ -391,9 +390,9 @@ describe("the trip sheet: hours marks, share and print", () => {
   });
 
   it("marks where 8 and 11 hours of driving fall, with the last truck stop before each", () => {
-    const d = doc(stripHtml(res, "Chicago, IL", "Omaha, NE", CFG, false, 6.5, 50));
+    const d = doc(stripHtml(res, "Chicago, IL", "Omaha, NE", CFG, 1, 6.5, 50));
     const all = t(d.querySelector("div"));
-    expect(doc(stripHtml(res, "A", "B", CFG, true, 6.5, 50)).querySelectorAll(".hrs .lk[data-i]")).toHaveLength(2);
+    expect(doc(stripHtml(res, "A", "B", CFG, 2, 6.5, 50)).querySelectorAll(".hrs .lk[data-i]")).toHaveLength(2);
     expect(all).toContain("About 14 hours of driving at 50 miles per hour.");
     expect(Array.from(d.querySelectorAll(".hrs li")).map(t)).toEqual([
       "8 hours at mile 400. Last truck stop on the map before it: Love's, near I 80, mile 390.",
@@ -404,7 +403,7 @@ describe("the trip sheet: hours marks, share and print", () => {
   });
 
   it("puts each mark among the stops in mile order, under the state it falls in", () => {
-    const h = stripHtml(res, "A", "B", CFG, false, 6.5, 50);
+    const h = stripHtml(res, "A", "B", CFG, 1, 6.5, 50);
     const rows = h.split('<table class="rs">')[1].split("<tr").slice(2).map((r) => r.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
     expect(rows).toEqual([
       "class=\"rg\"> Illinois: 1 place, miles 0 to 300, state tax 54.5¢",
@@ -419,20 +418,20 @@ describe("the trip sheet: hours marks, share and print", () => {
   });
 
   it("marks nothing on a trip shorter than 8 hours, and says when no truck stop comes before a mark", () => {
-    const short = stripHtml({ ...res, miles: 300 }, "A", "B", CFG, false, 6.5, 50);
+    const short = stripHtml({ ...res, miles: 300 }, "A", "B", CFG, 1, 6.5, 50);
     expect(short).not.toContain('class="hrs"');
     expect(short).not.toContain('class="hm"');
     expect(t(doc(short).querySelector("div"))).toContain("About 6 hours of driving at 50 miles per hour.");
     const bare = { ...res, runs: [run("IL", 0, 700, [])] };
-    expect(t(doc(stripHtml(bare, "A", "B", CFG, false, 6.5, 50)).querySelector(".hrs li"))).toBe("8 hours at mile 400. No truck stop on the map before it.");
+    expect(t(doc(stripHtml(bare, "A", "B", CFG, 1, 6.5, 50)).querySelector(".hrs li"))).toBe("8 hours at mile 400. No truck stop on the map before it.");
     // the default speed is 55
-    expect(stripHtml(res, "A", "B", CFG, false)).toContain("at 55 miles per hour");
+    expect(stripHtml(res, "A", "B", CFG, 1)).toContain("at 55 miles per hour");
   });
 
   it("gives the odometer a line for every state line, a state crossed back into included", () => {
     // Nashville to Chattanooga on I 24 dips into Georgia and comes back
     const back = { ...res, miles: 130, runs: [run("TN", 0, 118, []), run("GA", 119, 122, []), run("TN", 123, 130, [])] };
-    const lines = stripHtml(back, "Nashville, TN", "Chattanooga, TN", { ...CFG, px: [...CFG.px, ["TN", "Tennessee", "$6.000", null, "", "", "27.0¢"], ["GA", "Georgia", "$6.000", null, "", "", "33.1¢"]] }, false)
+    const lines = stripHtml(back, "Nashville, TN", "Chattanooga, TN", { ...CFG, px: [...CFG.px, ["TN", "Tennessee", "$6.000", null, "", "", "27.0¢"], ["GA", "Georgia", "$6.000", null, "", "", "33.1¢"]] }, 1)
       .split('<table class="rf po">')[1];
     expect(lines.match(/<tr><td>[^<]*/g)!.map((x) => x.slice(8))).toEqual(["Start, Nashville, TN", "Tennessee to Georgia", "Georgia to Tennessee", "End, Chattanooga, TN"]);
   });
@@ -440,18 +439,18 @@ describe("the trip sheet: hours marks, share and print", () => {
   it("shares no fuel cost without saying which miles it leaves out", () => {
     const run2 = (code: string, from: number, to: number) => ({ code, from, to, hits: [] });
     const mixed = { miles: 200, line: [], ring: [], outside: false, hits: 0, road: false, runs: [run2("IL", 0, 100), run2("AK", 105, 200)] };
-    const d = doc(stripHtml(mixed, "A", "B", CFG, false, 10));
+    const d = doc(stripHtml(mixed, "A", "B", CFG, 1, 10));
     expect(d.querySelector("[data-share]")!.getAttribute("data-share")).toMatch(/at 10 miles per gallon and each state's weekly average for the week of [^,]+, \d{4}, not counting 97 miles with no weekly price\.$/);
     // a straight line's hours say they are from the straight line, and it has no marks, as it can't be driven mile for mile
     expect(t(d.querySelector("div"))).toContain("of driving at 55 miles per hour, from the straight line, so longer on the road.");
-    const line = stripHtml({ ...res, road: false }, "A", "B", CFG, false, 6.5, 50);
+    const line = stripHtml({ ...res, road: false }, "A", "B", CFG, 1, 6.5, 50);
     expect(line).not.toContain('class="hrs"');
     expect(line).not.toContain('class="hm"');
-    expect(t(doc(stripHtml(res, "A", "B", CFG, false)).querySelector("div"))).not.toContain("from the straight line");
+    expect(t(doc(stripHtml(res, "A", "B", CFG, 1)).querySelector("div"))).not.toContain("from the straight line");
   });
 
   it("shares the trip as a link and one sentence, and prints blank columns to fill in", () => {
-    const d = doc(stripHtml(res, 'St. Louis, MO', 'Fort "Worth", TX', CFG, true, 10, 50));
+    const d = doc(stripHtml(res, 'St. Louis, MO', 'Fort "Worth", TX', CFG, 2, 10, 50));
     const s = d.querySelector("[data-share]")!;
     expect(t(s)).toBe("Share this trip");
     expect(s.getAttribute("data-u")).toBe("#" + encodeURIComponent('St. Louis, MO|Fort "Worth", TX'));
@@ -461,7 +460,7 @@ describe("the trip sheet: hours marks, share and print", () => {
     expect(t(d.querySelector("[data-clr]"))).toBe("Show every stop");
     // the sheet's columns: a heading each and a blank cell for every state and the total
     // (read from the markup: its end tags are left out as HTML allows, which linkedom can't nest)
-    const sheet = stripHtml(res, "A", "B", CFG, true, 10, 50);
+    const sheet = stripHtml(res, "A", "B", CFG, 2, 10, 50);
     expect(sheet).toContain('<th class="num">Fuel<th class="pr">Fuel bought, gallons<tbody>');
     // a fuel bought blank for each state and the total
     expect(sheet.split('<table class="rf po">')[0].match(/<td class="pr"><(tr|\/table)/g)).toHaveLength(3);
@@ -474,9 +473,40 @@ describe("the trip sheet: hours marks, share and print", () => {
     ]);
     expect(sheet).toContain('<h3 class="rh po">State lines</h3>');
     // with no map, share and print stay, Show every stop goes
-    const noMap = doc(stripHtml(res, "A", "B", CFG, false));
+    const noMap = doc(stripHtml(res, "A", "B", CFG, 1));
     expect(noMap.querySelectorAll("[data-share], [data-print]")).toHaveLength(2);
     expect(noMap.querySelector("[data-clr]")).toBeNull();
+    // a map page from before the button levels passes true, and keeps Show every stop
+    expect(doc(stripHtml(res, "A", "B", CFG, true as unknown as 2)).querySelector("[data-clr]")).not.toBeNull();
+    // the copy kept on the phone, shown when the script behind them may not have come, has none
+    const kept = doc(stripHtml(res, "A", "B", CFG, 0));
+    expect(kept.querySelector("button, .racts")).toBeNull();
+    expect(t(kept.querySelector(".rsum"))).toBe("A to B, 700 miles on freight highways");
+  });
+
+  it("shares the link and the sentence, copies them where the phone can't share, and prints", async () => {
+    const said: string[] = [];
+    const page = (nav: any) => {
+      const w = { navigator: nav, location: { href: "https://x.test/map/#old" }, printed: 0, print() { this.printed++; } };
+      return { w, click: acts(w, (s) => said.push(s)) };
+    };
+    const d = doc(stripHtml(res, "A", "B", CFG, 2));
+    const on = (sel: string) => ({ target: d.querySelector(sel) }) as unknown as Event;
+    const shared: any[] = [];
+    const a = page({ share: async (x: any) => shared.push(x) });
+    await a.click(on("[data-share]"));
+    expect(shared).toEqual([{ text: d.querySelector("[data-share]")!.getAttribute("data-share"), url: "https://x.test/map/#A%7CB" }]);
+    a.click(on("[data-print]"));
+    expect(a.w.printed).toBe(1);
+    // a driver who closes the share sheet hears nothing
+    await page({ share: async () => { throw Object.assign(new Error(), { name: "AbortError" }); } }).click(on("[data-share]"));
+    expect(said).toEqual([]);
+    const copied: string[] = [];
+    await page({ clipboard: { writeText: async (x: string) => copied.push(x) } }).click(on("[data-share]"));
+    expect(copied[0]).toMatch(/^A to B: 700 miles .* https:\/\/x\.test\/map\/#A%7CB$/);
+    expect(said).toEqual(["Copied the trip and its link."]);
+    await page({ clipboard: { writeText: async () => { throw new Error("blocked"); } } }).click(on("[data-share]"));
+    expect(said[1]).toBe("Copy the trip's link: https://x.test/map/#A%7CB");
   });
 });
 
@@ -645,16 +675,9 @@ describe("the list's rows and the popups", () => {
     expect(popupHtml(got[1], CFG)).toContain("For southbound traffic");
     expect(popupHtml(got[3], CFG)).toContain("<b>TA</b>");
     // and the trip's table print the same name
-    const trip = stripHtml(corridor([39.95, -83.5], [39.95, -82.3], got, []), "A", "B", CFG, false);
+    const trip = stripHtml(corridor([39.95, -83.5], [39.95, -82.3], got, []), "A", "B", CFG, 1);
     expect(trip).toContain("<td>Pilot, near I 70");
     for (const p of got) expect(p.n).not.toMatch(/[–—]|\s-\s|,$/);
-  });
-
-  it("sorts by name, type or state either way, ties by name", () => {
-    expect(sortPts(pts, "n", 1).map((p) => p.i)).toEqual([2, 0, 3, 1]);
-    expect(sortPts(pts, "n", -1).map((p) => p.i)).toEqual([1, 3, 0, 2]);
-    expect(sortPts(pts, "st", 1).map((p) => p.st)).toEqual(["", "IA", "IL", "IL"]);
-    expect(sortPts(pts, "t", 1).map((p) => p.t)).toEqual(["Repair and lube", "TA", "Weigh station", "Weigh station"]);
   });
 
   it("escapes what it prints", () => {

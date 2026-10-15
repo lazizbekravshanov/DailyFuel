@@ -3,7 +3,7 @@ import statesFile from "../data/states.json";
 import type { BenchmarkKey, Move } from "./data.ts";
 import type { SiteData, StateView } from "./site.ts";
 import {
-  countPlaces, missingNote, noSurveyNote, pctOf, samePriceCaption, samePriceMeta, stateDescription,
+  countPlaces, mapLink, missingNote, noSurveyNote, pctOf, samePriceCaption, samePriceMeta, stateDescription,
 } from "./copy.ts";
 import { homeMeta } from "../components/home/home.ts";
 import { changeWords, diffWords, formatMove } from "./format.ts";
@@ -340,5 +340,14 @@ describe("next door states", () => {
       const { document } = parseHTML(readFileSync(resolve(built!, `state/${code.toLowerCase()}/index.html`), "utf8"));
       expect(document.querySelector(".nd")).toBeNull();
     }
+  });
+});
+
+describe("mapLink", () => {
+  it("names what the map has in the state, and never opens an empty map", () => {
+    expect(mapLink("Ohio", ["w", "s", "v"])).toEqual({ button: "Truck stops in Ohio" });
+    expect(mapLink("Alaska", ["w", "w"])).toEqual({ button: "Weigh stations in Alaska" });
+    expect(mapLink("Guam", ["v"])).toEqual({ button: "Guam on the map" });
+    expect(mapLink("Hawaii", [])).toEqual({ line: "The map has no truck stops or weigh stations in Hawaii yet." });
   });
 });

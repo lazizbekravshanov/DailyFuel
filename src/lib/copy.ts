@@ -40,6 +40,18 @@ export function shortName(s: { code: string; name: string }): string {
   return s.code === "DC" ? "DC" : s.name;
 }
 
+/**
+ * The state page's way to the map, from the kinds of point the map has in
+ * the state: a button that names what's there, or a plain line when there is
+ * nothing, so no button opens an empty map.
+ */
+export function mapLink(name: string, kinds: string[]): { button: string } | { line: string } {
+  if (kinds.includes("s")) return { button: `Truck stops in ${name}` };
+  if (kinds.includes("w")) return { button: `Weigh stations in ${name}` };
+  if (kinds.length) return { button: `${name} on the map` };
+  return { line: `The map has no truck stops or weigh stations in ${name} yet.` };
+}
+
 /** "Alaska or Hawaii", "Iowa, Ohio or Utah". */
 function joinOr(names: string[]): string {
   if (names.length < 2) return names.join("");
