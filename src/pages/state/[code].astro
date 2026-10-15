@@ -24,7 +24,8 @@ import { changeOver, highLow, lastDays, newest, peakKind } from "../../lib/stats
 import { DOE_LINE, DYED_DIESEL_HERE, peakSentence } from "../../lib/doe.ts";
 import { LATE_TEXT, nextEiaRelease, nextUpdateText } from "../../lib/release.ts";
 import { quoteCpg } from "../../lib/tax.ts";
-import { countPlaces, noSurveyNote, pctOf, regionMates, shortName, stateDescription } from "../../lib/copy.ts";
+import { countPlaces, mapLink, noSurveyNote, pctOf, regionMates, shortName, stateDescription } from "../../lib/copy.ts";
+import { loadMapData } from "../../lib/mapdata.ts";
 import { regionLabel } from "../../lib/og.ts";
 import { stateShareText } from "../../lib/share.ts";
 import { NEIGHBORS } from "../../lib/neighbors.ts";
@@ -45,6 +46,7 @@ const pct = move ? pctOf(move) : null;
 const eia = latest.eia ?? null;
 const aaa = aaaMode ? latest.aaa : null;
 const name = shortName(s);
+const toMap = mapLink(name, loadMapData().points.filter((p) => p.state === s.code).map((p) => p.kind));
 
 // The head says whose number it is: "Ohio diesel: Midwest average $6.526,
 // down 15.4¢ | DailyFuel". California and AAA's daily prices are the state's own.
@@ -252,7 +254,7 @@ const save = inlineCall(myState, "document", JSON.stringify(s.code), "function()
     <>
       <p class="note">{noSurveyNote(s, westCoast)}</p>
       {us && <p class="note"><a href="/">U.S. average {formatPrice(us.price)} this week</a></p>}
-      <p class="note"><a class="btn wide" href={`/map/#${s.slug}`}>Truck stops in {name}</a></p>
+      {"button" in toMap ? <p class="note"><a class="btn wide" href={`/map/#${s.slug}`}>{toMap.button}</a></p> : <p class="note">{toMap.line}</p>}
     </>
   )}
   {peakLine && <p class="note">{peakLine}</p>}
@@ -278,7 +280,7 @@ const save = inlineCall(myState, "document", JSON.stringify(s.code), "function()
       {mates.length > 0 && (
         <p class="cap codes">Same price as {name} in {countPlaces(mates, s.code !== "DC")}: {mates.map((m) => <><a href={m.href}>{m.code}</a>{" "}</>)}</p>
       )}
-      <p class="note"><a class="btn wide" href={`/map/#${s.slug}`}>Truck stops in {name}</a></p>
+      {"button" in toMap ? <p class="note"><a class="btn wide" href={`/map/#${s.slug}`}>{toMap.button}</a></p> : <p class="note">{toMap.line}</p>}
     </section>
   )}
 

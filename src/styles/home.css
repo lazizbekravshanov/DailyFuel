@@ -484,8 +484,8 @@ th[aria-sort] .sortb {
   }
 }
 
-/* at 200% zoom on a small phone the table scrolls inside its box, never the page */
-@media (max-width: 299px) {
+/* on a small phone, or at 200% zoom, the table scrolls inside its box, never the page */
+@media (max-width: 349px) {
   .q .scroll {
     overflow-x: auto;
   }

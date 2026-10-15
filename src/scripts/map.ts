@@ -11,8 +11,9 @@
 // data-l "lat,lon", data-s the sources (o when missing), data-d the
 // direction's first letter, data-c the chain whose locator a truck service
 // point links to. The rest comes from the page's JSON block (#mapcfg): the
-// chains, the sources, the 51 price rows and the bounds. The outlines, the
-// roads and the places list load from /map/*.json.
+// chains, the sources, the 51 price rows and the bounds. The outlines load
+// from /map/states.json with the page; the roads and the places list load
+// from /map/*.json when a trip or a find is started.
 //
 // Pure functions are exported for src/scripts/map.test.ts.
 
@@ -190,9 +191,6 @@ export function findPlace(q: string, pl: Places | null, states: (string | null)[
   return L.some((s) => s.split(", ")[0] == t0) ? look(t0) : (look(t) ?? look(t0));
 }
 
-/** "41.878, −87.630": a point typed or tapped, with a real minus sign. */
-export const llText = (lat: number, lon: number): string => `${lat.toFixed(3)}, ${lon.toFixed(3)}`.replace(/-/g, "−");
-
 export interface Run {
   code: string | null;
   from: number;
@@ -237,12 +235,6 @@ export function radius(k: string, z: number): number {
   return (k === "s" ? [4, 5, 8] : k === "w" ? [3.5, 4.5, 6] : [2.5, 3.5, 4.5])[i];
 }
 
-/** Sort the points by a column: n name, t type, st state, then name, then state. */
-export function sortPts(pts: Pt[], key: "n" | "t" | "st", dir: 1 | -1): Pt[] {
-  // the sort is stable and pts is always in list order, so a full tie keeps that order
-  return pts.slice().sort((x, y) => (x[key].localeCompare(y[key]) || x.n.localeCompare(y.n) || x.st.localeCompare(y.st)) * dir);
-}
-
 // ----------------------------------------------------------------- page --
 
 export function init(doc: Document, win: any): void {
@@ -273,7 +265,7 @@ export function init(doc: Document, win: any): void {
     net: LL[][] = [],
     labels: [string, number, number, number][] = [];
 
-  // ---- the list: what is on screen, sortable, each name opening its marker
+  // ---- the list: what is on screen, each name opening its marker
   // Names become buttons 200 rows a task, the top of the list first, so the
   // list opens at once even with every row of the lower 48 in view.
   const todo: Pt[] = [];
@@ -379,21 +371,9 @@ export function init(doc: Document, win: any): void {
       const [wk, h] = JSON.parse(localStorage.getItem("dailyfuel:trip")!);
       out.innerHTML = `<p class="fine">Your last trip, kept on this phone with the ${esc(wk.replace(/^Week/, "week"))}. Prices may have changed since.</p>${h}`;
       root.classList.add("trip");
+      again = null;
     } catch {}
   };
-  // Share this trip sends its link and one sentence, or copies them where the phone can't share; Print trip sheet prints it
-  out.addEventListener("click", (e) => {
-    const t = e.target as Element,
-      s = t.closest("[data-share]") as HTMLElement | null,
-      n = win.navigator;
-    if (t.closest("[data-print]")) win.print();
-    if (!s) return;
-    const text = s.dataset.share!,
-      url = win.location.href.split("#")[0] + s.dataset.u;
-    Promise.resolve()
-      .then(() => (n.share ? n.share({ text, url }) : n.clipboard.writeText(`${text} ${url}`).then(() => say("Copied the trip and its link."))))
-      .catch((x: any) => x.name != "AbortError" && say(`Copy the trip's link: ${url}`));
-  });
   const title = doc.title,
     fs = form && form.querySelector("fieldset");
   if (fs) fs.disabled = false;
@@ -408,7 +388,18 @@ export function init(doc: Document, win: any): void {
   } catch {}
   let drawn: any[] = [],
     runs = 0,
-    tries = 0;
+    tries = 0,
+    // the trip shown, priced again from the MPG and MPH boxes
+    again: (() => void) | null = null;
+  // MPG and MPH that a trip can use; a pair that can is kept on this phone for the next trip
+  const fine = () => {
+    if (!(+inM.value >= 2 && +inM.value <= 20 && +inS.value >= 20 && +inS.value <= 80)) return false;
+    try {
+      localStorage.setItem("dailyfuel:mpg", inM.value.trim());
+      localStorage.setItem("dailyfuel:mph", inS.value.trim());
+    } catch {}
+    return true;
+  };
   // a new line fits the map to its band; a rerun (a filter) leaves the view alone
   const run = (a: [number, number], b: [number, number], al: string, bl: string, fit?: boolean) => {
     last = { a, b, al, bl, fit };
@@ -427,18 +418,25 @@ export function init(doc: Document, win: any): void {
       const path = net.length ? m.route(a, b, net) : null;
       if (!(await next())) return;
       const res = m.corridor(a, b, pts, shapes, path);
-      const sheet = (w: boolean) => m.stripHtml(res, al, bl, cfg, w, m.readMpg(inM.value) || m.MPG, m.readMph(inS.value) || m.MPH);
-      out.innerHTML = sheet(!!map);
-      // a trip shown: the page prints as its trip sheet (see map.astro)
+      const sheet = (w: number) => m.stripHtml(res, al, bl, cfg, w, m.readMpg(inM.value) || m.MPG, m.readMph(inS.value) || m.MPH);
+      // the trip is kept for a look back with no signal, without the buttons whose script may not come then
+      (again = () => {
+        out.innerHTML = sheet(map ? 2 : 1);
+        try {
+          localStorage.setItem("dailyfuel:trip", JSON.stringify([cfg.wk, sheet(0)]));
+        } catch {}
+      })();
+      // Share this trip and Print trip sheet
+      out.onclick = m.acts(win, say);
+      // a trip shown: the page prints as its trip sheet (see map.astro), and the tab is the trip's
       root.classList.add("trip");
-      // the tab is the trip's now, and the trip is kept for a look back with no signal
       doc.title = `${al} to ${bl} | DailyFuel`;
-      try {
-        localStorage.setItem("dailyfuel:trip", JSON.stringify([cfg.wk, sheet(false)]));
-      } catch {}
-      say((out.querySelector(".rsum") as Element).textContent || "", true);
-      // the map with its line comes into view over the prices
-      if (fit) map ? box.scrollIntoView() : out.scrollIntoView({ block: "nearest" });
+      // A new trip puts the focus on its summary, which a screen reader then
+      // reads, and the map with its line comes into view over the prices. A
+      // rerun from a filter leaves the focus in the key and only reads it out.
+      const sum = out.querySelector(".rsum") as HTMLElement;
+      if (fit) say(""), sum.focus({ preventScroll: true }), map ? box.scrollIntoView() : out.scrollIntoView({ block: "nearest" });
+      else say(sum.textContent || "", true);
       if (!map || !(await next())) return;
       for (const l of drawn) map.removeLayer(l);
       // only the stops along the trip stay on the map, until Show every stop
@@ -490,6 +488,11 @@ export function init(doc: Document, win: any): void {
       kept();
     });
   };
+  // a box the driver has to fix is marked so, and described by the message under the form
+  const flag = (i?: HTMLInputElement) => {
+    for (const j of [inA, inB, inM, inS]) j.setAttribute("aria-invalid", j == i ? "true" : "false"), j == i ? j.setAttribute("aria-describedby", "rt-st") : j.removeAttribute("aria-describedby");
+    i && i.focus();
+  };
   // the towns, the outlines and the roads come first, so a trip is drawn once, along the roads and priced by state
   const go = () => {
     // on a slow signal the strip says it is at work, until the answer or a message takes its place
@@ -503,22 +506,16 @@ export function init(doc: Document, win: any): void {
       if (miss) {
         const v = miss.value.trim().replace(/[\s,]+$/, ""), f = miss === inA ? a : b;
         say(f ? `Which ${v}? Type the town and state, like ${f}.` : v ? `We can't find ${v}. Try a town and state, like Columbus, OH.` : `Type a town for ${miss === inA ? "From" : "To"}.`);
-        return miss.focus();
+        return flag(miss);
       }
       const p = a as P, q = b as P;
-      if (p.lat === q.lat && p.lon === q.lon) return say("From and To are the same place.");
-      if (!(+inM.value >= 2 && +inM.value <= 20)) {
-        say("Type miles per gallon from 2 to 20, like 6.5.");
-        return inM.focus();
+      if (p.lat === q.lat && p.lon === q.lon) return say("From and To are the same place."), flag(inB);
+      if (!fine()) {
+        const s = !(+inM.value >= 2 && +inM.value <= 20);
+        say(s ? "Type miles per gallon from 2 to 20, like 6.5." : "Type an average speed from 20 to 80 miles per hour, like 55.");
+        return flag(s ? inM : inS);
       }
-      if (!(+inS.value >= 20 && +inS.value <= 80)) {
-        say("Type an average speed from 20 to 80 miles per hour, like 55.");
-        return inS.focus();
-      }
-      try {
-        localStorage.setItem("dailyfuel:mpg", inM.value.trim());
-        localStorage.setItem("dailyfuel:mph", inS.value.trim());
-      } catch {}
+      flag();
       run([p.lat, p.lon], [q.lat, q.lon], p.label, q.label, true);
       // the trip stays in the address, so a reload or a shared link brings it back
       history.replaceState(null, "", "#" + encodeURIComponent(p.label + "|" + q.label));
@@ -527,16 +524,19 @@ export function init(doc: Document, win: any): void {
     });
   };
   if (form && inA && inB) {
-    inA.addEventListener("focus", loadPlaces);
-    inB.addEventListener("focus", loadPlaces);
+    // the towns and the roads come when a trip is started, not with the page
+    const pre = () => (loadPlaces(), loadRoads());
+    inA.addEventListener("focus", pre);
+    inB.addEventListener("focus", pre);
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       go();
     });
+    // a new MPG or MPH prices the trip shown again where it is: no new route, and the page stays put
+    for (const i of [inM, inS]) i.oninput = () => again && fine() && again();
   }
 
   const stP = loadStates();
-  loadRoads();
   // the address: a trip "A|B", a state "#oh", or one of the page's own anchors (#credits), which is neither
   let c = "";
   try {
@@ -641,17 +641,16 @@ export function init(doc: Document, win: any): void {
       }
     },
   });
-  const grp = L.featureGroup();
-  // service squares first, then scales, then the truck stops on top
-  for (const k of ["v", "w", "s"]) {
-    for (const p of pts) {
-      if (p.k !== k) continue;
-      p.m = new Dot([p.lat, p.lon], { renderer: cv, radius: radius(p.k, 4) });
-      p.m.p = p;
-      grp.addLayer(p.m);
-    }
-  }
-  grp.addTo(map);
+  // Service squares first, then scales, then the truck stops on top, 500 a
+  // task, so the page can answer a tap while they go on. Until its marker is
+  // on, a point is in the list but not on the map.
+  const grp = L.featureGroup().addTo(map),
+    order = ["v", "w", "s"].flatMap((k) => pts.filter((p) => p.k == k)),
+    add = () => {
+      for (const p of order.splice(0, 500)) (p.m = new Dot([p.lat, p.lon], { renderer: cv, radius: radius(p.k, 4) })).p = p, grp.addLayer(p.m);
+      order.length && setTimeout(add);
+    };
+  add();
 
   // A state's outline box: for #oh, the saved state, and a state typed in
   // the find box. It jumps rather than glides: Leaflet drops a new view asked
@@ -678,7 +677,7 @@ export function init(doc: Document, win: any): void {
     map.closePopup();
     open = p;
     p.sel = true;
-    p.m.redraw();
+    p.m?.redraw();
     back = from;
     pop.setLatLng([p.lat, p.lon]).setContent(popupHtml(p, cfg)).openOn(map);
     if (from) pop.getElement()?.querySelector(".pp-in")?.focus();
@@ -686,7 +685,7 @@ export function init(doc: Document, win: any): void {
   map.on("popupclose", () => {
     if (open) {
       open.sel = false;
-      open.m.redraw();
+      open.m?.redraw();
       open = null;
     }
     back = null;
@@ -713,7 +712,7 @@ export function init(doc: Document, win: any): void {
   grp.on("click", (e: any) => {
     const z = map.getZoom(),
       at = map.mouseEventToLayerPoint(e.originalEvent),
-      far = (p: Pt) => (p.on ? p.m._point.distanceTo(at) : 1e9);
+      far = (p: Pt) => (p.on && p.m ? p.m._point.distanceTo(at) : 1e9);
     if (L.Browser.mobile && z < 6) return map.setView(e.latlng, z + 2);
     let best: Pt = e.layer.p, bd = far(best) - 1;
     for (const p of pts) {
@@ -737,7 +736,7 @@ export function init(doc: Document, win: any): void {
   out.addEventListener("click", (e) => {
     if (!(e.target as Element).closest("[data-clr]")) return;
     clearTimeout(wait);
-    last = null;
+    last = again = null;
     out.innerHTML = "";
     for (const l of drawn) map.removeLayer(l);
     drawn = [];
@@ -754,14 +753,15 @@ export function init(doc: Document, win: any): void {
     fst = doc.getElementById("fd-st") as HTMLElement;
   if (fd) {
     const fq = fd.elements.namedItem("q") as HTMLInputElement,
-      tell = (t: string) => (fst.textContent = t);
+      // a message about what was typed marks the box as needing a fix (map.astro ties the box to the message)
+      tell = (t: string, bad?: 1) => ((fst.textContent = t), fq.setAttribute("aria-invalid", bad ? "true" : "false"));
     (fd.querySelector("fieldset") as HTMLFieldSetElement).disabled = false;
     fq.addEventListener("focus", loadPlaces);
     fd.addEventListener("submit", (e) => {
       e.preventDefault();
       const v = fq.value.trim().toLowerCase(),
         r = cfg.px.find((x) => x[0].toLowerCase() == v || x[1].toLowerCase() == v);
-      if (!v) return tell("Type a town or state.");
+      if (!v) return tell("Type a town or state.", 1);
       // what was asked for wins over the opening view, even if the outlines are still on their way
       moved = 1;
       tell("");
@@ -771,7 +771,7 @@ export function init(doc: Document, win: any): void {
         if (!(r && toState(r[0]))) {
           if (!ok) return tell("The town list didn't load. Check your signal and try again.");
           const q = fq.value.trim().replace(/[\s,]+$/, "");
-          if (!p || !p.lat) return tell(p ? `Which ${q}? Type the town and state, like ${p}.` : `We can't find ${q}. Try a town and state, like Columbus, OH.`);
+          if (!p || !p.lat) return tell(p ? `Which ${q}? Type the town and state, like ${p}.` : `We can't find ${q}. Try a town and state, like Columbus, OH.`, 1);
           map.setView([p.lat, p.lon], 9);
         }
         fq.blur();
