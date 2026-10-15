@@ -484,8 +484,28 @@ th[aria-sort] .sortb {
   }
 }
 
-/* on a small phone, or at 200% zoom, the table scrolls inside its box, never the page */
-@media (max-width: 349px) {
+/* The four columns need about 368px. Under that the heads put their unit
+   under the word, "No weekly survey" takes two lines and the cells sit
+   closer, so the table fits the screen and
+   its heads still stay in view; only under 300px, or at 200% zoom, does it
+   scroll inside its box, never the page. */
+@media (max-width: 367px) {
+  .q th,
+  .q td {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+  .q th:first-child,
+  .q td:first-child {
+    padding-left: 0;
+  }
+  .q thead th,
+  .q thead .sortb,
+  .q td[colspan] {
+    white-space: normal;
+  }
+}
+@media (max-width: 299px) {
   .q .scroll {
     overflow-x: auto;
   }

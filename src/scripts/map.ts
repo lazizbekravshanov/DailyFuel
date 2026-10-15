@@ -372,6 +372,8 @@ export function init(doc: Document, win: any): void {
       out.innerHTML = `<p class="fine">Your last trip, kept on this phone with the ${esc(wk.replace(/^Week/, "week"))}. Prices may have changed since.</p>${h}`;
       root.classList.add("trip");
       again = null;
+      // a copy kept by an older page has Share and Print, whose script is not here
+      out.querySelector(".racts")?.remove();
     } catch {}
   };
   const title = doc.title,
@@ -391,9 +393,16 @@ export function init(doc: Document, win: any): void {
     tries = 0,
     // the trip shown, priced again from the MPG and MPH boxes
     again: (() => void) | null = null;
-  // MPG and MPH that a trip can use; a pair that can is kept on this phone for the next trip
-  const fine = () => {
-    if (!(+inM.value >= 2 && +inM.value <= 20 && +inS.value >= 20 && +inS.value <= 80)) return false;
+  // a box the driver has to fix is marked so, and described by the message under the form; f puts the focus in it
+  const flag = (i?: HTMLInputElement | null, f?: 1) => {
+    for (const j of [inA, inB, inM, inS]) j.setAttribute("aria-invalid", j == i ? "true" : "false"), j == i ? j.setAttribute("aria-describedby", "rt-st") : j.removeAttribute("aria-describedby");
+    f && i && i.focus();
+  };
+  // MPG and MPH that a trip can use are kept on this phone for the next trip; one it can't use is said, and its box marked
+  const fine = (f?: 1) => {
+    const g = +inM.value >= 2 && +inM.value <= 20;
+    if (!(g && +inS.value >= 20 && +inS.value <= 80))
+      return say(g ? "Type an average speed from 20 to 80 miles per hour, like 55." : "Type miles per gallon from 2 to 20, like 6.5."), flag(g ? inS : inM, f), false;
     try {
       localStorage.setItem("dailyfuel:mpg", inM.value.trim());
       localStorage.setItem("dailyfuel:mph", inS.value.trim());
@@ -432,12 +441,15 @@ export function init(doc: Document, win: any): void {
       root.classList.add("trip");
       doc.title = `${al} to ${bl} | DailyFuel`;
       // A new trip puts the focus on its summary, which a screen reader then
-      // reads, and the map with its line comes into view over the prices. A
-      // rerun from a filter leaves the focus in the key and only reads it out.
+      // reads, unless the driver has gone on to another box meanwhile, and
+      // the map with its line comes into view over the prices. A rerun from
+      // a filter leaves the focus in the key and only reads it out.
       const sum = out.querySelector(".rsum") as HTMLElement;
-      if (fit) say(""), sum.focus({ preventScroll: true }), map ? box.scrollIntoView() : out.scrollIntoView({ block: "nearest" });
-      else say(sum.textContent || "", true);
-      if (!map || !(await next())) return;
+      if (fit) say(""), doc.activeElement == doc.body && sum.focus({ preventScroll: true }), map ? box.scrollIntoView() : out.scrollIntoView({ block: "nearest" });
+      else flag(), say(sum.textContent || "", true);
+      // with no map there is no view to fit, so a rerun from a filter is a rerun
+      if (!map) return void (last!.fit = false);
+      if (!(await next())) return;
       for (const l of drawn) map.removeLayer(l);
       // only the stops along the trip stay on the map, until Show every stop
       for (const p of pts) p.x = 1;
@@ -488,11 +500,6 @@ export function init(doc: Document, win: any): void {
       kept();
     });
   };
-  // a box the driver has to fix is marked so, and described by the message under the form
-  const flag = (i?: HTMLInputElement) => {
-    for (const j of [inA, inB, inM, inS]) j.setAttribute("aria-invalid", j == i ? "true" : "false"), j == i ? j.setAttribute("aria-describedby", "rt-st") : j.removeAttribute("aria-describedby");
-    i && i.focus();
-  };
   // the towns, the outlines and the roads come first, so a trip is drawn once, along the roads and priced by state
   const go = () => {
     // on a slow signal the strip says it is at work, until the answer or a message takes its place
@@ -506,15 +513,11 @@ export function init(doc: Document, win: any): void {
       if (miss) {
         const v = miss.value.trim().replace(/[\s,]+$/, ""), f = miss === inA ? a : b;
         say(f ? `Which ${v}? Type the town and state, like ${f}.` : v ? `We can't find ${v}. Try a town and state, like Columbus, OH.` : `Type a town for ${miss === inA ? "From" : "To"}.`);
-        return flag(miss);
+        return flag(miss, 1);
       }
       const p = a as P, q = b as P;
-      if (p.lat === q.lat && p.lon === q.lon) return say("From and To are the same place."), flag(inB);
-      if (!fine()) {
-        const s = !(+inM.value >= 2 && +inM.value <= 20);
-        say(s ? "Type miles per gallon from 2 to 20, like 6.5." : "Type an average speed from 20 to 80 miles per hour, like 55.");
-        return flag(s ? inM : inS);
-      }
+      if (p.lat === q.lat && p.lon === q.lon) return say("From and To are the same place."), flag(inB, 1);
+      if (!fine(1)) return;
       flag();
       run([p.lat, p.lon], [q.lat, q.lon], p.label, q.label, true);
       // the trip stays in the address, so a reload or a shared link brings it back
@@ -532,8 +535,10 @@ export function init(doc: Document, win: any): void {
       e.preventDefault();
       go();
     });
-    // a new MPG or MPH prices the trip shown again where it is: no new route, and the page stays put
-    for (const i of [inM, inS]) i.oninput = () => again && fine() && again();
+    // A new MPG or MPH, once typed (the box left, or Enter), prices the trip
+    // shown again where it is: no new route, and the page stays put. Half a
+    // number is never used, and one the trip can't use is said.
+    for (const i of [inM, inS]) i.onchange = () => again && fine() && (flag(), say(""), again());
   }
 
   const stP = loadStates();

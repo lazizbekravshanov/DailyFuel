@@ -476,6 +476,8 @@ describe("the trip sheet: hours marks, share and print", () => {
     const noMap = doc(stripHtml(res, "A", "B", CFG, 1));
     expect(noMap.querySelectorAll("[data-share], [data-print]")).toHaveLength(2);
     expect(noMap.querySelector("[data-clr]")).toBeNull();
+    // a map page from before the button levels passes true, and keeps Show every stop
+    expect(doc(stripHtml(res, "A", "B", CFG, true as unknown as 2)).querySelector("[data-clr]")).not.toBeNull();
     // the copy kept on the phone, shown when the script behind them may not have come, has none
     const kept = doc(stripHtml(res, "A", "B", CFG, 0));
     expect(kept.querySelector("button, .racts")).toBeNull();

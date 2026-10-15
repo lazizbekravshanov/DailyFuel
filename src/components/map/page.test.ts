@@ -113,6 +113,11 @@ describe("the /map page", () => {
     // Near me scrolls to the map only once the phone says where it is; a refusal stays by the find box
     expect(script).toMatch(/locate\(\{setView:!0,maxZoom:9\}\)\}/);
     expect(script).toMatch(/on\("locationfound",\(\)=>[\w$]+\.scrollIntoView\(\)\)/);
+    // a new MPG or MPH reprices the trip shown once it is typed (the box left), never on half a number
+    expect(script).toMatch(/\.onchange=\(\)=>[\w$]+&&[\w$]+\(\)&&\(/);
+    expect(script).not.toContain(".oninput=");
+    // a copy kept by an older page loses the Share and Print its script can't answer
+    expect(script).toContain('.querySelector(".racts")?.remove()');
     expect(script).toMatch(/on\("locationerror",\(\)=>\{[\w$]+\("Your phone did not share where you are\. Type a town instead\."\),[\w$]+\.scrollIntoView\(/);
   });
 

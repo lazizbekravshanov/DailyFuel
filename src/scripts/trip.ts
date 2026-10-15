@@ -224,7 +224,8 @@ export const acts = (win: any, say: (s: string) => void) => (e: Event) => {
  * some state on the line is above it, and a tie names every state in it.
  */
 export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, btns: Btns, mpg = MPG, mph = MPH): string {
-  const withButtons = btns == 2;
+  // a map page from before Btns passes true here, and keeps its Show every stop
+  const withButtons = btns == 2 || (btns as unknown) === true;
   const byCode: Record<string, PriceRow> = {},
     seen: PriceRow[] = [],
     num = (r: PriceRow) => +r[2]!.slice(1);
