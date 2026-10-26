@@ -4,9 +4,14 @@
 //
 // A price in a picture goes stale, and chat apps cache previews by URL for a
 // long time. So every card prints its week and where the number comes from,
-// and the file name carries the date (/og/oh-2026-09-14-b.png). A new week is
+// and the file name carries the date (/og/oh-2026-09-14-c.png). A new week is
 // a new URL, so a fresh share never shows last week's price. The letter after
 // the date is the card's drawing, so a redrawn card gets a new URL too.
+//
+// The build keeps only this week's dated names, so each card is also drawn
+// under a name that never changes (/og/oh.png), and vercel.json sends any
+// dated name the rebuild removed there. A post from weeks ago keeps a picture,
+// this week's, which prints its own week.
 
 import { resolve } from "node:path";
 import { moveClass, type Cadence, type Direction } from "./bins.ts";
@@ -42,6 +47,11 @@ export interface Card {
   legend: string;
   /** The header's subtitle: "U.S. on-highway diesel · EIA weekly". */
   kicker: string;
+  /**
+   * What the site is, in ink where the kicker goes, for someone who has never
+   * seen it: the U.S. card only, the one the home page shares.
+   */
+  pitch: string | null;
   /** "$6.250" */
   price: string | null;
   /** Shown in place of a price when there is none. */
@@ -76,18 +86,33 @@ const doeCard = (site: SiteData) => site.national.cadence === "daily" && !!site.
 /**
  * The card's drawing. Chat apps cache a preview by its URL, so change this
  * letter whenever the card looks different ("a" was the green road sign, "b"
- * is the paper terminal), and links shared the same week pick up the new card.
+ * the paper terminal, "c" names the site on the U.S. card), and links shared
+ * the same week pick up the new card.
  */
-export const CARD_DESIGN = "b";
+export const CARD_DESIGN = "c";
+
+/** The line naming the site on the U.S. card. */
+export const CARD_PITCH = "Free diesel prices and trip costs for truck drivers";
 
 /** The card's file name without ".png": "oh-2026-09-14-b". */
 export function cardName(key: string, date: string): string {
   return `${key}-${date}-${CARD_DESIGN}`;
 }
 
-/** "/og/oh-2026-09-14-b.png" */
+/** "/og/oh-2026-09-14-c.png" */
 export function cardPath(key: string, date: string): string {
   return `/og/${cardName(key, date)}.png`;
+}
+
+/**
+ * The cards again under names that never change, "/og/oh.png", for the dated
+ * names a rebuild removes: `name` is the file, `key` the card drawn in it.
+ * "doe" is always there, as the U.S. card when that one is already the DOE
+ * weekly price, so an old surcharge share keeps its picture whatever the mode.
+ */
+export function stableCards(site: SiteData): { name: string; key: string }[] {
+  const keys = cardKeys(site);
+  return [...keys.map((key) => ({ name: key, key })), ...(keys.includes(DOE_KEY) ? [] : [{ name: DOE_KEY, key: US_KEY }])];
 }
 
 /** Which card a page shares: its own state, the DOE card for the surcharge page, or the U.S. card for everything else. */
@@ -170,6 +195,7 @@ export function cardFor(site: SiteData, key: string): Card {
       head: "U.S. diesel average",
       legend: "U.S. diesel average",
       kicker: key === DOE_KEY ? "U.S. on-highway diesel · EIA weekly" : kicker,
+      pitch: key === US_KEY ? CARD_PITCH : null,
       price: move ? formatPrice(move.price) : null,
       noPrice: "No national price",
       ...parts,
@@ -193,6 +219,7 @@ export function cardFor(site: SiteData, key: string): Card {
     head: s.name,
     legend: move ? `${s.name} diesel average` : `Diesel in ${s.name}`,
     kicker,
+    pitch: null,
     price: move ? formatPrice(move.price) : null,
     noPrice: aaaMode ? "No price today" : "No EIA price",
     ...parts,
@@ -207,7 +234,8 @@ export function cardAlt(card: Card): string {
   if (!card.price) return `${card.legend}: ${card.noPrice.charAt(0).toLowerCase()}${card.noPrice.slice(1)}. ${card.label}.`;
   const since = card.compareLine ? ` ${card.compareLine.charAt(0).toLowerCase()}${card.compareLine.slice(1)}` : "";
   const moved = card.spoken ? `, ${card.spoken}${since}` : "";
-  return `${card.legend}: ${card.price} a gallon${moved}. ${card.dateLine}. ${card.label}.`;
+  const pitch = card.pitch ? ` ${card.pitch}.` : "";
+  return `${card.legend}: ${card.price} a gallon${moved}. ${card.dateLine}. ${card.label}.${pitch}`;
 }
 
 // Drawing
@@ -279,9 +307,16 @@ export function cardSvg(card: Card, measure: Measure): string {
   out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}">`);
   out.push(rect(0, 0, CARD_WIDTH, CARD_HEIGHT, bg));
 
-  // The header: the wordmark, the subtitle, and the double rule under them.
+  // The header: the wordmark, the subtitle (or on the U.S. card, what the
+  // site is, in ink, shrunk to fit beside the wordmark), and the double rule.
   out.push(text(LEFT, 76, 30, 700, ink, "DAILYFUEL", { tracking: 0.14 }));
-  out.push(text(RIGHT, 76, 22, 400, ink2, card.kicker, { anchor: "end" }));
+  if (card.pitch) {
+    const room = INNER - width(measure, "DAILYFUEL", 30, 700, 0.14) - 40;
+    const size = Math.min(24, (24 * room) / width(measure, card.pitch, 24, 400));
+    out.push(text(RIGHT, 76, size, 400, ink, card.pitch, { anchor: "end" }));
+  } else {
+    out.push(text(RIGHT, 76, 22, 400, ink2, card.kicker, { anchor: "end" }));
+  }
   out.push(rect(LEFT, 98, INNER, 2, ink));
   out.push(rect(LEFT, 104, INNER, 2, ink));
 

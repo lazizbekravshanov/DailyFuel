@@ -14,8 +14,10 @@ import {
   cardMeta,
   cardPath,
   cardSvg,
+  CARD_PITCH,
   escapeXml,
   renderCard,
+  stableCards,
   type Card,
   type Measure,
 } from "./og.ts";
@@ -79,7 +81,7 @@ const fakeMeasure: Measure = (s) => ({ left: 0, right: s.length * 60 });
 const DASHES = /[‒–—―]| - /;
 
 function cardText(c: Card): string[] {
-  return [c.head, c.legend, c.kicker, c.noPrice, c.change ?? "", c.dateLine, c.compareLine ?? "", c.label, cardAlt(c)];
+  return [c.head, c.legend, c.kicker, c.pitch ?? "", c.noPrice, c.change ?? "", c.dateLine, c.compareLine ?? "", c.label, cardAlt(c)];
 }
 
 /** Every <text> element's fill and words. */
@@ -90,9 +92,16 @@ function texts(svg: string): { fill: string; words: string }[] {
 describe("share card URLs", () => {
   const site = fakeSite();
 
-  it("dates every card with the EIA survey week, and the paper drawing is b", () => {
+  it("dates every card with the EIA survey week, and the drawing that names the site on the U.S. card is c", () => {
     expect(cardDate(site)).toBe("2026-09-14");
-    expect(cardPath("oh", "2026-09-14")).toBe("/og/oh-2026-09-14-b.png");
+    expect(cardPath("oh", "2026-09-14")).toBe("/og/oh-2026-09-14-c.png");
+  });
+
+  it("names every card again under a name that never changes, the DOE one whatever the mode", () => {
+    expect(stableCards(site)).toEqual([...cardKeys(site).map((key) => ({ name: key, key })), { name: "doe", key: "us" }]);
+    const aaa = fakeSite({ aaa: true });
+    expect(stableCards(aaa)).toEqual(cardKeys(aaa).map((key) => ({ name: key, key })));
+    expect(stableCards(aaa).at(-1)).toEqual({ name: "doe", key: "doe" });
   });
 
   it("uses AAA's day when AAA leads", () => {
@@ -131,7 +140,7 @@ describe("share card URLs", () => {
 
   it("builds an absolute image URL and alt text for the page head", () => {
     const meta = cardMeta(site, "/state/oh/", "https://dailydiesel.vercel.app/");
-    expect(meta.url).toBe("https://dailydiesel.vercel.app/og/oh-2026-09-14-b.png");
+    expect(meta.url).toBe("https://dailydiesel.vercel.app/og/oh-2026-09-14-c.png");
     expect(meta.alt).toContain("Ohio");
   });
 });
@@ -222,6 +231,17 @@ describe("what a card says", () => {
     expect(c.legend).toBe("U.S. diesel average");
     expect(c.change).toBe("+31.8¢ +5.3%");
     expect(c.label).toBe("DOE weekly average, published by EIA");
+  });
+
+  it("says what the site is on the U.S. card only, the one the home page shares", () => {
+    expect(CARD_PITCH).toBe("Free diesel prices and trip costs for truck drivers");
+    expect(cardFor(site, "us").pitch).toBe(CARD_PITCH);
+    expect(cardFor(fakeSite({ aaa: true }), "us").pitch).toBe(CARD_PITCH);
+    expect(cardFor(fakeSite({ aaa: true }), "doe").pitch).toBeNull();
+    for (const code of ["oh", "ca", "ak", "dc"]) expect(cardFor(site, code).pitch, code).toBeNull();
+    expect(cardAlt(cardFor(site, "us"))).toBe(
+      "U.S. diesel average: $6.285 a gallon, up 31.8 cents since the week of Sep 7. Week of Sep 14, 2026. DOE weekly average, published by EIA. Free diesel prices and trip costs for truck drivers.",
+    );
   });
 
   it("reads the whole card as one sentence for the alt text", () => {
@@ -345,6 +365,22 @@ describe("drawing a card", () => {
     const box = /<rect x="73" y="[\d.]+" width="([\d.]+)"/.exec(svg)!;
     // box plus gap plus the tracked name stays inside the 1056px content width
     expect(Number(box[1]) + 20 + (size * name.length * 60) / 100 + (name.length - 1) * size * 0.04).toBeLessThanOrEqual(1056.5);
+  });
+
+  it("puts the line naming the site where a state card's kicker goes, in ink, beside the wordmark", () => {
+    const us = cardSvg(cardFor(site, "us"), fakeMeasure);
+    const line = /<text x="([\d.]+)" y="76" [^>]*font-size="([\d.]+)" fill="([^"]+)" text-anchor="end">([^<]+)<\/text>/.exec(us)!;
+    expect(line[4]).toBe(CARD_PITCH);
+    expect(line[1]).toBe("1128");
+    expect(line[3]).toBe(CARD_INK.ink);
+    // it fits between the wordmark and the right edge
+    const wordmark = (30 * 9 * 60) / 100 + 8 * 30 * 0.14;
+    expect(1128 - (Number(line[2]) * CARD_PITCH.length * 60) / 100).toBeGreaterThanOrEqual(72 + wordmark + 40 - 0.5);
+    expect(us).not.toContain("U.S. on-highway diesel");
+    // a state card keeps its kicker as it was
+    const oh = cardSvg(cardFor(site, "oh"), fakeMeasure);
+    expect(oh).toContain(`font-size="22" fill="${CARD_INK.ink2}" text-anchor="end">U.S. on-highway diesel · EIA weekly</text>`);
+    expect(oh).not.toContain(CARD_PITCH);
   });
 
   it("draws a no price card with no change and no coloured ink", () => {

@@ -214,18 +214,29 @@ describe("built pages", () => {
       expect(page).not.toMatch(/href="[^"]*(google\.[a-z.]+\/maps|maps\.google|maps\.apple|waze\.com)/);
     });
 
-    it(`puts the phone header in one row on ${name}: wordmark, the next place to go, and Night`, () => {
+    it(`names all four places in the header on ${name}, and keeps the phone header in one row: wordmark, the next place to go, and Night`, () => {
       const d = doc(file);
       const top = d.querySelector("header.top")!;
       const brand = top.querySelector("a.brand")!;
       expect(brand.getAttribute("href")).toBe("/");
       expect(text(brand)).toBe("DailyFuel");
-      expect(text(top.querySelector(".tl"))).toBe(site.mode === "aaa+eia" ? "Diesel prices by state, new every day" : "Diesel prices by state, new every week");
-      const controls = Array.from(top.querySelectorAll(".right > a.btn, .right > .share button, .right > button")).map(text);
+      // who it is for, in the masthead (wide screens; the home page says it on a phone)
+      expect(text(top.querySelector(".tl"))).toBe(site.mode === "aaa+eia" ? "Daily diesel prices for truck drivers" : "Weekly diesel prices for truck drivers");
+      // at a desk: every place, then Share where the page has a number, then Night
+      const places = Array.from(top.querySelectorAll(".right > nav.nav > a.btn"));
+      expect(places.map((a) => [text(a), a.getAttribute("href")])).toEqual([["Prices", "/"], ["Map", "/map/"], ["Surcharge", "/surcharge/"], ["About", "/about/"]]);
+      const controls = Array.from(top.querySelectorAll(".right > nav > a.btn, .right > .share button, .right > button")).map(text);
       const shares = file === PAGES.home || file.startsWith("state/");
-      expect(controls).toEqual(shares ? ["Map", "Share", "Night"] : ["Prices", "Map", "Night"]);
-      if (!shares) expect(top.querySelector(".right > a.btn")!.getAttribute("href")).toBe("/");
-      expect(top.querySelector("a.btn[href='/map/']")).not.toBeNull();
+      expect(controls).toEqual(["Prices", "Map", "Surcharge", "About", ...(shares ? ["Share"] : []), "Night"]);
+      // the page you are on says so, and only that one
+      const current = { [PAGES.home]: "Prices", [PAGES.about]: "About", [PAGES.surcharge]: "Surcharge" }[file] ?? null;
+      expect(places.filter((a) => a.getAttribute("aria-current") === "page").map(text)).toEqual(current ? [current] : []);
+      expect(places.filter((a) => a.hasAttribute("aria-current") && a.getAttribute("aria-current") !== "page")).toEqual([]);
+      // on a phone (the "dt" ones go under 480px) the row is the same as before: Map, and Prices where there is no Share
+      const phone = places.filter((a) => !a.classList.contains("dt")).map(text);
+      expect(phone).toEqual(shares ? ["Map"] : ["Prices", "Map"]);
+      const css = Array.from(d.querySelectorAll("style")).map((s) => s.textContent).join("\n");
+      expect(css).toMatch(/@media \(max-width: ?479px\)\{[^@]*?\.top \.dt(,[^{}]*)?\{display:none\}/);
       // the theme button names what a tap does and is never filled
       const theme = top.querySelector("[data-theme-toggle]")!;
       expect(theme.classList.contains("on")).toBe(false);
@@ -249,7 +260,7 @@ describe("built pages", () => {
       }
       if (site.tax) expect(text(ps[0])).toMatch(new RegExp(String.raw` Tax: Federal Highway Administration, ${site.tax.reporting_period}\.$`));
       expect(text(ps[1])).toBe("Prices include federal and state tax.");
-      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This phone keeps only the state you save, your day or night choice, your truck's miles per gallon and average speed, your last trip, your fuel surcharge base price and miles per gallon, and a copy of the pages you open, for when there is no signal.")).toBe(true);
+      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This device keeps only the state you save, your day or night choice, your truck's miles per gallon and average speed, your last trip, your fuel surcharge base price and miles per gallon, and a copy of the pages you open, for when there is no signal.")).toBe(true);
       // the next step is at the bottom of every page
       const row = ps[3];
       expect(row.getAttribute("class")).toBe("flinks");
@@ -474,7 +485,7 @@ describe("the home page", () => {
     // forgetting sits at the end of the page, far from Change
     const forget = d.querySelector("main > p.fg [data-ys-forget]")!;
     expect(text(forget)).toBe("Forget my state");
-    expect(text(forget.parentElement)).toBe("This phone remembers your state. Forget my state");
+    expect(text(forget.parentElement)).toBe("This device remembers your state. Forget my state");
     expect(d.querySelector("#states")!.compareDocumentPosition(forget) & 4).toBeTruthy();
   });
 
@@ -600,6 +611,51 @@ describe("the home page", () => {
     expect(d.querySelector('script[type="application/ld+json"]')).not.toBeNull();
     expect(d.querySelector('meta[property="og:image"]')!.getAttribute("content")).toMatch(/\/og\/us-\d{4}-\d{2}-\d{2}-[a-z]\.png$/);
     expect(d.querySelector("[data-share] button")!.getAttribute("data-text")).toMatch(/^U\.S\. diesel is \$\d\.\d{3} a gallon/);
+  });
+
+  it("tells a link preview what the site is, with this week's U.S. price", () => {
+    const d = doc(PAGES.home);
+    const og = (p: string) => d.querySelector(`meta[property="og:${p}"]`)!.getAttribute("content")!;
+    expect(og("title")).toBe("DailyFuel: free diesel prices and trip fuel costs for truck drivers");
+    const said = og("description");
+    expect(said.startsWith(`U.S. diesel is ${formatPrice(nm.price)} a gallon`)).toBe(true);
+    expect(said).toMatch(/\. Free for truck drivers: .*, trip fuel cost by state, a truck stop map and a fuel surcharge calculator\. No ads, no sign up\.$/);
+    expect(said).not.toMatch(/every state|\blive\b|pump/i);
+    // the U.S. card names the site too
+    expect(og("image:alt")).toMatch(/\. Free diesel prices and trip costs for truck drivers\.$/);
+    // the tab title and the search snippet keep the number first
+    expect(text(d.querySelector("title"))).toMatch(/^DailyFuel: U\.S\. diesel \$/);
+    // a state page's preview is its own title and description, as before
+    const oh = doc(PAGES.ohio);
+    expect(oh.querySelector('meta[property="og:title"]')!.getAttribute("content")).toBe(text(oh.querySelector("title")));
+    expect(oh.querySelector('meta[property="og:description"]')!.getAttribute("content")).toBe(oh.querySelector('meta[name="description"]')!.getAttribute("content"));
+  });
+
+  it("says who it is for under the U.S. price, with a sample trip, the map and the surcharge a click away", () => {
+    const d = doc(PAGES.home);
+    const pitch = d.querySelector(".hero .lead > .pitch")!;
+    // under the price block and the week, before the picker
+    expect(pitch.previousElementSibling!.matches("p.wkl")).toBe(true);
+    expect(pitch.nextElementSibling!.matches("form#find-your-state")).toBe(true);
+    const line = pitch.querySelector("p")!;
+    expect(text(line.querySelector("b"))).toBe("Free for truck drivers:");
+    expect(text(line)).toBe(
+      daily
+        ? "Free for truck drivers: today's diesel price for your state, trip fuel cost by state, a truck stop map and a fuel surcharge calculator. No ads, no sign up."
+        : "Free for truck drivers: the weekly DOE diesel price for your region, trip fuel cost by state, a truck stop map and a fuel surcharge calculator. No ads, no sign up.",
+    );
+    const links = Array.from(pitch.querySelectorAll("p.go-to > a.btn")).map((a) => [text(a), a.getAttribute("href")!]);
+    expect(links).toEqual([
+      ["Try Chicago to Denver", "/map/#Chicago%2C%20IL%7CDenver%2C%20CO"],
+      ["Truck stop map", "/map/"],
+      ["Fuel surcharge", "/surcharge/"],
+    ]);
+    // the map reads that address as the trip "A|B"
+    expect(decodeURIComponent(links[0][1].split("#")[1]).split("|")).toEqual(["Chicago, IL", "Denver, CO"]);
+    // a phone shows it until a state is saved; then the saved state leads and the line goes
+    const css = Array.from(d.querySelectorAll("style")).map((s) => s.textContent).join("\n");
+    expect(css).toMatch(/@media \(max-width: ?479px\)\{[^@]*?\.ys\[data-ys-state\]\+\.hero \.pitch[,{]/);
+    expect(css).not.toMatch(/(^|[},])\.pitch(,[^{}]*)?\{[^}]*display:none/);
   });
 
   it("stays inside its budget: under 20 KB gzipped, under 3 KB of inline JS", () => {

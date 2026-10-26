@@ -157,6 +157,8 @@ describe("share sentence on the home page", () => {
   });
 
   it("still says something plain with no national price", () => {
-    expect(homeShareText(site({ us: null }))).toBe("Diesel prices for every state, and which way they moved.");
+    expect(homeShareText(site({ us: null }))).toBe("Free diesel prices and trip fuel costs for truck drivers.");
+    // regional averages are never a price for every state
+    expect(homeShareText(site({ us: null }))).not.toMatch(/every state/);
   });
 });
