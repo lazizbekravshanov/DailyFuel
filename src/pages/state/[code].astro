@@ -503,36 +503,41 @@ const save = inlineCall(myState, "document", JSON.stringify(s.code), "function()
     min-height: 24px;
     line-height: 24px;
   }
-  /* A wide screen fills its width in two columns: the answer with then and
-     now under it on the left, next door on the right, and the chart, the
-     numbers and the tax across the page under them. Only the boxes move; the
+  /* A wide screen fills its width in two columns when there is a box for the
+     right one: next door, or on Alaska and Hawaii, which have no next door,
+     the tax boxes. The answer (every paragraph) and then and now under it go
+     on the left, however many lines the answer has; the chart, the numbers
+     and the tax go across the page under both. Only the boxes move; the
      markup keeps the phone's order, so a screen reader and the Tab key still
-     go answer, next door, chart, then and now, tax. The answer's lines (every
-     paragraph) take rows 3 to 6, then and now sits in row 7, which stretches
-     to whichever side is taller, and a longer answer drops below it. */
+     go answer, next door, chart, then and now, tax. The right box starts
+     under the head row, never over Save as my state, and its last row
+     stretches to whichever side is taller. A page with no right box (AAA's
+     daily prices) keeps the one column. */
   @media screen and (min-width: 1024px) {
-    main {
+    main:has(> .nd, > .np) {
       display: grid;
-      grid-template: repeat(6, auto) 1fr / repeat(2, minmax(0, 1fr));
+      grid-template: repeat(12, auto) 1fr / repeat(2, minmax(0, 1fr));
+      grid-auto-flow: dense;
       column-gap: 48px;
     }
     main > * {
       grid-column: 1 / 3;
     }
-    main > p {
+    main > p,
+    .tn {
       grid-column: 1;
     }
-    .tn {
-      grid-area: 7 / 1;
-    }
-    /* Alaska and Hawaii have no next door, so their tax boxes take its place */
     .nd,
-    .np ~ [aria-labelledby="tax-title"] {
-      grid-area: 3 / 2 / 8;
-      margin-top: -14px;
+    .np ~ .tx {
+      grid-area: 3 / 2 / -1;
+    }
+    /* its rule level with the top of the price */
+    .nd > .sh,
+    .np ~ .tx > .sh {
+      margin-top: 16px;
     }
     .tn .stats,
-    .np ~ * .stats {
+    .np ~ .tx .stats {
       grid-template-columns: 1fr 1fr;
     }
   }

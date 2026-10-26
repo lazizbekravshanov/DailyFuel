@@ -39,6 +39,17 @@
   }
 }
 
+/* "Scroll the table sideways", shown only where a table can scroll */
+.swipe {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .swipe {
+    display: block;
+  }
+}
+
 /* the quote table (every state) and the region board */
 .q table {
   min-width: 740px;
@@ -254,7 +265,7 @@ th[aria-sort] .sortb {
   margin-left: auto;
 }
 
-/* who the site is for, and its other tools, under the U.S. price */
+/* who the site is for, and its other tools, under the U.S. price and the picker */
 .pitch {
   max-width: 64ch;
   margin-top: 16px;

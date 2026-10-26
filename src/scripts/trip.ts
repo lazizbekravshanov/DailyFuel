@@ -39,6 +39,42 @@ export function nearLine(line: LL[], w: number): (q: number[]) => boolean {
   };
 }
 
+/** The freight roads by route, as the map decodes them: lines, name (empty for an unsigned one), 1 for an interstate. */
+export type Roads = [LL[][], string, number][];
+
+/** The trip on the map: its band, its line and the A and B tags, which the map adds once the view is set. */
+export const tripLayers = (L: any, res: Corridor, a: LL, b: LL): any[] => {
+  const ab = (ll: LL, t: string) => L.marker(ll, { icon: L.divIcon({ className: "rab", html: t, iconSize: [20, 20] }), keyboard: false, interactive: false });
+  return [L.polygon(res.ring, { className: "rb" }), L.polyline(res.line, { className: "rl" }), ab(a, "A"), ab(b, "B")];
+};
+
+/**
+ * The freight roads show only along the trip: every road line with a point
+ * in the band, under the line, added to the map here. A signed route is
+ * named on hover or tap by an unseen twin on the markers' canvas (cv), which
+ * is on top and takes every pointer; the twin sits under the markers, and
+ * the canvas's tolerance makes a thin road easy to tap. Labels in the band
+ * go on too; the map's data-z shows interstates (h1) from zoom 6, US routes
+ * (h2) from 7 and the rest from 8.
+ */
+export function roadLayers(L: any, map: any, cv: any, res: Corridor, roads: Roads, labels: [string, number, number, number][]): any[] {
+  const inBand = nearLine(res.line, res.road ? ROAD_MI : BAND_MI),
+    I: LL[][] = [],
+    O: LL[][] = [],
+    under: any[] = [];
+  for (const [ls, t, w] of roads) {
+    const k = ls.filter((l) => l.some(inBand));
+    if (!k.length) continue;
+    (w ? I : O).push(...k);
+    if (t) under.push(L.polyline(k, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }));
+  }
+  under.push(L.polyline(I, { className: "ri" }), L.polyline(O, { className: "ro" }));
+  for (const [t, y, x, w] of labels)
+    if (inBand([y, x])) under.push(L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }).addTo(map));
+  for (const l of under) if (l.bringToBack) l.addTo(map).bringToBack();
+  return under;
+}
+
 /**
  * The trip from a to b: along the freight highway route when there is one
  * (see src/scripts/route.ts), else the straight line, sampled every mile on a

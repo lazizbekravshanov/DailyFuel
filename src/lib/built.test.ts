@@ -232,11 +232,13 @@ describe("built pages", () => {
       const current = { [PAGES.home]: "Prices", [PAGES.about]: "About", [PAGES.surcharge]: "Surcharge" }[file] ?? null;
       expect(places.filter((a) => a.getAttribute("aria-current") === "page").map(text)).toEqual(current ? [current] : []);
       expect(places.filter((a) => a.hasAttribute("aria-current") && a.getAttribute("aria-current") !== "page")).toEqual([]);
-      // on a phone (the "dt" ones go under 480px) the row is the same as before: Map, and Prices where there is no Share
+      // on a phone, a phone on its side, a tablet or half a laptop's screen (the "dt" ones go under 800px)
+      // the controls are the same as before: Map, and Prices where there is no Share; so the header keeps
+      // its two rows there, with Night never alone on a third
       const phone = places.filter((a) => !a.classList.contains("dt")).map(text);
       expect(phone).toEqual(shares ? ["Map"] : ["Prices", "Map"]);
       const css = Array.from(d.querySelectorAll("style")).map((s) => s.textContent).join("\n");
-      expect(css).toMatch(/@media \(max-width: ?479px\)\{[^@]*?\.top \.dt(,[^{}]*)?\{display:none\}/);
+      expect(css).toMatch(/@media \(max-width: ?799px\)\{\.top \.dt\{display:none\}\}/);
       // the theme button names what a tap does and is never filled
       const theme = top.querySelector("[data-theme-toggle]")!;
       expect(theme.classList.contains("on")).toBe(false);
@@ -634,9 +636,12 @@ describe("the home page", () => {
   it("says who it is for under the U.S. price, with a sample trip, the map and the surcharge a click away", () => {
     const d = doc(PAGES.home);
     const pitch = d.querySelector(".hero .lead > .pitch")!;
-    // under the price block and the week, before the picker
-    expect(pitch.previousElementSibling!.matches("p.wkl")).toBe(true);
-    expect(pitch.nextElementSibling!.matches("form#find-your-state")).toBe(true);
+    // under the price block, the week and the picker, so a small phone still shows the picker on its
+    // first screen (320 by 568, Safari's view of an iPhone SE), with the pitch right under it
+    const before = Array.from(d.querySelectorAll(".hero .lead > *"));
+    expect(before.indexOf(pitch)).toBeGreaterThan(before.indexOf(d.querySelector(".hero .lead > p.wkl")!));
+    expect(pitch.previousElementSibling!.matches("form#find-your-state")).toBe(true);
+    expect(pitch.nextElementSibling === null || pitch.nextElementSibling.matches("p.then")).toBe(true);
     const line = pitch.querySelector("p")!;
     expect(text(line.querySelector("b"))).toBe("Free for truck drivers:");
     expect(text(line)).toBe(
@@ -676,7 +681,10 @@ describe("the production build, the one Vercel ships", () => {
     expect(gz(page)).toBeLessThan(20 * 1024);
     // the analytics tag has no body; what it adds to the inline scripts is nothing
     expect(gz(inlineScripts(page).join("\n"))).toBeLessThan(3 * 1024);
-    for (const file of [PAGES.ohio, PAGES.tennessee, PAGES.alaska, PAGES.surcharge]) {
+    // every state page, since which one is largest moves with the week's data (Arizona, then Tennessee)
+    const states = getSite().states.map((s) => `state/${s.slug}/index.html`);
+    expect(states).toHaveLength(51);
+    for (const file of [...states, PAGES.surcharge]) {
       const state = readFileSync(resolve(prod, file), "utf8");
       expect(gz(state), file).toBeLessThan(12 * 1024);
       expect(gz([...state.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n")), file).toBeLessThan(3 * 1024);
@@ -858,7 +866,10 @@ describe("the state page", () => {
     const rows = Array.from(table.querySelectorAll("tbody tr"));
     expect(rows.length).toBeGreaterThan(200);
     expect(text(rows[0].querySelector("td"))).toMatch(/^\w{3} \d{1,2}, \d{4}$/);
-    expect(text(rows[0].querySelector("td.v"))).toBe(text(plots[0].querySelector(".ytag")));
+    // every cell after the date is a price, with no class of its own; its head says which series
+    expect(text(rows[0].querySelector("td + td"))).toBe(text(plots[0].querySelector(".ytag")));
+    expect(table.querySelector("tbody td[class]:not(.muted)")).toBeNull();
+    expect(Array.from(table.querySelectorAll("thead th.v")).map(text)).toEqual(["Price $"]);
   });
 
   it("boxes then and now in words, and the tax with the key fact first", () => {
@@ -978,7 +989,8 @@ describe("the state page", () => {
   });
 
   it("stays under 12 KB gzip, Tennessee with its 8 neighbours included", () => {
-    for (const file of [PAGES.ohio, PAGES.minnesota, PAGES.california, PAGES.tennessee, "state/mo/index.html", PAGES.alaska]) {
+    // every state page: which one is largest moves with the week's data
+    for (const file of site.states.map((s) => `state/${s.slug}/index.html`)) {
       expect(gz(html(file)), file).toBeLessThan(12 * 1024);
       expect(gz([...html(file).matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n")), file).toBeLessThan(3 * 1024);
     }
@@ -992,28 +1004,54 @@ describe("the state page", () => {
         .map((el) =>
           el.matches(".head-row:not(.line)") ? "head" : el.matches("section.nd") ? "next door" : el.matches("section.ch") ? "chart"
             : el.matches("details.numbers") ? "numbers" : el.matches("section.tn[aria-labelledby=stats-title]") ? "then and now"
-              : el.matches("section[aria-labelledby=tax-title]") ? "tax" : el.tagName === "P" ? "p" : el.tagName,
+              : el.matches("section.tx[aria-labelledby=tax-title]") ? "tax" : el.tagName === "P" ? "p" : el.tagName,
         );
-    // the wide grid puts every paragraph straight in main on the left and next
-    // door on the right, so the answer is paragraphs, all of them before next door
+    // The wide layout is for screens only, so paper and phones keep one column, and only for a page with a
+    // box for the right column: next door, or the tax boxes on a page with no weekly price (Alaska, Hawaii).
+    const css = [...html(PAGES.ohio).matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("");
+    const at = css.indexOf("@media screen and (min-width:1024px){");
+    expect(at).toBeGreaterThan(-1);
+    const wide = css.slice(at, css.indexOf("}}", at) + 2);
+    const gate = wide.match(/^@media screen and \(min-width:1024px\)\{(main:has\([^{]*\))\{([^}]*)\}/)!;
+    expect(gate, "the grid only where there is a right column box").not.toBeNull();
+    expect(gate[1]).toBe("main:has(>.nd,>.np)");
+    expect(gate[2]).toMatch(/display:grid/);
+    // the paragraphs and then and now flow down the left, however many lines the answer has, and the right
+    // box spans them to the grid's last explicit row, which takes up whichever side is taller
+    expect(gate[2]).toMatch(/grid-template:repeat\((\d+),auto\) 1fr\//);
+    expect(gate[2]).toContain("grid-auto-flow:dense");
+    expect(wide).toContain("main>p,.tn{grid-column:1}");
+    expect(wide).toContain(".nd,.np~.tx{grid-area:3/2/-1}");
+    expect(wide).not.toMatch(/\.tn\{grid-(area|row)/);
+    // The right box starts in the row under the head row and is never pulled up over it, so the whole of
+    // Save as my state takes a click (a negative margin there once left its lower half dead)
+    expect(wide).not.toMatch(/margin[\w-]*:-/);
+    const rows = Number(gate[2].match(/repeat\((\d+),auto\)/)![1]);
+    const grid = (file: string) => doc(file).querySelector(gate[1]) !== null;
+    if (site.mode === "aaa+eia") {
+      // AAA's daily prices: no next door on any page, so every page with a price keeps the one column
+      for (const s of site.states) {
+        const d = doc(`state/${s.slug}/index.html`);
+        expect(d.querySelector("main > .nd"), s.code).toBeNull();
+        if (s.primary) expect(grid(`state/${s.slug}/index.html`), s.code).toBe(false);
+      }
+      return;
+    }
+    // the answer is paragraphs, all of them before next door, and fewer than the rows the left column has
     for (const file of [PAGES.ohio, PAGES.tennessee, PAGES.dc, PAGES.california, PAGES.minnesota]) {
       const got = parts(file);
       const answer = got.slice(2, got.indexOf("next door"));
       expect(got.slice(0, 2), file).toEqual(["p", "head"]);
       expect(answer.length, file).toBeGreaterThanOrEqual(3);
+      expect(answer.length + 3, file).toBeLessThanOrEqual(rows);
       expect(new Set(answer), file).toEqual(new Set(["p"]));
       expect(got.slice(2 + answer.length), file).toEqual(["next door", "chart", "numbers", "then and now", "tax"]);
+      expect(grid(file), file).toBe(true);
     }
     // Alaska: the answer, then the tax boxes, which take next door's place
     expect(parts(PAGES.alaska)).toEqual(["p", "head", "p", "p", "p", "p", "tax"]);
-    expect(doc(PAGES.alaska).querySelector("main > .np ~ [aria-labelledby=tax-title]")).not.toBeNull();
-    // the wide layout is for screens only, so paper and phones keep one column
-    const css = [...html(PAGES.ohio).matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("");
-    const wide = css.slice(css.indexOf("@media screen and (min-width:1024px){"));
-    expect(wide).toMatch(/^@media screen and \(min-width:1024px\)\{main\{[^}]*display:grid/);
-    expect(wide).toContain("main>p{grid-column:1}");
-    expect(wide).toMatch(/\.nd,[^{]*\{grid-area:3\/2\/8;/);
-    expect(wide).toContain(".tn{grid-area:7/1}");
+    expect(doc(PAGES.alaska).querySelector("main > .np ~ .tx")).not.toBeNull();
+    expect(grid(PAGES.alaska)).toBe(true);
   });
 });
 
@@ -1043,6 +1081,22 @@ describe("the about page", () => {
     expect(text(back)).toBe("All states");
     expect(back.getAttribute("href")).toBe("/#states");
     expect(text(d.querySelector("main"))).toMatch(/Both are already in the pump price\./);
+  });
+
+  it("keeps each licence in brackets on one line with its bracket, though the link is a block on a phone", () => {
+    const d = doc(PAGES.about);
+    const credits = Array.from(d.querySelectorAll(".prose p")).find((p) => text(p).startsWith("The map: truck stops"))!;
+    expect(text(credits)).toContain("Iowa DOT (CC BY 4.0), and weigh station and truck service points from DailyFuel (CC BY 4.0). Freight roads");
+    expect(text(credits)).toContain("Place names are from GeoNames (CC BY 4.0).");
+    // a link right after "(" sits in a no wrap span with both brackets, so the line can't break between them
+    const opened = Array.from(credits.querySelectorAll("a")).filter((a) => (a.previousSibling?.textContent ?? "").endsWith("("));
+    expect(opened.length).toBe(3);
+    for (const a of opened) {
+      expect(a.parentElement!.matches("span.nw"), text(a)).toBe(true);
+      expect(text(a.parentElement)).toBe("(CC BY 4.0)");
+    }
+    const css = Array.from(d.querySelectorAll("style")).map((s) => s.textContent).join("\n");
+    expect(css).toContain(".prose .nw{white-space:nowrap}");
   });
 });
 

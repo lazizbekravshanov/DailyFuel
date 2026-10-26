@@ -64,5 +64,15 @@ jobs:
           DAILYFUEL_ALLOW_SYNTHETIC: "1"
         run: npm run build
 
+      - name: Check the wide state page layout in AAA mode
+        # The site tests above read a build of data/ (EIA only). The state
+        # page's two column layout depends on the mode (AAA's pages have no
+        # next door box), so its test reads this AAA build as well.
+        env:
+          DAILYFUEL_DATA_DIR: tmp/fixture-data
+          DAILYFUEL_ALLOW_SYNTHETIC: "1"
+          DAILYFUEL_BUILT_DIR: dist
+        run: npx vitest run src/lib/built.test.ts -t "only sets it in two columns"
+
       - name: Rebuild against data/ so no synthetic dist is left behind
         run: npm run build

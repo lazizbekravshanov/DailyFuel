@@ -68,8 +68,10 @@ const description =
         >
           <p class="mp-msg">The map needs JavaScript. Every place on it is in the list below.</p>
         </div>
-        {/* said once the base map's images keep failing (see map.ts) */}
+        {/* said while the base map's images keep failing (see map.ts) */}
         <p class="fine mp-te" id="te" hidden>The base map isn't loading. Truck stops, scales and trips still show.</p>
+        {/* a trip's miles and fuel cost, said again right under its line (see map.ts), so they show with the map */}
+        <p class="mp-ts" id="ts"></p>
         <p class="fine mp-tip"><span class="on-t">Use two fingers to move the map, or tap + and −.</span> <span class="on-m">Drag to move the map. Click + and − to zoom, or click the map and scroll.</span></p>
         {/* the credit the tiles need, next to the map; every source is named in Map credits at the end of the page */}
         <p class="fine mp-attr">
@@ -342,6 +344,12 @@ const description =
   }
   .mp-attr {
     margin: 8px 0 0;
+  }
+  .mp-ts {
+    margin: 8px 0 0;
+  }
+  .mp-ts:empty {
+    display: none;
   }
 
   /* the legend: a tick, the marker's key, the name, the count */

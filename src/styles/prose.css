@@ -1,0 +1,75 @@
+/*
+  Plain sentences under section heads: the about page and the 404 page. They
+  sit here, not in global.css, so the pages with a size budget (home, the
+  state pages, the map, the surcharge) don't carry them.
+*/
+
+.prose {
+  padding: 4px 0 8px;
+}
+
+.prose > h1 {
+  margin: 0 0 6px;
+}
+
+.prose > .back {
+  margin-bottom: 8px;
+}
+
+.prose p,
+.prose li {
+  margin: 0 0 10px;
+  max-width: 64ch;
+}
+
+.prose ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prose li b {
+  font-weight: 700;
+}
+
+.prose details {
+  margin: 0 0 10px;
+}
+
+/* a summary in the prose (the 404 page's Find your state) at a control's size */
+.prose summary {
+  min-height: 24px;
+  line-height: 24px;
+  cursor: pointer;
+  font-size: var(--fs-s);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.prose details p {
+  margin-top: 8px;
+}
+
+/* every link in the prose is a 24px target, like the footer's */
+.prose a {
+  display: inline-block;
+  min-height: 24px;
+  line-height: 24px;
+}
+
+/* a licence in brackets stays on the line with its bracket, though its link is a block */
+.prose .nw {
+  white-space: nowrap;
+}
+
+/* a phone: 44px targets, and the summary in sentence case like every label */
+@media (max-width: 479px) {
+  .prose a {
+    min-height: 44px;
+    line-height: 44px;
+  }
+  .prose summary {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+}

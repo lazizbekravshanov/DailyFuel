@@ -7,7 +7,8 @@
   the ones the design mockup uses, so a page reads like the mockup's markup.
 
   Sections: page, header, headline, section heads, tables, sparklines,
-  the find box, the boxed strip, charts, stat boxes, state page head, prose.
+  the find box, the boxed strip, charts, stat boxes, state page head, fine
+  print, footer. The about page and the 404 page add prose.css.
 */
 
 /* ---------------------------------------------------------------- page --- */
@@ -213,12 +214,22 @@ main:focus {
   background: var(--bg);
 }
 
-@media (max-width: 479px) {
-  /* one row: the tagline and the week tag go, since the week is printed
-     under every price, and so do the places the page and the footer link to */
-  .top .tl,
-  .top .wk,
+/* The places the page and the footer link to (Surcharge, About, and Prices
+   where there is Share) show from 800px, where every control fits on the row
+   under the wordmark. Narrower, on a phone on its side, a tablet or half a
+   laptop's screen, the header keeps its two rows, Map, Share and Night
+   together on the second. */
+@media (max-width: 799px) {
   .top .dt {
+    display: none;
+  }
+}
+
+@media (max-width: 479px) {
+  /* one row: the tagline and the week tag go too, since the week is printed
+     under every price */
+  .top .tl,
+  .top .wk {
     display: none;
   }
   .top-in {
@@ -348,17 +359,6 @@ main:focus {
   font-size: var(--fs-s);
   color: var(--ink2);
   max-width: 90ch;
-}
-
-/* "Swipe the table sideways", shown only where a table can scroll */
-.swipe {
-  display: none;
-}
-
-@media (max-width: 760px) {
-  .swipe {
-    display: block;
-  }
 }
 
 /* -------------------------------------------------------------- tables --- */
@@ -699,40 +699,7 @@ tbody tr:last-child td {
   line-height: 24px;
 }
 
-/* --------------------------------------------------------------- prose --- */
-
-/* the about page and the 404 page: plain sentences under section heads */
-.prose {
-  padding: 4px 0 8px;
-}
-
-.prose > h1 {
-  margin: 0 0 6px;
-}
-
-.prose > .back {
-  margin-bottom: 8px;
-}
-
-.prose p,
-.prose li {
-  margin: 0 0 10px;
-  max-width: 64ch;
-}
-
-.prose ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.prose li b {
-  font-weight: 700;
-}
-
-.prose details {
-  margin: 0 0 10px;
-}
+/* ---------------------------------------------------------- fine print --- */
 
 /* fine print folded under one button: "What the price and tax include" */
 .more {
@@ -745,20 +712,6 @@ tbody tr:last-child td {
 
 .more > summary::-webkit-details-marker {
   display: none;
-}
-
-/* a summary in the prose (the 404 page's Find your state) at a control's size */
-.prose summary {
-  min-height: 24px;
-  line-height: 24px;
-  cursor: pointer;
-  font-size: var(--fs-s);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.prose details p {
-  margin-top: 8px;
 }
 
 /* -------------------------------------------------------------- footer --- */
@@ -781,9 +734,8 @@ tbody tr:last-child td {
   font-weight: 700;
 }
 
-/* every link in the footer and the prose is a 24px target, like the notes' links on a state page */
-.foot a,
-.prose a {
+/* every link in the footer is a 24px target, like the notes' links on a state page */
+.foot a {
   display: inline-block;
   min-height: 24px;
   line-height: 24px;
@@ -809,8 +761,7 @@ tbody tr:last-child td {
     min-height: 44px;
   }
   .back a,
-  .foot a,
-  .prose a {
+  .foot a {
     min-height: 44px;
     line-height: 44px;
   }
@@ -906,7 +857,6 @@ tbody tr:last-child td {
   .stats dt,
   .nmbig,
   .back,
-  .prose summary,
   .sortb {
     text-transform: none;
     letter-spacing: 0;

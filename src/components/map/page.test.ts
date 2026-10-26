@@ -104,13 +104,13 @@ describe("the /map page", () => {
     // read by the same function as the address the page opened with, unless it is the trip already shown
     expect(script).toMatch(/([\w$]+)\(\),[\w$]+\.addEventListener\("hashchange",\1\)/);
     expect(script).toMatch(/!=\([\w$]+&&[\w$]+\.al\+"\|"\+[\w$]+\.bl\)/);
-    // the map comes into view over a new trip moving the page no more than it must, so a trip link opened
-    // from outside keeps the page's header in view
-    expect(script).toMatch(/\([\w$]+\?[\w$]+:[\w$]+\)\.scrollIntoView\(\{block:"nearest"\}\)/);
+    // the map, then the trip's line under it, come into view over a new trip moving the page no more than
+    // they must, so a trip link opened from outside keeps the page's header in view and shows the fuel cost
+    expect(script).toMatch(/for\(let ([\w$]+) of [\w$]+\?\[[\w$]+,[\w$]+\]:\[[\w$]+\]\)\1\.scrollIntoView\(\{block:"nearest"\}\)/);
     expect(script).not.toMatch(/[\w$]+\.scrollIntoView\(\),/);
   });
 
-  it("says once, under the map, when the base map's images keep failing", () => {
+  it("says under the map while the base map's images keep failing, and not once they come back", () => {
     const d = doc();
     const te = d.getElementById("te")!;
     expect(te.hasAttribute("hidden")).toBe(true);
@@ -118,9 +118,31 @@ describe("the /map page", () => {
     // right under the map, in the map's column
     expect(te.parentElement).toBe(d.querySelector(".mp-mc"));
     expect(te.previousElementSibling).toBe(d.getElementById("map"));
-    // a few failed tiles in a row, not the first one lost to a bad signal, show it; nothing ever hides it again
+    // four failed tiles in a row, not the first one lost to a bad signal, show it, and the next tile that
+    // comes hides it again, so it never sits under a map that has come back
     const script = [...html().matchAll(/<script type="module">([\s\S]*?)<\/script>/g)][0][1];
-    expect(script).toMatch(/\.on\("tileerror",\(\)=>\+\+[\w$]+>3&&\([\w$]+\.getElementById\("te"\)\.hidden=!1\)\)/);
+    const m = script.match(/([\w$]+)=[\w$]+\.getElementById\("te"\);[\w$]+\.tileLayer\([\w$]+\.tl\)\.on\("tileerror tileload",(([\w$]+)=>\1\.hidden=\(([\w$]+)=\3\.type=="tileload"\?0:\4\+1\)<4)\)/);
+    expect(m, "the tile handler").not.toBeNull();
+    // the page's own handler, run against a stand in for the line: shown on the fourth error in a row, gone on the next load
+    const [, el, handler, , count] = m!;
+    const line = { hidden: true };
+    const on = new Function(el, `let ${count}=0;return ${handler}`)(line) as (e: { type: string }) => void;
+    const seen = ["tileerror", "tileerror", "tileerror", "tileload", "tileerror", "tileerror", "tileerror", "tileerror", "tileload"].map((type) => (on({ type }), line.hidden));
+    expect(seen).toEqual([true, true, true, true, true, true, true, false, true]);
+  });
+
+  it("says a trip's miles and fuel cost again right under the map, so they show with its line on a laptop", () => {
+    const d = doc();
+    const ts = d.getElementById("ts")!;
+    // in the map's column, under the map (and the hidden tile line), empty and so taking no room until a trip
+    expect(ts.parentElement).toBe(d.querySelector(".mp-mc"));
+    expect(ts.previousElementSibling).toBe(d.getElementById("te"));
+    expect(ts.innerHTML).toBe("");
+    expect(html()).toMatch(/\.mp-ts:empty\{display:none\}/);
+    const script = [...html().matchAll(/<script type="module">([\s\S]*?)<\/script>/g)][0][1];
+    // filled from the result's summary and fuel each time the result is drawn, and emptied by Show every stop
+    expect(script).toMatch(/[\w$]+\.innerHTML=Array\.from\([\w$]+\.querySelectorAll\("\.rsum,\.rfuel"\),([\w$]+)=>\1\.innerHTML\)\.join\("\. "\)\+"\."/);
+    expect(script).toMatch(/[\w$]+\.innerHTML=[\w$]+\.innerHTML=""/);
   });
 
   it("keeps a bad address, an empty box and a refused location from leaving the driver guessing", () => {
@@ -219,7 +241,7 @@ describe("the /map page", () => {
     const src = readFileSync(resolve(ROOT, "src/scripts/map.ts"), "utf8");
     const block = src.slice(src.indexOf("import(tries"), src.indexOf("tries++"));
     const calls = new Set([...block.matchAll(/\bm\.(\w+)/g)].map((x) => x[1]).filter((n) => n !== "redraw"));
-    expect([...calls].sort()).toEqual(["MPG", "MPH", "acts", "corridor", "graph", "nearLine", "readMpg", "readMph", "route", "stripHtml"]);
+    expect([...calls].sort()).toEqual(["MPG", "MPH", "acts", "corridor", "graph", "readMpg", "readMph", "roadLayers", "route", "stripHtml", "tripLayers"]);
     const js = file("map/trip.js");
     expect(gz(js)).toBeLessThan(6 * KB);
     const tmp = resolve(ROOT, "tmp/trip-contract");
