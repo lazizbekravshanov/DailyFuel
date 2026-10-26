@@ -4,7 +4,8 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseHTML } from "linkedom";
 import {
-  biggestNote, coverage, fromLine, homeMeta, homeTitle, keyLine, leaders, memberCount, movers, recordLine, recordNote, sharedNote,
+  biggestNote, coverage, fromLine, HOME_OG_TITLE, homeMeta, homeOgDescription, homeTitle, keyLine, leaders, memberCount, movers,
+  pitch, recordLine, recordNote, SAMPLE_TRIP, sharedNote, taxCell, tripHref,
 } from "./home.ts";
 
 // regionNote, withNote, byChange and topWithTies went with the map and the
@@ -206,7 +207,52 @@ describe("the title", () => {
     expect(homeTitle(6.285, -0.021)).toBe("DailyFuel: U.S. diesel $6.285 a gallon, down 2.1¢");
     expect(homeTitle(6.285, 0)).toBe("DailyFuel: U.S. diesel $6.285 a gallon, unchanged");
     expect(homeTitle(6.285, null)).toBe("DailyFuel: U.S. diesel $6.285 a gallon");
-    expect(homeTitle(null, null)).toBe("DailyFuel: diesel prices in every state");
+    expect(homeTitle(null, null)).toBe("DailyFuel: diesel prices for truck drivers");
+  });
+});
+
+describe("who the site is for", () => {
+  it("says it in one line under the price: free, for drivers, and more than a price", () => {
+    const weekly = pitch(false);
+    expect(`${weekly.lead} ${weekly.rest}`).toBe(
+      "Free for truck drivers: the weekly DOE diesel price for your region, trip fuel cost by state, a truck stop map and a fuel surcharge calculator. No ads, no sign up.",
+    );
+    // AAA's daily prices are per state; DOE's are per region, and the line never says otherwise
+    expect(pitch(true).rest).toMatch(/^today's diesel price for your state, /);
+    for (const p of [pitch(false), pitch(true)]) {
+      expect(`${p.lead} ${p.rest}`).not.toMatch(NO_DASH);
+      expect(`${p.lead} ${p.rest}`).not.toMatch(/every state|\blive\b|pump/i);
+    }
+  });
+
+  it("links the sample trip the way the map reads its address", () => {
+    expect(tripHref(SAMPLE_TRIP.from, SAMPLE_TRIP.to)).toBe("/map/#Chicago%2C%20IL%7CDenver%2C%20CO");
+    expect(decodeURIComponent(tripHref("A, B", "C").slice(6))).toBe("A, B|C");
+  });
+
+  it("names the site in the link preview, with this week's U.S. price first", () => {
+    expect(HOME_OG_TITLE).toBe("DailyFuel: free diesel prices and trip fuel costs for truck drivers");
+    expect(homeOgDescription(6.285, 0.318, false)).toBe(
+      "U.S. diesel is $6.285 a gallon, up 31.8¢ this week. Free for truck drivers: the weekly DOE diesel price for your region, trip fuel cost by state, a truck stop map and a fuel surcharge calculator. No ads, no sign up.",
+    );
+    expect(homeOgDescription(6.285, 0, false)).toMatch(/^U\.S\. diesel is \$6\.285 a gallon, unchanged this week\. Free for truck drivers: /);
+    expect(homeOgDescription(6.1, -0.021, true)).toMatch(/^U\.S\. diesel is \$6\.100 a gallon, down 2\.1¢ since yesterday\. Free for truck drivers: today's /);
+    expect(homeOgDescription(6.285, null, false)).toMatch(/^U\.S\. diesel is \$6\.285 a gallon\. Free for truck drivers: /);
+    expect(homeOgDescription(null, null, false)).toMatch(/^Free for truck drivers: /);
+    expect(homeOgDescription(6.285, 0.318, false)).not.toMatch(NO_DASH);
+  });
+});
+
+describe("the tax column", () => {
+  it("prints every rate to the most decimals any rate in the column has, adding zeros and never rounding", () => {
+    const cell = taxCell([30, 8, 28.5, 46.85, 74.1, 29.75]);
+    expect([30, 8, 28.5, 46.85, 74.1, 29.75].map(cell)).toEqual(["30.00", "8.00", "28.50", "46.85", "74.10", "29.75"]);
+    // a rate with thousandths widens the whole column, so nothing is cut
+    expect([30, 32.299].map(taxCell([30, 32.299]))).toEqual(["30.000", "32.299"]);
+    // whole and tenths alone keep one decimal, the way the state pages print a rate
+    expect([30, 28.5].map(taxCell([30, 28.5]))).toEqual(["30.0", "28.5"]);
+    expect([30].map(taxCell([30]))).toEqual(["30.0"]);
+    expect(taxCell([])(30)).toBe("30.0");
   });
 });
 

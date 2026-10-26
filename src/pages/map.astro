@@ -10,7 +10,7 @@
 // credits and the whole list as a table.
 import Base from "../layouts/Base.astro";
 import { CHAINS } from "../components/map/chains.ts";
-import { baseMap, jsonBlock, mapConfig, mapScript, rowsHtml, tally } from "../components/map/page.ts";
+import { baseMap, CC_BY, IOWA_DOT, jsonBlock, mapConfig, mapScript, rowsHtml, tally } from "../components/map/page.ts";
 import { formatDate } from "../lib/dates.ts";
 import { andList, coverageLine, loadMapData } from "../lib/mapdata.ts";
 import { getSite } from "../lib/site.ts";
@@ -44,7 +44,8 @@ const description =
   <div class="mp">
     <div class="mp-head">
       <h1 class="mp-h">Truck stops and weigh stations</h1>
-      <p class="mp-in">Zoom in, then tap a dot to see what it is. Not every truck stop or scale is on the map.</p>
+      {/* words for a finger, or for a mouse where there is one (the CSS shows one of each pair, no script) */}
+      <p class="mp-in"><span class="on-t">Zoom in, then tap a dot to see what it is.</span> <span class="on-m">Zoom in, then click a dot to see what it is.</span> Not every truck stop or scale is on the map.</p>
     </div>
     {/* jump to a town or a state, or to where the phone is; the script enables it */}
     <form id="fd" class="fd" autocomplete="off">
@@ -67,7 +68,11 @@ const description =
         >
           <p class="mp-msg">The map needs JavaScript. Every place on it is in the list below.</p>
         </div>
-        <p class="fine mp-tip">Use two fingers to move the map, or tap + and −.</p>
+        {/* said while the base map's images keep failing (see map.ts) */}
+        <p class="fine mp-te" id="te" hidden>The base map isn't loading. Truck stops, scales and trips still show.</p>
+        {/* a trip's miles and fuel cost, said again right under its line (see map.ts), so they show with the map */}
+        <p class="mp-ts" id="ts"></p>
+        <p class="fine mp-tip"><span class="on-t">Use two fingers to move the map, or tap + and −.</span> <span class="on-m">Drag to move the map. Click + and − to zoom, or click the map and scroll.</span></p>
         {/* the credit the tiles need, next to the map; every source is named in Map credits at the end of the page */}
         <p class="fine mp-attr">
           {bm.credit.name === "CARTO" && <><a href={bm.credit.href}>© CARTO</a> <span class="dot">·</span> </>}<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> <span class="dot">·</span> <a href="#credits">Map credits</a>
@@ -78,6 +83,8 @@ const description =
             <h2 id="rt-h">Prices along a trip</h2>
             <p class="meta">{cfg.wk}{taxYear && <> <span class="dot">·</span> {taxYear} state tax</>}</p>
           </div>
+          {/* a trip to try, for a first look: the address takes it (see map.ts) */}
+          <p class="fine rt-try"><a href="#Chicago%2C%20IL%7CDenver%2C%20CO">Try Chicago to Denver</a></p>
           <form id="rt" class="rt" autocomplete="off">
             <fieldset disabled>
               <legend class="sr-only">Where the trip starts and ends, the truck's miles per gallon and its average speed</legend>
@@ -96,11 +103,18 @@ const description =
           <p class="note">
             The line follows the main freight highways, not turn by turn directions, so check your own route for height and weight limits. Each price is the region's weekly average, and pumps in one state can differ by more than a dollar, so check the chain's website for today's price.
           </p>
+          {/* the printed trip sheet's credit for its stops, scales and state lines, as Map credits names them; paper only */}
+          <p class="fine po">
+            Map data © OpenStreetMap contributors (ODbL). More weigh stations: U.S. DOT NTAD (public domain) and Iowa DOT (CC BY 4.0).
+            {data.present.roads && " Roads: NTAD National Highway Freight Network, U.S. DOT BTS, public domain."}
+            {data.present.states && " State outlines: U.S. Census Bureau, public domain."}
+            {data.present.places && " Place names: GeoNames, CC BY 4.0."}
+          </p>
         </section>
       </div>
 
       <aside class="mp-lg" aria-labelledby="lg-h">
-        <div class="sh"><h2 id="lg-h">What is on the map</h2><p class="meta">Tap to show or hide</p></div>
+        <div class="sh"><h2 id="lg-h">What is on the map</h2><p class="meta"><span class="on-t">Tap to show or hide</span> <span class="on-m">Click to show or hide</span></p></div>
         {/* on a phone the key and its filters wait behind one button */}
         <input type="checkbox" id="lgt" class="sr-only" />
         <label for="lgt" class="btn wide lgt-l"><span class="o1">Show the key and filters</span><span class="o2">Hide the key and filters</span></label>
@@ -170,11 +184,11 @@ const description =
       <div class="sh"><h2 id="credits">Map credits</h2></div>
       <p class="fine">
         {bm.credit.name === "CARTO" ? <>Base map <a href={bm.credit.href}>© CARTO</a>, map data and stops </> : "Base map, map data and stops "}<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, ODbL</a>, extract of {osmDate}.
-        {" "}More weigh stations: U.S. DOT NTAD (public domain) and Iowa DOT (CC BY 4.0).
-        {data.present.fleet && " Weigh station and truck service points: DailyFuel, CC BY 4.0."}
+        {" "}More weigh stations: U.S. DOT NTAD (public domain) and <a href={IOWA_DOT}>Iowa DOT</a> (<a href={CC_BY}>CC BY 4.0</a>).
+        {data.present.fleet && <> Weigh station and truck service points: DailyFuel, <a href={CC_BY}>CC BY 4.0</a>.</>}
         {data.present.roads && " Roads: NTAD National Highway Freight Network, U.S. DOT BTS, public domain."}
         {data.present.states && " State outlines: U.S. Census Bureau, public domain."}
-        {data.present.places && <> Place names: <a href="https://www.geonames.org">GeoNames</a>, CC BY 4.0.</>}
+        {data.present.places && <> Place names: <a href="https://www.geonames.org">GeoNames</a>, <a href={CC_BY}>CC BY 4.0</a>.</>}
         {" "}Drawn with Leaflet.
       </p>
     </section>
@@ -231,14 +245,33 @@ const description =
   .fd .btn {
     flex: 1 1 auto;
   }
-  .mp-tip {
-    display: none;
+  .mp-tip,
+  .mp-te {
     margin: 8px 0 0;
     color: var(--ink);
+  }
+  /* the tip on moving the map: a finger's words on a touch screen, a mouse's where there is one */
+  .mp-tip {
+    display: none;
   }
   @media (pointer: coarse) {
     .mp-tip {
       display: block;
+    }
+  }
+  /* each pair of words for a finger (.on-t) and for a mouse (.on-m) shows one, a finger's unless there is a mouse */
+  .on-m {
+    display: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .mp-tip {
+      display: block;
+    }
+    .on-m {
+      display: inline;
+    }
+    .on-t {
+      display: none;
     }
   }
   .mp-mc {
@@ -311,6 +344,12 @@ const description =
   }
   .mp-attr {
     margin: 8px 0 0;
+  }
+  .mp-ts {
+    margin: 8px 0 0;
+  }
+  .mp-ts:empty {
+    display: none;
   }
 
   /* the legend: a tick, the marker's key, the name, the count */
@@ -610,6 +649,57 @@ const description =
   .rsum {
     margin: 14px 0 0;
   }
+  /* The script puts the focus on a new trip's summary for a screen reader to
+     read; it is not a control, so it draws no ring, even on a trip link
+     opened from outside, where the browser would otherwise box it. */
+  .rsum:focus {
+    outline: none;
+  }
+  /* a trip to try, over the form; it needs the script */
+  .rt-try {
+    margin: 0 0 8px;
+  }
+  .rt-try a {
+    display: inline-block;
+    min-height: 24px;
+    line-height: 24px;
+  }
+  @media (scripting: none) {
+    .rt-try {
+      display: none;
+    }
+  }
+  /* From and To share a row, each wide enough for the whole example in the
+     box ("Town, like Chicago, IL"), or take a row each where two won't fit;
+     MPG, MPH and the button go on the row under them */
+  .rt .rt-f:not(.rt-m) {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 260px;
+    max-width: none;
+  }
+  /* On a wide screen the result is two columns: the summary, the prices and
+     every place along the route on the left, the miles and fuel by state and
+     the hours of driving on the right. A phone and the printed sheet keep
+     the one column, in the same order. */
+  @media screen and (min-width: 1100px), screen and (min-width: 760px) and (max-width: 899px) {
+    .rx {
+      display: grid;
+      grid-template: "a b" auto "c b" 1fr / minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0 32px;
+    }
+    .r1 {
+      grid-area: a;
+    }
+    .r2 {
+      grid-area: b;
+    }
+    .r3 {
+      grid-area: c;
+    }
+    .r2 > .rh:first-child {
+      margin-top: 14px;
+    }
+  }
   /* the trip's prices, one state a line */
   .rp,
   .hrs {
@@ -759,6 +849,10 @@ const description =
     .fd .btn {
       min-height: 48px;
     }
+    .rt-try a {
+      min-height: 44px;
+      line-height: 44px;
+    }
     .fd .rt-f {
       margin: 0;
     }
@@ -816,11 +910,14 @@ const description =
     .trip .mp-top > :not(.mp-mc),
     .trip .mp-mc > :not(.mp-rt),
     .trip #rt,
-    .trip #rt-st {
+    .trip #rt-st,
+    .rt-try,
+    .mp-te {
       display: none;
     }
     .trip .mp-rt,
-    h3.po {
+    h3.po,
+    p.po {
       display: block;
     }
     table.po {

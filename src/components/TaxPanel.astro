@@ -24,7 +24,7 @@ const since = sinceLabel(v);
 // "District of Columbia tax" wraps on a phone, and DC is what people call it.
 const stateLabel = `${s.code === "DC" ? "DC" : s.name} tax`;
 ---
-<section aria-labelledby="tax-title">
+<section class="tx" aria-labelledby="tax-title">
   <div class="sh"><h2 id="tax-title">Tax</h2><p class="meta">Cents a gallon, {tax.reporting_period} federal table</p></div>
   {priced && <p class="note tin">Tax is already in the pump price above.</p>}
   <dl class="stats">

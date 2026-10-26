@@ -39,6 +39,17 @@
   }
 }
 
+/* "Scroll the table sideways", shown only where a table can scroll */
+.swipe {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .swipe {
+    display: block;
+  }
+}
+
 /* the quote table (every state) and the region board */
 .q table {
   min-width: 740px;
@@ -254,6 +265,27 @@ th[aria-sort] .sortb {
   margin-left: auto;
 }
 
+/* who the site is for, and its other tools, under the U.S. price and the picker */
+.pitch {
+  max-width: 64ch;
+  margin-top: 16px;
+}
+
+.pitch p {
+  margin: 0;
+}
+
+.pitch b {
+  font-weight: 700;
+}
+
+.go-to {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 10px;
+}
+
 /* the picker: the phone's own list, in a box with an ink edge */
 .go {
   max-width: 460px;
@@ -270,8 +302,10 @@ th[aria-sort] .sortb {
   gap: 8px;
 }
 
+/* wide enough for "Pick your state" and its arrow; on a 320px phone the
+   button goes under it instead of cutting the words off */
 .go select {
-  flex: 1 1 14ch;
+  flex: 1 1 18ch;
   min-width: 0;
   min-height: 44px;
   padding: 0 10px;
@@ -366,7 +400,8 @@ th[aria-sort] .sortb {
     font-size: var(--fs-b);
   }
   .ys[data-ys-state] + .hero .wkl,
-  .ys[data-ys-state] + .hero .then {
+  .ys[data-ys-state] + .hero .then,
+  .ys[data-ys-state] + .hero .pitch {
     display: none;
   }
   .go {

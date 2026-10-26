@@ -39,6 +39,42 @@ export function nearLine(line: LL[], w: number): (q: number[]) => boolean {
   };
 }
 
+/** The freight roads by route, as the map decodes them: lines, name (empty for an unsigned one), 1 for an interstate. */
+export type Roads = [LL[][], string, number][];
+
+/** The trip on the map: its band, its line and the A and B tags, which the map adds once the view is set. */
+export const tripLayers = (L: any, res: Corridor, a: LL, b: LL): any[] => {
+  const ab = (ll: LL, t: string) => L.marker(ll, { icon: L.divIcon({ className: "rab", html: t, iconSize: [20, 20] }), keyboard: false, interactive: false });
+  return [L.polygon(res.ring, { className: "rb" }), L.polyline(res.line, { className: "rl" }), ab(a, "A"), ab(b, "B")];
+};
+
+/**
+ * The freight roads show only along the trip: every road line with a point
+ * in the band, under the line, added to the map here. A signed route is
+ * named on hover or tap by an unseen twin on the markers' canvas (cv), which
+ * is on top and takes every pointer; the twin sits under the markers, and
+ * the canvas's tolerance makes a thin road easy to tap. Labels in the band
+ * go on too; the map's data-z shows interstates (h1) from zoom 6, US routes
+ * (h2) from 7 and the rest from 8.
+ */
+export function roadLayers(L: any, map: any, cv: any, res: Corridor, roads: Roads, labels: [string, number, number, number][]): any[] {
+  const inBand = nearLine(res.line, res.road ? ROAD_MI : BAND_MI),
+    I: LL[][] = [],
+    O: LL[][] = [],
+    under: any[] = [];
+  for (const [ls, t, w] of roads) {
+    const k = ls.filter((l) => l.some(inBand));
+    if (!k.length) continue;
+    (w ? I : O).push(...k);
+    if (t) under.push(L.polyline(k, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }));
+  }
+  under.push(L.polyline(I, { className: "ri" }), L.polyline(O, { className: "ro" }));
+  for (const [t, y, x, w] of labels)
+    if (inBand([y, x])) under.push(L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }).addTo(map));
+  for (const l of under) if (l.bringToBack) l.addTo(map).bringToBack();
+  return under;
+}
+
 /**
  * The trip from a to b: along the freight highway route when there is one
  * (see src/scripts/route.ts), else the straight line, sampled every mile on a
@@ -222,6 +258,9 @@ export const acts = (win: any, say: (s: string) => void) => (e: Event) => {
  * stretch's state with its miles and tax.
  * Many states share one regional average, so the lowest is named only when
  * some state on the line is above it, and a tie names every state in it.
+ * It comes in three blocks in reading order (.r1 the summary and prices, .r2
+ * the miles, fuel and hours, .r3 the places), which map.astro sets in two
+ * columns on a wide screen and leaves as one on a phone and on paper.
  */
 export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cfg, btns: Btns, mpg = MPG, mph = MPH): string {
   // a map page from before Btns passes true here, and keeps its Show every stop
@@ -253,7 +292,7 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
   // The share sends the link and one sentence; the week names whose averages the fuel is at
   const wk = cfg.wk.replace(/^Week/, "week").replace(/ prices$/, ""),
     say = `${aLabel} to ${bLabel}: ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}${cost ? `, about ${gal(gals)} gallons of diesel, about ${usd(cost)} at ${mpg} miles per gallon and each state's weekly average for the ${wk}${unpriced ? `, not counting ${fmt(unpriced)} miles with no weekly price` : ""}` : ""}.`;
-  let h = `<p class="rsum" tabindex="-1"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}</p>`,
+  let h = `<div class="rx"><div class="r1"><p class="rsum" tabindex="-1"><b>${esc(aLabel)}</b> to <b>${esc(bLabel)}</b>, ${fmt(Math.round(res.miles))} miles ${res.road ? "on freight highways" : "in a straight line"}</p>`,
     rest = "";
   if (cost) h += `<p class="rfuel">About ${gal(gals)} gallons of diesel, about <b>${usd(cost)}</b> at ${mpg} miles per gallon${unpriced ? `, not counting ${fmt(unpriced)} miles with no weekly price` : ""}</p>`;
   // The freight network has no road on some lanes, and a town can sit far
@@ -287,7 +326,8 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     low = priced.filter((r) => num(r) == lo);
   if (low.length < priced.length)
     h += `<p>Lowest weekly average on this line: <b>${esc(low.map((r) => r[1]).join(", ").replace(/, ([^,]*)$/, " and $1"))}, ${low[0][2]}</b></p>`;
-  h += `<h3 class="rh">Miles and fuel by state</h3><p class="fine">At ${mpg} miles per gallon and each state's weekly average, not any one stop's price.</p>`;
+  // the miles by state are what IFTA asks for, so the table says so, and that it is for planning
+  h += `</div><div class="r2"><h3 class="rh">Miles and fuel by state</h3><p class="fine">For planning your IFTA miles. File with your real miles from your ELD or trip records.</p><p class="fine">At ${mpg} miles per gallon and each state's weekly average, not any one stop's price.</p>`;
   h += `<table class="rf"><thead><tr><th>State<th class="num">Miles<th class="num">Gallons<th class="num">Fuel<th class="pr">Fuel bought, gallons<tbody>${fuel}`;
   h += `<tr class="tot"><th>Total<td class="num">${fmt(Math.round(res.miles))}<td class="num">${gal(gals)}<td class="num">${cost ? usd(cost) : "No price"}${blank}</table>`;
   // The odometer at the start, at every state line in road order (a state
@@ -313,5 +353,5 @@ export function stripHtml(res: Corridor, aLabel: string, bLabel: string, cfg: Cf
     h += `</ul>`;
   }
   h += `<p class="fine">A rough guide from your average speed, not your log. Plan your own breaks and stops.</p>`;
-  return h + `<h3 class="rh">${fmt(res.hits)} ${res.hits == 1 ? "place" : "places"} along the route</h3><table class="rs"><thead><tr><th class="num">Mile<th>Name<tbody>${rest}</table>`;
+  return h + `</div><div class="r3"><h3 class="rh">${fmt(res.hits)} ${res.hits == 1 ? "place" : "places"} along the route</h3><table class="rs"><thead><tr><th class="num">Mile<th>Name<tbody>${rest}</table></div></div>`;
 }

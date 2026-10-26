@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import "../styles/prose.css";
 import FindYourState from "../components/FindYourState.astro";
 import { getSite } from "../lib/site.ts";
 import { formatPrice } from "../lib/format.ts";
@@ -39,7 +40,7 @@ if(t!==location.pathname)location.replace(t+location.hash);
     <p class="back"><a href="/#states">All states</a></p>
     <h1 class="nmbig">That page isn't here</h1>
     <p>This page doesn't exist. Pick your state below.</p>
-    <p><a href="/">See diesel prices for every state</a></p>
+    <p><a href="/">See this week's diesel prices</a></p>
     {/* the same list as the home page's Find your state, open from the start */}
     <div class="jump">
       <FindYourState open />

@@ -214,18 +214,31 @@ describe("built pages", () => {
       expect(page).not.toMatch(/href="[^"]*(google\.[a-z.]+\/maps|maps\.google|maps\.apple|waze\.com)/);
     });
 
-    it(`puts the phone header in one row on ${name}: wordmark, the next place to go, and Night`, () => {
+    it(`names all four places in the header on ${name}, and keeps the phone header in one row: wordmark, the next place to go, and Night`, () => {
       const d = doc(file);
       const top = d.querySelector("header.top")!;
       const brand = top.querySelector("a.brand")!;
       expect(brand.getAttribute("href")).toBe("/");
       expect(text(brand)).toBe("DailyFuel");
-      expect(text(top.querySelector(".tl"))).toBe(site.mode === "aaa+eia" ? "Diesel prices by state, new every day" : "Diesel prices by state, new every week");
-      const controls = Array.from(top.querySelectorAll(".right > a.btn, .right > .share button, .right > button")).map(text);
+      // who it is for, in the masthead (wide screens; the home page says it on a phone)
+      expect(text(top.querySelector(".tl"))).toBe(site.mode === "aaa+eia" ? "Daily diesel prices for truck drivers" : "Weekly diesel prices for truck drivers");
+      // at a desk: every place, then Share where the page has a number, then Night
+      const places = Array.from(top.querySelectorAll(".right > nav.nav > a.btn"));
+      expect(places.map((a) => [text(a), a.getAttribute("href")])).toEqual([["Prices", "/"], ["Map", "/map/"], ["Surcharge", "/surcharge/"], ["About", "/about/"]]);
+      const controls = Array.from(top.querySelectorAll(".right > nav > a.btn, .right > .share button, .right > button")).map(text);
       const shares = file === PAGES.home || file.startsWith("state/");
-      expect(controls).toEqual(shares ? ["Map", "Share", "Night"] : ["Prices", "Map", "Night"]);
-      if (!shares) expect(top.querySelector(".right > a.btn")!.getAttribute("href")).toBe("/");
-      expect(top.querySelector("a.btn[href='/map/']")).not.toBeNull();
+      expect(controls).toEqual(["Prices", "Map", "Surcharge", "About", ...(shares ? ["Share"] : []), "Night"]);
+      // the page you are on says so, and only that one
+      const current = ({ [PAGES.home]: "Prices", [PAGES.about]: "About", [PAGES.surcharge]: "Surcharge" } as Record<string, string>)[file] ?? null;
+      expect(places.filter((a) => a.getAttribute("aria-current") === "page").map(text)).toEqual(current ? [current] : []);
+      expect(places.filter((a) => a.hasAttribute("aria-current") && a.getAttribute("aria-current") !== "page")).toEqual([]);
+      // on a phone, a phone on its side, a tablet or half a laptop's screen (the "dt" ones go under 800px)
+      // the controls are the same as before: Map, and Prices where there is no Share; so the header keeps
+      // its two rows there, with Night never alone on a third
+      const phone = places.filter((a) => !a.classList.contains("dt")).map(text);
+      expect(phone).toEqual(shares ? ["Map"] : ["Prices", "Map"]);
+      const css = Array.from(d.querySelectorAll("style")).map((s) => s.textContent).join("\n");
+      expect(css).toMatch(/@media \(max-width: ?799px\)\{\.top \.dt\{display:none\}\}/);
       // the theme button names what a tap does and is never filled
       const theme = top.querySelector("[data-theme-toggle]")!;
       expect(theme.classList.contains("on")).toBe(false);
@@ -249,7 +262,7 @@ describe("built pages", () => {
       }
       if (site.tax) expect(text(ps[0])).toMatch(new RegExp(String.raw` Tax: Federal Highway Administration, ${site.tax.reporting_period}\.$`));
       expect(text(ps[1])).toBe("Prices include federal and state tax.");
-      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This phone keeps only the state you save, your day or night choice, your truck's miles per gallon and average speed, your last trip, your fuel surcharge base price and miles per gallon, and a copy of the pages you open, for when there is no signal.")).toBe(true);
+      expect(text(ps[2]).startsWith("No ads, no cookies, no accounts. This device keeps only the state you save, your day or night choice, your truck's miles per gallon and average speed, your last trip, your fuel surcharge base price and miles per gallon, and a copy of the pages you open, for when there is no signal.")).toBe(true);
       // the next step is at the bottom of every page
       const row = ps[3];
       expect(row.getAttribute("class")).toBe("flinks");
@@ -474,7 +487,7 @@ describe("the home page", () => {
     // forgetting sits at the end of the page, far from Change
     const forget = d.querySelector("main > p.fg [data-ys-forget]")!;
     expect(text(forget)).toBe("Forget my state");
-    expect(text(forget.parentElement)).toBe("This phone remembers your state. Forget my state");
+    expect(text(forget.parentElement)).toBe("This device remembers your state. Forget my state");
     expect(d.querySelector("#states")!.compareDocumentPosition(forget) & 4).toBeTruthy();
   });
 
@@ -602,6 +615,54 @@ describe("the home page", () => {
     expect(d.querySelector("[data-share] button")!.getAttribute("data-text")).toMatch(/^U\.S\. diesel is \$\d\.\d{3} a gallon/);
   });
 
+  it("tells a link preview what the site is, with this week's U.S. price", () => {
+    const d = doc(PAGES.home);
+    const og = (p: string) => d.querySelector(`meta[property="og:${p}"]`)!.getAttribute("content")!;
+    expect(og("title")).toBe("DailyFuel: free diesel prices and trip fuel costs for truck drivers");
+    const said = og("description");
+    expect(said.startsWith(`U.S. diesel is ${formatPrice(nm.price)} a gallon`)).toBe(true);
+    expect(said).toMatch(/\. Free for truck drivers: .*, trip fuel cost by state, a truck stop map and a fuel surcharge calculator\. No ads, no sign up\.$/);
+    expect(said).not.toMatch(/every state|\blive\b|pump/i);
+    // the U.S. card names the site too
+    expect(og("image:alt")).toMatch(/\. Free diesel prices and trip costs for truck drivers\.$/);
+    // the tab title and the search snippet keep the number first
+    expect(text(d.querySelector("title"))).toMatch(/^DailyFuel: U\.S\. diesel \$/);
+    // a state page's preview is its own title and description, as before
+    const oh = doc(PAGES.ohio);
+    expect(oh.querySelector('meta[property="og:title"]')!.getAttribute("content")).toBe(text(oh.querySelector("title")));
+    expect(oh.querySelector('meta[property="og:description"]')!.getAttribute("content")).toBe(oh.querySelector('meta[name="description"]')!.getAttribute("content"));
+  });
+
+  it("says who it is for under the U.S. price, with a sample trip, the map and the surcharge a click away", () => {
+    const d = doc(PAGES.home);
+    const pitch = d.querySelector(".hero .lead > .pitch")!;
+    // under the price block, the week and the picker, so a small phone still shows the picker on its
+    // first screen (320 by 568, Safari's view of an iPhone SE), with the pitch right under it
+    const before = Array.from(d.querySelectorAll(".hero .lead > *"));
+    expect(before.indexOf(pitch)).toBeGreaterThan(before.indexOf(d.querySelector(".hero .lead > p.wkl")!));
+    expect(pitch.previousElementSibling!.matches("form#find-your-state")).toBe(true);
+    expect(pitch.nextElementSibling === null || pitch.nextElementSibling.matches("p.then")).toBe(true);
+    const line = pitch.querySelector("p")!;
+    expect(text(line.querySelector("b"))).toBe("Free for truck drivers:");
+    expect(text(line)).toBe(
+      daily
+        ? "Free for truck drivers: today's diesel price for your state, trip fuel cost by state, a truck stop map and a fuel surcharge calculator. No ads, no sign up."
+        : "Free for truck drivers: the weekly DOE diesel price for your region, trip fuel cost by state, a truck stop map and a fuel surcharge calculator. No ads, no sign up.",
+    );
+    const links = Array.from(pitch.querySelectorAll("p.go-to > a.btn")).map((a) => [text(a), a.getAttribute("href")!]);
+    expect(links).toEqual([
+      ["Try Chicago to Denver", "/map/#Chicago%2C%20IL%7CDenver%2C%20CO"],
+      ["Truck stop map", "/map/"],
+      ["Fuel surcharge", "/surcharge/"],
+    ]);
+    // the map reads that address as the trip "A|B"
+    expect(decodeURIComponent(links[0][1].split("#")[1]).split("|")).toEqual(["Chicago, IL", "Denver, CO"]);
+    // a phone shows it until a state is saved; then the saved state leads and the line goes
+    const css = Array.from(d.querySelectorAll("style")).map((s) => s.textContent).join("\n");
+    expect(css).toMatch(/@media \(max-width: ?479px\)\{[^@]*?\.ys\[data-ys-state\]\+\.hero \.pitch[,{]/);
+    expect(css).not.toMatch(/(^|[},])\.pitch(,[^{}]*)?\{[^}]*display:none/);
+  });
+
   it("stays inside its budget: under 20 KB gzipped, under 3 KB of inline JS", () => {
     const page = html(PAGES.home);
     expect(gz(page)).toBeLessThan(20 * 1024);
@@ -620,7 +681,10 @@ describe("the production build, the one Vercel ships", () => {
     expect(gz(page)).toBeLessThan(20 * 1024);
     // the analytics tag has no body; what it adds to the inline scripts is nothing
     expect(gz(inlineScripts(page).join("\n"))).toBeLessThan(3 * 1024);
-    for (const file of [PAGES.ohio, PAGES.tennessee, PAGES.alaska, PAGES.surcharge]) {
+    // every state page, since which one is largest moves with the week's data (Arizona, then Tennessee)
+    const states = getSite().states.map((s) => `state/${s.slug}/index.html`);
+    expect(states).toHaveLength(51);
+    for (const file of [...states, PAGES.surcharge]) {
       const state = readFileSync(resolve(prod, file), "utf8");
       expect(gz(state), file).toBeLessThan(12 * 1024);
       expect(gz([...state.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n")), file).toBeLessThan(3 * 1024);
@@ -802,7 +866,10 @@ describe("the state page", () => {
     const rows = Array.from(table.querySelectorAll("tbody tr"));
     expect(rows.length).toBeGreaterThan(200);
     expect(text(rows[0].querySelector("td"))).toMatch(/^\w{3} \d{1,2}, \d{4}$/);
-    expect(text(rows[0].querySelector("td.v"))).toBe(text(plots[0].querySelector(".ytag")));
+    // every cell after the date is a price, with no class of its own; its head says which series
+    expect(text(rows[0].querySelector("td + td"))).toBe(text(plots[0].querySelector(".ytag")));
+    expect(table.querySelector("tbody td[class]:not(.muted)")).toBeNull();
+    expect(Array.from(table.querySelectorAll("thead th.v")).map(text)).toEqual(["Price $"]);
   });
 
   it("boxes then and now in words, and the tax with the key fact first", () => {
@@ -922,10 +989,69 @@ describe("the state page", () => {
   });
 
   it("stays under 12 KB gzip, Tennessee with its 8 neighbours included", () => {
-    for (const file of [PAGES.ohio, PAGES.minnesota, PAGES.california, PAGES.tennessee, "state/mo/index.html", PAGES.alaska]) {
+    // every state page: which one is largest moves with the week's data
+    for (const file of site.states.map((s) => `state/${s.slug}/index.html`)) {
       expect(gz(html(file)), file).toBeLessThan(12 * 1024);
       expect(gz([...html(file).matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n")), file).toBeLessThan(3 * 1024);
     }
+  });
+
+  it("keeps the phone's order in the markup and only sets it in two columns on a wide screen", () => {
+    // what each child of main is, in order (the inline scripts paint nothing)
+    const parts = (file: string) =>
+      Array.from(doc(file).querySelectorAll("main > *"))
+        .filter((el) => el.tagName !== "SCRIPT")
+        .map((el) =>
+          el.matches(".head-row:not(.line)") ? "head" : el.matches("section.nd") ? "next door" : el.matches("section.ch") ? "chart"
+            : el.matches("details.numbers") ? "numbers" : el.matches("section.tn[aria-labelledby=stats-title]") ? "then and now"
+              : el.matches("section.tx[aria-labelledby=tax-title]") ? "tax" : el.tagName === "P" ? "p" : el.tagName,
+        );
+    // The wide layout is for screens only, so paper and phones keep one column, and only for a page with a
+    // box for the right column: next door, or the tax boxes on a page with no weekly price (Alaska, Hawaii).
+    const css = [...html(PAGES.ohio).matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("");
+    const at = css.indexOf("@media screen and (min-width:1024px){");
+    expect(at).toBeGreaterThan(-1);
+    const wide = css.slice(at, css.indexOf("}}", at) + 2);
+    const gate = wide.match(/^@media screen and \(min-width:1024px\)\{(main:has\([^{]*\))\{([^}]*)\}/)!;
+    expect(gate, "the grid only where there is a right column box").not.toBeNull();
+    expect(gate[1]).toBe("main:has(>.nd,>.np)");
+    expect(gate[2]).toMatch(/display:grid/);
+    // the paragraphs and then and now flow down the left, however many lines the answer has, and the right
+    // box spans them to the grid's last explicit row, which takes up whichever side is taller
+    expect(gate[2]).toMatch(/grid-template:repeat\((\d+),auto\) 1fr\//);
+    expect(gate[2]).toContain("grid-auto-flow:dense");
+    expect(wide).toContain("main>p,.tn{grid-column:1}");
+    expect(wide).toContain(".nd,.np~.tx{grid-area:3/2/-1}");
+    expect(wide).not.toMatch(/\.tn\{grid-(area|row)/);
+    // The right box starts in the row under the head row and is never pulled up over it, so the whole of
+    // Save as my state takes a click (a negative margin there once left its lower half dead)
+    expect(wide).not.toMatch(/margin[\w-]*:-/);
+    const rows = Number(gate[2].match(/repeat\((\d+),auto\)/)![1]);
+    const grid = (file: string) => doc(file).querySelector(gate[1]) !== null;
+    if (site.mode === "aaa+eia") {
+      // AAA's daily prices: no next door on any page, so every page with a price keeps the one column
+      for (const s of site.states) {
+        const d = doc(`state/${s.slug}/index.html`);
+        expect(d.querySelector("main > .nd"), s.code).toBeNull();
+        if (s.primary) expect(grid(`state/${s.slug}/index.html`), s.code).toBe(false);
+      }
+      return;
+    }
+    // the answer is paragraphs, all of them before next door, and fewer than the rows the left column has
+    for (const file of [PAGES.ohio, PAGES.tennessee, PAGES.dc, PAGES.california, PAGES.minnesota]) {
+      const got = parts(file);
+      const answer = got.slice(2, got.indexOf("next door"));
+      expect(got.slice(0, 2), file).toEqual(["p", "head"]);
+      expect(answer.length, file).toBeGreaterThanOrEqual(3);
+      expect(answer.length + 3, file).toBeLessThanOrEqual(rows);
+      expect(new Set(answer), file).toEqual(new Set(["p"]));
+      expect(got.slice(2 + answer.length), file).toEqual(["next door", "chart", "numbers", "then and now", "tax"]);
+      expect(grid(file), file).toBe(true);
+    }
+    // Alaska: the answer, then the tax boxes, which take next door's place
+    expect(parts(PAGES.alaska)).toEqual(["p", "head", "p", "p", "p", "p", "tax"]);
+    expect(doc(PAGES.alaska).querySelector("main > .np ~ .tx")).not.toBeNull();
+    expect(grid(PAGES.alaska)).toBe(true);
   });
 });
 
@@ -936,6 +1062,9 @@ describe("the 404 page", () => {
     expect(text(back)).toBe("All states");
     expect(back.getAttribute("href")).toBe("/#states");
     expect(Array.from(d.querySelectorAll("main p")).map(text)).toContain("This page doesn't exist. Pick your state below.");
+    // the prices are regional averages, never a price for every state
+    expect(text(d.querySelector("main a[href='/']"))).toBe("See this week's diesel prices");
+    expect(text(d.querySelector("main"))).not.toMatch(/every state/i);
     const find = d.querySelector("details[data-ys-find]")!;
     expect(find.hasAttribute("open")).toBe(true);
     expect(find.querySelectorAll("a[data-ys-pick]")).toHaveLength(51);
@@ -952,6 +1081,22 @@ describe("the about page", () => {
     expect(text(back)).toBe("All states");
     expect(back.getAttribute("href")).toBe("/#states");
     expect(text(d.querySelector("main"))).toMatch(/Both are already in the pump price\./);
+  });
+
+  it("keeps each licence in brackets on one line with its bracket, though the link is a block on a phone", () => {
+    const d = doc(PAGES.about);
+    const credits = Array.from(d.querySelectorAll(".prose p")).find((p) => text(p).startsWith("The map: truck stops"))!;
+    expect(text(credits)).toContain("Iowa DOT (CC BY 4.0), and weigh station and truck service points from DailyFuel (CC BY 4.0). Freight roads");
+    expect(text(credits)).toContain("Place names are from GeoNames (CC BY 4.0).");
+    // a link right after "(" sits in a no wrap span with both brackets, so the line can't break between them
+    const opened = Array.from(credits.querySelectorAll("a")).filter((a) => (a.previousSibling?.textContent ?? "").endsWith("("));
+    expect(opened.length).toBe(3);
+    for (const a of opened) {
+      expect(a.parentElement!.matches("span.nw"), text(a)).toBe(true);
+      expect(text(a.parentElement)).toBe("(CC BY 4.0)");
+    }
+    const css = Array.from(d.querySelectorAll("style")).map((s) => s.textContent).join("\n");
+    expect(css).toContain(".prose .nw{white-space:nowrap}");
   });
 });
 
@@ -1235,5 +1380,17 @@ describe("the surcharge page", () => {
     expect(gz(page)).toBeLessThan(12 * 1024);
     expect(gz(inlineScripts(page).join("\n"))).toBeLessThan(3 * 1024);
     expect(gz(script(doc(PAGES.surcharge)))).toBeLessThan(1.5 * 1024);
+  });
+
+  it("keeps the phone's order and puts the DOE prices beside the calculator only on a wide screen", () => {
+    const d = doc(PAGES.surcharge);
+    const kids = Array.from(d.querySelectorAll("main > *")).filter((el) => el.tagName !== "SCRIPT" && el.tagName !== "NOSCRIPT");
+    expect(kids.map((el) => (el.matches(".sc-head") ? "head" : el.matches("form#sc") ? "form" : el.matches(".sc-res") ? "answer"
+      : el.matches("p.note") ? "what it is" : el.matches("section.sc-w[aria-labelledby=sc-t-h]") ? "prices" : el.tagName))).toEqual(["head", "form", "answer", "what it is", "prices"]);
+    // the wide layout is for screens only, so paper and phones keep one column
+    const css = [...html(PAGES.surcharge).matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("");
+    const wide = css.slice(css.indexOf("@media screen and (min-width:1024px){"));
+    expect(wide).toMatch(/^@media screen and \(min-width:1024px\)\{main\{[^}]*display:grid/);
+    expect(wide).toContain(".sc-w{grid-area:2/2/6}");
   });
 });

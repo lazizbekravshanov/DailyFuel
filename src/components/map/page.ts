@@ -72,6 +72,11 @@ export function priceRows(site: SiteData): PriceRow[] {
   });
 }
 
+/** The licence of the map's CC BY sources (Iowa DOT, GeoNames), linked wherever the site names it. */
+export const CC_BY = "https://creativecommons.org/licenses/by/4.0/";
+/** Iowa DOT's weigh scale layer, where data/map/weigh_ia.json comes from (its source_url), linked from the credits. */
+export const IOWA_DOT = "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/Weigh_Scale_View/FeatureServer/0";
+
 /** The lower 48 and the box the map may pan in: all 50 states, the far Aleutians shifted west of 180. */
 export const LOWER48: [[number, number], [number, number]] = [[24.4, -124.8], [49.4, -66.9]];
 export const MAX_BOUNDS: [[number, number], [number, number]] = [[15, -190], [72.5, -60]];

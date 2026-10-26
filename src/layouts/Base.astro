@@ -19,8 +19,11 @@ interface Props {
   skipLabel?: string;
   /** One plain sentence with the page's numbers. When given, the header shows the Share control. */
   share?: string;
+  /** What a link preview says, when it should say more than the tab title and the search snippet. */
+  ogTitle?: string;
+  ogDescription?: string;
 }
-const { title, description, noindex = false, skipLabel = "Skip to the numbers", share } = Astro.props;
+const { title, description, noindex = false, skipLabel = "Skip to the numbers", share, ogTitle = title, ogDescription = description } = Astro.props;
 const site = getSite();
 const origin = Astro.site?.href ?? SITE_URL;
 const canonical = new URL(Astro.url.pathname, origin).href;
@@ -58,6 +61,21 @@ const next = eia
   ? nextEiaRelease(eia.period, eia.next_release_date ?? site.weekly?.next_release_date ?? null, todayInNewYork())
   : null;
 const LATE = "new prices are late";
+
+// Every page names all four places in the header, so a visitor at a desk
+// finds the map, the surcharge and the sources from anywhere. A phone keeps
+// its one row: the next place to go (Map, and Prices where there is no Share)
+// and Share or Night; the rest are marked "dt" and hidden under 800px, so a
+// phone on its side or a tablet keeps the two row header, and the home page's
+// pitch and every footer link to them.
+const NAV = [
+  ["/", "Prices"],
+  ["/map/", "Map"],
+  ["/surcharge/", "Surcharge"],
+  ["/about/", "About"],
+] as const;
+const here = (href: string) => (href === "/" ? current === "/" : current.startsWith(href.slice(0, -1)));
+const onPhone = (href: string) => href === "/map/" || (href === "/" && !share);
 ---
 <!doctype html>
 <html lang="en">
@@ -77,8 +95,8 @@ const LATE = "new prices are late";
     <script is:inline set:html={themeBoot}></script>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE_NAME} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={ogDescription} />
     {!noindex && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={card.url} />
     <meta property="og:image:type" content="image/png" />
@@ -95,7 +113,7 @@ const LATE = "new prices are late";
     <header class="top">
       <div class="wrap top-in">
         <a class="brand" href="/" aria-current={current === "/" ? "page" : undefined}>DailyFuel</a>
-        <span class="tag tl">{aaa ? "Diesel prices by state, new every day" : "Diesel prices by state, new every week"}</span>
+        <span class="tag tl">{aaa ? "Daily diesel prices for truck drivers" : "Weekly diesel prices for truck drivers"}</span>
         <div class="right">
           {aaa ? (
             <span class="tag wk">
@@ -110,9 +128,11 @@ const LATE = "new prices are late";
               )}
             </span>
           ) : null}
-          {/* pages with no number to share (the map, about, 404) get a way back to the prices */}
-          {!share && current !== "/" && <a class="btn" href="/">Prices</a>}
-          <a class="btn" href="/map/" aria-current={current.startsWith("/map") ? "page" : undefined}>Map</a>
+          <nav class="nav">
+            {NAV.map(([href, label]) => (
+              <a class:list={["btn", !onPhone(href) && "dt"]} href={href} aria-current={here(href) ? "page" : undefined}>{label}</a>
+            ))}
+          </nav>
           {share && <ShareButton text={share} />}
           <ThemeToggle />
         </div>

@@ -48,7 +48,7 @@
   var rows = [].slice.call(table.tBodies[0].rows).map(function (r) {
     return {
       d: fromText(r.cells[0].textContent),
-      v: [].slice.call(r.querySelectorAll("td.v")).map(function (td) {
+      v: [].slice.call(r.cells, 1).map(function (td) {
         var t = td.textContent.trim();
         return /^\d/.test(t) ? parseFloat(t) : null;
       }),

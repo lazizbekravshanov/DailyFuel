@@ -251,6 +251,8 @@ export function init(doc: Document, win: any): void {
     out = doc.getElementById("rt-out") as HTMLElement,
     status = doc.getElementById("rt-st") as HTMLElement,
     form = doc.getElementById("rt") as HTMLFormElement,
+    // the trip's summary and fuel again, right under the map (see run)
+    ts = doc.getElementById("ts") as HTMLElement,
     root = doc.documentElement;
   let map: any = null,
     shapes: Shape[] = [],
@@ -431,6 +433,7 @@ export function init(doc: Document, win: any): void {
       // the trip is kept for a look back with no signal, without the buttons whose script may not come then
       (again = () => {
         out.innerHTML = sheet(map ? 2 : 1);
+        ts.innerHTML = Array.from(out.querySelectorAll(".rsum,.rfuel"), (e) => e.innerHTML).join(". ") + ".";
         try {
           localStorage.setItem("dailyfuel:trip", JSON.stringify([cfg.wk, sheet(0)]));
         } catch {}
@@ -441,12 +444,20 @@ export function init(doc: Document, win: any): void {
       root.classList.add("trip");
       doc.title = `${al} to ${bl} | DailyFuel`;
       // A new trip puts the focus on its summary, which a screen reader then
-      // reads, unless the driver has gone on to another box meanwhile, and
-      // the map with its line comes into view over the prices. A rerun from
-      // a filter leaves the focus in the key and only reads it out.
+      // reads, unless the driver has gone on to another box meanwhile (the
+      // summary draws no ring for it, see map.astro), and the map with its
+      // line and the summary under it come into view, moving the page no
+      // more than they must: a trip link opened from outside, or the home
+      // page's sample trip, lands at the top with the miles and the fuel
+      // cost on the first screen, even on a laptop, where the whole result
+      // is below it. A rerun from a filter leaves the focus in the key and
+      // only reads it out.
       const sum = out.querySelector(".rsum") as HTMLElement;
-      if (fit) say(""), doc.activeElement == doc.body && sum.focus({ preventScroll: true }), map ? box.scrollIntoView() : out.scrollIntoView({ block: "nearest" });
-      else flag(), say(sum.textContent || "", true);
+      if (fit) {
+        say("");
+        doc.activeElement == doc.body && sum.focus({ preventScroll: true });
+        for (const e of map ? [box, ts] : [out]) e.scrollIntoView({ block: "nearest" });
+      } else flag(), say(sum.textContent || "", true);
       // with no map there is no view to fit, so a rerun from a filter is a rerun
       if (!map) return void (last!.fit = false);
       if (!(await next())) return;
@@ -463,37 +474,11 @@ export function init(doc: Document, win: any): void {
       if (was == view()) grp.eachLayer((m: any) => m.redraw()), list();
       drawn = [];
       if (!(await next())) return;
-      const ab = (ll: [number, number], t: string) =>
-        L.marker(ll, { icon: L.divIcon({ className: "rab", html: t, iconSize: [20, 20] }), keyboard: false, interactive: false });
-      drawn = [
-        L.polygon(res.ring, { className: "rb" }),
-        L.polyline(res.line, { className: "rl" }),
-        ab(a, "A"),
-        ab(b, "B"),
-      ];
+      // the band, the line and the A and B tags, then the freight roads along it (both built by the trip module)
+      drawn = m.tripLayers(L, res, a, b);
       for (const l of drawn) l.addTo(map);
       if (!(await next())) return;
-      // The freight roads show only along the trip: every road line with a
-      // point in the band, under the line. A signed route is named on hover or
-      // tap by an unseen twin on the markers' canvas, which is on top and takes
-      // every pointer; the twin sits under the markers, and the canvas's
-      // tolerance makes a thin road easy to tap.
-      const inBand = m.nearLine(res.line, res.road ? ROAD_MI : BAND_MI),
-        I: [number, number][][] = [],
-        O: typeof I = [],
-        under: any[] = [];
-      for (const [ls, t, w] of roads) {
-        const k = ls.filter((l) => l.some(inBand));
-        if (!k.length) continue;
-        (w ? I : O).push(...k);
-        if (t) under.push(L.polyline(k, { renderer: cv, stroke: false }).bindTooltip(t, { sticky: true }));
-      }
-      under.push(L.polyline(I, { className: "ri" }), L.polyline(O, { className: "ro" }));
-      // labels in the band; data-z shows interstates (h1) from zoom 6, US routes (h2) from 7 and the rest from 8
-      for (const [t, y, x, w] of labels)
-        if (inBand([y, x])) under.push(L.marker([y, x], { pane: "overlayPane", icon: L.divIcon({ className: "hl h" + w, html: t, iconSize: null }), keyboard: false }).addTo(map));
-      for (const l of under) if (l.bringToBack) l.addTo(map).bringToBack();
-      drawn.push(...under);
+      drawn.push(...m.roadLayers(L, map, cv, res, roads, labels));
     }, () => {
       tries++;
       say("The trip didn't load. Check your signal and try again.");
@@ -542,17 +527,21 @@ export function init(doc: Document, win: any): void {
   }
 
   const stP = loadStates();
-  // the address: a trip "A|B", a state "#oh", or one of the page's own anchors (#credits), which is neither
-  let c = "";
-  try {
-    c = decodeURIComponent(win.location.hash.slice(1));
-  } catch (e) {}
-  const ab = c.split("|");
-  if (ab[1] && inA) {
-    inA.value = ab[0];
-    inB.value = ab[1];
-    go();
-  }
+  // The address: a trip "A|B", a state "#oh", or one of the page's own
+  // anchors (#credits), which is neither. A trip put in it while the page is
+  // open (a link pasted, the sample trip, back and forward) is worked out
+  // then; the trip already shown, an anchor or a state leaves the page alone.
+  let c = "",
+    ab: string[] = [];
+  const hash = () => {
+    try {
+      c = decodeURIComponent(win.location.hash.slice(1));
+    } catch (e) {}
+    ab = c.split("|");
+    if (ab[1] && inA && c != (last && last.al + "|" + last.bl)) (inA.value = ab[0]), (inB.value = ab[1]), go();
+  };
+  hash();
+  win.addEventListener("hashchange", hash);
 
   if (!L || !box) {
     // the page's own script ran, so it was the map's file that didn't come; the tip on moving it goes too
@@ -594,7 +583,16 @@ export function init(doc: Document, win: any): void {
   map.fitBounds(cfg.l48, { animate: false });
   fit();
   map.on("movestart", () => (moved = 1));
-  L.tileLayer(cfg.tl).addTo(map);
+  // When the base map's images keep failing (an outage, or the key's quota
+  // used up), the line under the map (#te in map.astro) says so: the stops
+  // and the trip are drawn by the page and still show. It counts failures in
+  // a row, so the first image that comes takes the line away again, as after
+  // a moment with no signal.
+  let te = 0;
+  const tel = doc.getElementById("te") as HTMLElement;
+  L.tileLayer(cfg.tl)
+    .on("tileerror tileload", (e: any) => (tel.hidden = (te = e.type == "tileload" ? 0 : te + 1) < 4))
+    .addTo(map);
   // Leaflet follows the window's size itself; the floor moves with it, so the lower 48 always fits
   map.on("resize", fit);
 
@@ -742,7 +740,7 @@ export function init(doc: Document, win: any): void {
     if (!(e.target as Element).closest("[data-clr]")) return;
     clearTimeout(wait);
     last = again = null;
-    out.innerHTML = "";
+    out.innerHTML = ts.innerHTML = "";
     for (const l of drawn) map.removeLayer(l);
     drawn = [];
     for (const p of pts) p.x = 0;
@@ -790,7 +788,7 @@ export function init(doc: Document, win: any): void {
     // the map comes into view only once it is there; a refusal is said by the find box, kept in view
     map.on("locationfound", () => box.scrollIntoView());
     map.on("locationerror", () => {
-      tell("Your phone did not share where you are. Type a town instead.");
+      tell("We couldn't tell where you are. Type a town instead.");
       fst.scrollIntoView({ block: "nearest" });
     });
   }

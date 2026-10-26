@@ -3,9 +3,11 @@
 // first, under a "Show the numbers" summary. Prices print as 6.285 under a
 // head that says LAST $. It is also where the chart's readout script reads
 // its dates and prices (src/scripts/chart.js), so the page carries each
-// value once: the price cells wear the `v` class for it. No sort buttons and
-// no change column: the paper terminal prints the sheet as it is, and the
-// readout says each week's move.
+// value once: every cell after the date is a price, and its head wears the
+// `v` class. The cells carry no class of their own, since two hundred weeks
+// of them would cost the page's budget a tenth of a kilobyte; the CSS sets
+// them right. No sort buttons and no change column: the paper terminal
+// prints the sheet as it is, and the readout says each week's move.
 import { formatDate } from "../lib/dates.ts";
 import { formatQuote } from "../lib/format.ts";
 interface Props {
@@ -37,7 +39,7 @@ const { caption, firstColumn, columns, rows, label } = Astro.props;
         {rows.map((row) => (
           <tr>
             <td>{formatDate(row.date)}</td>
-            {row.values.map((v) => <td class:list={["num", "v", v === null && "muted"]}>{v === null ? "n/a" : formatQuote(v)}</td>)}
+            {row.values.map((v) => (v === null ? <td class="muted">n/a</td> : <td>{formatQuote(v)}</td>))}
           </tr>
         ))}
       </tbody>
@@ -68,5 +70,8 @@ const { caption, firstColumn, columns, rows, label } = Astro.props;
     position: sticky;
     top: 0;
     background: var(--bg);
+  }
+  .numbers td + td {
+    text-align: right;
   }
 </style>

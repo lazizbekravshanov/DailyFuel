@@ -8,6 +8,7 @@ import { directionFor, type Cadence } from "../../lib/bins.ts";
 import { allRegionsSentence, peakSentence, RECORDS_START } from "../../lib/doe.ts";
 import { changeTenths, formatCents, formatPrice, formatSignedCents, spokenChange } from "../../lib/format.ts";
 import type { PeakKind } from "../../lib/stats.ts";
+import { toMils } from "../../lib/tax.ts";
 
 export interface Moved {
   change: number;
@@ -214,7 +215,7 @@ export function sharedNote(region: { name: string; codes: string[]; price: numbe
 
 /** The browser tab and search result: "DailyFuel: U.S. diesel $6.285 a gallon, up 31.8¢". */
 export function homeTitle(price: number | null, change: number | null): string {
-  if (price === null) return "DailyFuel: diesel prices in every state";
+  if (price === null) return "DailyFuel: diesel prices for truck drivers";
   const moved = change === null ? "" : `, ${saidChange(change)}`;
   return `DailyFuel: U.S. diesel ${formatPrice(price)} a gallon${moved}`;
 }
@@ -249,4 +250,64 @@ export function homeMeta({ price, change, daily, priced, regions }: DescriptionI
   const moved = change === null ? "" : `, ${saidChange(change)}`;
   const when = change === null ? "" : daily ? " since yesterday" : " this week";
   return `U.S. diesel is ${formatPrice(price)} a gallon${moved}${when}. See ${what}.`;
+}
+
+/**
+ * Who the site is for and what it does, in one breath: the line under the
+ * U.S. price, and the share preview's description after the price.
+ *   "Free for truck drivers: the weekly DOE diesel price for your region, trip
+ *    fuel cost by state, a truck stop map and a fuel surcharge calculator. No
+ *    ads, no sign up."
+ * While EIA is the source it says region, never state: DOE prices regions.
+ */
+export function pitch(daily: boolean): { lead: string; rest: string } {
+  const price = daily ? "today's diesel price for your state" : "the weekly DOE diesel price for your region";
+  return {
+    lead: "Free for truck drivers:",
+    rest: `${price}, trip fuel cost by state, a truck stop map and a fuel surcharge calculator. No ads, no sign up.`,
+  };
+}
+
+/** The sample trip the home page offers, as the map reads it from the address: "A|B". */
+export const SAMPLE_TRIP = { from: "Chicago, IL", to: "Denver, CO" } as const;
+
+/** "/map/#Chicago%2C%20IL%7CDenver%2C%20CO": the map opens with the trip priced. */
+export function tripHref(from: string, to: string): string {
+  return `/map/#${encodeURIComponent(`${from}|${to}`)}`;
+}
+
+/** The home page's link preview: what the site is, for someone who has never seen it. */
+export const HOME_OG_TITLE = "DailyFuel: free diesel prices and trip fuel costs for truck drivers";
+
+/**
+ * The preview's description: this week's U.S. price first, then the pitch.
+ *   "U.S. diesel is $6.285 a gallon, up 31.8¢ this week. Free for truck drivers: ..."
+ */
+export function homeOgDescription(price: number | null, change: number | null, daily: boolean): string {
+  const p = pitch(daily);
+  const said = `${p.lead} ${p.rest}`;
+  if (price === null) return said;
+  const moved = change === null ? "" : `, ${saidChange(change)}${daily ? " since yesterday" : " this week"}`;
+  return `U.S. diesel is ${formatPrice(price)} a gallon${moved}. ${said}`;
+}
+
+/** How many decimals a rate has, as thousandths of a cent: 46850 has 2, 30000 has 0. */
+function decimals(mils: number): number {
+  return String(Math.abs(mils) % 1000).padStart(3, "0").replace(/0+$/, "").length;
+}
+
+/**
+ * The tax column's cells, all to the same number of decimals: as many as the
+ * most precise rate in the column has, so "30.0" and "46.85" print as
+ * "30.00" and "46.85". Only zeros are added; no rate is ever rounded. At
+ * least one decimal, the way the state pages print a rate.
+ */
+export function taxCell(rates: number[]): (cpg: number) => string {
+  const places = Math.max(1, ...rates.map((r) => decimals(toMils(r))));
+  return (cpg) => {
+    const mils = toMils(cpg);
+    const a = Math.abs(mils);
+    const frac = String(a % 1000).padStart(3, "0").slice(0, places);
+    return `${mils < 0 ? "−" : ""}${Math.floor(a / 1000)}.${frac}`;
+  };
 }

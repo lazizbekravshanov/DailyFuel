@@ -5,7 +5,8 @@
 // price history with its range switch and table twin, then and now, the tax
 // boxes, and the fine print folded under one button. Alaska and Hawaii,
 // which EIA doesn't survey, get the no survey page: why, a rough guide, the
-// U.S. average, and their tax boxes.
+// U.S. average, and their tax boxes. A wide screen sets the same markup in two
+// columns (the style block at the end says how).
 //
 // Every printed value comes from the data. The words come from the shared
 // helpers (src/lib/copy.ts, doe.ts, format.ts, release.ts, tax.ts) so the
@@ -311,7 +312,7 @@ const save = inlineCall(myState, "document", JSON.stringify(s.code), "function()
   )}
 
   {(fourWeek || yearChange || yearHL) && (
-    <section aria-labelledby="stats-title">
+    <section class="tn" aria-labelledby="stats-title">
       <div class="sh"><h2 id="stats-title">Then and now</h2><p class="meta">{statsMeta}</p></div>
       <dl class="stats">
         <div>
@@ -501,6 +502,44 @@ const save = inlineCall(myState, "document", JSON.stringify(s.code), "function()
     display: inline-block;
     min-height: 24px;
     line-height: 24px;
+  }
+  /* A wide screen fills its width in two columns when there is a box for the
+     right one: next door, or on Alaska and Hawaii, which have no next door,
+     the tax boxes. The answer (every paragraph) and then and now under it go
+     on the left, however many lines the answer has; the chart, the numbers
+     and the tax go across the page under both. Only the boxes move; the
+     markup keeps the phone's order, so a screen reader and the Tab key still
+     go answer, next door, chart, then and now, tax. The right box starts
+     under the head row, never over Save as my state, and its last row
+     stretches to whichever side is taller. A page with no right box (AAA's
+     daily prices) keeps the one column. */
+  @media screen and (min-width: 1024px) {
+    main:has(> .nd, > .np) {
+      display: grid;
+      grid-template: repeat(12, auto) 1fr / repeat(2, minmax(0, 1fr));
+      grid-auto-flow: dense;
+      column-gap: 48px;
+    }
+    main > * {
+      grid-column: 1 / 3;
+    }
+    main > p,
+    .tn {
+      grid-column: 1;
+    }
+    .nd,
+    .np ~ .tx {
+      grid-area: 3 / 2 / -1;
+    }
+    /* its rule level with the top of the price */
+    .nd > .sh,
+    .np ~ .tx > .sh {
+      margin-top: 16px;
+    }
+    .tn .stats,
+    .np ~ .tx .stats {
+      grid-template-columns: 1fr 1fr;
+    }
   }
   @media (max-width: 479px) {
     .plate {
