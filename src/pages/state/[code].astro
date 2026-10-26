@@ -5,7 +5,8 @@
 // price history with its range switch and table twin, then and now, the tax
 // boxes, and the fine print folded under one button. Alaska and Hawaii,
 // which EIA doesn't survey, get the no survey page: why, a rough guide, the
-// U.S. average, and their tax boxes.
+// U.S. average, and their tax boxes. A wide screen sets the same markup in two
+// columns (the style block at the end says how).
 //
 // Every printed value comes from the data. The words come from the shared
 // helpers (src/lib/copy.ts, doe.ts, format.ts, release.ts, tax.ts) so the
@@ -311,7 +312,7 @@ const save = inlineCall(myState, "document", JSON.stringify(s.code), "function()
   )}
 
   {(fourWeek || yearChange || yearHL) && (
-    <section aria-labelledby="stats-title">
+    <section class="tn" aria-labelledby="stats-title">
       <div class="sh"><h2 id="stats-title">Then and now</h2><p class="meta">{statsMeta}</p></div>
       <dl class="stats">
         <div>
@@ -501,6 +502,39 @@ const save = inlineCall(myState, "document", JSON.stringify(s.code), "function()
     display: inline-block;
     min-height: 24px;
     line-height: 24px;
+  }
+  /* A wide screen fills its width in two columns: the answer with then and
+     now under it on the left, next door on the right, and the chart, the
+     numbers and the tax across the page under them. Only the boxes move; the
+     markup keeps the phone's order, so a screen reader and the Tab key still
+     go answer, next door, chart, then and now, tax. The answer's lines (every
+     paragraph) take rows 3 to 6, then and now sits in row 7, which stretches
+     to whichever side is taller, and a longer answer drops below it. */
+  @media screen and (min-width: 1024px) {
+    main {
+      display: grid;
+      grid-template: repeat(6, auto) 1fr / repeat(2, minmax(0, 1fr));
+      column-gap: 48px;
+    }
+    main > * {
+      grid-column: 1 / 3;
+    }
+    main > p {
+      grid-column: 1;
+    }
+    .tn {
+      grid-area: 7 / 1;
+    }
+    /* Alaska and Hawaii have no next door, so their tax boxes take its place */
+    .nd,
+    .np ~ [aria-labelledby="tax-title"] {
+      grid-area: 3 / 2 / 8;
+      margin-top: -14px;
+    }
+    .tn .stats,
+    .np ~ * .stats {
+      grid-template-columns: 1fr 1fr;
+    }
   }
   @media (max-width: 479px) {
     .plate {

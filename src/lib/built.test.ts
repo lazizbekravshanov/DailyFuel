@@ -983,6 +983,38 @@ describe("the state page", () => {
       expect(gz([...html(file).matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n")), file).toBeLessThan(3 * 1024);
     }
   });
+
+  it("keeps the phone's order in the markup and only sets it in two columns on a wide screen", () => {
+    // what each child of main is, in order (the inline scripts paint nothing)
+    const parts = (file: string) =>
+      Array.from(doc(file).querySelectorAll("main > *"))
+        .filter((el) => el.tagName !== "SCRIPT")
+        .map((el) =>
+          el.matches(".head-row:not(.line)") ? "head" : el.matches("section.nd") ? "next door" : el.matches("section.ch") ? "chart"
+            : el.matches("details.numbers") ? "numbers" : el.matches("section.tn[aria-labelledby=stats-title]") ? "then and now"
+              : el.matches("section[aria-labelledby=tax-title]") ? "tax" : el.tagName === "P" ? "p" : el.tagName,
+        );
+    // the wide grid puts every paragraph straight in main on the left and next
+    // door on the right, so the answer is paragraphs, all of them before next door
+    for (const file of [PAGES.ohio, PAGES.tennessee, PAGES.dc, PAGES.california, PAGES.minnesota]) {
+      const got = parts(file);
+      const answer = got.slice(2, got.indexOf("next door"));
+      expect(got.slice(0, 2), file).toEqual(["p", "head"]);
+      expect(answer.length, file).toBeGreaterThanOrEqual(3);
+      expect(new Set(answer), file).toEqual(new Set(["p"]));
+      expect(got.slice(2 + answer.length), file).toEqual(["next door", "chart", "numbers", "then and now", "tax"]);
+    }
+    // Alaska: the answer, then the tax boxes, which take next door's place
+    expect(parts(PAGES.alaska)).toEqual(["p", "head", "p", "p", "p", "p", "tax"]);
+    expect(doc(PAGES.alaska).querySelector("main > .np ~ [aria-labelledby=tax-title]")).not.toBeNull();
+    // the wide layout is for screens only, so paper and phones keep one column
+    const css = [...html(PAGES.ohio).matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("");
+    const wide = css.slice(css.indexOf("@media screen and (min-width:1024px){"));
+    expect(wide).toMatch(/^@media screen and \(min-width:1024px\)\{main\{[^}]*display:grid/);
+    expect(wide).toContain("main>p{grid-column:1}");
+    expect(wide).toMatch(/\.nd,[^{]*\{grid-area:3\/2\/8;/);
+    expect(wide).toContain(".tn{grid-area:7/1}");
+  });
 });
 
 describe("the 404 page", () => {
@@ -1291,5 +1323,17 @@ describe("the surcharge page", () => {
     expect(gz(page)).toBeLessThan(12 * 1024);
     expect(gz(inlineScripts(page).join("\n"))).toBeLessThan(3 * 1024);
     expect(gz(script(doc(PAGES.surcharge)))).toBeLessThan(1.5 * 1024);
+  });
+
+  it("keeps the phone's order and puts the DOE prices beside the calculator only on a wide screen", () => {
+    const d = doc(PAGES.surcharge);
+    const kids = Array.from(d.querySelectorAll("main > *")).filter((el) => el.tagName !== "SCRIPT" && el.tagName !== "NOSCRIPT");
+    expect(kids.map((el) => (el.matches(".sc-head") ? "head" : el.matches("form#sc") ? "form" : el.matches(".sc-res") ? "answer"
+      : el.matches("p.note") ? "what it is" : el.matches("section.sc-w[aria-labelledby=sc-t-h]") ? "prices" : el.tagName))).toEqual(["head", "form", "answer", "what it is", "prices"]);
+    // the wide layout is for screens only, so paper and phones keep one column
+    const css = [...html(PAGES.surcharge).matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("");
+    const wide = css.slice(css.indexOf("@media screen and (min-width:1024px){"));
+    expect(wide).toMatch(/^@media screen and \(min-width:1024px\)\{main\{[^}]*display:grid/);
+    expect(wide).toContain(".sc-w{grid-area:2/2/6}");
   });
 });
