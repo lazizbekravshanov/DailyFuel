@@ -17,7 +17,7 @@ import { loadMapData } from "../../lib/mapdata.ts";
 import { getSite } from "../../lib/site.ts";
 import { decodeLines, decodeStates, readRow } from "../../scripts/map.ts";
 import { CHAINS } from "./chains.ts";
-import { baseMap } from "./page.ts";
+import { baseMap, CC_BY, IOWA_DOT } from "./page.ts";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 let dist = process.env.DAILYFUEL_MAP_BUILT_DIR ? resolve(ROOT, process.env.DAILYFUEL_MAP_BUILT_DIR) : "";
@@ -100,6 +100,27 @@ describe("the /map page", () => {
     // the map opens on the state in the address or the saved one, and a trip in the address comes back
     expect(script).toContain("dailyfuel:state");
     expect(script).toMatch(/replaceState\(null,"","#"\+encodeURIComponent\(/);
+    // a trip put in the address while the page is open (a pasted link, the sample trip, back and forward) is worked out,
+    // read by the same function as the address the page opened with, unless it is the trip already shown
+    expect(script).toMatch(/([\w$]+)\(\),[\w$]+\.addEventListener\("hashchange",\1\)/);
+    expect(script).toMatch(/!=\([\w$]+&&[\w$]+\.al\+"\|"\+[\w$]+\.bl\)/);
+    // the map comes into view over a new trip moving the page no more than it must, so a trip link opened
+    // from outside keeps the page's header in view
+    expect(script).toMatch(/\([\w$]+\?[\w$]+:[\w$]+\)\.scrollIntoView\(\{block:"nearest"\}\)/);
+    expect(script).not.toMatch(/[\w$]+\.scrollIntoView\(\),/);
+  });
+
+  it("says once, under the map, when the base map's images keep failing", () => {
+    const d = doc();
+    const te = d.getElementById("te")!;
+    expect(te.hasAttribute("hidden")).toBe(true);
+    expect(text(te)).toBe("The base map isn't loading. Truck stops, scales and trips still show.");
+    // right under the map, in the map's column
+    expect(te.parentElement).toBe(d.querySelector(".mp-mc"));
+    expect(te.previousElementSibling).toBe(d.getElementById("map"));
+    // a few failed tiles in a row, not the first one lost to a bad signal, show it; nothing ever hides it again
+    const script = [...html().matchAll(/<script type="module">([\s\S]*?)<\/script>/g)][0][1];
+    expect(script).toMatch(/\.on\("tileerror",\(\)=>\+\+[\w$]+>3&&\([\w$]+\.getElementById\("te"\)\.hidden=!1\)\)/);
   });
 
   it("keeps a bad address, an empty box and a refused location from leaving the driver guessing", () => {
@@ -118,13 +139,17 @@ describe("the /map page", () => {
     expect(script).not.toContain(".oninput=");
     // a copy kept by an older page loses the Share and Print its script can't answer
     expect(script).toContain('.querySelector(".racts")?.remove()');
-    expect(script).toMatch(/on\("locationerror",\(\)=>\{[\w$]+\("Your phone did not share where you are\. Type a town instead\."\),[\w$]+\.scrollIntoView\(/);
+    expect(script).toMatch(/on\("locationerror",\(\)=>\{[\w$]+\("We couldn't tell where you are\. Type a town instead\."\),[\w$]+\.scrollIntoView\(/);
   });
 
   it("finds a town or a state from a row above the map, with Near me, and nothing to press until the script runs", () => {
     const d = doc();
     expect(text(d.querySelector("h1.mp-h"))).toBe("Truck stops and weigh stations");
-    expect(text(d.querySelector(".mp-in"))).toBe("Zoom in, then tap a dot to see what it is. Not every truck stop or scale is on the map.");
+    // the words for a finger, and for a mouse where there is one: the CSS shows one of each pair
+    const words = (sel: string) => [".on-t", ".on-m"].map((k) => text(d.querySelector(`${sel} ${k}`)));
+    expect(words(".mp-in")).toEqual(["Zoom in, then tap a dot to see what it is.", "Zoom in, then click a dot to see what it is."]);
+    expect(text(d.querySelector(".mp-in"))).toMatch(/ Not every truck stop or scale is on the map\.$/);
+    expect(words(".mp-lg .sh .meta")).toEqual(["Tap to show or hide", "Click to show or hide"]);
     const fd = d.getElementById("fd")!;
     expect(fd.querySelector("fieldset")!.hasAttribute("disabled")).toBe(true);
     const q = fd.querySelector('input[name="q"]')!;
@@ -139,7 +164,18 @@ describe("the /map page", () => {
     const page = html();
     expect(page.indexOf('id="fd"')).toBeLessThan(page.indexOf('id="map"'));
     expect(page.indexOf('id="map"')).toBeLessThan(page.indexOf('id="trip"'));
-    expect(text(d.querySelector(".mp-tip"))).toBe("Use two fingers to move the map, or tap + and −.");
+    expect(words(".mp-tip")).toEqual([
+      "Use two fingers to move the map, or tap + and −.",
+      "Drag to move the map. Click + and − to zoom, or click the map and scroll.",
+    ]);
+    // a mouse's words only where there is a mouse, with no script
+    const page2 = html();
+    expect(page2).toMatch(/\.on-m\s*\{\s*display:\s*none/);
+    expect(page2).toMatch(/@media \(hover: ?hover\) and \(pointer: ?fine\)\s*\{[^@]*\.on-t\s*\{\s*display:\s*none/);
+    // nothing in the page's own words tells a mouse to tap, outside a finger's half of a pair
+    const bare = d.querySelector("main")!.cloneNode(true) as Element;
+    for (const e of Array.from(bare.querySelectorAll(".on-t"))) e.remove();
+    expect(text(bare)).not.toMatch(/\btap\b/i);
   });
 
   it("keeps every media query in a form older phones read", () => {
@@ -207,7 +243,7 @@ describe("the /map page", () => {
     expect(res.runs.map((r: any) => r.code).filter((c: string, i: number, all: string[]) => c !== all[i - 1])).toEqual(["IL", "IA", "NE", "CO"]);
     expect(res.hits).toBeGreaterThan(20);
     const sheet = m.stripHtml(res, "Chicago, IL", "Denver, CO", cfg, 2, m.readMpg("6.5"), m.readMph("55"));
-    expect(sheet).toMatch(/^<p class="rsum"[^>]*><b>Chicago, IL<\/b> to <b>Denver, CO<\/b>, (9[5-9]\d|1,0\d\d) miles on freight highways/);
+    expect(sheet).toMatch(/^<div class="rx"><div class="r1"><p class="rsum"[^>]*><b>Chicago, IL<\/b> to <b>Denver, CO<\/b>, (9[5-9]\d|1,0\d\d) miles on freight highways/);
     expect(sheet).toContain("data-share=");
   });
 
@@ -303,6 +339,26 @@ describe("the /map page", () => {
       expect(full.querySelector('a[href="https://www.geonames.org"]')).not.toBeNull();
     }
     expect(t).toContain("Drawn with Leaflet.");
+    // every CC BY 4.0 is linked to the licence, and Iowa DOT to its layer
+    const ccBy = Array.from(full.querySelectorAll("a")).filter((a) => text(a) === "CC BY 4.0");
+    expect(ccBy.length).toBe(1 + (data.present.fleet ? 1 : 0) + (data.present.places ? 1 : 0));
+    for (const a of ccBy) expect(a.getAttribute("href")).toBe("https://creativecommons.org/licenses/by/4.0/");
+    expect(t.match(/CC BY 4\.0/g)).toHaveLength(ccBy.length);
+    expect(full.querySelector(`a[href="${IOWA_DOT}"]`)?.textContent).toBe("Iowa DOT");
+  });
+
+  it("links the same licence and the Iowa DOT source from the About page's credits, where the map's file says they are", () => {
+    const ia = JSON.parse(readFileSync(resolve(ROOT, "data/map/weigh_ia.json"), "utf8"));
+    expect(IOWA_DOT).toBe(ia.source_url);
+    expect(CC_BY).toBe(ia.licence_url);
+    const about = parseHTML(file("about/index.html").toString("utf8")).document;
+    const p = Array.from(about.querySelectorAll("#credits ~ p, section[aria-labelledby=credits] p")).find((x) => text(x).startsWith("The map:"))!;
+    expect(text(p)).toContain("Iowa DOT (CC BY 4.0)");
+    expect(p.querySelector(`a[href="${IOWA_DOT}"]`)?.textContent).toBe("Iowa DOT");
+    const ccBy = Array.from(p.querySelectorAll("a")).filter((a) => text(a) === "CC BY 4.0");
+    expect(ccBy.length).toBe((text(p).match(/CC BY 4\.0/g) ?? []).length);
+    expect(ccBy.length).toBeGreaterThanOrEqual(2);
+    for (const a of ccBy) expect(a.getAttribute("href")).toBe(CC_BY);
   });
 
   it("says the weigh layer includes DailyFuel's own list, and how much of it no open source has", () => {
@@ -341,6 +397,25 @@ describe("the /map page", () => {
     expect(Array.from(section.querySelectorAll("#rt input[list]")).map((i) => i.getAttribute("placeholder"))).toEqual(["Town, like Chicago, IL", "Town, like Denver, CO"]);
     expect(text(section.querySelector('#rt button[type="submit"]'))).toBe("Show prices");
     expect(html()).not.toMatch(/cheapest|truck route/i);
+    // a trip to try, a plain link the address takes (see the script's hashchange), over the form
+    const tryIt = section.querySelector(".rt-try a")!;
+    expect(text(tryIt)).toBe("Try Chicago to Denver");
+    expect(tryIt.getAttribute("href")).toBe("#" + encodeURIComponent("Chicago, IL|Denver, CO"));
+    expect(all.indexOf(tryIt.parentElement!)).toBeLessThan(all.indexOf(d.getElementById("rt")!));
+    // the printed sheet credits the map's public sources, as Map credits names them, and only on paper
+    const cr = section.querySelector("p.po")!;
+    expect(all.indexOf(cr)).toBe(all.indexOf(note) + 1);
+    const ct = text(cr);
+    expect(ct).toMatch(/^Map data © OpenStreetMap contributors \(ODbL\)\. More weigh stations: U\.S\. DOT NTAD \(public domain\) and Iowa DOT \(CC BY 4\.0\)\./);
+    if (data.present.roads) expect(ct).toContain("Roads: NTAD National Highway Freight Network, U.S. DOT BTS, public domain.");
+    if (data.present.states) expect(ct).toContain("State outlines: U.S. Census Bureau, public domain.");
+    if (data.present.places) expect(ct).toContain("Place names: GeoNames, CC BY 4.0.");
+    expect(ct).not.toMatch(/DailyFuel|fleet/i);
+    expect(html()).toMatch(/@media print\s*\{[\s\S]*h3\.po,\s*p\.po\s*\{\s*display:\s*block/);
+    // a new trip's summary takes the focus for a screen reader, and draws no ring for it
+    expect(html()).toMatch(/\.rsum:focus\s*\{\s*outline:\s*none/);
+    // the result in two columns on a wide screen only, never on paper or a phone
+    expect(html()).toMatch(/@media screen and \(min-width: ?1100px\)[^{]*\{\s*\.rx\s*\{[^}]*display:\s*grid/);
   });
 
   it("hands the script the 51 states' EIA prices and taxes from the site's own loaders", () => {

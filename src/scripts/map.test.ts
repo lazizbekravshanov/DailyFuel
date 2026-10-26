@@ -382,6 +382,26 @@ describe("the trip sheet: hours marks, share and print", () => {
   const doc = (h: string) => parseHTML(`<div>${h}</div>`).document;
   const t = (e: Element | null) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
 
+  it("comes in three blocks in reading order, for two columns on a wide screen, and names the miles by state for IFTA planning", () => {
+    const h = stripHtml(res, "A", "B", CFG, 2, 6.5, 50);
+    // the summary and prices; the miles, fuel and hours; then the places (map.astro sets them side by side on a wide screen)
+    expect(h.match(/<div class="r\w">/g)).toEqual(['<div class="rx">', '<div class="r1">', '<div class="r2">', '<div class="r3">']);
+    expect(h.endsWith("</table></div></div>")).toBe(true);
+    const blocks = h.split(/<div class="r\d">/).slice(1);
+    const heads = (b: string) => [...b.matchAll(/<h3 class="rh[^"]*">([^<]*)<\/h3>/g)].map((m) => m[1]);
+    expect(blocks.map(heads)).toEqual([[], ["Miles and fuel by state", "State lines", "Hours of driving"], ["4 places along the route"]]);
+    expect(blocks[0]).toMatch(/^<p class="rsum" tabindex="-1">/);
+    expect(blocks[0]).toContain('<ul class="rp">');
+    expect(blocks[0]).toContain("data-share=");
+    expect(blocks[1]).toContain("A rough guide from your average speed");
+    // IFTA named right under the miles by state, as a plan, with the driver's own records the ones to file
+    expect(blocks[1]).toMatch(
+      /^<h3 class="rh">Miles and fuel by state<\/h3><p class="fine">For planning your IFTA miles\. File with your real miles from your ELD or trip records\.<\/p><p class="fine">At 6\.5 miles per gallon/,
+    );
+    // the copy kept on the phone, and the sheet with no map, come in the same blocks
+    for (const b of [0, 1] as const) expect(stripHtml(res, "A", "B", CFG, b)).toMatch(/^<div class="rx"><div class="r1"><p class="rsum"/);
+  });
+
   it("reads the hours and a truck's average speed", () => {
     expect([MPH, HOURS]).toEqual([55, [8, 11]]);
     expect([5 + 1 / 3, 1.83, 2, 0.5, 0.02].map(hoursText)).toEqual(["5 hours 20 minutes", "1 hour 50 minutes", "2 hours", "30 minutes", "5 minutes"]);

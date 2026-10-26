@@ -441,11 +441,14 @@ export function init(doc: Document, win: any): void {
       root.classList.add("trip");
       doc.title = `${al} to ${bl} | DailyFuel`;
       // A new trip puts the focus on its summary, which a screen reader then
-      // reads, unless the driver has gone on to another box meanwhile, and
-      // the map with its line comes into view over the prices. A rerun from
-      // a filter leaves the focus in the key and only reads it out.
+      // reads, unless the driver has gone on to another box meanwhile (the
+      // summary draws no ring for it, see map.astro), and the map with its
+      // line comes into view over the prices, moving the page no more than it
+      // must: a trip link opened from outside lands at the top, header and
+      // all, with the map already in view. A rerun from a filter leaves the
+      // focus in the key and only reads it out.
       const sum = out.querySelector(".rsum") as HTMLElement;
-      if (fit) say(""), doc.activeElement == doc.body && sum.focus({ preventScroll: true }), map ? box.scrollIntoView() : out.scrollIntoView({ block: "nearest" });
+      if (fit) say(""), doc.activeElement == doc.body && sum.focus({ preventScroll: true }), (map ? box : out).scrollIntoView({ block: "nearest" });
       else flag(), say(sum.textContent || "", true);
       // with no map there is no view to fit, so a rerun from a filter is a rerun
       if (!map) return void (last!.fit = false);
@@ -542,17 +545,21 @@ export function init(doc: Document, win: any): void {
   }
 
   const stP = loadStates();
-  // the address: a trip "A|B", a state "#oh", or one of the page's own anchors (#credits), which is neither
-  let c = "";
-  try {
-    c = decodeURIComponent(win.location.hash.slice(1));
-  } catch (e) {}
-  const ab = c.split("|");
-  if (ab[1] && inA) {
-    inA.value = ab[0];
-    inB.value = ab[1];
-    go();
-  }
+  // The address: a trip "A|B", a state "#oh", or one of the page's own
+  // anchors (#credits), which is neither. A trip put in it while the page is
+  // open (a link pasted, the sample trip, back and forward) is worked out
+  // then; the trip already shown, an anchor or a state leaves the page alone.
+  let c = "",
+    ab: string[] = [];
+  const hash = () => {
+    try {
+      c = decodeURIComponent(win.location.hash.slice(1));
+    } catch (e) {}
+    ab = c.split("|");
+    if (ab[1] && inA && c != (last && last.al + "|" + last.bl)) (inA.value = ab[0]), (inB.value = ab[1]), go();
+  };
+  hash();
+  win.addEventListener("hashchange", hash);
 
   if (!L || !box) {
     // the page's own script ran, so it was the map's file that didn't come; the tip on moving it goes too
@@ -594,7 +601,13 @@ export function init(doc: Document, win: any): void {
   map.fitBounds(cfg.l48, { animate: false });
   fit();
   map.on("movestart", () => (moved = 1));
-  L.tileLayer(cfg.tl).addTo(map);
+  // When the base map's images keep failing (an outage, or the key's quota
+  // used up), the line under the map (#te in map.astro) says so, once: the
+  // stops and the trip are drawn by the page and still show.
+  let te = 0;
+  L.tileLayer(cfg.tl)
+    .on("tileerror", () => ++te > 3 && ((doc.getElementById("te") as HTMLElement).hidden = false))
+    .addTo(map);
   // Leaflet follows the window's size itself; the floor moves with it, so the lower 48 always fits
   map.on("resize", fit);
 
@@ -790,7 +803,7 @@ export function init(doc: Document, win: any): void {
     // the map comes into view only once it is there; a refusal is said by the find box, kept in view
     map.on("locationfound", () => box.scrollIntoView());
     map.on("locationerror", () => {
-      tell("Your phone did not share where you are. Type a town instead.");
+      tell("We couldn't tell where you are. Type a town instead.");
       fst.scrollIntoView({ block: "nearest" });
     });
   }
