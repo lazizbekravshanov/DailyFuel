@@ -291,8 +291,10 @@ th[aria-sort] .sortb {
   gap: 8px;
 }
 
+/* wide enough for "Pick your state" and its arrow; on a 320px phone the
+   button goes under it instead of cutting the words off */
 .go select {
-  flex: 1 1 14ch;
+  flex: 1 1 18ch;
   min-width: 0;
   min-height: 44px;
   padding: 0 10px;

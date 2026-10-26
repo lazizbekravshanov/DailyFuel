@@ -1024,6 +1024,9 @@ describe("the 404 page", () => {
     expect(text(back)).toBe("All states");
     expect(back.getAttribute("href")).toBe("/#states");
     expect(Array.from(d.querySelectorAll("main p")).map(text)).toContain("This page doesn't exist. Pick your state below.");
+    // the prices are regional averages, never a price for every state
+    expect(text(d.querySelector("main a[href='/']"))).toBe("See this week's diesel prices");
+    expect(text(d.querySelector("main"))).not.toMatch(/every state/i);
     const find = d.querySelector("details[data-ys-find]")!;
     expect(find.hasAttribute("open")).toBe(true);
     expect(find.querySelectorAll("a[data-ys-pick]")).toHaveLength(51);
