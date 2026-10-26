@@ -5,9 +5,10 @@
 // surcharge a mile. The first answer is worked out here, with the U.S. price,
 // the newest week, a $1.25 base and 6 MPG, so the page reads right before its
 // script runs, or with none; the script (src/scripts/surcharge.js) works out
-// the rest and keeps the base and the MPG on this phone. Under it, a few lines
+// the rest and keeps the base and the MPG on this device. Under it, a few lines
 // on what a surcharge is, then the DOE prices for the last four weeks: every
-// price a row, so the table fits a phone, which shows two of the weeks.
+// price a row, so the table fits a phone, which shows two of the weeks. A wide
+// screen puts the prices beside the calculator instead of under it.
 import Base from "../layouts/Base.astro";
 import surchargeScript from "../scripts/surcharge.js?raw";
 import { moveClass } from "../lib/bins.ts";
@@ -118,7 +119,7 @@ const description =
         the week after. The base price and the MPG come from your contract too, so use its numbers, not your truck's.
       </p>
 
-      <section aria-labelledby="sc-t-h">
+      <section class="sc-w" aria-labelledby="sc-t-h">
         <div class="sh"><h2 id="sc-t-h">DOE prices by week</h2><p class="meta">Dollars a gallon</p></div>
         <table class="sc-t" aria-describedby="sc-t-cap">
           <thead>
@@ -259,6 +260,35 @@ const description =
   .sc-t tr.us > * {
     font-weight: 700;
     border-bottom: 1px solid var(--hair);
+  }
+  /* A wide screen puts the calculator, its answer and what a surcharge is on
+     the left and the DOE prices on the right, in the page's own order. The
+     last row stretches to whichever side is taller. */
+  @media screen and (min-width: 1024px) {
+    main {
+      display: grid;
+      grid-template: repeat(4, auto) 1fr / repeat(2, minmax(0, 1fr));
+      column-gap: 48px;
+    }
+    main > * {
+      grid-column: 1;
+    }
+    .sc-head {
+      grid-column: 1 / 3;
+    }
+    /* the price's name is longer than a date, so its field gets the room */
+    .sc fieldset {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+    .sc-w {
+      grid-area: 2 / 2 / 6;
+    }
+    .sc-w .sh {
+      margin-top: 18px;
+    }
+    .sc-t {
+      width: 100%;
+    }
   }
   @media (max-width: 479px) {
     .sc fieldset {
