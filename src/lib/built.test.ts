@@ -229,7 +229,7 @@ describe("built pages", () => {
       const shares = file === PAGES.home || file.startsWith("state/");
       expect(controls).toEqual(["Prices", "Map", "Surcharge", "About", ...(shares ? ["Share"] : []), "Night"]);
       // the page you are on says so, and only that one
-      const current = { [PAGES.home]: "Prices", [PAGES.about]: "About", [PAGES.surcharge]: "Surcharge" }[file] ?? null;
+      const current = ({ [PAGES.home]: "Prices", [PAGES.about]: "About", [PAGES.surcharge]: "Surcharge" } as Record<string, string>)[file] ?? null;
       expect(places.filter((a) => a.getAttribute("aria-current") === "page").map(text)).toEqual(current ? [current] : []);
       expect(places.filter((a) => a.hasAttribute("aria-current") && a.getAttribute("aria-current") !== "page")).toEqual([]);
       // on a phone, a phone on its side, a tablet or half a laptop's screen (the "dt" ones go under 800px)
