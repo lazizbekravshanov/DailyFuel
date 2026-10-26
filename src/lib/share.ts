@@ -41,7 +41,7 @@ function sourceLine(s: StateView | null, daily: boolean): string {
 /** The home page's sentence: the U.S. price its headline shows. */
 export function homeShareText(site: SiteData): string {
   const us = site.national.move;
-  if (!us) return "Diesel prices for every state, and which way they moved.";
+  if (!us) return "Free diesel prices and trip fuel costs for truck drivers.";
   const daily = site.national.cadence === "daily";
   // AAA's national number always moves since yesterday, like the headline
   // says, even after a day the state prices skipped.

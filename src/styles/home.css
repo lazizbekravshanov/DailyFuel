@@ -254,6 +254,27 @@ th[aria-sort] .sortb {
   margin-left: auto;
 }
 
+/* who the site is for, and its other tools, under the U.S. price */
+.pitch {
+  max-width: 64ch;
+  margin-top: 16px;
+}
+
+.pitch p {
+  margin: 0;
+}
+
+.pitch b {
+  font-weight: 700;
+}
+
+.go-to {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 10px;
+}
+
 /* the picker: the phone's own list, in a box with an ink edge */
 .go {
   max-width: 460px;
@@ -366,7 +387,8 @@ th[aria-sort] .sortb {
     font-size: var(--fs-b);
   }
   .ys[data-ys-state] + .hero .wkl,
-  .ys[data-ys-state] + .hero .then {
+  .ys[data-ys-state] + .hero .then,
+  .ys[data-ys-state] + .hero .pitch {
     display: none;
   }
   .go {

@@ -1,10 +1,11 @@
 ---
 // The home page, in the paper terminal. Your state first once one is saved,
 // its price the headline; then the U.S. average with its change in words, the
-// week, and the picker; then the prices by region, each with its states; then
-// every state in one sortable table. On a phone the U.S. chart and the full
-// table are one tap away, so the answers fit on the first two screens. Every
-// printed value comes from the data.
+// week, who the site is for with its other tools, and the picker; then the
+// prices by region, each with its states; then every state in one sortable
+// table. On a phone the U.S. chart and the full table are one tap away, so
+// the answers fit on the first two screens. Every printed value comes from
+// the data.
 import Base from "../layouts/Base.astro";
 import "../styles/home.css";
 import YourState from "../components/YourState.astro";
@@ -12,7 +13,7 @@ import UsChart from "../components/home/UsChart.astro";
 import RegionsBoard from "../components/home/RegionsBoard.astro";
 import Quotes from "../components/home/Quotes.astro";
 import { spark, type Spark } from "../components/home/chart.ts";
-import { homeMeta, homeTitle } from "../components/home/home.ts";
+import { HOME_OG_TITLE, homeMeta, homeOgDescription, homeTitle, pitch, SAMPLE_TRIP, tripHref } from "../components/home/home.ts";
 import { quotes } from "../components/home/quotes.ts";
 import { readout } from "../components/home/readout.ts";
 import { moveClass } from "../lib/bins.ts";
@@ -86,10 +87,14 @@ const description = homeMeta({
   regions: aaaMode ? undefined : site.regions.length,
 }) + missingNote(site);
 const share = homeShareText(site);
+// Who the site is for, under the price: a visitor who has never seen it
+// learns in one line that it is free, for drivers, and more than a price.
+const says = pitch(daily);
+const ogDescription = homeOgDescription(nm?.price ?? null, nm?.change ?? null, daily);
 const readoutScript = inlineCall(readout, "document");
 const quotesScript = inlineCall(quotes, "document");
 ---
-<Base title={title} description={description} share={share}>
+<Base title={title} description={description} share={share} ogTitle={HOME_OG_TITLE} ogDescription={ogDescription}>
   <YourState>
     {week}{nextText && <> <span data-next-release={release?.date} data-late={late}>{release?.late ? late : nextText}</span></>}
   </YourState>
@@ -110,6 +115,14 @@ const quotesScript = inlineCall(quotes, "document");
       <p class="wkl">
         {week}{nextText && <> <span data-next-release={release?.date} data-late={late}>{release?.late ? late : nextText}</span></>}
       </p>
+      <div class="pitch">
+        <p><b>{says.lead}</b> {says.rest}</p>
+        <p class="go-to">
+          <a class="btn" href={tripHref(SAMPLE_TRIP.from, SAMPLE_TRIP.to)}>Try Chicago to Denver</a>
+          <a class="btn" href="/map/">Truck stop map</a>
+          <a class="btn" href="/surcharge/">Fuel surcharge</a>
+        </p>
+      </div>
       {/* With JS on, the page's script saves the pick and opens its page; with
           JS off the form goes to /go, which vercel.json sends to the state's page.
           The id keeps every old /#find-your-state link landing here. */}
@@ -139,7 +152,7 @@ const quotesScript = inlineCall(quotes, "document");
   <Quotes site={site} sparks={sparks} />
 
   {/* far from Change your state, so a gloved thumb can't hit it by mistake */}
-  <p class="fg fine">This phone remembers your state. <button type="button" class="btn" data-ys-forget>Forget my state</button></p>
+  <p class="fg fine">This device remembers your state. <button type="button" class="btn" data-ys-forget>Forget my state</button></p>
 
   {sparks.size > 0 && (
     <svg class="sprite" aria-hidden="true" focusable="false">

@@ -1,14 +1,14 @@
 # DailyFuel
 
-Diesel prices for every US state plus DC, and which way they moved.
+Free for truck drivers: the weekly DOE diesel price for your region, trip fuel cost by state, a truck stop map and a fuel surcharge calculator. No ads, no sign up.
 
-Live at **[dailydiesel.vercel.app](https://dailydiesel.vercel.app)**
+Open it at **[dailydiesel.vercel.app](https://dailydiesel.vercel.app)**
 
-DailyFuel is a free site for truck drivers, owner operators, dispatchers, farmers and anyone else who fills up with diesel. It answers one question fast: what does diesel cost in my state right now, and did it go up or down? No ads, no cookies, no accounts. A phone keeps only the state you save, your day or night choice, the truck's miles per gallon and average speed and the last trip for the map's trip planner, the base price and miles per gallon for the fuel surcharge page, and a copy of the pages you open (public/sw.js), so the site still opens with no signal. Visits are counted with Vercel Web Analytics, which uses no cookies and stores no personal data. The `/map` page's base map loads from OpenStreetMap's tile servers, or CARTO's when the build has a key, which see a visitor's IP address like any web server; that is the one request the site makes to another site.
+DailyFuel is a free site for truck drivers, owner operators, dispatchers, farmers and anyone else who fills up with diesel. It answers one question fast: what does diesel cost in my state right now, and did it go up or down? No ads, no cookies, no accounts. A device keeps only the state you save, your day or night choice, the truck's miles per gallon and average speed and the last trip for the map's trip planner, the base price and miles per gallon for the fuel surcharge page, and a copy of the pages you open (public/sw.js), so the site still opens with no signal. Visits are counted with Vercel Web Analytics, which uses no cookies and stores no personal data. The `/map` page's base map loads from OpenStreetMap's tile servers, or CARTO's when the build has a key, which see a visitor's IP address like any web server; that is the one request the site makes to another site.
 
 ## Design
 
-The site is a paper terminal: a white page, near black ink, the monospace font already on your device (`ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`), hairline rules, and colour in exactly one place, on a change (red when diesel rose, blue when it fell). No web font, no icons, no arrows, no cards, nothing animates. Prices print as `$6.285` in headings and `6.285` in tables, changes as `+31.8¢ +5.3%`, with the sign carrying the direction. Dark mode is the true inverse, white ink on black; it follows the system setting and the DARK button in the header can force either one, remembered on that phone only. The tokens live in `src/styles/tokens.css` and the shared classes in `src/styles/global.css`.
+The site is a paper terminal: a white page, near black ink, the monospace font already on your device (`ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`), hairline rules, and colour in exactly one place, on a change (red when diesel rose, blue when it fell). No web font, no icons, no arrows, no cards, nothing animates. Prices print as `$6.285` in headings and `6.285` in tables, changes as `+31.8¢ +5.3%`, with the sign carrying the direction. Dark mode is the true inverse, white ink on black; it follows the system setting and the NIGHT button in the header can force either one, remembered on that device only. The tokens live in `src/styles/tokens.css` and the shared classes in `src/styles/global.css`.
 
 ## How the data works
 
@@ -23,6 +23,12 @@ There's no server and no database. A scheduled GitHub Actions job fetches prices
 * The site checks the data again at build time, so bad data fails the deploy instead of going live.
 
 EIA's weekly prices are as of Monday morning and come out on Tuesday, or Wednesday after a Monday holiday.
+
+### Share images and caching
+
+Each page's share image is drawn at build time with the week in its name (`/og/oh-2026-10-19-c.png`), so chat apps that cache a preview by its URL pick up the new price with the new week. The build also writes each card under a name that never changes (`/og/oh.png`), and `vercel.json` rewrites a dated name the newest build no longer has to it, so an old post keeps a picture.
+
+`vercel.json` also says how long a browser keeps a file, since every request counts against Vercel's monthly edge requests. Leaflet is kept a year (its bytes are pinned by a test, so a new version goes in a new folder), the favicon, the icons and the manifest a day, and everything else, pages, `sw.js`, the map's `/map/trip.js` and `/map/*.json` and the share images, not at all, so they never fall out of step with the page. `src/lib/vercel.test.ts` explains each rule and checks it.
 
 ## Two modes
 

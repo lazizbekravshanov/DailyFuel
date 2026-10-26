@@ -132,8 +132,9 @@ main:focus {
   border-color: var(--ink);
 }
 
-/* a pressed control inverts */
-.btn[aria-pressed="true"] {
+/* a pressed control inverts, and so does the header's link to the page you are on */
+.btn[aria-pressed="true"],
+.top .nav [aria-current] {
   background: var(--ink);
   color: var(--bg);
   border-color: var(--ink);
@@ -179,17 +180,20 @@ main:focus {
   gap: 10px;
 }
 
-/* the Share control and its status, on one line with the other controls */
-.share {
+/* Prices, Map, Surcharge and About: one group, spaced like the controls */
+.top .nav {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: inherit;
 }
 
-/* "Link copied" floats under the button, so showing it and clearing it never
+/* the Share control and its status, on one line with the other controls.
+   "Link copied" floats under the button, so showing it and clearing it never
    moves the header or the page under it */
 .share {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .share-status {
@@ -210,9 +214,11 @@ main:focus {
 }
 
 @media (max-width: 479px) {
-  /* one row: the tagline and the week tag go, since the week is printed under every price */
+  /* one row: the tagline and the week tag go, since the week is printed
+     under every price, and so do the places the page and the footer link to */
   .top .tl,
-  .top .wk {
+  .top .wk,
+  .top .dt {
     display: none;
   }
   .top-in {
@@ -865,8 +871,9 @@ tbody tr:last-child td {
 
 @media (forced-colors: active) {
   /* every inverse fill that carries a state: a pressed control, the price
-     tag, your state's row, the chosen range */
+     tag, your state's row, the chosen range, the page you are on */
   .btn[aria-pressed="true"],
+  .top .nav [aria-current],
   .ytag,
   tr.mine th,
   tr.mine td,
