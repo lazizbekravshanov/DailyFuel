@@ -1,18 +1,18 @@
 {
   "schema": "dailyfuel/latest/1",
-  "generated_at": "2026-10-20T17:08:30Z",
+  "generated_at": "2026-10-27T18:01:51Z",
   "mode": "eia_only",
   "aaa": null,
   "eia": {
-    "period": "2026-10-19",
-    "prev_period": "2026-10-12",
-    "release_date": "2026-10-20",
-    "next_release_date": "2026-10-27",
+    "period": "2026-10-26",
+    "prev_period": "2026-10-19",
+    "release_date": "2026-10-27",
+    "next_release_date": "2026-11-03",
     "us": {
-      "price": 6.276,
-      "prev": 6.179,
-      "change": 0.097,
-      "change_pct": 1.57,
+      "price": 6.352,
+      "prev": 6.276,
+      "change": 0.076,
+      "change_pct": 1.21,
       "direction": "up"
     }
   },
@@ -25,10 +25,10 @@
       "eia_series": "R30",
       "aaa": null,
       "eia": {
-        "price": 5.903,
-        "prev": 5.809,
-        "change": 0.094,
-        "change_pct": 1.62,
+        "price": 5.951,
+        "prev": 5.903,
+        "change": 0.048,
+        "change_pct": 0.81,
         "direction": "up"
       },
       "flags": []
@@ -53,11 +53,11 @@
       "eia_series": "R5XCA",
       "aaa": null,
       "eia": {
-        "price": 6.659,
-        "prev": 6.503,
-        "change": 0.156,
-        "change_pct": 2.4,
-        "direction": "up"
+        "price": 6.614,
+        "prev": 6.659,
+        "change": -0.045,
+        "change_pct": -0.68,
+        "direction": "down"
       },
       "flags": []
     },
@@ -69,10 +69,10 @@
       "eia_series": "R30",
       "aaa": null,
       "eia": {
-        "price": 5.903,
-        "prev": 5.809,
-        "change": 0.094,
-        "change_pct": 1.62,
+        "price": 5.951,
+        "prev": 5.903,
+        "change": 0.048,
+        "change_pct": 0.81,
         "direction": "up"
       },
       "flags": []
@@ -85,11 +85,11 @@
       "eia_series": "SCA",
       "aaa": null,
       "eia": {
-        "price": 8.242,
-        "prev": 8.091,
-        "change": 0.151,
-        "change_pct": 1.87,
-        "direction": "up"
+        "price": 8.155,
+        "prev": 8.242,
+        "change": -0.087,
+        "change_pct": -1.06,
+        "direction": "down"
       },
       "flags": []
     },
@@ -101,10 +101,10 @@
       "eia_series": "R40",
       "aaa": null,
       "eia": {
-        "price": 6.422,
-        "prev": 6.302,
-        "change": 0.12,
-        "change_pct": 1.9,
+        "price": 6.521,
+        "prev": 6.422,
+        "change": 0.099,
+        "change_pct": 1.54,
         "direction": "up"
       },
       "flags": []
@@ -117,11 +117,11 @@
       "eia_series": "R1X",
       "aaa": null,
       "eia": {
-        "price": 6.47,
-        "prev": 6.441,
-        "change": 0.029,
-        "change_pct": 0.45,
-        "direction": "up"
+        "price": 6.421,
+        "prev": 6.47,
+        "change": -0.049,
+        "change_pct": -0.76,
+        "direction": "down"
       },
       "flags": []
     },
@@ -133,11 +133,11 @@
       "eia_series": "R1Y",
       "aaa": null,
       "eia": {
-        "price": 6.508,
-        "prev": 6.471,
-        "change": 0.037,
-        "change_pct": 0.57,
-        "direction": "up"
+        "price": 6.496,
+        "prev": 6.508,
+        "change": -0.012,
+        "change_pct": -0.18,
+        "direction": "down"
       },
       "flags": []
     },
@@ -149,11 +149,11 @@
       "eia_series": "R1Y",
       "aaa": null,
       "eia": {
-        "price": 6.508,
-        "prev": 6.471,
-        "change": 0.037,
-        "change_pct": 0.57,
-        "direction": "up"
+        "price": 6.496,
+        "prev": 6.508,
+        "change": -0.012,
+        "change_pct": -0.18,
+        "direction": "down"
       },
       "flags": []
     },
@@ -165,10 +165,10 @@
       "eia_series": "R1Z",
       "aaa": null,
       "eia": {
-        "price": 5.74,
-        "prev": 5.645,
-        "change": 0.095,
-        "change_pct": 1.68,
+        "price": 5.89,
+        "prev": 5.74,
+        "change": 0.15,
+        "change_pct": 2.61,
         "direction": "up"
       },
       "flags": []
@@ -181,10 +181,10 @@
       "eia_series": "R1Z",
       "aaa": null,
       "eia": {
-        "price": 5.74,
-        "prev": 5.645,
-        "change": 0.095,
-        "change_pct": 1.68,
+        "price": 5.89,
+        "prev": 5.74,
+        "change": 0.15,
+        "change_pct": 2.61,
         "direction": "up"
       },
       "flags": []
@@ -209,10 +209,10 @@
       "eia_series": "R40",
       "aaa": null,
       "eia": {
-        "price": 6.422,
-        "prev": 6.302,
-        "change": 0.12,
-        "change_pct": 1.9,
+        "price": 6.521,
+        "prev": 6.422,
+        "change": 0.099,
+        "change_pct": 1.54,
         "direction": "up"
       },
       "flags": []
@@ -225,10 +225,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -241,10 +241,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -257,10 +257,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -273,10 +273,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -289,10 +289,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -305,10 +305,10 @@
       "eia_series": "R30",
       "aaa": null,
       "eia": {
-        "price": 5.903,
-        "prev": 5.809,
-        "change": 0.094,
-        "change_pct": 1.62,
+        "price": 5.951,
+        "prev": 5.903,
+        "change": 0.048,
+        "change_pct": 0.81,
         "direction": "up"
       },
       "flags": []
@@ -321,11 +321,11 @@
       "eia_series": "R1X",
       "aaa": null,
       "eia": {
-        "price": 6.47,
-        "prev": 6.441,
-        "change": 0.029,
-        "change_pct": 0.45,
-        "direction": "up"
+        "price": 6.421,
+        "prev": 6.47,
+        "change": -0.049,
+        "change_pct": -0.76,
+        "direction": "down"
       },
       "flags": []
     },
@@ -337,11 +337,11 @@
       "eia_series": "R1Y",
       "aaa": null,
       "eia": {
-        "price": 6.508,
-        "prev": 6.471,
-        "change": 0.037,
-        "change_pct": 0.57,
-        "direction": "up"
+        "price": 6.496,
+        "prev": 6.508,
+        "change": -0.012,
+        "change_pct": -0.18,
+        "direction": "down"
       },
       "flags": []
     },
@@ -353,11 +353,11 @@
       "eia_series": "R1X",
       "aaa": null,
       "eia": {
-        "price": 6.47,
-        "prev": 6.441,
-        "change": 0.029,
-        "change_pct": 0.45,
-        "direction": "up"
+        "price": 6.421,
+        "prev": 6.47,
+        "change": -0.049,
+        "change_pct": -0.76,
+        "direction": "down"
       },
       "flags": []
     },
@@ -369,10 +369,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -385,10 +385,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -401,10 +401,10 @@
       "eia_series": "R30",
       "aaa": null,
       "eia": {
-        "price": 5.903,
-        "prev": 5.809,
-        "change": 0.094,
-        "change_pct": 1.62,
+        "price": 5.951,
+        "prev": 5.903,
+        "change": 0.048,
+        "change_pct": 0.81,
         "direction": "up"
       },
       "flags": []
@@ -417,10 +417,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -433,10 +433,10 @@
       "eia_series": "R40",
       "aaa": null,
       "eia": {
-        "price": 6.422,
-        "prev": 6.302,
-        "change": 0.12,
-        "change_pct": 1.9,
+        "price": 6.521,
+        "prev": 6.422,
+        "change": 0.099,
+        "change_pct": 1.54,
         "direction": "up"
       },
       "flags": []
@@ -449,10 +449,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -465,11 +465,11 @@
       "eia_series": "R5XCA",
       "aaa": null,
       "eia": {
-        "price": 6.659,
-        "prev": 6.503,
-        "change": 0.156,
-        "change_pct": 2.4,
-        "direction": "up"
+        "price": 6.614,
+        "prev": 6.659,
+        "change": -0.045,
+        "change_pct": -0.68,
+        "direction": "down"
       },
       "flags": []
     },
@@ -481,11 +481,11 @@
       "eia_series": "R1X",
       "aaa": null,
       "eia": {
-        "price": 6.47,
-        "prev": 6.441,
-        "change": 0.029,
-        "change_pct": 0.45,
-        "direction": "up"
+        "price": 6.421,
+        "prev": 6.47,
+        "change": -0.049,
+        "change_pct": -0.76,
+        "direction": "down"
       },
       "flags": []
     },
@@ -497,11 +497,11 @@
       "eia_series": "R1Y",
       "aaa": null,
       "eia": {
-        "price": 6.508,
-        "prev": 6.471,
-        "change": 0.037,
-        "change_pct": 0.57,
-        "direction": "up"
+        "price": 6.496,
+        "prev": 6.508,
+        "change": -0.012,
+        "change_pct": -0.18,
+        "direction": "down"
       },
       "flags": []
     },
@@ -513,10 +513,10 @@
       "eia_series": "R30",
       "aaa": null,
       "eia": {
-        "price": 5.903,
-        "prev": 5.809,
-        "change": 0.094,
-        "change_pct": 1.62,
+        "price": 5.951,
+        "prev": 5.903,
+        "change": 0.048,
+        "change_pct": 0.81,
         "direction": "up"
       },
       "flags": []
@@ -529,11 +529,11 @@
       "eia_series": "R1Y",
       "aaa": null,
       "eia": {
-        "price": 6.508,
-        "prev": 6.471,
-        "change": 0.037,
-        "change_pct": 0.57,
-        "direction": "up"
+        "price": 6.496,
+        "prev": 6.508,
+        "change": -0.012,
+        "change_pct": -0.18,
+        "direction": "down"
       },
       "flags": []
     },
@@ -545,10 +545,10 @@
       "eia_series": "R1Z",
       "aaa": null,
       "eia": {
-        "price": 5.74,
-        "prev": 5.645,
-        "change": 0.095,
-        "change_pct": 1.68,
+        "price": 5.89,
+        "prev": 5.74,
+        "change": 0.15,
+        "change_pct": 2.61,
         "direction": "up"
       },
       "flags": []
@@ -561,10 +561,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -577,10 +577,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -593,10 +593,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -609,11 +609,11 @@
       "eia_series": "R5XCA",
       "aaa": null,
       "eia": {
-        "price": 6.659,
-        "prev": 6.503,
-        "change": 0.156,
-        "change_pct": 2.4,
-        "direction": "up"
+        "price": 6.614,
+        "prev": 6.659,
+        "change": -0.045,
+        "change_pct": -0.68,
+        "direction": "down"
       },
       "flags": []
     },
@@ -625,11 +625,11 @@
       "eia_series": "R1Y",
       "aaa": null,
       "eia": {
-        "price": 6.508,
-        "prev": 6.471,
-        "change": 0.037,
-        "change_pct": 0.57,
-        "direction": "up"
+        "price": 6.496,
+        "prev": 6.508,
+        "change": -0.012,
+        "change_pct": -0.18,
+        "direction": "down"
       },
       "flags": []
     },
@@ -641,11 +641,11 @@
       "eia_series": "R1X",
       "aaa": null,
       "eia": {
-        "price": 6.47,
-        "prev": 6.441,
-        "change": 0.029,
-        "change_pct": 0.45,
-        "direction": "up"
+        "price": 6.421,
+        "prev": 6.47,
+        "change": -0.049,
+        "change_pct": -0.76,
+        "direction": "down"
       },
       "flags": []
     },
@@ -657,10 +657,10 @@
       "eia_series": "R1Z",
       "aaa": null,
       "eia": {
-        "price": 5.74,
-        "prev": 5.645,
-        "change": 0.095,
-        "change_pct": 1.68,
+        "price": 5.89,
+        "prev": 5.74,
+        "change": 0.15,
+        "change_pct": 2.61,
         "direction": "up"
       },
       "flags": []
@@ -673,10 +673,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -689,10 +689,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -705,10 +705,10 @@
       "eia_series": "R30",
       "aaa": null,
       "eia": {
-        "price": 5.903,
-        "prev": 5.809,
-        "change": 0.094,
-        "change_pct": 1.62,
+        "price": 5.951,
+        "prev": 5.903,
+        "change": 0.048,
+        "change_pct": 0.81,
         "direction": "up"
       },
       "flags": []
@@ -721,10 +721,10 @@
       "eia_series": "R40",
       "aaa": null,
       "eia": {
-        "price": 6.422,
-        "prev": 6.302,
-        "change": 0.12,
-        "change_pct": 1.9,
+        "price": 6.521,
+        "prev": 6.422,
+        "change": 0.099,
+        "change_pct": 1.54,
         "direction": "up"
       },
       "flags": []
@@ -737,11 +737,11 @@
       "eia_series": "R1X",
       "aaa": null,
       "eia": {
-        "price": 6.47,
-        "prev": 6.441,
-        "change": 0.029,
-        "change_pct": 0.45,
-        "direction": "up"
+        "price": 6.421,
+        "prev": 6.47,
+        "change": -0.049,
+        "change_pct": -0.76,
+        "direction": "down"
       },
       "flags": []
     },
@@ -753,10 +753,10 @@
       "eia_series": "R1Z",
       "aaa": null,
       "eia": {
-        "price": 5.74,
-        "prev": 5.645,
-        "change": 0.095,
-        "change_pct": 1.68,
+        "price": 5.89,
+        "prev": 5.74,
+        "change": 0.15,
+        "change_pct": 2.61,
         "direction": "up"
       },
       "flags": []
@@ -769,11 +769,11 @@
       "eia_series": "R5XCA",
       "aaa": null,
       "eia": {
-        "price": 6.659,
-        "prev": 6.503,
-        "change": 0.156,
-        "change_pct": 2.4,
-        "direction": "up"
+        "price": 6.614,
+        "prev": 6.659,
+        "change": -0.045,
+        "change_pct": -0.68,
+        "direction": "down"
       },
       "flags": []
     },
@@ -785,10 +785,10 @@
       "eia_series": "R1Z",
       "aaa": null,
       "eia": {
-        "price": 5.74,
-        "prev": 5.645,
-        "change": 0.095,
-        "change_pct": 1.68,
+        "price": 5.89,
+        "prev": 5.74,
+        "change": 0.15,
+        "change_pct": 2.61,
         "direction": "up"
       },
       "flags": []
@@ -801,10 +801,10 @@
       "eia_series": "R20",
       "aaa": null,
       "eia": {
-        "price": 6.352,
-        "prev": 6.259,
-        "change": 0.093,
-        "change_pct": 1.49,
+        "price": 6.48,
+        "prev": 6.352,
+        "change": 0.128,
+        "change_pct": 2.02,
         "direction": "up"
       },
       "flags": []
@@ -817,10 +817,10 @@
       "eia_series": "R40",
       "aaa": null,
       "eia": {
-        "price": 6.422,
-        "prev": 6.302,
-        "change": 0.12,
-        "change_pct": 1.9,
+        "price": 6.521,
+        "prev": 6.422,
+        "change": 0.099,
+        "change_pct": 1.54,
         "direction": "up"
       },
       "flags": []
